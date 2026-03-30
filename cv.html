@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ben Howard | Personalised CV Preview</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="cv-preview">
+  <header class="app-header app-header--preview">
+    <div class="shell shell--header">
+      <p class="eyebrow">Personalised for you</p>
+      <div class="header-row">
+        <div>
+          <h1 id="cv-preview-title">Ben Howard</h1>
+          <p class="subtitle" id="cv-preview-subtitle">
+            Loading personalised CV preview&#8230;
+          </p>
+        </div>
+        <div class="header-actions no-print">
+          <button class="button button--ghost" id="cv-print-button" type="button">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell main-layout main-layout--cv">
+    <section class="card cv-status-card" id="cv-loading-state">
+      <p class="section-kicker">Loading</p>
+      <h2>Preparing your personalised preview</h2>
+      <p class="cv-body-copy">Fetching application data&#8230;</p>
+    </section>
+
+    <section class="card cv-status-card" id="cv-error-state" hidden>
+      <p class="section-kicker" id="cv-error-kicker">Preview unavailable</p>
+      <h2 id="cv-error-title">No preview available</h2>
+      <p class="cv-body-copy" id="cv-error-message"></p>
+      <div class="action-row">
+        <a class="button button--ghost" id="cv-sample-link" href="cv.html?ref=ally-consultants-general-manager-stoke-on-trent">Open Sample Preview</a>
+      </div>
+    </section>
+
+    <div class="cv-content" id="cv-content" hidden>
+      <section class="card cv-hero">
+        <div class="cv-hero-layout">
+          <div class="cv-hero-copy">
+            <p class="section-kicker" id="cv-hero-ref">Preview ref</p>
+            <p class="cv-greeting" id="cv-greeting">Hi there</p>
+            <h2 id="cv-hero-name">I&rsquo;m Ben Howard</h2>
+            <p class="cv-hero-thanks" id="cv-hero-thanks">
+              Thanks for taking a look at my application.
+            </p>
+            <p class="cv-hero-intro" id="cv-personalised-intro"></p>
+            <div class="cv-meta-strip">
+              <div class="cv-meta-pill">
+                <span>Location</span>
+                <strong id="cv-meta-location">-</strong>
+              </div>
+              <div class="cv-meta-pill">
+                <span>Sector</span>
+                <strong id="cv-meta-sector">-</strong>
+              </div>
+              <div class="cv-meta-pill">
+                <span>Salary</span>
+                <strong id="cv-meta-salary">-</strong>
+              </div>
+              <div class="cv-meta-pill">
+                <span>Type</span>
+                <strong id="cv-meta-employmentType">-</strong>
+              </div>
+            </div>
+          </div>
+
+          <aside class="cv-hero-side">
+            <p class="section-kicker">Role Snapshot</p>
+            <h3 id="cv-role-card-title">Role snapshot</h3>
+            <p class="cv-body-copy" id="cv-role-summary"></p>
+            <div class="chip-list chip-list--soft" id="cv-tone-list"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="cv-split">
+        <article class="card">
+          <p class="section-kicker">Why This Role</p>
+          <h2>Why this feels like a strong fit</h2>
+          <p class="cv-body-copy" id="cv-why-this-role-copy"></p>
+        </article>
+
+        <article class="card">
+          <p class="section-kicker">Signals From The Brief</p>
+          <h2>What seems to matter most here</h2>
+          <p class="cv-body-copy" id="cv-short-reasons"></p>
+          <div class="chip-list" id="cv-focus-areas-list"></div>
+        </article>
+      </section>
+
+      <section class="card">
+        <p class="section-kicker">What I Bring</p>
+        <h2>Leadership with range, rhythm, and clarity</h2>
+        <div class="capability-grid" id="cv-capabilities-grid"></div>
+      </section>
+
+      <section class="cv-split cv-split--wide">
+        <article class="card">
+          <p class="section-kicker">Relevance To This Role</p>
+          <h2>Priorities I would lean into early</h2>
+          <div class="highlight-list" id="cv-priorities-list"></div>
+        </article>
+
+        <article class="card">
+          <p class="section-kicker">Career Story Snapshot</p>
+          <h2>A background built across service, operations, and change</h2>
+          <div class="timeline" id="cv-timeline"></div>
+        </article>
+      </section>
+
+      <section class="card cv-closing">
+        <p class="section-kicker">Closing</p>
+        <h2>Thank you for taking a look</h2>
+        <p class="cv-body-copy" id="cv-closing-copy"></p>
+      </section>
+    </div>
+  </main>
+
+  <script src="script.js?v=12" defer></script>
+</body>
+</html>

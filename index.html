@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ben Howard | Application Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="generator">
+  <header class="app-header">
+    <div class="shell shell--header">
+      <p class="eyebrow">Private dashboard</p>
+      <div class="header-row">
+        <div>
+          <h1>Application Dashboard</h1>
+          <p class="subtitle">Paste finished JSON, publish a personalised CV page, and manage every application from one place.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell main-layout">
+    <div id="admin-content">
+
+      <section class="card dashboard-summary-card" aria-labelledby="dashboard-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Overview</p>
+            <h2 id="dashboard-title">Current dashboard</h2>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-tile">
+            <span class="summary-label">Applications</span>
+            <strong class="summary-value" id="stats-total">0</strong>
+            <p class="summary-copy">JSON records currently published in the repo.</p>
+          </article>
+
+          <article class="summary-tile">
+            <span class="summary-label">Latest publish</span>
+            <strong class="summary-value summary-value--small" id="stats-latest">None yet</strong>
+            <p class="summary-copy">Most recent application record loaded into the dashboard.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="keys-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Connection</p>
+            <h2 id="keys-title">GitHub token</h2>
+          </div>
+        </div>
+        <p class="card-helper">Stored in your browser only. Used only to create or update JSON files in this repo.</p>
+        <div class="field-grid field-grid--single">
+          <div class="field-group field-group--wide">
+            <label for="github-token">GitHub Personal Access Token</label>
+            <input id="github-token" type="password" placeholder="github_pat_... or ghp_... with contents write access">
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="button button--ghost button--compact" id="save-keys-button" type="button">Save Token</button>
+          <button class="button button--ghost button--compact" id="clear-keys-button" type="button">Clear Token</button>
+          <p class="inline-feedback" id="keys-status"></p>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="add-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Add or update</p>
+            <h2 id="add-title">Application JSON</h2>
+          </div>
+        </div>
+        <p class="card-helper">Paste the finished JSON payload here. The dashboard will validate it, normalise the ref, then publish or update the matching file.</p>
+        <div class="field-group">
+          <label for="json-input">Application JSON</label>
+          <textarea id="json-input" rows="18" placeholder='Paste JSON here, for example: {"companyName":"Example Co","roleTitle":"Operations Manager"}'></textarea>
+        </div>
+        <div class="action-row action-row--spread">
+          <div class="action-row">
+            <button class="button" id="publish-button" type="button">Publish Application</button>
+            <button class="button button--ghost" id="reset-json-button" type="button">Clear Form</button>
+          </div>
+          <p class="inline-feedback" id="publish-status" aria-live="polite">Ready.</p>
+        </div>
+        <p class="error-message" id="publish-error" role="alert" hidden></p>
+      </section>
+
+      <section class="card" aria-labelledby="result-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Latest result</p>
+            <h2 id="result-title">Published application</h2>
+          </div>
+        </div>
+        <div id="result-panel" hidden>
+          <div class="field-grid">
+            <div class="field-group"><label>Company</label><input id="result-company" type="text" readonly></div>
+            <div class="field-group"><label>Role</label><input id="result-role" type="text" readonly></div>
+            <div class="field-group"><label>Location</label><input id="result-location" type="text" readonly></div>
+            <div class="field-group"><label>Ref</label><input id="result-ref" type="text" readonly></div>
+          </div>
+          <div class="field-group" style="margin-top:1rem">
+            <label for="result-url">Employer URL</label>
+            <input id="result-url" type="text" readonly style="font-weight:bold">
+          </div>
+          <div class="action-row">
+            <button class="button" id="copy-url-button" type="button">Copy URL</button>
+            <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open Preview</a>
+            <a class="button button--ghost" id="open-pdf-link" href="#" target="_blank" rel="noopener noreferrer">Open PDF View</a>
+          </div>
+        </div>
+        <p class="cv-body-copy" id="result-empty">Publish an application to see the URL and quick actions here.</p>
+      </section>
+
+      <section class="card" aria-labelledby="saved-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Library</p>
+            <h2 id="saved-title">Published applications</h2>
+          </div>
+        </div>
+        <div id="saved-list"><p class="empty-state">Loading&#8230;</p></div>
+      </section>
+
+      <section class="card">
+        <details class="debug-panel">
+          <summary>Latest normalised JSON</summary>
+          <pre class="debug-output" id="raw-json-output">No application loaded yet.</pre>
+        </details>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js?v=12" defer></script>
+</body>
+</html>

@@ -13,7 +13,7 @@
       <div class="header-row">
         <div>
           <h1>Create a job-specific CV</h1>
-          <p class="subtitle">Paste the JSON from your shortcut, review the extracted fields, confirm, and publish the unique CV page to GitHub.</p>
+          <p class="subtitle">Paste the JSON from your shortcut, review the extracted fields, save it on this device, and generate the unique CV page.</p>
         </div>
         <div class="header-actions">
           <a class="button button--ghost" href="index.html">Back to dashboard</a>
@@ -23,27 +23,6 @@
   </header>
 
   <main class="shell main-layout dashboard-layout">
-    <section class="card" aria-labelledby="token-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Connection</p>
-          <h2 id="token-title">GitHub token</h2>
-        </div>
-      </div>
-      <p class="card-helper">Stored in your browser only. Used to write the new application JSON into this repo.</p>
-      <div class="field-grid field-grid--single">
-        <div class="field-group field-group--wide">
-          <label for="github-token">GitHub Personal Access Token</label>
-          <input id="github-token" type="password" placeholder="github_pat_... or ghp_... with contents write access">
-        </div>
-      </div>
-      <div class="action-row">
-        <button class="button button--ghost button--compact" id="save-keys-button" type="button">Save Token</button>
-        <button class="button button--ghost button--compact" id="clear-keys-button" type="button">Clear Token</button>
-        <p class="inline-feedback" id="keys-status"></p>
-      </div>
-    </section>
-
     <section class="card" aria-labelledby="input-title">
       <div class="section-heading">
         <div>
@@ -73,7 +52,7 @@
           <h2 id="review-title">Review the parsed fields</h2>
         </div>
       </div>
-      <p class="card-helper">Check the generated ref, the company details, and the personalised copy before you publish.</p>
+      <p class="card-helper">Check the generated ref, the company details, and the personalised copy before you save it.</p>
       <div class="review-grid" id="review-preview"></div>
       <details class="debug-panel">
         <summary>Normalised JSON</summary>
@@ -81,10 +60,10 @@
       </details>
       <div class="action-row action-row--spread">
         <div class="action-row">
-          <button class="button" id="confirm-publish-button" type="button" disabled>Confirm &amp; Publish</button>
+          <button class="button" id="confirm-publish-button" type="button" disabled>Save &amp; Generate</button>
           <button class="button button--ghost" id="edit-json-button" type="button">Edit JSON</button>
         </div>
-        <p class="inline-feedback" id="publish-status" aria-live="polite">Ready to publish.</p>
+        <p class="inline-feedback" id="publish-status" aria-live="polite">Ready to save.</p>
       </div>
       <p class="error-message" id="publish-error" role="alert" hidden></p>
     </section>
@@ -93,7 +72,7 @@
       <div class="section-heading">
         <div>
           <p class="section-kicker">Result</p>
-          <h2 id="result-title">Published application</h2>
+          <h2 id="result-title">Saved application</h2>
         </div>
       </div>
       <div class="field-grid">
@@ -129,6 +108,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
-  <script src="script.js?v=20" defer></script>
+  <script src="script.js?v=21" defer></script>
 </body>
 </html>

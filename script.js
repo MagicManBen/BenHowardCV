@@ -1,13 +1,11 @@
 // Ben Howard CV system
 // Dashboard: track applications and open custom URLs.
-// New job: review pasted JSON, publish to GitHub Pages, generate QR code.
+// New job: review pasted JSON, save locally, generate QR code.
 // CV preview: render the personalised page and printable PDF view.
 
-const GITHUB_OWNER = "MagicManBen";
-const GITHUB_REPO = "BenHowardCV";
-const GITHUB_BRANCH = "main";
 const CV_BASE_URL = new URL("cv.html", window.location.href).href;
 const NEW_JOB_URL = new URL("new-job.html", window.location.href).href;
+const APPLICATIONS_STORE_KEY = "cv_applications_local";
 const APPLICATIONS_INDEX_PATH = "data/applications.json";
 
 const CAPABILITY_CARDS = Object.freeze([
@@ -46,6 +44,8 @@ const REVIEW_FIELDS = [
 
 let toastTimer = null;
 let previewDom = null;
+let savedApplications = [];
+let savedApplicationMap = new Map();
 
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
@@ -86,10 +86,13 @@ function initDashboardPage() {
     const ref = actionButton.dataset.ref;
     if (!action || !ref) return;
 
+    const application = savedApplicationMap.get(ref) || null;
+    const previewUrl = application ? buildPreviewUrl(application) : buildPreviewUrl(ref);
+    const printUrl = application ? buildPrintUrl(application) : buildPrintUrl(ref);
+
     if (action === "copy-url") {
-      const url = buildPreviewUrl(ref);
       try {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(previewUrl);
         showToast(dom, "URL copied.");
       } catch {
         showToast(dom, "Could not copy automatically.");
@@ -98,12 +101,12 @@ function initDashboardPage() {
     }
 
     if (action === "open-preview") {
-      window.open(buildPreviewUrl(ref), "_blank", "noopener,noreferrer");
+      window.open(previewUrl, "_blank", "noopener,noreferrer");
       return;
     }
 
     if (action === "open-pdf") {
-      window.open(buildPrintUrl(ref), "_blank", "noopener,noreferrer");
+      window.open(printUrl, "_blank", "noopener,noreferrer");
     }
   });
 
@@ -112,10 +115,6 @@ function initDashboardPage() {
 
 function initNewJobPage() {
   const dom = {
-    githubToken: document.getElementById("github-token"),
-    saveKeysButton: document.getElementById("save-keys-button"),
-    clearKeysButton: document.getElementById("clear-keys-button"),
-    keysStatus: document.getElementById("keys-status"),
     jobJsonInput: document.getElementById("job-json-input"),
     reviewButton: document.getElementById("review-json-button"),
     clearJsonButton: document.getElementById("clear-json-button"),
@@ -143,22 +142,6 @@ function initNewJobPage() {
 
   let pendingApplication = null;
 
-  dom.githubToken.value = localStorage.getItem("cv_github_token") || "";
-  updateKeysStatus(dom);
-
-  dom.saveKeysButton?.addEventListener("click", () => {
-    localStorage.setItem("cv_github_token", dom.githubToken.value.trim());
-    updateKeysStatus(dom);
-    showToast(dom, "GitHub token saved.");
-  });
-
-  dom.clearKeysButton?.addEventListener("click", () => {
-    localStorage.removeItem("cv_github_token");
-    dom.githubToken.value = "";
-    updateKeysStatus(dom);
-    showToast(dom, "GitHub token cleared.");
-  });
-
   dom.clearJsonButton?.addEventListener("click", () => {
     dom.jobJsonInput.value = "";
     pendingApplication = null;
@@ -167,7 +150,7 @@ function initNewJobPage() {
     dom.reviewError.hidden = true;
     dom.publishError.hidden = true;
     dom.reviewStatus.textContent = "Waiting for JSON.";
-    dom.publishStatus.textContent = "Ready to publish.";
+    dom.publishStatus.textContent = "Ready to save.";
     dom.rawJsonOutput.textContent = "No application loaded yet.";
     showToast(dom, "JSON form cleared.");
   });
@@ -176,7 +159,7 @@ function initNewJobPage() {
     if (!pendingApplication) return;
     pendingApplication = null;
     dom.confirmPublishButton.disabled = true;
-    dom.reviewStatus.textContent = "JSON changed. Review again before publishing.";
+    dom.reviewStatus.textContent = "JSON changed. Review again before saving.";
   });
 
   dom.reviewButton?.addEventListener("click", () => {
@@ -197,7 +180,7 @@ function initNewJobPage() {
       dom.rawJsonOutput.textContent = JSON.stringify(pendingApplication, null, 2);
       dom.reviewPanel.hidden = false;
       dom.confirmPublishButton.disabled = false;
-      dom.reviewStatus.textContent = `Ready to publish ${pendingApplication.companyName} / ${pendingApplication.roleTitle}.`;
+      dom.reviewStatus.textContent = `Ready to save ${pendingApplication.companyName} / ${pendingApplication.roleTitle}.`;
       showToast(dom, "JSON parsed successfully.");
       dom.reviewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
@@ -216,34 +199,34 @@ function initNewJobPage() {
   dom.confirmPublishButton?.addEventListener("click", async () => {
     dom.publishError.hidden = true;
 
-    const githubToken = dom.githubToken.value.trim() || localStorage.getItem("cv_github_token") || "";
-    if (!githubToken) {
-      showError(dom.publishError, "Enter your GitHub token first.");
-      return;
-    }
-
     if (!pendingApplication) {
-      showError(dom.publishError, "Review the JSON before publishing.");
+      showError(dom.publishError, "Review the JSON before saving.");
       return;
     }
 
     dom.confirmPublishButton.disabled = true;
-    dom.confirmPublishButton.textContent = "Publishing…";
-    dom.publishStatus.textContent = "Saving application to GitHub…";
+    dom.confirmPublishButton.textContent = "Saving…";
+    dom.publishStatus.textContent = "Saving application on this device…";
 
     try {
-      const saved = await saveApplicationToGitHub(githubToken, pendingApplication);
+      const saved = saveApplicationLocally(pendingApplication);
       await renderPublishedResult(dom, saved);
       dom.resultPanel.hidden = false;
-      dom.publishStatus.textContent = "Published.";
-      showToast(dom, "Application published.");
+      dom.publishStatus.textContent = "Saved.";
+      showToast(dom, "Application saved.");
       dom.resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      loadSavedList({
+        statsTotal: document.getElementById("stats-total"),
+        statsLatest: document.getElementById("stats-latest"),
+        savedList: document.getElementById("saved-list"),
+        toast: document.getElementById("toast")
+      }, saved);
     } catch (error) {
-      showError(dom.publishError, error instanceof Error ? error.message : "Could not publish the application.");
-      dom.publishStatus.textContent = "Publish failed.";
+      showError(dom.publishError, error instanceof Error ? error.message : "Could not save the application.");
+      dom.publishStatus.textContent = "Save failed.";
     } finally {
       dom.confirmPublishButton.disabled = false;
-      dom.confirmPublishButton.textContent = "Confirm & Publish";
+      dom.confirmPublishButton.textContent = "Save & Generate";
     }
   });
 
@@ -310,12 +293,6 @@ function initCvPreviewPage() {
   loadPreviewApplication();
 }
 
-function updateKeysStatus(dom) {
-  if (!dom.keysStatus) return;
-  const hasGithub = Boolean(dom.githubToken?.value.trim());
-  dom.keysStatus.textContent = hasGithub ? "GitHub token set." : "No GitHub token set.";
-}
-
 function normaliseApplicationPayload(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     throw new Error("The pasted JSON must be a single object.");
@@ -373,7 +350,7 @@ function renderReviewPreview(application) {
 }
 
 async function renderPublishedResult(dom, application) {
-  const url = buildPreviewUrl(application.ref);
+  const url = buildPreviewUrl(application);
 
   dom.resultCompany.value = application.companyName || "";
   dom.resultRole.value = application.roleTitle || "";
@@ -390,115 +367,54 @@ async function renderPublishedResult(dom, application) {
   }
 }
 
-async function saveApplicationToGitHub(token, data) {
-  await putJsonFile(token, `data/${data.ref}.json`, data, `Add/update application: ${data.companyName} / ${data.roleTitle}`);
-  await upsertApplicationsIndex(token, data);
-  return data;
-}
-
-async function upsertApplicationsIndex(token, application) {
-  const currentIndex = await fetchApplicationsIndexForWrite(token);
-
-  const summary = {
-    ref: application.ref,
-    companyName: application.companyName,
-    roleTitle: application.roleTitle,
-    location: application.location,
-    updatedAt: application.updatedAt,
-    createdAt: application.createdAt
+function saveApplicationLocally(application) {
+  const current = readStoredApplications();
+  const nowIso = new Date().toISOString();
+  const payload = {
+    ...application,
+    createdAt: application.createdAt || nowIso,
+    updatedAt: nowIso
   };
 
-  const existingIndex = currentIndex.items.findIndex((item) => item.ref === application.ref);
+  const existingIndex = current.findIndex((item) => item.ref === payload.ref);
   if (existingIndex >= 0) {
-    currentIndex.items[existingIndex] = { ...currentIndex.items[existingIndex], ...summary };
+    current[existingIndex] = payload;
   } else {
-    currentIndex.items.push(summary);
+    current.unshift(payload);
   }
 
-  currentIndex.items.sort((a, b) => {
+  current.sort((a, b) => {
     const aTime = Date.parse(a.updatedAt || a.createdAt || "") || 0;
     const bTime = Date.parse(b.updatedAt || b.createdAt || "") || 0;
     return bTime - aTime;
   });
 
-  await putJsonFile(token, APPLICATIONS_INDEX_PATH, currentIndex.items, `Update applications index: ${application.ref}`, currentIndex.sha);
+  localStorage.setItem(APPLICATIONS_STORE_KEY, JSON.stringify(current));
+  return payload;
 }
 
-async function fetchApplicationsIndexForWrite(token) {
-  const response = await fetch(buildGitHubContentsUrl(APPLICATIONS_INDEX_PATH), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json"
-    }
-  });
-
-  if (response.status === 404) {
-    return { items: [], sha: null };
-  }
-
-  if (!response.ok) {
-    const errBody = await response.json().catch(() => ({}));
-    throw new Error(errBody.message || "Could not read applications index from GitHub.");
-  }
-
-  const payload = await response.json();
-  const decoded = decodeBase64Utf8(payload.content || "");
-  let items = [];
-
+function readStoredApplications() {
   try {
-    const parsed = JSON.parse(decoded || "[]");
-    items = Array.isArray(parsed) ? parsed : [];
+    const raw = localStorage.getItem(APPLICATIONS_STORE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(isApplicationObject) : [];
   } catch {
-    items = [];
-  }
-
-  return { items, sha: payload.sha || null };
-}
-
-async function putJsonFile(token, path, data, message, sha = null) {
-  const body = {
-    message,
-    content: encodeBase64Utf8(JSON.stringify(data, null, 2)),
-    branch: GITHUB_BRANCH
-  };
-
-  if (sha) {
-    body.sha = sha;
-  }
-
-  const response = await fetch(buildGitHubContentsUrl(path), {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (!response.ok) {
-    const errBody = await response.json().catch(() => ({}));
-    throw new Error(errBody.message || `GitHub API returned ${response.status}`);
+    return [];
   }
 }
 
-function buildGitHubContentsUrl(path) {
-  return `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+function isApplicationObject(value) {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value) && typeof value.ref === "string");
 }
 
 async function loadSavedList(dom, latestApplication = null) {
   try {
-    const response = await fetch(`${APPLICATIONS_INDEX_PATH}?t=${Date.now()}`, { cache: "no-store" });
+    const localApplications = readStoredApplications();
+    const applications = localApplications.length ? localApplications : await fetchSeedApplications();
 
-    if (!response.ok) {
-      dom.savedList.innerHTML = '<p class="empty-state">No applications saved yet.</p>';
-      dom.statsTotal.textContent = "0";
-      dom.statsLatest.textContent = latestApplication ? `${latestApplication.companyName} · ${latestApplication.roleTitle}` : "None yet";
-      return;
-    }
-
-    const items = await response.json();
-    const applications = Array.isArray(items) ? items : [];
+    savedApplications = applications;
+    savedApplicationMap = new Map(applications.map((application) => [application.ref, application]));
 
     if (!applications.length) {
       dom.savedList.innerHTML = '<p class="empty-state">No applications saved yet.</p>';
@@ -515,7 +431,7 @@ async function loadSavedList(dom, latestApplication = null) {
 
     dom.statsTotal.textContent = String(applications.length);
     const latest = latestApplication || applications[0];
-    dom.statsLatest.textContent = latest ? `${latest.companyName} · ${latest.roleTitle}` : "None yet";
+    dom.statsLatest.textContent = latest ? `${latest.companyName || latest.ref} · ${latest.roleTitle || "Saved CV"}` : "None yet";
     dom.savedList.innerHTML = applications.map((application) => renderSavedApplicationCard(application)).join("");
   } catch {
     dom.savedList.innerHTML = '<p class="empty-state">Could not load saved applications.</p>';
@@ -524,9 +440,20 @@ async function loadSavedList(dom, latestApplication = null) {
   }
 }
 
+async function fetchSeedApplications() {
+  try {
+    const response = await fetch(`${APPLICATIONS_INDEX_PATH}?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) return [];
+    const items = await response.json();
+    return Array.isArray(items) ? items.filter(isApplicationObject) : [];
+  } catch {
+    return [];
+  }
+}
+
 function renderSavedApplicationCard(application) {
-  const url = buildPreviewUrl(application.ref);
-  const printUrl = buildPrintUrl(application.ref);
+  const previewUrl = buildPreviewUrl(application);
+  const printUrl = buildPrintUrl(application);
   const updated = formatDateTime(application.updatedAt || application.createdAt);
   const metaBits = [application.location, updated ? `Updated ${updated}` : ""].filter(Boolean).join(" · ");
 
@@ -534,7 +461,7 @@ function renderSavedApplicationCard(application) {
     <article class="saved-application-card">
       <div class="saved-application-header">
         <div>
-          <h3 class="saved-application-title">${escapeHtml(application.companyName)} · ${escapeHtml(application.roleTitle)}</h3>
+          <h3 class="saved-application-title">${escapeHtml(application.companyName || application.ref)} · ${escapeHtml(application.roleTitle || "Saved CV")}</h3>
           <p class="saved-application-meta">${escapeHtml(metaBits || application.ref)}</p>
         </div>
       </div>
@@ -543,28 +470,154 @@ function renderSavedApplicationCard(application) {
         <button class="saved-action" type="button" data-action="open-pdf" data-ref="${escapeHtml(application.ref)}">PDF view</button>
         <button class="saved-action" type="button" data-action="copy-url" data-ref="${escapeHtml(application.ref)}">Copy URL</button>
       </div>
-      <p class="saved-application-meta">Preview: ${escapeHtml(url)}<br>PDF: ${escapeHtml(printUrl)}</p>
+      <p class="saved-application-meta">Preview: ${escapeHtml(previewUrl)}<br>PDF: ${escapeHtml(printUrl)}</p>
     </article>
   `;
 }
 
-function buildPreviewUrl(ref) {
-  return `${CV_BASE_URL}?ref=${encodeURIComponent(ref)}`;
+function buildPreviewUrl(refOrApplication) {
+  if (typeof refOrApplication === "string") {
+    return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication)}`;
+  }
+
+  if (isEmbeddedPayloadReady(refOrApplication)) {
+    const payload = buildEmbeddedPreviewPayload(refOrApplication);
+    return `${CV_BASE_URL}#app=${encodeApplicationPayload(payload)}`;
+  }
+
+  return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication.ref || "")}`;
 }
 
-function buildPrintUrl(ref) {
-  return `${CV_BASE_URL}?ref=${encodeURIComponent(ref)}&print=1`;
+function buildPrintUrl(refOrApplication) {
+  if (typeof refOrApplication === "string") {
+    return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication)}&print=1`;
+  }
+
+  if (isEmbeddedPayloadReady(refOrApplication)) {
+    const payload = buildEmbeddedPreviewPayload(refOrApplication);
+    return `${CV_BASE_URL}?print=1#app=${encodeApplicationPayload(payload)}`;
+  }
+
+  return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication.ref || "")}&print=1`;
 }
 
 function buildPrintUrlFromUrl(url) {
   try {
     const parsed = new URL(url, window.location.href);
+    const hash = parsed.hash;
+
+    if (hash.startsWith("#app=")) {
+      parsed.hash = hash;
+      parsed.searchParams.set("print", "1");
+      return parsed.href;
+    }
+
     const ref = (parsed.searchParams.get("ref") || "").trim();
     if (!ref) return url;
-    return buildPrintUrl(ref);
+    parsed.searchParams.set("print", "1");
+    return parsed.href;
   } catch {
     return url;
   }
+}
+
+function isEmbeddedPayloadReady(application) {
+  return Boolean(
+    application &&
+      typeof application === "object" &&
+      !Array.isArray(application) &&
+      application.companyName &&
+      application.roleTitle &&
+      (Array.isArray(application.toneKeywords) ||
+        Array.isArray(application.probablePriorities) ||
+        Array.isArray(application.keyFocusAreas) ||
+        typeof application.personalisedIntro === "string")
+  );
+}
+
+function buildEmbeddedPreviewPayload(application) {
+  return {
+    ref: application.ref || slugify([application.companyName, application.roleTitle, application.location].filter(Boolean).join(" ")),
+    companyName: application.companyName || "",
+    roleTitle: application.roleTitle || "",
+    location: application.location || "",
+    sector: application.sector || "",
+    salary: application.salary || "",
+    employmentType: application.employmentType || "",
+    shortCompanyReason: application.shortCompanyReason || "",
+    shortRoleReason: application.shortRoleReason || "",
+    toneKeywords: Array.isArray(application.toneKeywords) ? application.toneKeywords : [],
+    probablePriorities: Array.isArray(application.probablePriorities) ? application.probablePriorities : [],
+    advertSummary: application.advertSummary || "",
+    personalisedIntro: application.personalisedIntro || "",
+    whyThisRole: application.whyThisRole || "",
+    keyFocusAreas: Array.isArray(application.keyFocusAreas) ? application.keyFocusAreas : []
+  };
+}
+
+function readEmbeddedApplicationFromLocation() {
+  try {
+    const hash = window.location.hash.replace(/^#/, "");
+    if (!hash) return null;
+
+    const hashParams = new URLSearchParams(hash);
+    const encoded = (hashParams.get("app") || "").trim();
+    if (!encoded) return null;
+
+    const decoded = decodeApplicationPayload(encoded);
+    const parsed = JSON.parse(decoded);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+
+    return normaliseEmbeddedApplication(parsed);
+  } catch {
+    return null;
+  }
+}
+
+function normaliseEmbeddedApplication(input) {
+  const application = {
+    ref: toCleanString(input.ref) || slugify([input.companyName, input.roleTitle, input.location].filter(Boolean).join(" ")),
+    companyName: toCleanString(input.companyName),
+    roleTitle: toCleanString(input.roleTitle),
+    location: toCleanString(input.location),
+    sector: toCleanString(input.sector),
+    salary: toCleanString(input.salary),
+    employmentType: toCleanString(input.employmentType),
+    shortCompanyReason: toCleanString(input.shortCompanyReason),
+    shortRoleReason: toCleanString(input.shortRoleReason),
+    toneKeywords: normaliseStringArray(input.toneKeywords),
+    probablePriorities: normaliseStringArray(input.probablePriorities),
+    advertSummary: toCleanString(input.advertSummary),
+    personalisedIntro: toCleanString(input.personalisedIntro),
+    whyThisRole: toCleanString(input.whyThisRole),
+    keyFocusAreas: normaliseStringArray(input.keyFocusAreas)
+  };
+
+  if (!application.companyName || !application.roleTitle) {
+    throw new Error("Embedded application data is missing companyName or roleTitle.");
+  }
+
+  return application;
+}
+
+function encodeApplicationPayload(value) {
+  const json = typeof value === "string" ? value : JSON.stringify(value);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+}
+
+function decodeApplicationPayload(value) {
+  const base64 = value.replaceAll("-", "+").replaceAll("_", "/");
+  const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
 
 async function fetchApplicationByRef(ref) {
@@ -575,136 +628,65 @@ async function fetchApplicationByRef(ref) {
   return response.json();
 }
 
-function slugify(text) {
-  return String(text)
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 80);
-}
-
-function toCleanString(value) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function normaliseStringArray(value) {
-  if (!Array.isArray(value)) return [];
-  return value.map((item) => (typeof item === "string" ? item.trim() : "")).filter(Boolean);
-}
-
-function showError(el, message) {
-  if (!el) return;
-  el.hidden = false;
-  el.textContent = message;
-}
-
-function showToast(dom, message) {
-  const el = dom.toast;
-  if (!el) return;
-
-  el.textContent = message;
-  el.classList.add("is-visible");
-
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    el.classList.remove("is-visible");
-  }, 3000);
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function formatDateTime(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(date);
-}
-
-function encodeBase64Utf8(value) {
-  return btoa(unescape(encodeURIComponent(value)));
-}
-
-function decodeBase64Utf8(value) {
-  return decodeURIComponent(escape(atob(String(value).replace(/\n/g, ""))));
-}
-
-async function renderQrImage(img, text) {
-  if (!img) return "";
-
-  if (!window.QRCode?.toDataURL) {
-    img.hidden = true;
-    return "";
-  }
-
-  const dataUrl = await window.QRCode.toDataURL(text, {
-    width: 300,
-    margin: 1,
-    errorCorrectionLevel: "M"
-  });
-
-  img.src = dataUrl;
-  img.hidden = false;
-  return dataUrl;
-}
-
-async function loadPreviewApplication() {
+function loadPreviewApplication() {
+  const embeddedApplication = readEmbeddedApplicationFromLocation();
   const params = new URLSearchParams(window.location.search);
   const requestedRef = (params.get("ref") || "").trim().toLowerCase();
   const shouldAutoPrint = params.get("print") === "1";
 
+  if (embeddedApplication) {
+    renderPreviewApplication(embeddedApplication);
+    const previewUrl = buildPreviewUrl(embeddedApplication);
+    showPreviewLoading();
+    renderQrImage(previewDom.qrImage, previewUrl)
+      .then(() => {
+        previewDom.qrBadge.hidden = false;
+        showPreviewContent();
+        if (shouldAutoPrint) {
+          window.setTimeout(() => window.print(), 450);
+        }
+      })
+      .catch(() => {
+        previewDom.qrBadge.hidden = true;
+        showPreviewContent();
+        if (shouldAutoPrint) {
+          window.setTimeout(() => window.print(), 450);
+        }
+      });
+    return;
+  }
+
   if (!requestedRef) {
-    showPreviewError("Missing preview reference", "Open this page with a ?ref=... value so it knows which application to load.");
+    showPreviewError("Missing preview reference", "Open this page with a ?ref=... value or a #app=... payload so it knows which application to load.");
     return;
   }
 
   showPreviewLoading();
 
-  try {
-    const response = await fetch(`data/${encodeURIComponent(requestedRef)}.json?t=${Date.now()}`, { cache: "no-store" });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        showPreviewError("Application not found", `No application matches the ref “${requestedRef}”. It may not have been published yet, or GitHub Pages may still be deploying.`);
-        return;
-      }
-      throw new Error(`Failed to load application data (${response.status}).`);
-    }
-
-    const application = await response.json();
-    renderPreviewApplication(application);
-
-    const previewUrl = buildPreviewUrl(application.ref || requestedRef);
-    try {
-      await renderQrImage(previewDom.qrImage, previewUrl);
-      previewDom.qrBadge.hidden = false;
-    } catch {
-      previewDom.qrBadge.hidden = true;
-    }
-    showPreviewContent();
-
-    if (shouldAutoPrint) {
-      window.setTimeout(() => window.print(), 450);
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "The application data could not be loaded.";
-    showPreviewError("Could not load preview data", message);
-  }
+  fetchApplicationByRef(requestedRef)
+    .then((application) => {
+      renderPreviewApplication(application);
+      const previewUrl = buildPreviewUrl(application.ref || requestedRef);
+      return renderQrImage(previewDom.qrImage, previewUrl)
+        .then(() => {
+          previewDom.qrBadge.hidden = false;
+          showPreviewContent();
+          if (shouldAutoPrint) {
+            window.setTimeout(() => window.print(), 450);
+          }
+        })
+        .catch(() => {
+          previewDom.qrBadge.hidden = true;
+          showPreviewContent();
+          if (shouldAutoPrint) {
+            window.setTimeout(() => window.print(), 450);
+          }
+        });
+    })
+    .catch((error) => {
+      const message = error instanceof Error ? error.message : "The application data could not be loaded.";
+      showPreviewError("Could not load preview data", message);
+    });
 }
 
 function showPreviewLoading() {
@@ -854,4 +836,76 @@ function buildClosingCopy(app) {
   const company = app.companyName || "your team";
   const role = app.roleTitle || "the role";
   return `Thank you for reviewing this personalised overview. I would welcome the chance to discuss how my background in operations leadership could support ${company} in the ${role} position. I am happy to provide further detail, references, or arrange a conversation at your convenience.`;
+}
+
+function updateKeysStatus() {}
+
+function toCleanString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function normaliseStringArray(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => (typeof item === "string" ? item.trim() : "")).filter(Boolean);
+}
+
+function showError(el, message) {
+  if (!el) return;
+  el.hidden = false;
+  el.textContent = message;
+}
+
+function showToast(dom, message) {
+  const el = dom.toast;
+  if (!el) return;
+
+  el.textContent = message;
+  el.classList.add("is-visible");
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove("is-visible");
+  }, 3000);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+async function renderQrImage(img, text) {
+  if (!img) return "";
+
+  if (!window.QRCode?.toDataURL) {
+    img.hidden = true;
+    return "";
+  }
+
+  const dataUrl = await window.QRCode.toDataURL(text, {
+    width: 300,
+    margin: 1,
+    errorCorrectionLevel: "M"
+  });
+
+  img.src = dataUrl;
+  img.hidden = false;
+  return dataUrl;
 }

@@ -1,5 +1,5 @@
 const LOCAL_API_BASE = "/api";
-const DEFAULT_PUBLIC_CV_BASE_URL = "https://magicmanben.github.io/BenHowardCV/cv.html";
+const DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html";
 
 const REVIEW_FIELDS = [
   ["ref", "Generated ref"],

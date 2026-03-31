@@ -27,7 +27,7 @@ GITHUB_OWNER = "MagicManBen"
 GITHUB_REPO = "BenHowardCV"
 GITHUB_BRANCH = "main"
 APPLICATIONS_INDEX_PATH = "data/applications.json"
-DEFAULT_PUBLIC_CV_BASE_URL = "https://magicmanben.github.io/BenHowardCV/cv.html"
+DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
 
 
 def load_local_config():

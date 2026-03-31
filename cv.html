@@ -6,38 +6,53 @@
   <title>Ben T. Howard | Senior Operations and Transformation Leader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --paper: #ffffff;
-      --canvas: #d7c2a0;
-      --ink: #2f2f31;
-      --muted: #76797d;
-      --gold: #b7984a;
-      --gold-soft: rgba(183, 152, 74, 0.14);
-      --teal: #33596b;
-      --teal-deep: #284a5b;
-      --line: #d9d9d9;
-      --soft-bar: #f1f3f5;
-      --shadow: 0 24px 48px rgba(39, 31, 18, 0.16);
+      --bg: #ffd7a1;
+      --bg-deep: #ffc777;
+      --surface: rgba(255, 252, 247, 0.88);
+      --surface-strong: #fffdf9;
+      --surface-muted: #fff1de;
+      --border: rgba(50, 41, 31, 0.11);
+      --border-strong: rgba(184, 90, 10, 0.2);
+      --text: #281306;
+      --text-soft: #6a3d18;
+      --text-faint: #8c5d36;
+      --brand: #f97a00;
+      --brand-strong: #c95f00;
+      --brand-soft: rgba(249, 122, 0, 0.12);
+      --accent: #ff9c1a;
+      --accent-soft: rgba(255, 156, 26, 0.14);
+      --teal: #8c4200;
+      --teal-strong: #5f2e00;
+      --shadow: 0 20px 50px rgba(41, 31, 21, 0.10);
+      --shadow-soft: 0 12px 24px rgba(27, 22, 18, 0.08);
+      --radius: 26px;
+      --radius-small: 18px;
+      --radius-pill: 999px;
+      --content-width: 1220px;
     }
 
-    * {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
     }
 
     html {
-      font-size: 16px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      scroll-behavior: smooth;
     }
 
     body {
       margin: 0;
-      font-family: "Source Sans 3", "Segoe UI", sans-serif;
-      color: var(--ink);
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Manrope", "Segoe UI", sans-serif;
       background:
-        linear-gradient(180deg, #d5c0a0 0%, #d5c0a0 52%, #f3f3f3 52%, #f3f3f3 100%);
+        radial-gradient(circle at top left, rgba(255, 140, 0, 0.28), transparent 26%),
+        radial-gradient(circle at top right, rgba(255, 194, 102, 0.34), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, #ffe2ba 58%, #ffd39c 100%);
     }
 
     body::before {
@@ -45,9 +60,11 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(circle at top left, rgba(183, 152, 74, 0.08), transparent 28%),
-        radial-gradient(circle at top right, rgba(51, 89, 107, 0.08), transparent 24%);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 24%),
+        radial-gradient(circle at 20% 20%, rgba(255, 127, 0, 0.12), transparent 18%),
+        radial-gradient(circle at 80% 0%, rgba(255, 181, 83, 0.16), transparent 16%);
       pointer-events: none;
+      z-index: 0;
     }
 
     a {
@@ -55,11 +72,14 @@
       text-decoration: none;
     }
 
+    button {
+      font: inherit;
+    }
+
     p,
     li {
       margin: 0;
-      font-size: 0.74rem;
-      line-height: 1.38;
+      line-height: 1.6;
     }
 
     h1,
@@ -67,472 +87,820 @@
     h3,
     h4 {
       margin: 0;
-      line-height: 1.1;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
     }
 
     ul {
       margin: 0;
-      padding-left: 1rem;
+      padding-left: 1.05rem;
     }
 
     li + li {
-      margin-top: 0.18rem;
+      margin-top: 0.45rem;
     }
 
-    .document {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      gap: 18px;
-      padding: 22px 0 28px;
+    .shell {
+      width: min(calc(100% - 1.5rem), var(--content-width));
+      margin: 0 auto;
     }
 
     .page {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 0 auto;
-      background: var(--paper);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      break-after: page;
-      page-break-after: always;
-    }
-
-    .page:last-child {
-      break-after: auto;
-      page-break-after: auto;
-    }
-
-    .page-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 31.5%;
-      min-height: 100%;
-    }
-
-    .main-column {
-      padding: 10mm 11mm 9mm 12mm;
-    }
-
-    .sidebar {
-      padding: 10mm 7.5mm 9mm 7.5mm;
-      background: linear-gradient(180deg, var(--teal) 0%, var(--teal-deep) 100%);
-      color: #f5f5f1;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-
-    .sidebar-spacer {
-      flex: 1 1 auto;
-    }
-
-    .print-fab {
-      position: fixed;
-      z-index: 2;
-      top: 16px;
-      right: 16px;
-      border: 1px solid rgba(50, 41, 31, 0.18);
-      background: rgba(255, 255, 255, 0.92);
-      color: var(--ink);
-      border-radius: 999px;
-      padding: 0.8rem 1.05rem;
-      font-family: "Montserrat", sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(39, 31, 18, 0.12);
-    }
-
-    .masthead {
-      display: flex;
-      justify-content: flex-end;
-      align-items: flex-start;
-      margin-bottom: 0.55rem;
-    }
-
-    .name-lockup {
-      text-align: right;
-    }
-
-    .name-lockup h1 {
-      font-family: "Montserrat", sans-serif;
-      font-size: 2rem;
-      font-weight: 500;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      text-indent: 0.28em;
-      color: var(--gold);
-    }
-
-    .role-title {
-      margin-top: 0.42rem;
-      font-family: "Montserrat", sans-serif;
-      font-size: 0.56rem;
-      font-weight: 700;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: #3a3d41;
-    }
-
-    .tailored-line {
-      margin-top: 0.42rem;
-      font-family: "Montserrat", sans-serif;
-      font-size: 0.46rem;
-      font-weight: 700;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      color: var(--gold);
-    }
-
-    .summary-block,
-    .section-block,
-    .continuation-intro {
-      margin-top: 1rem;
-    }
-
-    .summary-copy {
-      color: #505458;
-      font-size: 0.8rem;
-      line-height: 1.48;
-      max-width: 95%;
-    }
-
-    .summary-copy strong {
-      color: var(--ink);
-      font-weight: 700;
-    }
-
-    .section-heading {
       position: relative;
+      z-index: 1;
+      padding: 1rem 0 2.25rem;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(16px);
+      background: rgba(255, 238, 214, 0.88);
+      border-bottom: 1px solid rgba(184, 90, 10, 0.10);
+    }
+
+    .topbar-inner {
       display: flex;
       align-items: center;
-      min-height: 1rem;
-      margin-bottom: 0.68rem;
-      padding: 0.16rem 0.6rem 0.14rem 0.82rem;
-      background: linear-gradient(90deg, var(--soft-bar) 0%, rgba(241, 243, 245, 0.58) 100%);
-      font-family: "Montserrat", sans-serif;
-      font-size: 0.58rem;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 0.9rem;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(145deg, rgba(249, 122, 0, 0.96), rgba(201, 95, 0, 0.98));
+      color: #fff;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.24em;
+      box-shadow: 0 12px 24px rgba(249, 122, 0, 0.22);
+      flex: 0 0 auto;
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.98rem;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-copy span {
+      display: block;
+      margin-top: 0.12rem;
+      color: var(--text-soft);
+      font-size: 0.86rem;
+    }
+
+    .topnav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      justify-content: center;
+    }
+
+    .topnav a,
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      min-height: 2.4rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(50, 41, 31, 0.10);
+      background: rgba(255, 255, 255, 0.62);
+      font-size: 0.82rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .topnav a:hover,
+    .pill:hover,
+    .button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(27, 22, 18, 0.12);
+    }
+
+    .button {
+      appearance: none;
+      border: 1px solid transparent;
+      background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .button--ghost {
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--text);
+      border-color: rgba(50, 41, 31, 0.10);
+    }
+
+    .cv-layout {
+      display: grid;
+      gap: 1rem;
+      padding-top: 1rem;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(290px, 0.95fr);
+      gap: 1rem;
+      align-items: stretch;
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) + 6px);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 252, 247, 0.82)),
+        var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: auto -6rem -8rem auto;
+      width: 18rem;
+      height: 18rem;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 146, 0, 0.20), transparent 64%);
+      pointer-events: none;
+    }
+
+    .hero-copy,
+    .hero-panel,
+    .card {
+      position: relative;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.55rem;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4.6rem);
+      line-height: 0.96;
+    }
+
+    .hero-role {
+      margin-top: 0.65rem;
+      color: var(--text-soft);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      max-width: 52ch;
+    }
+
+    .hero-summary {
+      margin-top: 0.95rem;
+      max-width: 66ch;
+      color: var(--text-soft);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.15rem;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-height: 2.1rem;
+      padding: 0.45rem 0.8rem;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 107, 93, 0.08);
+      color: var(--teal-strong);
+      border: 1px solid rgba(15, 107, 93, 0.12);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .hero-panel {
+      display: grid;
+      gap: 0.9rem;
+      align-content: start;
+    }
+
+    .stats {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .stat {
+      padding: 0.95rem 1rem;
+      border-radius: var(--radius-small);
+      border: 1px solid rgba(50, 41, 31, 0.10);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--text-faint);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+    }
+
+    .stat-value {
+      display: block;
+      margin-top: 0.4rem;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .contact-card {
+      padding: 1rem;
+      border-radius: var(--radius-small);
+      background:
+        linear-gradient(180deg, rgba(184, 90, 10, 0.98), rgba(124, 58, 0, 0.98));
+      color: rgba(245, 245, 241, 0.94);
+      box-shadow: 0 18px 34px rgba(184, 90, 10, 0.24);
+    }
+
+    .contact-card h2 {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.32rem 0.6rem;
+      border-radius: 0.7rem;
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--teal-strong);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+    }
+
+    .contact-lines {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 0.9rem;
+    }
+
+    .contact-lines p {
+      display: grid;
+      gap: 0.12rem;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .contact-lines strong {
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .contact-lines a {
+      text-decoration: underline;
+      text-decoration-color: rgba(255, 255, 255, 0.24);
+      text-underline-offset: 0.12em;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.88fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .card {
+      padding: 1.1rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-kicker {
+      margin: 0 0 0.3rem;
+      color: var(--brand);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
-    .section-heading::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--gold);
+    .section-head h2 {
+      font-size: clamp(1.25rem, 2vw, 1.7rem);
     }
 
-    .role-entry + .role-entry {
-      margin-top: 1rem;
-      padding-top: 0.95rem;
-      border-top: 1px solid var(--line);
+    .section-note {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+      max-width: 62ch;
+    }
+
+    .profile-copy {
+      color: var(--text-soft);
+      max-width: 78ch;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 0.95rem;
+    }
+
+    .role-card {
+      position: relative;
+      padding: 1rem 1rem 1rem 1.05rem;
+      border-radius: 22px;
+      border: 1px solid rgba(50, 41, 31, 0.10);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 252, 247, 0.94));
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .role-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--accent), rgba(15, 107, 93, 0.85));
     }
 
     .role-header {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.8rem;
+      gap: 0.85rem;
       align-items: baseline;
     }
 
     .role-name {
-      font-family: "Montserrat", sans-serif;
-      font-size: 0.72rem;
+      font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: none;
-      line-height: 1.15;
     }
 
     .role-meta {
-      margin-top: 0.18rem;
-      color: #666a6f;
-      font-size: 0.68rem;
+      margin-top: 0.15rem;
+      color: var(--text-soft);
+      font-size: 0.88rem;
     }
 
     .role-date {
-      color: #666a6f;
-      font-size: 0.64rem;
-      white-space: nowrap;
-      text-align: right;
-      font-weight: 600;
-      padding-top: 0.08rem;
-    }
-
-    .role-entry ul {
-      margin-top: 0.5rem;
-    }
-
-    .role-entry li::marker,
-    .sidebar-list li::marker {
-      color: var(--gold);
-    }
-
-    .sidebar-card + .sidebar-card {
-      margin-top: 1rem;
-    }
-
-    .sidebar-card h2 {
-      display: inline-block;
-      padding: 0.18rem 0.52rem 0.12rem;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(255, 255, 255, 0.94);
-      color: var(--teal-deep);
-      font-family: "Montserrat", sans-serif;
-      font-size: 0.48rem;
-      font-weight: 700;
-      letter-spacing: 0.24em;
+      color: var(--text-faint);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
-    .sidebar-card p,
-    .sidebar-card li {
-      color: rgba(245, 245, 241, 0.92);
-      font-size: 0.72rem;
-      line-height: 1.48;
+    .role-card ul {
+      margin-top: 0.8rem;
+      color: var(--text-soft);
     }
 
-    .sidebar-card p + p,
-    .sidebar-card ul,
-    .sidebar-card .mini-entry-list {
-      margin-top: 0.45rem;
+    .role-card li::marker,
+    .list-card li::marker {
+      color: var(--accent);
     }
 
-    .contact-lines {
+    .side-stack {
       display: grid;
-      gap: 0.42rem;
+      gap: 1rem;
+      position: sticky;
+      top: 5.8rem;
     }
 
-    .contact-lines strong {
-      color: #ffffff;
-      font-weight: 700;
+    .list-card h2 {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.32rem 0.6rem;
+      border-radius: 0.7rem;
+      background: rgba(15, 107, 93, 0.08);
+      border: 1px solid rgba(15, 107, 93, 0.12);
+      color: var(--teal-strong);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .list-card p,
+    .list-card li {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .list-card ul {
+      margin-top: 0.8rem;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 0.85rem;
+      margin-top: 0.8rem;
     }
 
     .mini-entry {
-      padding-bottom: 0.56rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(50, 41, 31, 0.10);
     }
 
-    .mini-entry + .mini-entry {
-      margin-top: 0.52rem;
+    .mini-entry:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
     }
 
     .mini-entry h3 {
-      font-family: "Montserrat", sans-serif;
-      font-size: 0.55rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: none;
-      color: #ffffff;
-      line-height: 1.2;
     }
 
     .mini-entry p {
-      margin-top: 0.12rem;
-    }
-
-    .sidebar-list {
-      padding-left: 0.95rem;
-    }
-
-    .sidebar-list.tight li + li {
-      margin-top: 0.24rem;
+      margin-top: 0.18rem;
+      color: var(--text-soft);
+      font-size: 0.9rem;
     }
 
     .note-card {
-      padding-top: 0.1rem;
-    }
-
-    .note-card p {
-      color: rgba(245, 245, 241, 0.84);
-    }
-
-    .note-card strong {
-      color: #ffffff;
-    }
-
-    .focus-list {
-      margin: 0.55rem 0 0;
-      padding-left: 0.95rem;
-    }
-
-    .focus-list li + li {
-      margin-top: 0.35rem;
+      background:
+        linear-gradient(135deg, rgba(255, 156, 26, 0.18), rgba(255, 255, 255, 0.82)),
+        var(--surface);
+      border-color: rgba(255, 156, 26, 0.18);
     }
 
     .focus-lead {
-      margin-top: 0.45rem;
-      color: rgba(245, 245, 241, 0.92);
-      line-height: 1.48;
+      color: var(--text-soft);
+      margin-top: 0.25rem;
     }
 
-    .page-note {
-      color: #666a6f;
-      font-size: 0.7rem;
-      line-height: 1.45;
-      margin-top: 0.1rem;
-      margin-bottom: 0.65rem;
+    .focus-list {
+      margin-top: 0.75rem;
     }
 
-    @media (max-width: 960px) {
-      .document {
-        padding: 0;
-        gap: 0;
-      }
+    .tight li + li {
+      margin-top: 0.3rem;
+    }
 
-      .page {
-        width: 100%;
-        min-height: auto;
-        box-shadow: none;
-      }
+    .footer-note {
+      margin-top: 0.65rem;
+      color: var(--text-faint);
+      font-size: 0.84rem;
+    }
 
-      .page-grid {
+    .subtle-line {
+      width: 100%;
+      height: 1px;
+      margin: 0.3rem 0 0;
+      background: linear-gradient(90deg, rgba(50, 41, 31, 0.12), transparent);
+    }
+
+    .print-button {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 40;
+      border-radius: var(--radius-pill);
+      padding: 0.8rem 1rem;
+      box-shadow: 0 14px 30px rgba(27, 22, 18, 0.14);
+    }
+
+    .hidden-anchor {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .content-grid {
         grid-template-columns: 1fr;
       }
 
-      .main-column,
-      .sidebar {
-        padding: 1.25rem;
+      .side-stack {
+        position: static;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .topbar-inner {
+        flex-direction: column;
+        align-items: stretch;
       }
 
-      .masthead {
+      .brand {
         justify-content: flex-start;
       }
 
-      .name-lockup {
-        text-align: left;
+      .topnav {
+        justify-content: flex-start;
       }
 
-      .name-lockup h1 {
-        text-indent: 0;
-        font-size: 1.7rem;
+      .hero {
+        padding: 1rem;
       }
 
-      .print-fab {
-        right: 12px;
-        top: 12px;
+      .hero h1 {
+        font-size: clamp(2.1rem, 11vw, 3.4rem);
+      }
+
+      .role-header {
+        grid-template-columns: 1fr;
+      }
+
+      .role-date {
+        white-space: normal;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .hero,
+      .card,
+      .role-card,
+      .stat,
+      .contact-card {
+        animation: float-in 0.55s ease both;
+      }
+
+      .hero { animation-delay: 0.05s; }
+      .card:nth-of-type(1) { animation-delay: 0.09s; }
+      .card:nth-of-type(2) { animation-delay: 0.13s; }
+
+      @keyframes float-in {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
     }
 
     @media print {
       @page {
         size: A4 portrait;
-        margin: 0;
+        margin: 0.45in;
       }
 
       html,
       body {
-        margin: 0;
-        background: #ffffff;
+        background: #fff;
       }
 
       body::before,
-      .print-fab {
+      .topbar,
+      .print-button {
         display: none !important;
       }
 
-      .document {
-        padding: 0;
-        gap: 0;
-        zoom: 0.92;
-      }
-
       .page {
+        padding: 0;
+      }
+
+      .shell {
+        width: 100%;
+      }
+
+      .hero,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card,
+      .hero,
+      .stat,
+      .contact-card,
+      .role-card {
         box-shadow: none;
-        break-inside: avoid;
-        page-break-inside: avoid;
       }
 
-      .sidebar {
-        display: block;
-      }
-
-      .sidebar-spacer {
-        display: none;
+      .side-stack {
+        position: static;
       }
     }
   </style>
 </head>
 <body>
-  <button class="print-fab no-print" type="button" onclick="window.print()">Download PDF</button>
+  <a class="hidden-anchor" href="#main-content">Skip to content</a>
 
-  <main class="document">
-    <section class="page">
-      <div class="page-grid">
-        <div class="main-column">
-          <header class="masthead">
-            <div class="name-lockup">
-              <h1 id="cv-name">Ben T. Howard</h1>
-              <p class="role-title" id="cv-role-title">Senior Operations and Transformation Leader</p>
-              <p class="tailored-line" id="cv-tailored-line">Tailored CV for KaarbonTech | Highways Drainage Surveyor</p>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand" aria-label="Ben T. Howard CV">
+        <div class="brand-mark">BH</div>
+        <div class="brand-copy">
+          <strong>Ben T. Howard</strong>
+          <span>Senior Operations and Transformation Leader</span>
+        </div>
+      </div>
+
+      <nav class="topnav" aria-label="CV sections">
+        <a href="#profile">Profile</a>
+        <a href="#experience">Experience</a>
+        <a href="#education">Education</a>
+        <a href="#skills">Skills</a>
+        <a href="#fit">Fit</a>
+      </nav>
+
+      <button class="pill button button--ghost print-button" type="button" onclick="window.print()">Download PDF</button>
+    </div>
+  </header>
+
+  <main class="page" id="main-content">
+    <div class="shell cv-layout">
+      <section class="hero" aria-labelledby="cv-name">
+        <div class="hero-copy">
+          <p class="eyebrow">Interactive CV website</p>
+          <h1 id="cv-name">Ben T. Howard</h1>
+          <p class="hero-role" id="cv-role-title">Senior Operations and Transformation Leader</p>
+          <p class="hero-summary" id="cv-profile-copy">
+            Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. Delivers operational turnaround, service redesign, financial control and performance improvement in complex, fast-moving environments. Combines strategic oversight with hands-on delivery across governance, workforce planning, reporting and service execution. Known for bringing structure, commercial grip and measurable results.
+          </p>
+          <div class="hero-actions">
+            <a class="pill" href="tel:07507789672">Call</a>
+            <a class="pill" href="mailto:benthoward@outlook.com">Email</a>
+            <a class="pill" href="https://linkedin.com/in/benthoward">LinkedIn</a>
+            <a class="pill button" href="#experience">View experience</a>
+          </div>
+          <div class="chip-row" aria-label="Quick facts">
+            <span class="chip">Leek, Staffordshire</span>
+            <span class="chip">Executive MBA</span>
+            <span class="chip">Operational turnaround</span>
+            <span class="chip">Change delivery</span>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <div class="stats" aria-label="Profile highlights">
+            <div class="stat">
+              <span class="stat-label">Current focus</span>
+              <span class="stat-value" id="cv-target-role">Highways Drainage Surveyor</span>
             </div>
-          </header>
+            <div class="stat">
+              <span class="stat-label">Target company</span>
+              <span class="stat-value" id="cv-target-company">KaarbonTech</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Tailored angle</span>
+              <span class="stat-value" id="cv-tailored-fit">This version is tuned for KaarbonTech's Highways Drainage Surveyor role with a focus on field delivery, travel, practical reporting and safe execution.</span>
+            </div>
+          </div>
 
-          <section class="summary-block">
-            <div class="section-heading">Professional Profile</div>
-            <p class="summary-copy" id="cv-profile-copy">
+          <div class="contact-card">
+            <h2>Contact</h2>
+            <div class="contact-lines">
+              <p><strong>Phone</strong><span><a href="tel:07507789672">07507 789672</a></span></p>
+              <p><strong>Email</strong><span><a href="mailto:benthoward@outlook.com">benthoward@outlook.com</a></span></p>
+              <p><strong>Location</strong><span>Leek, Staffordshire</span></p>
+              <p><strong>LinkedIn</strong><span><a href="https://linkedin.com/in/benthoward">linkedin.com/in/benthoward</a></span></p>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="content-grid" aria-label="CV content">
+        <div class="stack">
+          <section class="card" id="profile">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Professional profile</p>
+                <h2>Leadership that turns structure into results</h2>
+              </div>
+            </div>
+            <p class="profile-copy" id="cv-profile-copy-secondary">
               Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. Delivers operational turnaround, service redesign, financial control and performance improvement in complex, fast-moving environments. Combines strategic oversight with hands-on delivery across governance, workforce planning, reporting and service execution. Known for bringing structure, commercial grip and measurable results.
+            </p>
+            <p class="footer-note" id="cv-page2-kicker">
+              Selected for the <span id="cv-target-role-inline">Highways Drainage Surveyor</span> role at <span id="cv-target-company-inline">KaarbonTech</span>.
             </p>
           </section>
 
-          <section class="section-block">
-            <div class="section-heading">Professional Experience</div>
-
-            <article class="role-entry">
-              <div class="role-header">
-                <div>
-                  <h2 class="role-name">Operations, Development and Transformation Manager</h2>
-                  <p class="role-meta">NHS Primary Care</p>
-                </div>
-                <p class="role-date">2024 - Present</p>
+          <section class="card" id="experience">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Professional experience</p>
+                <h2>Career timeline</h2>
               </div>
-              <ul>
-                <li>Lead operational performance, transformation and service control across clinical, administrative and patient-facing functions, supporting delivery across a &pound;1.56m annual income base.</li>
-                <li>Improved patient experience by increasing Google review score from 2.09 to 4.51 and raising five-star reviews from 19.8% to 81.3% across 209 tenure-period reviews.</li>
-                <li>Supported a &pound;149.9k improvement in profit before appropriation, released &pound;33.3k of working capital through a 40.3% reduction in debtor balances and helped increase cash at bank by &pound;172.6k year on year.</li>
-                <li>Built senior reporting across workflow, room utilisation, payroll and contractual income, including reconciliation of 64 PCSE remittance files covering &pound;2.83m.</li>
-              </ul>
-            </article>
+              <p class="section-note">The same CV content, now presented as a readable web page instead of a paginated document.</p>
+            </div>
 
-            <article class="role-entry">
-              <div class="role-header">
-                <div>
-                  <h2 class="role-name">Operations Manager</h2>
-                  <p class="role-meta">Copper Alloys Ltd</p>
+            <div class="timeline">
+              <article class="role-card">
+                <div class="role-header">
+                  <div>
+                    <h3 class="role-name">Operations, Development and Transformation Manager</h3>
+                    <p class="role-meta">NHS Primary Care</p>
+                  </div>
+                  <p class="role-date">2024 - Present</p>
                 </div>
-                <p class="role-date">2022 - 2024</p>
-              </div>
-              <ul>
-                <li>Led day-to-day operations within a specialist manufacturing environment during a scale-up phase, supporting disciplined delivery across production, people, systems and customer requirements.</li>
-                <li>Contributed to operational improvements during a period in which gross profit margin increased from 29% to 39% and orders won rose by 60%.</li>
-                <li>Improved operational resilience through changes to processes, equipment, capacity and ways of working, supporting business growth in a precision manufacturing setting.</li>
-                <li>Used sales, delivery and KPI reporting to monitor performance, maintain customer service levels and strengthen execution across the operation.</li>
-              </ul>
-            </article>
+                <ul>
+                  <li>Lead operational performance, transformation and service control across clinical, administrative and patient-facing functions, supporting delivery across a &pound;1.56m annual income base.</li>
+                  <li>Improved patient experience by increasing Google review score from 2.09 to 4.51 and raising five-star reviews from 19.8% to 81.3% across 209 tenure-period reviews.</li>
+                  <li>Supported a &pound;149.9k improvement in profit before appropriation, released &pound;33.3k of working capital through a 40.3% reduction in debtor balances and helped increase cash at bank by &pound;172.6k year on year.</li>
+                  <li>Built senior reporting across workflow, room utilisation, payroll and contractual income, including reconciliation of 64 PCSE remittance files covering &pound;2.83m.</li>
+                </ul>
+              </article>
+
+              <article class="role-card">
+                <div class="role-header">
+                  <div>
+                    <h3 class="role-name">Operations Manager</h3>
+                    <p class="role-meta">Copper Alloys Ltd</p>
+                  </div>
+                  <p class="role-date">2022 - 2024</p>
+                </div>
+                <ul>
+                  <li>Led day-to-day operations within a specialist manufacturing environment during a scale-up phase, supporting disciplined delivery across production, people, systems and customer requirements.</li>
+                  <li>Contributed to operational improvements during a period in which gross profit margin increased from 29% to 39% and orders won rose by 60%.</li>
+                  <li>Improved operational resilience through changes to processes, equipment, capacity and ways of working, supporting business growth in a precision manufacturing setting.</li>
+                  <li>Used sales, delivery and KPI reporting to monitor performance, maintain customer service levels and strengthen execution across the operation.</li>
+                </ul>
+              </article>
+
+              <article class="role-card">
+                <div class="role-header">
+                  <div>
+                    <h3 class="role-name">Operations &amp; Continuous Improvement Manager</h3>
+                    <p class="role-meta">Merlin Entertainments | Alton Towers Resort</p>
+                  </div>
+                  <p class="role-date">2016 - 2022</p>
+                </div>
+                <ul>
+                  <li>Progressed through operational and continuous improvement roles, combining frontline resort operations with cross-site transformation delivery across five major European theme park sites.</li>
+                  <li>Managed live operations across major attraction launches and seasonal events, including the opening of Wicker Man, a &pound;16m investment and the UK's first new wooden rollercoaster in over 20 years.</li>
+                  <li>Led cross-site improvement activity across Alton Towers, Chessington, Gardaland, Heide Park and Thorpe Park, using operational data and frontline insight to strengthen execution standards.</li>
+                  <li>Coordinated live operations across teams of more than 300 in a KPI-led guest-experience environment, using live feedback tools and digital ride-time information to support operational decision-making.</li>
+                </ul>
+              </article>
+
+              <article class="role-card">
+                <div class="role-header">
+                  <div>
+                    <h3 class="role-name">Product Executive</h3>
+                    <p class="role-meta">Experian</p>
+                  </div>
+                  <p class="role-date">2010 - 2016</p>
+                </div>
+                <ul>
+                  <li>Supported business-critical delivery and client service within a regulated, data-sensitive corporate environment.</li>
+                  <li>Coordinated workload allocation and training across a 12-person function to maintain service standards and processing performance.</li>
+                  <li>Built early capability in stakeholder management, process control and performance-led delivery within a structured corporate setting.</li>
+                </ul>
+              </article>
+            </div>
           </section>
         </div>
 
-        <aside class="sidebar">
-          <section class="sidebar-card">
-            <h2>Contact</h2>
-            <div class="contact-lines">
-              <p><strong>Phone</strong><br><a href="tel:07507789672">07507 789672</a></p>
-              <p><strong>Email</strong><br><a href="mailto:benthoward@outlook.com">benthoward@outlook.com</a></p>
-              <p><strong>Location</strong><br>Leek, Staffordshire</p>
-              <p><strong>LinkedIn</strong><br><a href="https://linkedin.com/in/benthoward">linkedin.com/in/benthoward</a></p>
-            </div>
-          </section>
-
-          <section class="sidebar-card">
+        <aside class="side-stack">
+          <section class="card list-card" id="education">
             <h2>Education</h2>
-            <div class="mini-entry-list">
+            <div class="mini-list">
               <article class="mini-entry">
                 <h3>Executive MBA</h3>
                 <p>Aston University</p>
@@ -551,9 +919,9 @@
             </div>
           </section>
 
-          <section class="sidebar-card">
-            <h2>Core Skills</h2>
-            <ul class="sidebar-list">
+          <section class="card list-card" id="skills">
+            <h2>Core skills</h2>
+            <ul>
               <li>Operational Performance</li>
               <li>Service Improvement and Redesign</li>
               <li>KPI Governance and Reporting</li>
@@ -565,67 +933,9 @@
             </ul>
           </section>
 
-          <section class="sidebar-card note-card">
-            <h2>Tailored Fit</h2>
-            <p class="focus-lead" id="cv-tailored-fit">
-              This version is tuned for KaarbonTech's Highways Drainage Surveyor role with a focus on field delivery, travel, practical reporting and safe execution.
-            </p>
-            <ul class="sidebar-list tight focus-list" id="cv-focus-list">
-              <li>Accurate drainage asset data collection</li>
-              <li>Physical fitness and field readiness</li>
-              <li>Nationwide travel flexibility</li>
-            </ul>
-          </section>
-
-          <div class="sidebar-spacer"></div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="page">
-      <div class="page-grid">
-        <div class="main-column">
-          <section class="continuation-intro">
-            <div class="section-heading">Professional Experience</div>
-            <p class="page-note" id="cv-page2-kicker">Selected for the <span id="cv-target-role">Highways Drainage Surveyor</span> role at <span id="cv-target-company">KaarbonTech</span>.</p>
-          </section>
-
-          <article class="role-entry">
-            <div class="role-header">
-              <div>
-                <h2 class="role-name">Operations & Continuous Improvement Manager</h2>
-                <p class="role-meta">Merlin Entertainments | Alton Towers Resort</p>
-              </div>
-              <p class="role-date">2016 - 2022</p>
-            </div>
+          <section class="card list-card">
+            <h2>Sector experience</h2>
             <ul>
-              <li>Progressed through operational and continuous improvement roles, combining frontline resort operations with cross-site transformation delivery across five major European theme park sites.</li>
-              <li>Managed live operations across major attraction launches and seasonal events, including the opening of Wicker Man, a &pound;16m investment and the UK's first new wooden rollercoaster in over 20 years.</li>
-              <li>Led cross-site improvement activity across Alton Towers, Chessington, Gardaland, Heide Park and Thorpe Park, using operational data and frontline insight to strengthen execution standards.</li>
-              <li>Coordinated live operations across teams of more than 300 in a KPI-led guest-experience environment, using live feedback tools and digital ride-time information to support operational decision-making.</li>
-            </ul>
-          </article>
-
-          <article class="role-entry">
-            <div class="role-header">
-              <div>
-                <h2 class="role-name">Product Executive</h2>
-                <p class="role-meta">Experian</p>
-              </div>
-              <p class="role-date">2010 - 2016</p>
-            </div>
-            <ul>
-              <li>Supported business-critical delivery and client service within a regulated, data-sensitive corporate environment.</li>
-              <li>Coordinated workload allocation and training across a 12-person function to maintain service standards and processing performance.</li>
-              <li>Built early capability in stakeholder management, process control and performance-led delivery within a structured corporate setting.</li>
-            </ul>
-          </article>
-        </div>
-
-        <aside class="sidebar">
-          <section class="sidebar-card">
-            <h2>Sector Experience</h2>
-            <ul class="sidebar-list">
               <li>NHS and healthcare operations</li>
               <li>Specialist manufacturing</li>
               <li>Leisure, attractions and visitor operations</li>
@@ -633,9 +943,9 @@
             </ul>
           </section>
 
-          <section class="sidebar-card">
-            <h2>Leadership Themes</h2>
-            <ul class="sidebar-list tight">
+          <section class="card list-card">
+            <h2>Leadership themes</h2>
+            <ul class="tight">
               <li>Operational turnaround and stabilisation</li>
               <li>Service redesign and customer experience improvement</li>
               <li>Commercial grip, reporting and financial control</li>
@@ -643,19 +953,27 @@
             </ul>
           </section>
 
-          <section class="sidebar-card note-card">
-            <h2>Role Focus</h2>
+          <section class="card note-card" id="fit">
+            <h2>Role focus</h2>
             <p class="focus-lead" id="cv-why-this-role">
               This role combines on-site surveying with advanced technology, providing opportunities for travel, professional growth, and contributing to essential UK infrastructure.
             </p>
-            <p id="cv-short-company-reason">KaarbonTech is a well-regarded provider of drainage surveying solutions with supportive and growth-oriented culture.</p>
-            <p id="cv-short-role-reason">The role offers hands-on field surveying, nationwide travel, and the chance to contribute to vital infrastructure projects.</p>
+            <div class="subtle-line"></div>
+            <ul class="focus-list tight" id="cv-focus-list">
+              <li>Accurate drainage asset data collection</li>
+              <li>Physical fitness and field readiness</li>
+              <li>Nationwide travel flexibility</li>
+            </ul>
+            <p class="footer-note" id="cv-short-company-reason">
+              KaarbonTech is a well-regarded provider of drainage surveying solutions with supportive and growth-oriented culture.
+            </p>
+            <p class="footer-note" id="cv-short-role-reason">
+              The role offers hands-on field surveying, nationwide travel, and the chance to contribute to vital infrastructure projects.
+            </p>
           </section>
-
-          <div class="sidebar-spacer"></div>
         </aside>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 
   <script>
@@ -665,11 +983,11 @@
         roleTitle: "Highways Drainage Surveyor",
         location: "Cannock Chase",
         sector: "Highways and Drainage Surveying",
-        salary: "\u00a329,440.75 - \u00a346,000.00 per year",
+        salary: "&pound;29,440.75 - &pound;46,000.00 per year",
         employmentType: "Full-time",
         shortCompanyReason: "KaarbonTech is a well-regarded provider of drainage surveying solutions with a supportive and growth-oriented culture.",
         shortRoleReason: "The role offers hands-on field surveying, nationwide travel, and the chance to contribute to vital infrastructure projects.",
-        advertSummary: "KaarbonTech seeks a Highways Drainage Surveyor to collect, measure, photograph, and report on drainage assets using field technology. The role involves nationwide travel, physical activity, and a competitive salary up to \u00a346,000 with benefits and training provided.",
+        advertSummary: "KaarbonTech seeks a Highways Drainage Surveyor to collect, measure, photograph, and report on drainage assets using field technology. The role involves nationwide travel, physical activity, and a competitive salary up to &pound;46,000 with benefits and training provided.",
         personalisedIntro: "Experienced in field surveying and infrastructure data collection, ready to deliver accurate drainage surveys and support KaarbonTech's nationwide projects.",
         whyThisRole: "This position combines on-site surveying with advanced technology, providing opportunities for travel, professional growth, and contributing to essential UK infrastructure.",
         toneKeywords: ["supportive", "practical", "growth-focused", "travel-intensive", "hands-on"],
@@ -712,9 +1030,9 @@
 
           const base64 = encoded.replaceAll("-", "+").replaceAll("_", "/");
           const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-          const json = atob(padded);
-          const parsed = JSON.parse(new TextDecoder().decode(Uint8Array.from(json, (char) => char.charCodeAt(0))));
-          return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+          const binary = atob(padded);
+          const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+          return JSON.parse(new TextDecoder().decode(bytes));
         } catch {
           return null;
         }
@@ -749,17 +1067,21 @@
       };
 
       document.title = `Ben T. Howard | ${state.roleTitle}`;
-      document.getElementById("cv-tailored-line").textContent = `Tailored CV for ${state.companyName} | ${state.roleTitle}`;
+      document.getElementById("cv-role-title").textContent = `Senior Operations and Transformation Leader | ${state.roleTitle}`;
       document.getElementById("cv-profile-copy").textContent =
-        `Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. This version is tailored for ${state.companyName}'s ${state.roleTitle} role, with emphasis on ${state.sector.toLowerCase()}, field delivery and practical reporting. ` +
-        state.personalisedIntro;
+        `Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. This version is tailored for ${state.companyName}'s ${state.roleTitle} role, with emphasis on ${state.sector.toLowerCase()}, field delivery and practical reporting. ${state.personalisedIntro}`;
+      document.getElementById("cv-profile-copy-secondary").textContent =
+        `Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. This version is tailored for ${state.companyName}'s ${state.roleTitle} role, with emphasis on ${state.sector.toLowerCase()}, field delivery and practical reporting. ${state.personalisedIntro}`;
       document.getElementById("cv-tailored-fit").textContent =
         state.shortCompanyReason + " " + state.shortRoleReason;
       document.getElementById("cv-target-company").textContent = state.companyName;
       document.getElementById("cv-target-role").textContent = state.roleTitle;
+      document.getElementById("cv-target-company-inline").textContent = state.companyName;
+      document.getElementById("cv-target-role-inline").textContent = state.roleTitle;
       document.getElementById("cv-why-this-role").textContent = state.whyThisRole;
       document.getElementById("cv-short-company-reason").textContent = state.shortCompanyReason;
       document.getElementById("cv-short-role-reason").textContent = state.shortRoleReason;
+      document.getElementById("cv-page2-kicker").textContent = `Selected for the ${state.roleTitle} role at ${state.companyName}.`;
 
       const focusList = document.getElementById("cv-focus-list");
       if (focusList) {
@@ -767,11 +1089,6 @@
         if (Array.isArray(state.keyFocusAreas)) focusValues.push(...state.keyFocusAreas);
         if (Array.isArray(state.probablePriorities)) focusValues.push(...state.probablePriorities.slice(0, 2));
         renderList(focusList, focusValues.slice(0, 5));
-      }
-
-      const page2Kicker = document.getElementById("cv-page2-kicker");
-      if (page2Kicker) {
-        page2Kicker.textContent = `Selected for the ${state.roleTitle} role at ${state.companyName}.`;
       }
     })();
   </script>

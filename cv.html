@@ -205,10 +205,14 @@
       border-color: rgba(50, 41, 31, 0.10);
     }
 
+    .section-block {
+      margin-top: 1.15rem;
+    }
+
     .cv-layout {
       display: grid;
-      gap: 0.9rem;
-      padding-top: 0.9rem;
+      gap: 1rem;
+      padding-top: 0.95rem;
     }
 
     .hero {
@@ -236,7 +240,7 @@
 
     .hero-copy {
       position: relative;
-      padding: 1.35rem 1.3rem 1.2rem 1.3rem;
+      padding: 1.5rem 1.45rem 1.35rem 1.45rem;
     }
 
     .eyebrow {
@@ -259,6 +263,15 @@
       color: #5a3820;
       font-size: clamp(1rem, 2vw, 1.18rem);
       max-width: 52ch;
+    }
+
+    .hero-context {
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
     }
 
     .hero-summary {
@@ -383,7 +396,7 @@
     .content-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(310px, 0.42fr);
-      gap: 1rem;
+      gap: 1.1rem;
       align-items: start;
     }
 
@@ -431,6 +444,46 @@
     .profile-copy {
       color: #4f4f53;
       max-width: 78ch;
+    }
+
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .impact-card {
+      padding: 1rem 1rem 0.95rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(50, 41, 31, 0.10);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .impact-value {
+      display: block;
+      font-family: "Montserrat", sans-serif;
+      font-size: clamp(1.55rem, 3vw, 2.2rem);
+      font-weight: 800;
+      line-height: 1;
+      color: #3a2a1e;
+    }
+
+    .impact-label {
+      display: block;
+      margin-top: 0.35rem;
+      color: var(--gold);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    .impact-copy {
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
     }
 
     .timeline {
@@ -608,10 +661,26 @@
       border: 0;
     }
 
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.75s ease, transform 0.75s ease;
+      will-change: transform, opacity;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     @media (max-width: 1080px) {
       .hero,
       .content-grid {
         grid-template-columns: 1fr;
+      }
+
+      .impact-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .side-stack {
@@ -642,6 +711,10 @@
       .hero-copy,
       .hero-panel {
         padding: 1rem;
+      }
+
+      .impact-grid {
+        grid-template-columns: 1fr;
       }
 
       .role-header {
@@ -685,6 +758,7 @@
       .hero-summary,
       .profile-copy,
       .section-note,
+      .impact-copy,
       .role-card li,
       .list-card li,
       .mini-entry p {
@@ -798,6 +872,7 @@
 
       <nav class="topnav" aria-label="CV sections">
         <a href="#profile">Profile</a>
+        <a href="#impact">Impact</a>
         <a href="#experience">Experience</a>
         <a href="#education">Education</a>
         <a href="#skills">Skills</a>
@@ -812,9 +887,10 @@
     <div class="shell cv-layout">
       <section class="hero" aria-labelledby="cv-name">
         <div class="hero-copy">
-          <p class="eyebrow">Interactive CV website</p>
+          <p class="eyebrow" id="cv-hero-kicker">Prepared for KaarbonTech</p>
           <h1 id="cv-name">Ben T. Howard</h1>
           <p class="hero-role" id="cv-role-title">Senior Operations and Transformation Leader</p>
+          <p class="hero-context" id="cv-hero-context">Tailored for KaarbonTech | Highways Drainage Surveyor</p>
           <p class="hero-summary" id="cv-profile-copy">
             Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. Delivers operational turnaround, service redesign, financial control and performance improvement in complex, fast-moving environments. Combines strategic oversight with hands-on delivery across governance, workforce planning, reporting and service execution. Known for bringing structure, commercial grip and measurable results.
           </p>
@@ -858,6 +934,39 @@
             </div>
           </div>
         </aside>
+      </section>
+
+      <section class="section-block" id="impact" aria-labelledby="impact-title">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Selected highlights</p>
+            <h2 id="impact-title">Proof points that map to this role</h2>
+          </div>
+          <p class="section-note" id="cv-impact-note">Prepared for KaarbonTech's Highways Drainage Surveyor role in Cannock Chase.</p>
+        </div>
+
+        <div class="impact-grid">
+          <article class="impact-card">
+            <span class="impact-value">2.09 → 4.51</span>
+            <span class="impact-label">Patient experience</span>
+            <p class="impact-copy">Google review score improvement across 209 tenure-period reviews.</p>
+          </article>
+          <article class="impact-card">
+            <span class="impact-value">£149.9k</span>
+            <span class="impact-label">Financial impact</span>
+            <p class="impact-copy">Improvement in profit before appropriation, plus £33.3k working capital released.</p>
+          </article>
+          <article class="impact-card">
+            <span class="impact-value">29% → 39%</span>
+            <span class="impact-label">Manufacturing growth</span>
+            <p class="impact-copy">Gross profit margin increased while orders won rose by 60%.</p>
+          </article>
+          <article class="impact-card">
+            <span class="impact-value">300+</span>
+            <span class="impact-label">Live operations</span>
+            <p class="impact-copy">Teams coordinated across five major European theme park sites and major launches.</p>
+          </article>
+        </div>
       </section>
 
       <section class="content-grid" aria-label="CV content">
@@ -1123,7 +1232,11 @@
       };
 
       document.title = `Ben T. Howard | ${state.roleTitle}`;
-      document.getElementById("cv-role-title").textContent = `Senior Operations and Transformation Leader | ${state.roleTitle}`;
+      document.getElementById("cv-hero-kicker").textContent = `Prepared for ${state.companyName}`;
+      document.getElementById("cv-role-title").textContent = "Senior Operations and Transformation Leader";
+      document.getElementById("cv-hero-context").textContent = `Tailored for ${state.companyName} | ${state.roleTitle}`;
+      document.getElementById("cv-impact-note").textContent =
+        `Prepared for ${state.companyName}'s ${state.roleTitle} role in ${state.location || "the UK"}.`;
       document.getElementById("cv-profile-copy").textContent =
         `Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. This version is tailored for ${state.companyName}'s ${state.roleTitle} role, with emphasis on ${state.sector.toLowerCase()}, field delivery and practical reporting. ${state.personalisedIntro}`;
       document.getElementById("cv-profile-copy-secondary").textContent =
@@ -1146,6 +1259,33 @@
         if (Array.isArray(state.probablePriorities)) focusValues.push(...state.probablePriorities.slice(0, 2));
         renderList(focusList, focusValues.slice(0, 5));
       }
+
+      const revealTargets = document.querySelectorAll(".hero, .section-block, .card, .role-card, .impact-card");
+      revealTargets.forEach((element, index) => {
+        element.classList.add("reveal");
+        element.style.transitionDelay = `${Math.min(index * 40, 220)}ms`;
+      });
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+        revealTargets.forEach((element) => element.classList.add("is-visible"));
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        (entries, io) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            io.unobserve(entry.target);
+          });
+        },
+        {
+          threshold: 0.16,
+          rootMargin: "0px 0px -10% 0px"
+        }
+      );
+
+      revealTargets.forEach((element) => observer.observe(element));
     })();
   </script>
 </body>

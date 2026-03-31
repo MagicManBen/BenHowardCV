@@ -2,7 +2,10 @@
 
 import base64
 import json
+import re
 import sys
+import traceback
+from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -16,12 +19,15 @@ LOCAL_ADMIN_DIR = ROOT / "local-admin"
 LOCAL_CACHE_DIR = ROOT / "local-cache"
 LOCAL_CACHE_DATA_DIR = LOCAL_CACHE_DIR / "data"
 LOCAL_CONFIG_PATH = LOCAL_ADMIN_DIR / "secrets.local.json"
+DEBUG_DIR = ROOT / "debug"
+PUBLISH_DEBUG_DIR = DEBUG_DIR / "publish"
+PUBLISH_DEBUG_INDEX = DEBUG_DIR / "publish.log"
 
 GITHUB_OWNER = "MagicManBen"
 GITHUB_REPO = "BenHowardCV"
 GITHUB_BRANCH = "main"
 APPLICATIONS_INDEX_PATH = "data/applications.json"
-DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
+DEFAULT_PUBLIC_CV_BASE_URL = "https://magicmanben.github.io/BenHowardCV/cv.html"
 
 
 def load_local_config():
@@ -52,6 +58,55 @@ def read_json(path, default):
 def write_json(path, payload):
   path.parent.mkdir(parents=True, exist_ok=True)
   path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def safe_filename(value):
+  text = str(value or "").strip().lower()
+  if not text:
+    return "unknown"
+
+  text = re.sub(r"[^a-z0-9]+", "-", text)
+  text = text.strip("-")
+  return text[:80] or "unknown"
+
+
+def now_iso():
+  return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def filter_request_headers(headers):
+  allowlist = {"user-agent", "content-length", "content-type", "origin", "referer"}
+  return {
+    key: value
+    for key, value in headers.items()
+    if key.lower() in allowlist
+  }
+
+
+def write_publish_debug_log(entry):
+  PUBLISH_DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+  PUBLISH_DEBUG_INDEX.parent.mkdir(parents=True, exist_ok=True)
+
+  ref = entry.get("application", {}).get("ref") or "unknown"
+  timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
+  filename = f"{timestamp}-{safe_filename(ref)}.json"
+  path = PUBLISH_DEBUG_DIR / filename
+
+  write_json(path, entry)
+
+  summary = {
+    "timestamp": entry.get("timestamp"),
+    "ref": ref,
+    "companyName": entry.get("application", {}).get("companyName", ""),
+    "roleTitle": entry.get("application", {}).get("roleTitle", ""),
+    "publishedToGitHub": entry.get("result", {}).get("publishedToGitHub"),
+    "status": entry.get("status", "unknown"),
+    "debugPath": str(path.relative_to(ROOT)),
+  }
+  with PUBLISH_DEBUG_INDEX.open("a", encoding="utf-8") as handle:
+    handle.write(json.dumps(summary) + "\n")
+
+  return str(path.relative_to(ROOT))
 
 
 def is_application_summary(item):
@@ -169,7 +224,16 @@ def fetch_remote_json(path, token):
 
 
 def put_remote_json(path, payload, token, message):
-  _, current_sha = fetch_remote_json(path, token)
+  try:
+    _, current_sha = fetch_remote_json(path, token)
+  except RuntimeError as exc:
+    return {
+      "path": path,
+      "message": message,
+      "ok": False,
+      "phase": "fetch-sha",
+      "error": str(exc),
+    }
 
   request_body = {
     "message": message,
@@ -180,20 +244,59 @@ def put_remote_json(path, payload, token, message):
     request_body["sha"] = current_sha
 
   status, response = github_request(path, token, method="PUT", payload=request_body)
-  if status < 200 or status >= 300:
-    message = response.get("message") or f"GitHub API returned {status}"
-    raise RuntimeError(message)
+  ok = 200 <= status < 300
+  result = {
+    "path": path,
+    "message": message,
+    "ok": ok,
+    "status": status,
+    "request": {
+      "branch": GITHUB_BRANCH,
+      "hasSha": bool(current_sha),
+      "sha": current_sha,
+    },
+    "response": response,
+  }
+  if not ok:
+    result["error"] = response.get("message") or f"GitHub API returned {status}"
+  return result
 
 
 def push_application_to_github(application, token):
-  put_remote_json(
+  steps = []
+
+  app_result = put_remote_json(
     f"data/{application['ref']}.json",
     application,
     token,
     f"Add/update application: {application.get('companyName', '')} / {application.get('roleTitle', '')}",
   )
+  steps.append(app_result)
+  if not app_result.get("ok"):
+    return {
+      "publishedToGitHub": False,
+      "steps": steps,
+      "error": app_result.get("error") or "Could not publish application file.",
+    }
 
-  remote_index, _ = fetch_remote_json(APPLICATIONS_INDEX_PATH, token)
+  try:
+    remote_index, remote_index_sha = fetch_remote_json(APPLICATIONS_INDEX_PATH, token)
+  except RuntimeError as exc:
+    steps.append(
+      {
+        "path": APPLICATIONS_INDEX_PATH,
+        "message": f"Update applications index: {application['ref']}",
+        "ok": False,
+        "phase": "fetch-index",
+        "error": str(exc),
+      }
+    )
+    return {
+      "publishedToGitHub": False,
+      "steps": steps,
+      "error": str(exc),
+    }
+
   remote_items = remote_index if isinstance(remote_index, list) else []
   summary = {
     "ref": application["ref"],
@@ -205,7 +308,23 @@ def push_application_to_github(application, token):
   }
 
   merged = merge_application_lists(remote_items, [summary])
-  put_remote_json(APPLICATIONS_INDEX_PATH, merged, token, f"Update applications index: {application['ref']}")
+  index_result = put_remote_json(APPLICATIONS_INDEX_PATH, merged, token, f"Update applications index: {application['ref']}")
+  index_result["remoteIndexSha"] = remote_index_sha
+  index_result["remoteIndexCount"] = len(remote_items)
+  steps.append(index_result)
+  if not index_result.get("ok"):
+    return {
+      "publishedToGitHub": False,
+      "steps": steps,
+      "error": index_result.get("error") or "Could not update applications index.",
+    }
+
+  return {
+    "publishedToGitHub": True,
+    "steps": steps,
+    "remoteIndexCount": len(remote_items),
+    "remoteIndexSha": remote_index_sha,
+  }
 
 
 def validate_github_token(token):
@@ -306,43 +425,105 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(400, {"error": "Invalid JSON"})
       return
 
+    client_context = payload.get("clientContext") if isinstance(payload, dict) and isinstance(payload.get("clientContext"), dict) else {}
     application = payload.get("application") if isinstance(payload, dict) and isinstance(payload.get("application"), dict) else payload
     if not isinstance(application, dict) or not application.get("ref"):
       self.send_json(400, {"error": "Application payload is missing ref"})
       return
 
+    debug_entry = {
+      "timestamp": now_iso(),
+      "event": "publish",
+      "request": {
+        "path": parsed.path,
+        "query": parsed.query,
+        "clientAddress": {
+          "host": self.client_address[0],
+          "port": self.client_address[1],
+        },
+        "headers": filter_request_headers(self.headers),
+      },
+      "clientContext": client_context,
+      "application": application,
+      "status": "started",
+    }
+
     try:
       upsert_local_application(application)
       config = load_local_config()
+      public_url = f"{config['publicCvBaseUrl']}?ref={application['ref']}"
+      debug_entry["publicUrl"] = public_url
+      debug_entry["publicCvBaseUrl"] = config["publicCvBaseUrl"]
+      debug_entry["githubTokenConfigured"] = bool(config["githubToken"])
+
       if not config["githubToken"]:
+        debug_entry["status"] = "saved-locally-no-token"
+        debug_entry["result"] = {
+          "savedLocally": True,
+          "publishedToGitHub": False,
+          "error": f"Missing GitHub token in {LOCAL_CONFIG_PATH.name}",
+        }
+        debug_path = write_publish_debug_log(debug_entry)
         self.send_json(
           500,
           {
             "error": f"Missing GitHub token in {LOCAL_CONFIG_PATH.name}",
             "savedLocally": True,
             "application": application,
+            "publicUrl": public_url,
+            "debugLogPath": debug_path,
           },
         )
         return
 
-      push_application_to_github(application, config["githubToken"])
-      self.send_json(
-        200,
-        {
-          "application": application,
-          "publicUrl": f"{config['publicCvBaseUrl']}?ref={application['ref']}",
-          "savedLocally": True,
-          "publishedToGitHub": True,
-        },
-      )
-    except RuntimeError as exc:
+      github_result = push_application_to_github(application, config["githubToken"])
+      debug_entry["githubResult"] = github_result
+      debug_entry["status"] = "published" if github_result.get("publishedToGitHub") else "failed"
+      debug_entry["result"] = {
+        "savedLocally": True,
+        "publishedToGitHub": github_result.get("publishedToGitHub", False),
+        "error": github_result.get("error"),
+      }
+      debug_path = write_publish_debug_log(debug_entry)
+
+      if github_result.get("publishedToGitHub"):
+        self.send_json(
+          200,
+          {
+            "application": application,
+            "publicUrl": public_url,
+            "savedLocally": True,
+            "publishedToGitHub": True,
+            "debugLogPath": debug_path,
+            "githubResult": github_result,
+          },
+        )
+        return
+
       self.send_json(
         502,
+        {
+          "error": github_result.get("error") or "GitHub publish did not complete.",
+          "savedLocally": True,
+          "application": application,
+          "publicUrl": public_url,
+          "debugLogPath": debug_path,
+          "githubResult": github_result,
+        },
+      )
+    except Exception as exc:
+      debug_entry["status"] = "error"
+      debug_entry["error"] = str(exc)
+      debug_entry["traceback"] = traceback.format_exc()
+      debug_path = write_publish_debug_log(debug_entry)
+      self.send_json(
+        500,
         {
           "error": str(exc),
           "savedLocally": True,
           "application": application,
           "publicUrl": f"{load_local_config()['publicCvBaseUrl']}?ref={application['ref']}",
+          "debugLogPath": debug_path,
         },
       )
 

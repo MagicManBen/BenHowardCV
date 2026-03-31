@@ -1,5 +1,5 @@
 const LOCAL_API_BASE = "/api";
-const DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html";
+const DEFAULT_PUBLIC_CV_BASE_URL = "https://magicmanben.github.io/BenHowardCV/cv.html";
 
 const REVIEW_FIELDS = [
   ["ref", "Generated ref"],
@@ -135,7 +135,9 @@ async function initLocalAdminPage() {
 
       await renderPublishedResult(dom, application, publicUrl, localPreviewUrl);
       dom.resultPanel.hidden = false;
-      dom.publishStatus.textContent = response.publishedToGitHub ? "Published." : "Saved locally.";
+      dom.publishStatus.textContent = response.publishedToGitHub
+        ? `Published. Debug log: ${response.debugLogPath || "not reported"}`
+        : `Saved locally. Debug log: ${response.debugLogPath || "not reported"}`;
       showToast(dom, response.publishedToGitHub ? "Application published." : "Saved locally.");
       dom.resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -145,7 +147,9 @@ async function initLocalAdminPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not publish the application.";
       showError(dom.publishError, message);
-      dom.publishStatus.textContent = "Publish failed.";
+      dom.publishStatus.textContent = error instanceof Error && "debugLogPath" in error && error.debugLogPath
+        ? `Publish failed. Debug log: ${error.debugLogPath}`
+        : "Publish failed.";
     } finally {
       dom.confirmPublishButton.disabled = false;
       dom.confirmPublishButton.textContent = "Confirm & Publish";
@@ -204,16 +208,33 @@ async function publishApplication(application) {
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ application })
+    body: JSON.stringify({
+      application,
+      clientContext: buildClientContext()
+    })
   });
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const message = payload.error || `Local server returned ${response.status}`;
-    throw new Error(message);
+    const error = new Error(message);
+    error.debugLogPath = payload.debugLogPath || "";
+    error.response = payload;
+    throw error;
   }
 
   return payload;
+}
+
+function buildClientContext() {
+  return {
+    pageUrl: window.location.href,
+    origin: window.location.origin,
+    referrer: document.referrer || "",
+    title: document.title,
+    userAgent: navigator.userAgent,
+    timestamp: new Date().toISOString()
+  };
 }
 
 function normaliseApplicationPayload(input) {

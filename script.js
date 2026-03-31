@@ -8,7 +8,9 @@ const NEW_JOB_URL = new URL("new-job.html", window.location.href).href;
 const LOCAL_ADMIN_URL = new URL("local-admin/", window.location.href).href;
 const IS_LOCAL_RUNTIME = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const LOCAL_API_BASE = "/api";
-const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : CV_BASE_URL;
+const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME
+  ? "https://magicmanben.github.io/BenHowardCV/cv.html"
+  : CV_BASE_URL;
 const APPLICATIONS_STORE_KEY = "cv_applications_local";
 const APPLICATIONS_INDEX_PATH = "data/applications.json";
 

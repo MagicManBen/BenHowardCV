@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ben Howard | CV Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="dashboard">
+  <header class="app-header">
+    <div class="shell shell--header">
+      <p class="eyebrow">Online dashboard</p>
+      <div class="header-row">
+        <div>
+          <h1>Application Dashboard</h1>
+          <p class="subtitle">Track the jobs you have applied for, open each custom CV URL, and start a new application from one clean place.</p>
+        </div>
+        <div class="header-actions">
+          <a class="button" href="new-job.html" id="new-job-button">New Job</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell main-layout dashboard-layout">
+    <section class="card dashboard-summary-card" aria-labelledby="dashboard-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Overview</p>
+          <h2 id="dashboard-title">Current applications</h2>
+        </div>
+        <button class="button button--ghost button--compact" id="refresh-list-button" type="button">Refresh</button>
+      </div>
+
+      <p class="card-helper">Each application record creates a unique CV URL, and the printable CV view includes the QR code you can put on the PDF version.</p>
+
+      <div class="summary-grid">
+        <article class="summary-tile">
+          <span class="summary-label">Applications</span>
+          <strong class="summary-value" id="stats-total">0</strong>
+          <p class="summary-copy">Published records stored in GitHub.</p>
+        </article>
+
+        <article class="summary-tile">
+          <span class="summary-label">Latest application</span>
+          <strong class="summary-value summary-value--small" id="stats-latest">None yet</strong>
+          <p class="summary-copy">Most recent job record currently loaded.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="saved-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Library</p>
+          <h2 id="saved-title">Custom CV URLs</h2>
+        </div>
+      </div>
+      <div id="saved-list"><p class="empty-state">Loading&#8230;</p></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+  <script src="script.js?v=20" defer></script>
+</body>
+</html>

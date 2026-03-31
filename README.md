@@ -4,13 +4,14 @@ This repo is the online GitHub Pages version of the CV system.
 
 ## Pages
 
-- `index.html` is the dashboard for current applications and custom CV URLs.
-- `new-job.html` is the JSON review and save flow.
+- `index.html` is the public dashboard for current applications and custom CV URLs.
+- `new-job.html` is a local-admin notice page for the hosted site.
 - `cv.html` is the public personalised CV page for each application.
+- `local-admin/index.html` is the local-only admin page you open on this PC to publish new applications to GitHub.
 
 ## Data
 
-- `data/{ref}.json` stores sample application records shipped with the repo.
-- `data/applications.json` stores the dashboard sample index.
+- `data/{ref}.json` stores the public application records.
+- `data/applications.json` stores the dashboard index.
 
-Applications you save through the browser are stored in this device's local storage, which avoids the GitHub Pages CSP issue and still gives you a unique CV URL and QR code for the PDF.
+The local admin page writes the JSON into GitHub from this computer. The hosted site only reads the saved files and renders the public CVs.

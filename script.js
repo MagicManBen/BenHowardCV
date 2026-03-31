@@ -410,9 +410,7 @@ function isApplicationObject(value) {
 
 async function loadSavedList(dom, latestApplication = null) {
   try {
-    const localApplications = readStoredApplications();
-    const applications = localApplications.length ? localApplications : await fetchSeedApplications();
-
+    const applications = await fetchSeedApplications();
     savedApplications = applications;
     savedApplicationMap = new Map(applications.map((application) => [application.ref, application]));
 
@@ -842,6 +840,16 @@ function updateKeysStatus() {}
 
 function toCleanString(value) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function slugify(text) {
+  return String(text)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
 }
 
 function normaliseStringArray(value) {

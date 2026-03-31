@@ -3,111 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ben Howard | New Job</title>
+  <title>Ben Howard | Local Admin</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body data-page="new-job">
-  <header class="app-header">
-    <div class="shell shell--header">
-      <p class="eyebrow">New application</p>
-      <div class="header-row">
-        <div>
-          <h1>Create a job-specific CV</h1>
-          <p class="subtitle">Paste the JSON from your shortcut, review the extracted fields, save it on this device, and generate the unique CV page.</p>
-        </div>
-        <div class="header-actions">
-          <a class="button button--ghost" href="index.html">Back to dashboard</a>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="shell main-layout dashboard-layout">
-    <section class="card" aria-labelledby="input-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Step 1</p>
-          <h2 id="input-title">Paste JSON</h2>
-        </div>
-      </div>
-      <p class="card-helper">Paste the JSON returned by your shortcut or local AI step. The page will validate it and show the parsed fields before publishing.</p>
-      <div class="field-group">
-        <label for="job-json-input">Job JSON</label>
-        <textarea id="job-json-input" rows="18" placeholder='Paste JSON here, for example: {"companyName":"Calex UK","roleTitle":"Central Operations & Quality Manager"}'></textarea>
-      </div>
-      <div class="action-row action-row--spread">
-        <div class="action-row">
-          <button class="button" id="review-json-button" type="button">Review JSON</button>
-          <button class="button button--ghost" id="clear-json-button" type="button">Clear Form</button>
-        </div>
-        <p class="inline-feedback" id="review-status" aria-live="polite">Waiting for JSON.</p>
-      </div>
-      <p class="error-message" id="review-error" role="alert" hidden></p>
-    </section>
-
-    <section class="card" id="review-panel" hidden aria-labelledby="review-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Step 2</p>
-          <h2 id="review-title">Review the parsed fields</h2>
-        </div>
-      </div>
-      <p class="card-helper">Check the generated ref, the company details, and the personalised copy before you save it.</p>
-      <div class="review-grid" id="review-preview"></div>
-      <details class="debug-panel">
-        <summary>Normalised JSON</summary>
-        <pre class="debug-output" id="raw-json-output">No application loaded yet.</pre>
-      </details>
-      <div class="action-row action-row--spread">
-        <div class="action-row">
-          <button class="button" id="confirm-publish-button" type="button" disabled>Save &amp; Generate</button>
-          <button class="button button--ghost" id="edit-json-button" type="button">Edit JSON</button>
-        </div>
-        <p class="inline-feedback" id="publish-status" aria-live="polite">Ready to save.</p>
-      </div>
-      <p class="error-message" id="publish-error" role="alert" hidden></p>
-    </section>
-
-    <section class="card" id="result-panel" hidden aria-labelledby="result-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Result</p>
-          <h2 id="result-title">Saved application</h2>
-        </div>
-      </div>
-      <div class="field-grid">
-        <div class="field-group"><label>Company</label><input id="result-company" type="text" readonly></div>
-        <div class="field-group"><label>Role</label><input id="result-role" type="text" readonly></div>
-        <div class="field-group"><label>Location</label><input id="result-location" type="text" readonly></div>
-        <div class="field-group"><label>Ref</label><input id="result-ref" type="text" readonly></div>
-      </div>
-      <div class="field-group" style="margin-top:1rem">
-        <label for="result-url">Custom CV URL</label>
-        <input id="result-url" type="text" readonly>
-      </div>
-      <div class="result-qr-layout">
-        <section class="result-qr-card">
-          <p class="section-kicker">QR Code</p>
-          <div class="result-qr-frame">
-            <img id="result-qr-image" alt="QR code for the custom CV" hidden>
-          </div>
-          <p class="cv-body-copy result-qr-note" id="result-qr-note">Scan this code to open the tailored online CV.</p>
-        </section>
-
-        <div class="result-actions">
-          <div class="action-row">
-            <button class="button" id="copy-url-button" type="button">Copy URL</button>
-            <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open CV</a>
-            <button class="button button--ghost" id="download-cv-button" type="button">Download CV</button>
-          </div>
-          <p class="card-helper">Download CV opens the printable version with the QR code in the bottom-right corner, ready for browser print-to-PDF.</p>
-        </div>
+<body data-page="admin-info">
+  <main class="shell main-layout dashboard-layout" style="padding-top: 4rem;">
+    <section class="card">
+      <p class="section-kicker">Local only</p>
+      <h1>Open the admin page on this PC</h1>
+      <p class="card-helper">
+        The online GitHub Pages site is now read-only. Use the local admin folder on this computer to paste the job JSON, review it, and push the application data to GitHub.
+      </p>
+      <div class="action-row">
+        <a class="button" href="local-admin/index.html">Open Local Admin</a>
+        <a class="button" href="index.html">Back to dashboard</a>
       </div>
     </section>
   </main>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
-  <script src="script.js?v=21" defer></script>
 </body>
 </html>

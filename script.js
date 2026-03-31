@@ -90,12 +90,19 @@ function initDashboardPage() {
     const ref = actionButton.dataset.ref;
     if (!action || !ref) return;
 
-    const application = savedApplicationMap.get(ref) || null;
-    const previewUrl = application ? buildPreviewUrl(application) : buildPreviewUrl(ref);
-    const printUrl = application ? buildPrintUrl(application) : buildPrintUrl(ref);
+    let application;
+    try {
+      application = await resolveApplicationForPreview(ref);
+    } catch {
+      showToast(dom, "Could not load the saved application data.");
+      return;
+    }
+
+    const previewUrl = buildPreviewUrl(application);
+    const printUrl = buildPrintUrl(application);
 
     if (action === "copy-url") {
-      const publicUrl = buildPublicPreviewUrl(ref);
+      const publicUrl = buildPublicPreviewUrl(application);
       try {
         await navigator.clipboard.writeText(publicUrl);
         showToast(dom, "URL copied.");
@@ -456,8 +463,6 @@ async function fetchSeedApplications() {
 }
 
 function renderSavedApplicationCard(application) {
-  const previewUrl = buildPublicPreviewUrl(application.ref);
-  const printUrl = buildPrintUrl(application);
   const updated = formatDateTime(application.updatedAt || application.createdAt);
   const metaBits = [application.location, updated ? `Updated ${updated}` : ""].filter(Boolean).join(" · ");
 
@@ -474,39 +479,37 @@ function renderSavedApplicationCard(application) {
         <button class="saved-action" type="button" data-action="open-pdf" data-ref="${escapeHtml(application.ref)}">PDF view</button>
         <button class="saved-action" type="button" data-action="copy-url" data-ref="${escapeHtml(application.ref)}">Copy URL</button>
       </div>
-      <p class="saved-application-meta">Preview: ${escapeHtml(previewUrl)}<br>PDF: ${escapeHtml(printUrl)}</p>
+      <p class="saved-application-meta">URL generated from the saved application data when you open or copy it.</p>
     </article>
   `;
 }
 
-function buildPublicPreviewUrl(ref) {
-  return `${PUBLIC_CV_BASE_URL}?ref=${encodeURIComponent(ref)}`;
+async function resolveApplicationForPreview(ref) {
+  const existing = savedApplicationMap.get(ref) || null;
+  if (isEmbeddedPayloadReady(existing)) {
+    return existing;
+  }
+
+  const application = await fetchApplicationByRef(ref);
+  if (application && application.ref) {
+    savedApplicationMap.set(application.ref, application);
+  }
+  return application;
+}
+
+function buildPublicPreviewUrl(application) {
+  const payload = buildEmbeddedPreviewPayload(application);
+  return `${PUBLIC_CV_BASE_URL}#app=${encodeApplicationPayload(payload)}`;
 }
 
 function buildPreviewUrl(refOrApplication) {
-  if (typeof refOrApplication === "string") {
-    return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication)}`;
-  }
-
-  if (isEmbeddedPayloadReady(refOrApplication)) {
-    const payload = buildEmbeddedPreviewPayload(refOrApplication);
-    return `${CV_BASE_URL}#app=${encodeApplicationPayload(payload)}`;
-  }
-
-  return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication.ref || "")}`;
+  const payload = buildEmbeddedPreviewPayload(refOrApplication);
+  return `${CV_BASE_URL}#app=${encodeApplicationPayload(payload)}`;
 }
 
 function buildPrintUrl(refOrApplication) {
-  if (typeof refOrApplication === "string") {
-    return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication)}&print=1`;
-  }
-
-  if (isEmbeddedPayloadReady(refOrApplication)) {
-    const payload = buildEmbeddedPreviewPayload(refOrApplication);
-    return `${CV_BASE_URL}?print=1#app=${encodeApplicationPayload(payload)}`;
-  }
-
-  return `${CV_BASE_URL}?ref=${encodeURIComponent(refOrApplication.ref || "")}&print=1`;
+  const payload = buildEmbeddedPreviewPayload(refOrApplication);
+  return `${CV_BASE_URL}?print=1#app=${encodeApplicationPayload(payload)}`;
 }
 
 function buildPrintUrlFromUrl(url) {
@@ -545,21 +548,20 @@ function isEmbeddedPayloadReady(application) {
 
 function buildEmbeddedPreviewPayload(application) {
   return {
-    ref: application.ref || slugify([application.companyName, application.roleTitle, application.location].filter(Boolean).join(" ")),
-    companyName: application.companyName || "",
-    roleTitle: application.roleTitle || "",
-    location: application.location || "",
-    sector: application.sector || "",
-    salary: application.salary || "",
-    employmentType: application.employmentType || "",
-    shortCompanyReason: application.shortCompanyReason || "",
-    shortRoleReason: application.shortRoleReason || "",
-    toneKeywords: Array.isArray(application.toneKeywords) ? application.toneKeywords : [],
-    probablePriorities: Array.isArray(application.probablePriorities) ? application.probablePriorities : [],
-    advertSummary: application.advertSummary || "",
-    personalisedIntro: application.personalisedIntro || "",
-    whyThisRole: application.whyThisRole || "",
-    keyFocusAreas: Array.isArray(application.keyFocusAreas) ? application.keyFocusAreas : []
+    c: application.companyName || "",
+    r: application.roleTitle || "",
+    l: application.location || "",
+    s: application.sector || "",
+    y: application.salary || "",
+    e: application.employmentType || "",
+    n: application.shortCompanyReason || "",
+    o: application.shortRoleReason || "",
+    a: application.advertSummary || "",
+    i: application.personalisedIntro || "",
+    w: application.whyThisRole || "",
+    t: Array.isArray(application.toneKeywords) ? application.toneKeywords : [],
+    p: Array.isArray(application.probablePriorities) ? application.probablePriorities : [],
+    f: Array.isArray(application.keyFocusAreas) ? application.keyFocusAreas : []
   };
 }
 
@@ -585,22 +587,26 @@ function readEmbeddedApplicationFromLocation() {
 }
 
 function normaliseEmbeddedApplication(input) {
+  const companyName = toCleanString(input.companyName) || toCleanString(input.c);
+  const roleTitle = toCleanString(input.roleTitle) || toCleanString(input.r);
+  const location = toCleanString(input.location) || toCleanString(input.l);
+
   const application = {
-    ref: toCleanString(input.ref) || slugify([input.companyName, input.roleTitle, input.location].filter(Boolean).join(" ")),
-    companyName: toCleanString(input.companyName),
-    roleTitle: toCleanString(input.roleTitle),
-    location: toCleanString(input.location),
-    sector: toCleanString(input.sector),
-    salary: toCleanString(input.salary),
-    employmentType: toCleanString(input.employmentType),
-    shortCompanyReason: toCleanString(input.shortCompanyReason),
-    shortRoleReason: toCleanString(input.shortRoleReason),
-    toneKeywords: normaliseStringArray(input.toneKeywords),
-    probablePriorities: normaliseStringArray(input.probablePriorities),
-    advertSummary: toCleanString(input.advertSummary),
-    personalisedIntro: toCleanString(input.personalisedIntro),
-    whyThisRole: toCleanString(input.whyThisRole),
-    keyFocusAreas: normaliseStringArray(input.keyFocusAreas)
+    ref: toCleanString(input.ref) || slugify([companyName, roleTitle, location].filter(Boolean).join(" ")),
+    companyName,
+    roleTitle,
+    location,
+    sector: toCleanString(input.sector) || toCleanString(input.s),
+    salary: toCleanString(input.salary) || toCleanString(input.y),
+    employmentType: toCleanString(input.employmentType) || toCleanString(input.e),
+    shortCompanyReason: toCleanString(input.shortCompanyReason) || toCleanString(input.n),
+    shortRoleReason: toCleanString(input.shortRoleReason) || toCleanString(input.o),
+    toneKeywords: normaliseStringArray(input.toneKeywords || input.t),
+    probablePriorities: normaliseStringArray(input.probablePriorities || input.p),
+    advertSummary: toCleanString(input.advertSummary) || toCleanString(input.a),
+    personalisedIntro: toCleanString(input.personalisedIntro) || toCleanString(input.i),
+    whyThisRole: toCleanString(input.whyThisRole) || toCleanString(input.w),
+    keyFocusAreas: normaliseStringArray(input.keyFocusAreas || input.f)
   };
 
   if (!application.companyName || !application.roleTitle) {
@@ -642,12 +648,11 @@ async function fetchApplicationByRef(ref) {
 function loadPreviewApplication() {
   const embeddedApplication = readEmbeddedApplicationFromLocation();
   const params = new URLSearchParams(window.location.search);
-  const requestedRef = (params.get("ref") || "").trim().toLowerCase();
   const shouldAutoPrint = params.get("print") === "1";
 
   if (embeddedApplication) {
     renderPreviewApplication(embeddedApplication);
-    const previewUrl = buildPublicPreviewUrl(embeddedApplication.ref);
+    const previewUrl = buildPublicPreviewUrl(embeddedApplication);
     showPreviewLoading();
     renderQrImage(previewDom.qrImage, previewUrl)
       .then(() => {
@@ -667,37 +672,7 @@ function loadPreviewApplication() {
     return;
   }
 
-  if (!requestedRef) {
-    showPreviewError("Missing preview reference", "Open this page with a ?ref=... value or a #app=... payload so it knows which application to load.");
-    return;
-  }
-
-  showPreviewLoading();
-
-  fetchApplicationByRef(requestedRef)
-    .then((application) => {
-      renderPreviewApplication(application);
-      const previewUrl = buildPublicPreviewUrl(application.ref || requestedRef);
-      return renderQrImage(previewDom.qrImage, previewUrl)
-        .then(() => {
-          previewDom.qrBadge.hidden = false;
-          showPreviewContent();
-          if (shouldAutoPrint) {
-            window.setTimeout(() => window.print(), 450);
-          }
-        })
-        .catch(() => {
-          previewDom.qrBadge.hidden = true;
-          showPreviewContent();
-          if (shouldAutoPrint) {
-            window.setTimeout(() => window.print(), 450);
-          }
-        });
-    })
-    .catch((error) => {
-      const message = error instanceof Error ? error.message : "The application data could not be loaded.";
-      showPreviewError("Could not load preview data", message);
-    });
+  showPreviewError("Missing preview data", "Open this page with a #app=... payload. This page now renders personalised content only from the URL.");
 }
 
 function showPreviewLoading() {

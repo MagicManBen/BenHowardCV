@@ -128,10 +128,10 @@ async function initLocalAdminPage() {
     try {
       const response = await publishApplication(pendingApplication);
       const application = response.application || pendingApplication;
-      const publicUrl = response.publicUrl || buildPublicPreviewUrl(application.ref);
+      const publicUrl = buildPublicPreviewUrl(application);
 
-      localPreviewUrl = buildLocalPreviewUrl(application.ref);
-      localPrintUrl = buildLocalPrintUrl(application.ref);
+      localPreviewUrl = buildLocalPreviewUrl(application);
+      localPrintUrl = buildLocalPrintUrl(application);
 
       await renderPublishedResult(dom, application, publicUrl, localPreviewUrl);
       dom.resultPanel.hidden = false;
@@ -288,16 +288,45 @@ async function renderPublishedResult(dom, application, publicUrl, localPreviewUr
   }
 }
 
-function buildPublicPreviewUrl(ref) {
-  return `${publicCvBaseUrl}?ref=${encodeURIComponent(ref)}`;
+function buildPublicPreviewUrl(application) {
+  return `${publicCvBaseUrl}#app=${encodeApplicationPayload(buildEmbeddedPreviewPayload(application))}`;
 }
 
-function buildLocalPreviewUrl(ref) {
-  return new URL(`../cv.html?ref=${encodeURIComponent(ref)}`, window.location.href).href;
+function buildLocalPreviewUrl(application) {
+  return new URL(`../cv.html#app=${encodeApplicationPayload(buildEmbeddedPreviewPayload(application))}`, window.location.href).href;
 }
 
-function buildLocalPrintUrl(ref) {
-  return new URL(`../cv.html?ref=${encodeURIComponent(ref)}&print=1`, window.location.href).href;
+function buildLocalPrintUrl(application) {
+  return new URL(`../cv.html?print=1#app=${encodeApplicationPayload(buildEmbeddedPreviewPayload(application))}`, window.location.href).href;
+}
+
+function buildEmbeddedPreviewPayload(application) {
+  return {
+    c: application.companyName || "",
+    r: application.roleTitle || "",
+    l: application.location || "",
+    s: application.sector || "",
+    y: application.salary || "",
+    e: application.employmentType || "",
+    n: application.shortCompanyReason || "",
+    o: application.shortRoleReason || "",
+    a: application.advertSummary || "",
+    i: application.personalisedIntro || "",
+    w: application.whyThisRole || "",
+    t: Array.isArray(application.toneKeywords) ? application.toneKeywords : [],
+    p: Array.isArray(application.probablePriorities) ? application.probablePriorities : [],
+    f: Array.isArray(application.keyFocusAreas) ? application.keyFocusAreas : []
+  };
+}
+
+function encodeApplicationPayload(value) {
+  const json = typeof value === "string" ? value : JSON.stringify(value);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
 function slugify(text) {

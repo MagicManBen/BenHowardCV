@@ -5,6 +5,10 @@
 
 const CV_BASE_URL = new URL("cv.html", window.location.href).href;
 const NEW_JOB_URL = new URL("new-job.html", window.location.href).href;
+const LOCAL_ADMIN_URL = new URL("local-admin/", window.location.href).href;
+const IS_LOCAL_RUNTIME = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const LOCAL_API_BASE = "/api";
+const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : CV_BASE_URL;
 const APPLICATIONS_STORE_KEY = "cv_applications_local";
 const APPLICATIONS_INDEX_PATH = "data/applications.json";
 
@@ -70,7 +74,7 @@ function initDashboardPage() {
   };
 
   dom.newJobButton?.addEventListener("click", () => {
-    window.location.href = NEW_JOB_URL;
+    window.location.href = IS_LOCAL_RUNTIME ? LOCAL_ADMIN_URL : NEW_JOB_URL;
   });
 
   dom.refreshListButton?.addEventListener("click", () => loadSavedList(dom));
@@ -91,8 +95,9 @@ function initDashboardPage() {
     const printUrl = application ? buildPrintUrl(application) : buildPrintUrl(ref);
 
     if (action === "copy-url") {
+      const publicUrl = buildPublicPreviewUrl(ref);
       try {
-        await navigator.clipboard.writeText(previewUrl);
+        await navigator.clipboard.writeText(publicUrl);
         showToast(dom, "URL copied.");
       } catch {
         showToast(dom, "Could not copy automatically.");
@@ -440,7 +445,8 @@ async function loadSavedList(dom, latestApplication = null) {
 
 async function fetchSeedApplications() {
   try {
-    const response = await fetch(`${APPLICATIONS_INDEX_PATH}?t=${Date.now()}`, { cache: "no-store" });
+    const target = IS_LOCAL_RUNTIME ? `${LOCAL_API_BASE}/applications?t=${Date.now()}` : `${APPLICATIONS_INDEX_PATH}?t=${Date.now()}`;
+    const response = await fetch(target, { cache: "no-store" });
     if (!response.ok) return [];
     const items = await response.json();
     return Array.isArray(items) ? items.filter(isApplicationObject) : [];
@@ -450,7 +456,7 @@ async function fetchSeedApplications() {
 }
 
 function renderSavedApplicationCard(application) {
-  const previewUrl = buildPreviewUrl(application);
+  const previewUrl = buildPublicPreviewUrl(application.ref);
   const printUrl = buildPrintUrl(application);
   const updated = formatDateTime(application.updatedAt || application.createdAt);
   const metaBits = [application.location, updated ? `Updated ${updated}` : ""].filter(Boolean).join(" · ");
@@ -471,6 +477,10 @@ function renderSavedApplicationCard(application) {
       <p class="saved-application-meta">Preview: ${escapeHtml(previewUrl)}<br>PDF: ${escapeHtml(printUrl)}</p>
     </article>
   `;
+}
+
+function buildPublicPreviewUrl(ref) {
+  return `${PUBLIC_CV_BASE_URL}?ref=${encodeURIComponent(ref)}`;
 }
 
 function buildPreviewUrl(refOrApplication) {
@@ -619,7 +629,10 @@ function decodeApplicationPayload(value) {
 }
 
 async function fetchApplicationByRef(ref) {
-  const response = await fetch(`data/${encodeURIComponent(ref)}.json?t=${Date.now()}`, { cache: "no-store" });
+  const target = IS_LOCAL_RUNTIME
+    ? `${LOCAL_API_BASE}/application?ref=${encodeURIComponent(ref)}&t=${Date.now()}`
+    : `data/${encodeURIComponent(ref)}.json?t=${Date.now()}`;
+  const response = await fetch(target, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Could not load ${ref}.json`);
   }
@@ -634,7 +647,7 @@ function loadPreviewApplication() {
 
   if (embeddedApplication) {
     renderPreviewApplication(embeddedApplication);
-    const previewUrl = buildPreviewUrl(embeddedApplication);
+    const previewUrl = buildPublicPreviewUrl(embeddedApplication.ref);
     showPreviewLoading();
     renderQrImage(previewDom.qrImage, previewUrl)
       .then(() => {
@@ -664,7 +677,7 @@ function loadPreviewApplication() {
   fetchApplicationByRef(requestedRef)
     .then((application) => {
       renderPreviewApplication(application);
-      const previewUrl = buildPreviewUrl(application.ref || requestedRef);
+      const previewUrl = buildPublicPreviewUrl(application.ref || requestedRef);
       return renderQrImage(previewDom.qrImage, previewUrl)
         .then(() => {
           previewDom.qrBadge.hidden = false;
@@ -902,17 +915,19 @@ function formatDateTime(value) {
 async function renderQrImage(img, text) {
   if (!img) return "";
 
-  if (!window.QRCode?.toDataURL) {
+  if (!window.QRious) {
     img.hidden = true;
     return "";
   }
 
-  const dataUrl = await window.QRCode.toDataURL(text, {
-    width: 300,
-    margin: 1,
-    errorCorrectionLevel: "M"
+  const qr = new window.QRious({
+    value: text,
+    size: 300,
+    level: "M",
+    background: "white",
+    foreground: "black"
   });
-
+  const dataUrl = qr.toDataURL();
   img.src = dataUrl;
   img.hidden = false;
   return dataUrl;

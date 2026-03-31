@@ -14,7 +14,7 @@ if lsof -ti tcp:${PORT} >/dev/null 2>&1; then
   exit 0
 fi
 
-python3 -m http.server "${PORT}" >/tmp/benhowardcv-http.log 2>&1 &
+python3 local_server.py "${PORT}" >/tmp/benhowardcv-http.log 2>&1 &
 SERVER_PID=$!
 
 sleep 1

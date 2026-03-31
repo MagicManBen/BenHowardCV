@@ -8,14 +8,15 @@ This repo is the online GitHub Pages version of the CV system.
 - `new-job.html` is a local-admin notice page for the hosted site.
 - `cv.html` is the public personalised CV page for each application.
 - `local-admin/index.html` is the local-only admin page you open on this PC to publish new applications to GitHub.
+- `local_server.py` is the local server that serves the site on your Mac and handles GitHub writes with your local credential.
 
 ## Data
 
 - `data/{ref}.json` stores the public application records.
 - `data/applications.json` stores the dashboard index.
 
-The local admin page writes the JSON into GitHub from this computer. The hosted site only reads the saved files and renders the public CVs.
+The local admin page now talks to `local_server.py` on your Mac. That local server is the only place that reads your GitHub token. The hosted site only reads the saved files and renders the public CVs.
 
 ## Start On Mac
 
-Double-click `Start Ben Howard CV.command` in Finder to start a local server and open the dashboard plus local admin page.
+Double-click `Start Ben Howard CV.command` in Finder, or run `python3 local_server.py`, to start the local server and open the dashboard plus local admin page.

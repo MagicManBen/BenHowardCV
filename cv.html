@@ -9,14 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --paper: #ffffff;
+      --paper: #f8f3ea;
+      --paper-2: #fbf8f2;
       --ink: #121212;
-      --ink-soft: #3f3f3f;
-      --muted: #6e6e6e;
-      --line: rgba(18, 18, 18, 0.16);
-      --line-strong: rgba(18, 18, 18, 0.36);
-      --shadow: 0 26px 60px rgba(18, 18, 18, 0.06);
-      --content-width: 1120px;
+      --ink-soft: #404040;
+      --muted: #6b665f;
+      --gold: #a9894f;
+      --gold-soft: rgba(169, 137, 79, 0.12);
+      --line: rgba(18, 18, 18, 0.14);
+      --line-strong: rgba(18, 18, 18, 0.34);
+      --shadow: 0 24px 60px rgba(18, 18, 18, 0.05);
+      --content-width: 1140px;
       --narrow-width: 920px;
       --scroll-y: 0px;
     }
@@ -32,10 +35,12 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        linear-gradient(180deg, #fff 0%, #fff 38%, #fcfcfc 100%);
       color: var(--ink);
       font-family: "Manrope", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(169, 137, 79, 0.06), transparent 26%),
+        radial-gradient(circle at top right, rgba(18, 18, 18, 0.035), transparent 20%),
+        linear-gradient(180deg, var(--paper) 0%, #f8f5ef 28%, var(--paper-2) 100%);
       overflow-x: hidden;
     }
 
@@ -47,18 +52,14 @@
       background:
         repeating-linear-gradient(
           180deg,
-          rgba(18, 18, 18, 0.015) 0,
-          rgba(18, 18, 18, 0.015) 1px,
+          rgba(18, 18, 18, 0.012) 0,
+          rgba(18, 18, 18, 0.012) 1px,
           transparent 1px,
-          transparent 108px
-        );
-      opacity: 0.65;
+          transparent 112px
+        ),
+        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.52), transparent 38%);
+      opacity: 0.9;
       z-index: 0;
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
     }
 
     a {
@@ -75,7 +76,7 @@
       margin: 0;
       color: var(--ink-soft);
       font-size: 1rem;
-      line-height: 1.78;
+      line-height: 1.8;
     }
 
     ul {
@@ -134,7 +135,7 @@
     .masthead {
       position: relative;
       z-index: 10;
-      padding: 1rem 0 0.3rem;
+      padding: 0.9rem 0 0.45rem;
     }
 
     .masthead-inner {
@@ -142,75 +143,67 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 1rem;
+      padding-bottom: 0.8rem;
       border-bottom: 1px solid var(--line);
-      padding-bottom: 0.85rem;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 0.9rem;
+      gap: 0.85rem;
       min-width: 0;
     }
 
     .brand-mark {
-      width: 2.55rem;
-      height: 2.55rem;
+      width: 2.5rem;
+      height: 2.5rem;
       display: grid;
       place-items: center;
       border: 1px solid var(--ink);
-      border-radius: 0.15rem;
       font-weight: 800;
-      font-size: 0.95rem;
       letter-spacing: 0.08em;
-      background: #fff;
+      font-size: 0.92rem;
+      background: rgba(255, 255, 255, 0.4);
     }
 
     .brand-copy strong {
       display: block;
+      color: var(--ink);
       font-size: 0.98rem;
       font-weight: 800;
-      color: var(--ink);
     }
 
     .brand-copy span {
       display: block;
-      margin-top: 0.1rem;
+      margin-top: 0.12rem;
       color: var(--muted);
       font-size: 0.82rem;
     }
 
     .masthead-meta {
       display: grid;
-      gap: 0.45rem;
       justify-items: end;
+      gap: 0.45rem;
       text-align: right;
     }
 
-    .masthead-meta-line {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem 0.6rem;
-      justify-content: flex-end;
+    .masthead-context {
       color: var(--muted);
       font-size: 0.8rem;
-      line-height: 1.4;
-    }
-
-    .masthead-meta-line a {
-      color: var(--ink);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .masthead-nav {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.55rem;
+      gap: 0.4rem 0.85rem;
       justify-content: flex-end;
+      font-size: 0.8rem;
+      color: var(--muted);
     }
 
     .masthead-nav a {
-      font-size: 0.78rem;
-      color: var(--muted);
       padding-bottom: 0.1rem;
       border-bottom: 1px solid transparent;
       transition: color 0.18s ease, border-color 0.18s ease;
@@ -223,11 +216,11 @@
 
     .page {
       position: relative;
-      padding-bottom: 5rem;
+      padding-bottom: 4.5rem;
     }
 
     .section {
-      padding: clamp(4rem, 8vw, 7rem) 0;
+      padding: clamp(3.75rem, 8vw, 6.5rem) 0;
     }
 
     .section + .section {
@@ -237,17 +230,17 @@
     .eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 0.7rem;
-      color: var(--muted);
+      gap: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.18em;
       font-size: 0.7rem;
+      color: var(--muted);
       font-weight: 800;
     }
 
     .eyebrow::before {
       content: "";
-      width: 2.3rem;
+      width: 2.2rem;
       height: 1px;
       background: currentColor;
       opacity: 0.7;
@@ -262,146 +255,203 @@
 
     .hero-copy {
       display: grid;
-      gap: 1.15rem;
+      gap: 1.1rem;
     }
 
     .hero-title {
-      max-width: 9ch;
+      max-width: 8.5ch;
       font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(4.25rem, 10vw, 7.6rem);
-      line-height: 0.83;
+      font-size: clamp(4.35rem, 11vw, 7.9rem);
+      line-height: 0.82;
       font-weight: 700;
     }
 
     .hero-role {
       max-width: 28ch;
-      font-size: clamp(1.15rem, 2vw, 1.45rem);
-      line-height: 1.4;
-      color: #1f1f1f;
+      color: #222;
+      font-size: clamp(1.12rem, 2vw, 1.42rem);
+      line-height: 1.42;
     }
 
     .hero-summary {
-      max-width: 54ch;
+      max-width: 56ch;
+      color: var(--ink-soft);
       font-size: 1rem;
-      line-height: 1.85;
+      line-height: 1.86;
     }
 
-    .hero-rule {
-      width: 100%;
+    .hero-rule,
+    .section-rule,
+    .mini-rule {
+      position: relative;
       height: 1px;
-      background: linear-gradient(90deg, var(--line-strong), transparent 82%);
-      margin-top: 0.35rem;
+      background: var(--line-strong);
+      overflow: hidden;
+    }
+
+    .hero-rule::after,
+    .section-rule::after,
+    .mini-rule::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--gold), transparent 72%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.9s ease;
+    }
+
+    .is-visible.hero-rule::after,
+    .is-visible.section-rule::after,
+    .is-visible.mini-rule::after {
+      transform: scaleX(1);
     }
 
     .hero-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem 0.65rem;
-      margin-top: 0.15rem;
+      gap: 0.5rem 0.75rem;
+      margin-top: 0.1rem;
+      padding-top: 0.35rem;
+      border-top: 1px solid var(--line);
     }
 
     .hero-meta span {
-      display: inline-flex;
-      align-items: center;
-      min-height: 1.95rem;
-      padding: 0.3rem 0;
-      font-size: 0.82rem;
       color: var(--muted);
-      border-bottom: 1px solid var(--line);
+      font-size: 0.82rem;
+      padding-bottom: 0.2rem;
+      border-bottom: 1px solid rgba(18, 18, 18, 0.06);
     }
 
     .hero-note {
-      max-width: 42ch;
-      color: #1f1f1f;
+      max-width: 40ch;
+      color: #1c1c1c;
       font-size: 0.95rem;
     }
 
-    .hero-figure {
-      display: grid;
-      gap: 1rem;
-      justify-items: end;
-      align-self: stretch;
-    }
-
-    .hero-stage {
+    .hero-plate {
       position: relative;
-      width: min(100%, 420px);
       min-height: 32rem;
-      padding: 1.2rem 1rem 1rem;
+      padding: 1rem 0 1.1rem 1.25rem;
       border-top: 1px solid var(--line-strong);
       border-bottom: 1px solid var(--line-strong);
       isolation: isolate;
     }
 
-    .hero-stage::before,
-    .hero-stage::after {
+    .hero-plate::before {
       content: "";
       position: absolute;
-      background: var(--ink);
-      opacity: 0.12;
-      pointer-events: none;
-    }
-
-    .hero-stage::before {
-      left: 18%;
+      left: 19%;
       top: 0;
       width: 1px;
       height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(18, 18, 18, 0.16) 15%, rgba(18, 18, 18, 0.16) 85%, transparent);
     }
 
-    .hero-stage::after {
-      right: 7%;
+    .hero-plate::after {
+      content: "";
+      position: absolute;
+      right: 0;
       top: 2rem;
-      width: 58%;
+      width: 65%;
       height: 1px;
+      background: linear-gradient(90deg, rgba(18, 18, 18, 0.12), transparent);
     }
 
-    .hero-stage img {
+    .hero-monogram {
       position: absolute;
-      inset: 0 0 auto auto;
-      width: min(115%, 28rem);
-      max-width: none;
-      transform: translate(8%, 1.6rem) translateY(calc(var(--scroll-y) * -0.03));
-      filter: grayscale(1) contrast(1.1) brightness(0.97);
+      right: 0;
+      top: 1.8rem;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(5rem, 18vw, 9rem);
+      line-height: 0.8;
+      letter-spacing: -0.08em;
+      color: rgba(18, 18, 18, 0.08);
+      pointer-events: none;
+      transform: translateY(calc(var(--scroll-y) * -0.03));
     }
 
-    .stage-caption {
-      position: absolute;
-      left: 0;
-      bottom: 1rem;
-      width: min(18rem, 55%);
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--line);
-      font-size: 0.82rem;
-      line-height: 1.55;
-      color: var(--muted);
-    }
-
-    .stage-labels {
+    .hero-panel {
       display: grid;
-      gap: 0.4rem;
-      align-content: start;
-      width: min(12rem, 100%);
-      padding-right: 0.2rem;
-      margin-top: 0.2rem;
+      gap: 1rem;
+      align-content: end;
+      min-height: 100%;
     }
 
-    .stage-labels span {
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 0.25rem 0;
-      border-bottom: 1px solid var(--line);
+    .hero-kicker-block {
+      display: grid;
+      gap: 0.55rem;
+      align-content: start;
+      max-width: 24rem;
+      margin-top: auto;
+    }
+
+    .hero-kicker-label {
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    .hero-context-line {
+      font-size: 1.1rem;
+      color: #212121;
+      line-height: 1.6;
+    }
+
+    .hero-panel-grid {
+      display: grid;
+      gap: 0.7rem;
+      margin-top: 1rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+    }
+
+    .hero-panel-grid .row {
+      display: flex;
+      gap: 0.85rem;
+      align-items: baseline;
+      justify-content: space-between;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .hero-panel-grid .row strong {
+      flex: 0 0 auto;
+      min-width: 6.2rem;
       text-transform: uppercase;
       letter-spacing: 0.16em;
       font-size: 0.68rem;
       color: var(--muted);
     }
 
+    .hero-panel-grid .row span {
+      text-align: right;
+      color: var(--ink);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .hero-panel-copy {
+      margin-top: 0.8rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--line);
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    .hero-plate .draw-line,
+    .section-head .draw-line,
+    .chapter-image .draw-line {
+      display: block;
+    }
+
     .intro-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
-      gap: clamp(1.6rem, 5vw, 3rem);
+      grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
+      gap: clamp(1.8rem, 5vw, 3rem);
       align-items: start;
     }
 
@@ -415,7 +465,7 @@
 
     .section-head h2 {
       font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(2.4rem, 5.4vw, 4.8rem);
+      font-size: clamp(2.35rem, 5.4vw, 4.8rem);
       line-height: 0.92;
       max-width: 11ch;
     }
@@ -423,6 +473,7 @@
     .section-head p {
       justify-self: end;
       max-width: 34ch;
+      color: var(--ink-soft);
     }
 
     .intro-copy {
@@ -438,17 +489,10 @@
       color: var(--ink);
     }
 
-    .intro-rule {
-      width: 100%;
-      height: 1px;
-      background: linear-gradient(90deg, var(--line-strong), transparent 90%);
-      margin: 0.55rem 0 0.2rem;
-    }
-
     .intro-lines {
       display: grid;
-      gap: 0.6rem;
-      max-width: 44ch;
+      gap: 0.55rem;
+      max-width: 46ch;
       margin-top: 0.2rem;
     }
 
@@ -460,28 +504,40 @@
     .intro-side {
       display: grid;
       gap: 1rem;
-      align-items: start;
-      justify-items: end;
+      align-content: start;
     }
 
     .sketch-plate {
       position: relative;
-      width: 100%;
-      min-height: 17rem;
+      min-height: 14rem;
+      padding: 1rem 0 1.1rem;
       border-top: 1px solid var(--line-strong);
       border-bottom: 1px solid var(--line-strong);
-      padding: 1rem 0;
     }
 
-    .sketch-plate img {
-      width: 100%;
-      height: auto;
-      max-width: 100%;
-      filter: grayscale(1) contrast(1.08) brightness(0.98);
+    .sketch-plate::before {
+      content: "";
+      position: absolute;
+      left: 20%;
+      top: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(18, 18, 18, 0.12) 15%, rgba(18, 18, 18, 0.12) 85%, transparent);
+    }
+
+    .sketch-plate .mark {
+      position: absolute;
+      right: 0;
+      top: 0.5rem;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(4rem, 11vw, 6rem);
+      color: rgba(18, 18, 18, 0.08);
+      letter-spacing: -0.08em;
+      line-height: 1;
     }
 
     .plate-caption {
-      margin-top: 0.7rem;
+      margin-top: 0.75rem;
       padding-top: 0.65rem;
       border-top: 1px solid var(--line);
       color: var(--muted);
@@ -498,10 +554,10 @@
     }
 
     .proof-item {
-      min-height: 13.5rem;
-      padding: 1rem 1rem 1.1rem;
       display: grid;
       align-content: start;
+      min-height: 13.5rem;
+      padding: 1.05rem 1rem 1.15rem;
       border-right: 1px solid var(--line);
     }
 
@@ -529,6 +585,7 @@
 
     .proof-copy {
       margin-top: 0.85rem;
+      color: var(--ink-soft);
       font-size: 0.95rem;
       line-height: 1.7;
     }
@@ -537,7 +594,7 @@
       position: relative;
       width: min(100%, var(--narrow-width));
       margin: 0 auto;
-      padding-top: 1.25rem;
+      padding-top: 1rem;
     }
 
     .spine::before {
@@ -554,7 +611,7 @@
     .chapter-row {
       position: relative;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 2rem minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) 1.6rem minmax(0, 1fr);
       gap: 1.4rem;
       padding: 2.1rem 0;
     }
@@ -568,61 +625,62 @@
       position: absolute;
       left: 50%;
       top: 2.45rem;
-      width: 0.8rem;
-      height: 0.8rem;
+      width: 0.78rem;
+      height: 0.78rem;
       border-radius: 999px;
-      border: 1px solid var(--ink);
       background: #fff;
+      border: 1px solid var(--ink);
       transform: translateX(-50%);
       box-shadow: 0 0 0 6px #fff;
     }
 
-    .chapter-side {
+    .chapter-side,
+    .chapter-copy {
       display: grid;
-      gap: 0.85rem;
+      gap: 0.9rem;
       align-content: start;
     }
 
     .chapter-meta {
       display: grid;
-      gap: 0.2rem;
+      gap: 0.28rem;
       align-content: start;
-      text-align: right;
-      padding-top: 0.2rem;
     }
 
-    .chapter-side-left .chapter-meta {
-      text-align: left;
+    .chapter-side-right .chapter-meta {
+      text-align: right;
     }
 
     .chapter-year {
       text-transform: uppercase;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.18em;
       font-size: 0.7rem;
       font-weight: 800;
       color: var(--muted);
     }
 
+    .chapter-label {
+      color: var(--ink);
+      font-size: 0.92rem;
+    }
+
     .chapter-image {
       position: relative;
-      width: 100%;
-      min-height: 13rem;
+      min-height: 9rem;
+      padding: 1rem 0 1.1rem;
       border-top: 1px solid var(--line-strong);
       border-bottom: 1px solid var(--line-strong);
-      padding: 1rem 0;
     }
 
     .chapter-image::before,
     .chapter-image::after {
       content: "";
       position: absolute;
-      background: var(--ink);
-      opacity: 0.1;
-      pointer-events: none;
+      background: rgba(18, 18, 18, 0.1);
     }
 
     .chapter-image::before {
-      left: 18%;
+      left: 17%;
       top: 0;
       width: 1px;
       height: 100%;
@@ -630,89 +688,79 @@
 
     .chapter-image::after {
       right: 10%;
-      top: 1.8rem;
+      top: 1.7rem;
       width: 52%;
       height: 1px;
     }
 
-    .chapter-image img {
-      width: min(100%, 22rem);
-      max-width: 100%;
-      filter: grayscale(1) contrast(1.08) brightness(0.98);
-      transform: translateY(calc(var(--scroll-y) * -0.02));
+    .chapter-image .mark {
+      display: block;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(3.4rem, 8vw, 5rem);
+      color: rgba(18, 18, 18, 0.08);
+      letter-spacing: -0.07em;
+      line-height: 1;
+      transform: translateY(calc(var(--scroll-y) * -0.018));
     }
 
-    .chapter-image figcaption {
-      margin-top: 0.6rem;
-      padding-top: 0.55rem;
+    .chapter-caption {
+      margin-top: 0.55rem;
+      padding-top: 0.5rem;
       border-top: 1px solid var(--line);
       color: var(--muted);
       font-size: 0.8rem;
       line-height: 1.5;
     }
 
-    .chapter-copy {
-      display: grid;
-      gap: 0.95rem;
-      align-content: start;
-      padding-top: 0.1rem;
-    }
-
     .chapter-title {
       font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(1.45rem, 2.8vw, 2.15rem);
+      font-size: clamp(1.45rem, 2.8vw, 2.1rem);
       line-height: 0.96;
       max-width: 14ch;
     }
 
     .chapter-role {
+      color: var(--gold);
       text-transform: uppercase;
       letter-spacing: 0.16em;
       font-size: 0.68rem;
-      color: var(--muted);
       font-weight: 800;
     }
 
-    .chapter-copy ul {
-      margin-top: 0.1rem;
+    .chapter-copy p {
+      color: var(--ink-soft);
     }
 
     .visual-break {
       display: grid;
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
       gap: 2rem;
       align-items: center;
-      padding: 3rem 0;
-      border-top: 1px solid rgba(18, 18, 18, 0.07);
-      border-bottom: 1px solid rgba(18, 18, 18, 0.07);
-      margin: 1rem auto 0;
       width: min(100%, var(--narrow-width));
+      margin: 1rem auto 0;
+      padding: 3rem 0;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
     }
 
     .visual-break h3 {
       font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+      font-size: clamp(2.1rem, 4vw, 3.5rem);
       line-height: 0.92;
-      max-width: 9ch;
-      margin-bottom: 0.6rem;
+      max-width: 10ch;
+      margin-bottom: 0.55rem;
     }
 
     .visual-break p {
       max-width: 36ch;
     }
 
-    .visual-break figure {
-      margin: 0;
-      justify-self: end;
-      width: min(100%, 24rem);
-      padding: 1rem 0;
-      border-top: 1px solid var(--line-strong);
-      border-bottom: 1px solid var(--line-strong);
-    }
-
-    .visual-break img {
-      width: 100%;
-      filter: grayscale(1) contrast(1.08) brightness(0.98);
+    .visual-break .quote-line {
+      display: block;
+      margin-top: 0.8rem;
+      width: 6rem;
+      height: 1px;
+      background: var(--gold);
     }
 
     .themes-grid {
@@ -723,18 +771,18 @@
     }
 
     .theme-item {
-      padding-top: 1.1rem;
+      padding-top: 1rem;
     }
 
     .theme-item h3 {
       font-family: "Cormorant Garamond", Georgia, serif;
       font-size: clamp(1.45rem, 2.6vw, 2rem);
-      margin-bottom: 0.55rem;
+      margin-bottom: 0.5rem;
     }
 
     .theme-item p {
       max-width: 28ch;
-      margin-bottom: 0.95rem;
+      margin-bottom: 0.85rem;
     }
 
     .theme-tags {
@@ -744,15 +792,15 @@
     }
 
     .theme-tags span {
-      border-bottom: 1px solid var(--line);
       padding-bottom: 0.2rem;
+      border-bottom: 1px solid rgba(18, 18, 18, 0.08);
       color: var(--muted);
       font-size: 0.78rem;
     }
 
     .tailored-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.95fr);
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.95fr);
       gap: 2rem;
       align-items: start;
     }
@@ -762,7 +810,7 @@
       font-size: clamp(2rem, 4vw, 3.35rem);
       line-height: 0.95;
       max-width: 12ch;
-      padding-right: 2rem;
+      padding-top: 0.1rem;
     }
 
     .tailored-copy {
@@ -777,13 +825,14 @@
 
     .tailored-list {
       display: grid;
-      gap: 0.6rem;
-      margin-top: 0.6rem;
+      gap: 0.55rem;
+      margin-top: 0.35rem;
     }
 
     .tailored-list span {
       padding-bottom: 0.35rem;
       border-bottom: 1px solid rgba(18, 18, 18, 0.08);
+      color: var(--ink);
     }
 
     .contact-grid {
@@ -797,12 +846,12 @@
       display: grid;
       gap: 1rem;
       border-top: 1px solid var(--line-strong);
-      padding-top: 1.15rem;
+      padding-top: 1rem;
     }
 
     .contact-card h2 {
       font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(2.4rem, 5vw, 4.4rem);
+      font-size: clamp(2.35rem, 5vw, 4.4rem);
       line-height: 0.92;
       max-width: 8ch;
     }
@@ -810,13 +859,13 @@
     .contact-lines {
       display: grid;
       gap: 0.65rem;
-      margin-top: 0.1rem;
+      margin-top: 0.15rem;
     }
 
     .contact-line {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.35rem 0.6rem;
+      gap: 0.35rem 0.65rem;
       align-items: baseline;
       padding-bottom: 0.55rem;
       border-bottom: 1px solid rgba(18, 18, 18, 0.08);
@@ -831,27 +880,29 @@
     }
 
     .contact-figure {
-      margin: 0;
       padding: 1rem 0;
       border-top: 1px solid var(--line-strong);
       border-bottom: 1px solid var(--line-strong);
     }
 
-    .contact-figure img {
-      width: min(100%, 24rem);
-      margin-left: auto;
-      filter: grayscale(1) contrast(1.08) brightness(0.98);
-      transform: translateY(calc(var(--scroll-y) * -0.015));
+    .contact-figure .mark {
+      display: block;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(4rem, 11vw, 5.8rem);
+      color: rgba(18, 18, 18, 0.08);
+      letter-spacing: -0.08em;
+      line-height: 1;
+      text-align: right;
     }
 
-    .contact-figure figcaption {
+    .contact-caption {
       margin-top: 0.7rem;
       padding-top: 0.55rem;
       border-top: 1px solid var(--line);
       color: var(--muted);
       font-size: 0.8rem;
       line-height: 1.5;
-      max-width: 26ch;
+      max-width: 24ch;
       margin-left: auto;
     }
 
@@ -881,27 +932,6 @@
       transform: translateY(0);
     }
 
-    .draw-line {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .draw-line::after {
-      content: "";
-      position: absolute;
-      inset: auto 0 0 0;
-      height: 1px;
-      background: var(--ink);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.9s ease;
-      opacity: 0.85;
-    }
-
-    .is-visible.draw-line::after {
-      transform: scaleX(1);
-    }
-
     @media (max-width: 1060px) {
       .hero-grid,
       .intro-grid,
@@ -922,15 +952,11 @@
         text-align: left;
       }
 
-      .masthead-nav,
-      .masthead-meta-line {
+      .masthead-nav {
         justify-content: flex-start;
       }
 
-      .hero-figure,
-      .intro-side,
-      .visual-break figure,
-      .contact-figure img {
+      .section-head p {
         justify-self: start;
       }
 
@@ -949,8 +975,6 @@
 
       .chapter-row {
         grid-template-columns: 1.35rem 1fr;
-        padding-left: 0;
-        padding-right: 0;
         gap: 1rem;
       }
 
@@ -959,16 +983,15 @@
         transform: none;
       }
 
-      .chapter-row > .chapter-side {
+      .chapter-side-left .chapter-meta,
+      .chapter-side-right .chapter-meta {
         text-align: left;
       }
 
-      .chapter-row .chapter-meta {
-        text-align: left;
-      }
-
-      .chapter-row .chapter-image {
-        width: min(100%, 24rem);
+      .chapter-side-left,
+      .chapter-side-right,
+      .chapter-copy {
+        grid-column: 2;
       }
     }
 
@@ -990,28 +1013,18 @@
         max-width: none;
       }
 
-      .hero-stage {
+      .hero-plate {
         min-height: 24rem;
       }
 
-      .hero-stage img {
-        width: 100%;
-        transform: translate(0, 1.1rem) translateY(calc(var(--scroll-y) * -0.02));
+      .hero-monogram {
+        right: -0.25rem;
+        font-size: clamp(4.5rem, 28vw, 7.5rem);
       }
 
-      .stage-caption {
-        width: 65%;
-      }
-
-      .footer-inner {
-        flex-direction: column;
-      }
-    }
-
-    @media (max-width: 720px) {
       .chapter-row {
         display: block;
-        padding-left: 1.45rem;
+        padding-left: 1.35rem;
       }
 
       .chapter-row::before {
@@ -1019,13 +1032,22 @@
         transform: none;
       }
 
-      .chapter-row > div:nth-child(2) {
-        display: none;
+      .chapter-copy,
+      .chapter-side {
+        width: 100%;
       }
 
-      .chapter-row > .chapter-side,
-      .chapter-row > .chapter-copy {
-        width: 100%;
+      .chapter-side + .chapter-copy {
+        margin-top: 1rem;
+      }
+
+      .chapter-side-right .chapter-meta,
+      .chapter-side-left .chapter-meta {
+        text-align: left;
+      }
+
+      .footer-inner {
+        flex-direction: column;
       }
     }
 
@@ -1044,36 +1066,10 @@
         transform: none;
       }
 
-      .hero-stage img,
-      .chapter-image img,
-      .contact-figure img {
+      .hero-monogram,
+      .hero-plate::before,
+      .hero-plate::after {
         transform: none !important;
-      }
-    }
-
-    @media print {
-      body::before,
-      .masthead-nav {
-        display: none !important;
-      }
-
-      body {
-        background: #fff;
-      }
-
-      .section {
-        padding: 2rem 0;
-      }
-
-      .hero-stage,
-      .sketch-plate,
-      .chapter-image,
-      .contact-figure,
-      .proof-grid,
-      .theme-item,
-      .visual-break,
-      .contact-card {
-        box-shadow: none;
       }
     }
   </style>
@@ -1092,7 +1088,7 @@
       </div>
 
       <div class="masthead-meta">
-        <div class="masthead-meta-line" id="top-context-line">Prepared for your team</div>
+        <div class="masthead-context" id="top-context-line">Prepared for your team</div>
         <nav class="masthead-nav" aria-label="Page sections">
           <a href="#intro">Intro</a>
           <a href="#proof">Proof</a>
@@ -1112,34 +1108,45 @@
           <p class="eyebrow" id="hero-kicker">Prepared for your team</p>
           <h1 class="hero-title serif" id="hero-name">Ben T. Howard</h1>
           <p class="hero-role" id="hero-role">Senior Operations and Transformation Leader</p>
-          <p class="hero-summary" id="hero-summary">
-            Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services.
-          </p>
-          <div class="hero-rule draw-line is-visible"></div>
+          <p class="hero-summary" id="hero-summary">Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services.</p>
+          <div class="hero-rule draw-line"></div>
           <div class="hero-meta" aria-label="Quick facts">
             <span>Leek, Staffordshire</span>
             <span>Executive MBA</span>
             <span>Operational turnaround</span>
             <span>Service and performance improvement</span>
           </div>
-          <p class="hero-note" id="hero-tailored">
-            This page is designed as a long-form visual CV rather than a formal profile document.
-          </p>
+          <p class="hero-note" id="hero-tailored">This page is designed as a long-form visual CV rather than a formal profile document.</p>
         </div>
 
-        <figure class="hero-figure" data-reveal>
-          <div class="hero-stage draw-line">
-            <img src="Flat Assets-1/Humaaans/standing-18.svg" alt="Illustrated figure representing Ben Howard">
-            <div class="stage-caption">
-              A quiet visual thread through the page, using local illustration assets rather than a formal portrait treatment.
+        <div class="hero-plate draw-line" data-reveal>
+          <div class="hero-monogram">BH</div>
+          <div class="hero-panel">
+            <div class="hero-kicker-block">
+              <div class="hero-kicker-label">Prepared for</div>
+              <div class="hero-context-line" id="hero-context-line">A tailored role and company context appears here.</div>
+            </div>
+
+            <div class="hero-panel-grid">
+              <div class="row">
+                <strong>Company</strong>
+                <span id="hero-company">Your team</span>
+              </div>
+              <div class="row">
+                <strong>Role</strong>
+                <span id="hero-role-context">Operations leadership opportunity</span>
+              </div>
+              <div class="row">
+                <strong>Angle</strong>
+                <span id="hero-angle">A restrained, editorial view of the same CV content.</span>
+              </div>
+            </div>
+
+            <div class="hero-panel-copy">
+              A long scrolling narrative shaped to feel more like a crafted editorial CV than a conventional document.
             </div>
           </div>
-          <div class="stage-labels" aria-hidden="true">
-            <span>Lead</span>
-            <span>Improve</span>
-            <span>Deliver</span>
-          </div>
-        </figure>
+        </div>
       </div>
     </section>
 
@@ -1156,23 +1163,21 @@
         <div class="intro-grid">
           <div class="intro-copy" data-reveal>
             <p class="lede">I build structure, rhythm and measurable improvement in operational environments where service, people, process and delivery all need to hold together.</p>
-            <div class="intro-rule draw-line is-visible"></div>
+            <div class="mini-rule draw-line"></div>
             <div class="intro-lines">
               <span>Calm, accountable, systems-minded leadership.</span>
               <span>Hands-on delivery across healthcare, manufacturing and live operations.</span>
               <span>Better reporting, clearer processes and stronger follow-through.</span>
             </div>
-            <p id="intro-summary">
-              Combines strategic oversight with practical execution across governance, workforce planning, reporting and service delivery.
-            </p>
+            <p id="intro-summary">Combines strategic oversight with practical execution across governance, workforce planning, reporting and service delivery.</p>
           </div>
 
           <div class="intro-side" data-reveal>
             <div class="sketch-plate draw-line">
-              <img src="Flat Assets-2/Templates/Bust/peep-98.svg" alt="Illustrated bust style figure">
+              <div class="mark">01</div>
             </div>
             <div class="plate-caption">
-              A smaller visual pause before the timeline begins. The illustration stays relaxed and characterful rather than corporate.
+              Warm paper, fine rules and measured spacing do the work here. The page is designed to feel like a made object, not a UI shell.
             </div>
           </div>
         </div>
@@ -1184,9 +1189,9 @@
         <div class="section-head" data-reveal>
           <div>
             <p class="eyebrow">Proof</p>
-            <h2 class="serif">Headline evidence, presented with less noise.</h2>
+            <h2 class="serif">Headline evidence, surfaced early.</h2>
           </div>
-          <p id="proof-note">The clearest outcomes are surfaced early so the story is anchored in evidence.</p>
+          <p id="proof-note">The clearest outcomes are shown before the longer story so the substance lands immediately.</p>
         </div>
 
         <div class="proof-grid">
@@ -1230,12 +1235,12 @@
           <div class="chapter-side">
             <div class="chapter-meta">
               <div class="chapter-year">2024 to Present</div>
-              <div>NHS Primary Care</div>
+              <div class="chapter-label">NHS Primary Care</div>
             </div>
-            <figure class="chapter-image draw-line">
-              <img src="Flat Assets-2/Templates/Standing/peep-standing-24.svg" alt="Illustrated standing figure">
-              <figcaption>Healthcare leadership shown as a steady, practical chapter rather than a polished corporate profile.</figcaption>
-            </figure>
+            <div class="chapter-image draw-line">
+              <div class="mark">I</div>
+              <div class="chapter-caption">Healthcare leadership shown as a steady, practical chapter rather than a polished corporate profile.</div>
+            </div>
           </div>
           <div></div>
           <div class="chapter-copy">
@@ -1271,12 +1276,12 @@
           <div class="chapter-side">
             <div class="chapter-meta">
               <div class="chapter-year">2022 to 2024</div>
-              <div>Specialist Manufacturing</div>
+              <div class="chapter-label">Specialist Manufacturing</div>
             </div>
-            <figure class="chapter-image draw-line">
-              <img src="Flat Assets-1/Humaaans/standing-18.svg" alt="Illustrated standing figure">
-              <figcaption>Smaller, restrained figure treatment used as a visual pause between heavier text sections.</figcaption>
-            </figure>
+            <div class="chapter-image draw-line">
+              <div class="mark">II</div>
+              <div class="chapter-caption">A chapter built from process discipline, commercial awareness and a quieter kind of operational intensity.</div>
+            </div>
           </div>
         </article>
 
@@ -1285,22 +1290,24 @@
             <p class="eyebrow">Visual pause</p>
             <h3 class="serif">Live operations, improvement and scale.</h3>
             <p>This is where the page lets the scroll breathe before the most operationally intense chapter.</p>
+            <span class="quote-line"></span>
           </div>
-          <figure class="draw-line">
-            <img src="Flat Assets-2/Templates/Bust/peep-72.svg" alt="Illustrated bust style figure">
-          </figure>
+          <div class="chapter-image draw-line" style="margin: 0; padding-top: 0;">
+            <div class="mark" style="text-align:right;">III</div>
+            <div class="chapter-caption" style="max-width: 24ch; margin-left: auto;">The page uses the same vocabulary throughout: lines, spacing, typography and measured contrast.</div>
+          </div>
         </div>
 
         <article class="chapter-row chapter-side-left" data-reveal>
           <div class="chapter-side">
             <div class="chapter-meta">
               <div class="chapter-year">2016 to 2022</div>
-              <div>Merlin Entertainments | Alton Towers Resort</div>
+              <div class="chapter-label">Merlin Entertainments | Alton Towers Resort</div>
             </div>
-            <figure class="chapter-image draw-line">
-              <img src="Flat Assets-2/Templates/Standing/peep-standing-24.svg" alt="Illustrated standing figure">
-              <figcaption>A large live-operations environment turned into a narrative chapter, not a box on a page.</figcaption>
-            </figure>
+            <div class="chapter-image draw-line">
+              <div class="mark">IV</div>
+              <div class="chapter-caption">A large live-operations environment translated into a narrative chapter instead of a boxed panel.</div>
+            </div>
           </div>
           <div></div>
           <div class="chapter-copy">
@@ -1335,12 +1342,12 @@
           <div class="chapter-side">
             <div class="chapter-meta">
               <div class="chapter-year">2010 to 2016</div>
-              <div>Regulated Data Services</div>
+              <div class="chapter-label">Regulated Data Services</div>
             </div>
-            <figure class="chapter-image draw-line">
-              <img src="Flat Assets-2/Templates/Bust/peep-98.svg" alt="Illustrated bust style figure">
-              <figcaption>Earlier career context, kept quieter so the strongest operational chapters carry the narrative.</figcaption>
-            </figure>
+            <div class="chapter-image draw-line">
+              <div class="mark">V</div>
+              <div class="chapter-caption">The quieter beginning of the story, kept restrained so the strongest operations chapters lead the page.</div>
+            </div>
           </div>
         </article>
       </div>
@@ -1351,9 +1358,9 @@
         <div class="section-head" data-reveal>
           <div>
             <p class="eyebrow">Themes</p>
-            <h2 class="serif">Skills and sectors, handled as editorial notes.</h2>
+            <h2 class="serif">Skills and sectors as editorial notes.</h2>
           </div>
-          <p>Less like a dashboard, more like annotations at the edge of the story.</p>
+          <p>Less like a dashboard, more like annotations at the edge of the page.</p>
         </div>
 
         <div class="themes-grid">
@@ -1413,7 +1420,7 @@
 
           <div class="tailored-copy" data-reveal>
             <p id="tailored-company-line">Prepared for your team.</p>
-            <div class="tailored-list" id="role-facts">
+            <div class="tailored-list">
               <span id="detail-company">Your team</span>
               <span id="detail-role">Operations leadership opportunity</span>
               <span id="detail-location">United Kingdom</span>
@@ -1421,7 +1428,7 @@
               <span id="detail-employment">Not specified</span>
               <span id="detail-salary">Not specified</span>
             </div>
-            <p id="why-this-role" style="margin-top: 0.85rem;">The supplied role context suggests a position where visible leadership, operational judgement and practical delivery matter day to day.</p>
+            <p id="why-this-role" style="margin-top: 0.8rem;">The supplied role context suggests a position where visible leadership, operational judgement and practical delivery matter day to day.</p>
             <p id="role-summary" style="margin-top: 0.45rem;">The short role and company rationale from the saved application data will appear here.</p>
           </div>
         </div>
@@ -1458,10 +1465,10 @@
             </div>
           </article>
 
-          <figure class="contact-figure draw-line" data-reveal>
-            <img src="Flat Assets-2/Templates/Bust/peep-72.svg" alt="Illustrated figure closing the page">
-            <figcaption>A final reappearance of the illustrated figure so the page ends with a visual echo rather than a generic footer.</figcaption>
-          </figure>
+          <div class="contact-figure draw-line" data-reveal>
+            <div class="mark">BH</div>
+            <div class="contact-caption">A final typographic echo rather than an image close, keeping the page in the same visual language from top to bottom.</div>
+          </div>
         </div>
       </div>
     </section>
@@ -1602,10 +1609,16 @@
         setText("hero-kicker", state.companyName === defaults.companyName ? "Prepared as a tailored CV website" : `Prepared for ${state.companyName}`);
         setText("hero-summary", buildIntroCopy(state));
         setText("hero-tailored", buildTailoredAngle(state));
+        setText("hero-context-line", state.companyName === defaults.companyName
+          ? "A carefully designed long-form CV site that unfolds through the scroll."
+          : `An editorial CV prepared in consideration for ${state.companyName}'s ${state.roleTitle} role.`);
+        setText("hero-company", state.companyName);
+        setText("hero-role-context", state.roleTitle);
+        setText("hero-angle", buildTailoredAngle(state));
         setText("intro-note", state.companyName === defaults.companyName ? "A more editorial, human and visual retelling of the same CV content." : `Tuned for ${state.companyName} using only the role and company values already supplied.`);
         setText("intro-summary", buildIntroCopy(state));
         setText("proof-note", state.companyName === defaults.companyName
-          ? "The clearest outcomes are surfaced early so the story is anchored in evidence."
+          ? "The clearest outcomes are shown before the longer story so the substance lands immediately."
           : `Selected proof points from my CV that map credibly to the ${state.roleTitle} brief at ${state.companyName}.`);
         setText("tailored-heading", state.companyName === defaults.companyName
           ? "A restrained role-aware view, tuned to your context."
@@ -1629,11 +1642,11 @@
 
       function initReveal() {
         const targets = document.querySelectorAll("[data-reveal]");
-        const drawLines = document.querySelectorAll(".draw-line");
+        const drawTargets = document.querySelectorAll(".draw-line");
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
           targets.forEach((target) => target.classList.add("is-visible"));
-          drawLines.forEach((line) => line.classList.add("is-visible"));
+          drawTargets.forEach((target) => target.classList.add("is-visible"));
           return;
         }
 
@@ -1641,6 +1654,7 @@
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
             entry.target.classList.add("is-visible");
+            entry.target.querySelectorAll?.(".draw-line").forEach((line) => line.classList.add("is-visible"));
             observer.unobserve(entry.target);
           });
         }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
@@ -1649,8 +1663,6 @@
           target.style.transitionDelay = `${Math.min(index * 45, 260)}ms`;
           revealObserver.observe(target);
         });
-
-        drawLines.forEach((line) => line.classList.add("is-visible"));
       }
 
       function initScrollVariable() {

@@ -257,7 +257,6 @@
       grid-template-areas:
         "top top"
         "left panel"
-        "proof proof"
         "foot foot";
       gap: 1.4rem 2rem;
       align-items: start;
@@ -587,7 +586,7 @@
 
     .hero-proof-strip {
       grid-area: proof;
-      display: grid;
+      display: none;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0;
       border-top: 1px solid var(--line-strong);
@@ -627,7 +626,7 @@
     .hero-foot {
       grid-area: foot;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(220px, 0.82fr);
+      grid-template-columns: 1fr;
       gap: 1rem 1.6rem;
       align-items: start;
       padding-top: 0.95rem;
@@ -655,8 +654,7 @@
     }
 
     .hero-tone-wrap {
-      display: grid;
-      gap: 0.45rem;
+      display: none;
     }
 
     .hero-tone-wrap strong {
@@ -870,7 +868,7 @@
 
     .proof-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0;
       border-top: 1px solid var(--line-strong);
       border-bottom: 1px solid var(--line-strong);
@@ -1088,7 +1086,7 @@
 
     .themes-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 1.4rem;
       border-top: 1px solid var(--line-strong);
     }
@@ -1123,7 +1121,7 @@
 
     .tailored-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.95fr);
+      grid-template-columns: 1fr;
       gap: 2rem;
       align-items: start;
     }
@@ -1269,7 +1267,6 @@
           "top"
           "left"
           "panel"
-          "proof"
           "foot";
       }
 
@@ -1493,13 +1490,13 @@
       </div>
 
       <div class="masthead-meta">
-        <div class="masthead-context" id="top-context-line">Prepared for your team</div>
+        <div class="masthead-context" id="top-context-line">Prepared for this opportunity</div>
         <nav class="masthead-nav" aria-label="Page sections">
-          <a href="#intro">Intro</a>
-          <a href="#proof">Proof</a>
-          <a href="#journey">Journey</a>
-          <a href="#themes">Themes</a>
-          <a href="#tailored">Fit</a>
+          <a href="#intro">Why them</a>
+          <a href="#proof">Why me</a>
+          <a href="#journey">Career</a>
+          <a href="#themes">Strengths</a>
+          <a href="#tailored">Summary</a>
           <a href="#contact">Contact</a>
         </nav>
       </div>
@@ -1510,7 +1507,7 @@
     <section class="section hero-section">
       <div class="shell hero-editorial">
         <div class="hero-topline draw-line" data-reveal>
-          <span id="hero-kicker"><strong>Tailored profile</strong> / operations and transformation leadership</span>
+          <span id="hero-kicker"><strong>Prepared for this opportunity</strong> / tailored introduction</span>
           <div class="hero-topline-right">
             <span id="hero-topline-meta-1">Healthcare, manufacturing, leisure, regulated services</span>
             <span id="hero-topline-meta-2">United Kingdom</span>
@@ -1525,7 +1522,7 @@
 
           <div class="hero-main-column">
             <div class="hero-kicker-block">
-              <div class="hero-kicker-copy">Operational leadership across healthcare, manufacturing, leisure and regulated service environments</div>
+              <div class="hero-kicker-copy" id="hero-kicker-copy">Operational leadership across healthcare, manufacturing, leisure and regulated service environments</div>
               <div class="hero-kicker-notes" id="hero-kicker-notes">
                 <span>Leek, Staffordshire</span>
                 <span>Executive MBA</span>
@@ -1614,17 +1611,17 @@
         </div>
 
         <div class="intro-titleblock" data-reveal>
-          <p class="eyebrow">About me</p>
+          <p class="eyebrow">Why this company</p>
           <h2 class="serif">Built for complex operations that need steadier control and clearer momentum.</h2>
         </div>
 
         <div class="intro-side" data-reveal>
           <div class="intro-side-block">
-            <span class="intro-side-label">Sector range</span>
+            <span class="intro-side-label">Company signal</span>
             <p id="intro-note">Healthcare, manufacturing, leisure and regulated services.</p>
           </div>
           <div class="intro-side-block">
-            <span class="intro-side-label">Working style</span>
+            <span class="intro-side-label">Practical context</span>
             <div class="intro-lines" id="intro-traits">
               <span>Calm under pressure</span>
               <span>Clear standards and accountability</span>
@@ -1658,7 +1655,7 @@
       <div class="narrow">
         <div class="section-head" data-reveal>
           <div>
-            <p class="eyebrow">Proof</p>
+            <p class="eyebrow">Why me</p>
             <h2 class="serif">Headline evidence, surfaced early.</h2>
           </div>
           <p id="proof-note">The clearest outcomes are shown before the longer story so the substance lands immediately.</p>
@@ -1693,10 +1690,10 @@
       <div class="narrow">
         <div class="section-head" data-reveal>
           <div>
-            <p class="eyebrow">Journey</p>
-            <h2 class="serif">The career story as a vertical spine.</h2>
+            <p class="eyebrow">Career story</p>
+            <h2 class="serif">The experience behind the fit.</h2>
           </div>
-          <p>The strongest arc runs through healthcare operations, specialist manufacturing and major live sites.</p>
+          <p>The timeline below is supporting evidence for the tailored company and role story above.</p>
         </div>
 
         <div class="themes-grid" id="journey-context-grid" data-reveal></div>
@@ -1829,10 +1826,10 @@
       <div class="narrow">
         <div class="section-head" data-reveal>
           <div>
-            <p class="eyebrow">Themes</p>
-            <h2 class="serif">Skills and sectors as editorial notes.</h2>
+            <p class="eyebrow">Strengths</p>
+            <h2 class="serif">The strengths I bring into roles like this.</h2>
           </div>
-          <p>Less like a dashboard, more like annotations at the edge of the page.</p>
+          <p>A quieter view of strengths most relevant to this role context.</p>
         </div>
 
         <div class="themes-grid" id="themes-grid">
@@ -1876,10 +1873,10 @@
       <div class="narrow">
         <div class="section-head" data-reveal>
           <div>
-            <p class="eyebrow">Prepared for</p>
-            <h2 class="serif" id="tailored-heading">A restrained role-aware view, tuned to your context.</h2>
+            <p class="eyebrow">Summary</p>
+            <h2 class="serif" id="tailored-heading">A final summary for this role.</h2>
           </div>
-          <p id="tailored-note">This section uses only the role and company values already present in the URL or saved application data.</p>
+          <p id="tailored-note">This closing section pulls together the company context, the role and the fit.</p>
         </div>
 
         <div class="tailored-grid">
@@ -1901,7 +1898,7 @@
               <span id="detail-salary">Not specified</span>
             </div>
             <p id="why-this-role" style="margin-top: 0.8rem;">The supplied role context suggests a position where visible leadership, operational judgement and practical delivery matter day to day.</p>
-            <p id="role-summary" style="margin-top: 0.45rem;">The short role and company rationale from the saved application data will appear here.</p>
+            <p id="role-summary" style="margin-top: 0.45rem;">A concise view of the role, the fit and the priorities behind it.</p>
           </div>
         </div>
       </div>
@@ -1912,9 +1909,9 @@
         <div class="section-head" data-reveal>
           <div>
             <p class="eyebrow">Contact</p>
-            <h2 class="serif">Simple close, direct next step.</h2>
+            <h2 class="serif">Let's talk.</h2>
           </div>
-          <p id="contact-note-top">No extra layers. Easy to call, email or connect.</p>
+          <p id="contact-note-top">A direct final step if this feels like a strong fit.</p>
         </div>
 
         <div class="contact-grid">
@@ -2141,11 +2138,10 @@
       }
 
       function buildHeroStatement(state) {
-        const priorities = pickLines(state.probablePriorities, state.keyFocusAreas, 3);
-        if (state.companyName !== defaults.companyName && priorities.length) {
-          return `I lead turnaround, redesign and measurable improvement across complex operations. Relevant here where ${formatList(priorities)} matter day to day.`;
+        if (state.companyName !== defaults.companyName) {
+          return `Thank you for reviewing my CV. I wanted to give you a clearer picture of why ${state.companyName} and this role stood out to me, and why my operations background could be relevant here.`;
         }
-        return "I lead turnaround, redesign and measurable improvement across complex operations. Most useful where teams need clearer standards, tighter reporting and stronger follow-through.";
+        return "Thank you for reviewing my CV. This page gives a clearer picture of the role context, the company signals and the experience behind my fit.";
       }
 
       function buildHeroPullNote(state) {
@@ -2177,14 +2173,19 @@
       }
 
       function buildCompanyNote(state) {
-        return state.shortCompanyReason || "Service-led organisation where reliability, standards and customer experience matter.";
+        return state.headlineAttraction
+          || state.shortCompanyReason
+          || state.companySummary
+          || "Service-led organisation where reliability, standards and customer experience matter.";
       }
 
       function buildRoleNote(state) {
+        if (state.rolePurpose) return state.rolePurpose;
         if (state.shortRoleReason) return state.shortRoleReason;
+        if (state.roleSummary) return state.roleSummary;
         const focusAreas = pickLines(state.keyFocusAreas, state.probablePriorities, 3);
         if (focusAreas.length) {
-          return `Leadership role centred on ${formatList(focusAreas)}.`;
+          return `Role centred on ${formatList(focusAreas)}.`;
         }
         return "Leadership role centred on people, performance and day-to-day operational control.";
       }
@@ -2193,19 +2194,14 @@
         const values = [
           compactValue(state.location),
           compactValue(state.sector),
-          compactValue(state.employmentType),
-          compactValue(state.salary)
+          compactValue(state.workplaceType),
+          compactValue(state.hours)
         ].filter(Boolean);
         return values.slice(0, 4);
       }
 
       function buildHeroKickerNotes(state) {
-        const values = [
-          compactValue(state.location),
-          "Executive MBA",
-          compactValue(state.sector)
-        ].filter(Boolean);
-        return values.slice(0, 3);
+        return [state.companyName === defaults.companyName ? "Prepared specifically for this opportunity" : `Prepared for ${state.companyName}`];
       }
 
       function buildToneKeywords(state) {
@@ -2240,7 +2236,7 @@
           lines.push(`Notable advert signals: ${formatList(companyNotes)}.`);
         }
         if (!lines.length) {
-          lines.push("The page stays focused on the company and role data already present in the saved application.");
+          lines.push("This introduction stays grounded in the company and role details already captured in the application.");
         }
         return lines.join(" ");
       }
@@ -2266,29 +2262,28 @@
         const lines = [
           state.shortRoleReason,
           state.roleSummary,
-          state.rolePurpose,
-          state.advertSummary
+          state.rolePurpose
         ].map((value) => compactValue(value)).filter(Boolean);
-        return lines.length ? lines : [buildTailoredAngle(state)];
+        return lines.length ? lines.slice(0, 3) : [buildTailoredAngle(state)];
       }
 
       function buildRequirementCards(state) {
         return [
           {
-            title: "Main priorities",
+            title: "What matters most",
             copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)) || "Not provided",
             tags: pickLines(state.probablePriorities, state.keyFocusAreas, 3)
           },
           {
-            title: "Essential / preferred",
-            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 5)) || "Not provided",
+            title: "What they are looking for",
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3)) || "Not provided",
             tags: [
               ...cleanArray(state.essentialRequirements).slice(0, 2),
               ...cleanArray(state.preferredRequirements).slice(0, 2)
             ]
           },
           {
-            title: "Skills and methods",
+            title: "How the role works",
             copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned)].slice(0, 5)) || "Not provided",
             tags: [
               ...cleanArray(state.skillsWanted).slice(0, 2),
@@ -2296,7 +2291,7 @@
             ]
           },
           {
-            title: "People involved",
+            title: "Who the role works with",
             copy: formatList([
               ...cleanArray(state.stakeholderGroups),
               ...cleanArray(state.teamTypesMentioned),
@@ -2313,17 +2308,17 @@
       function buildBusinessNeedCards(state) {
         return [
           {
-            title: "Likely business needs",
+            title: "What the business seems to need",
             copy: formatList(pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)) || "Not provided",
             tags: pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)
           },
           {
-            title: "Strategic goals",
+            title: "Where the role could help",
             copy: formatList(cleanArray(state.impliedStrategicGoals).slice(0, 4)) || "Not provided",
             tags: cleanArray(state.impliedStrategicGoals).slice(0, 3)
           },
           {
-            title: "Likely deliverables",
+            title: "What this role is likely to produce",
             copy: formatList(cleanArray(state.deliverablesLikely).slice(0, 4)) || "Not provided",
             tags: cleanArray(state.deliverablesLikely).slice(0, 3)
           }
@@ -2357,7 +2352,7 @@
           state.shortRoleReason,
           state.rolePurpose
         ].map((value) => compactValue(value)).filter(Boolean);
-        return parts.length ? parts.slice(0, 3).join(" ") : "This remains a company-first summary built only from the saved application data.";
+        return parts.length ? parts.slice(0, 3).join(" ") : "A concise view of the role, the fit and the priorities behind it.";
       }
 
       function renderEditorialCards(containerId, cards) {
@@ -2434,41 +2429,41 @@
         const businessNeedCards = buildBusinessNeedCards(state);
         const cultureCards = buildCultureCards(state);
 
-        setText("top-context-line", state.companyName === defaults.companyName ? "Prepared for your next role" : `Prepared for ${state.companyName}`);
+        setText("top-context-line", state.companyName === defaults.companyName ? "Prepared for this opportunity" : `Prepared for ${state.companyName}`);
         setText("hero-kicker", state.companyName === defaults.companyName
-          ? "Tailored profile / operations and transformation leadership"
-          : `Tailored for ${state.companyName} / operations and transformation leadership`);
+          ? "Prepared for this opportunity / tailored introduction"
+          : `Prepared for ${state.companyName} / tailored introduction`);
         setText("hero-topline-meta-1", buildToplineMetaOne(state));
         setText("hero-topline-meta-2", buildToplineMetaTwo(state));
-        setText("hero-statement", state.headlineAttraction || buildHeroStatement(state));
-        setText("hero-positioning", state.rolePurpose || state.headlineAttraction || "Operational turnaround. Service redesign. Measurable improvement.");
+        setText("hero-statement", buildHeroStatement(state));
+        setText("hero-positioning", state.headlineAttraction || state.rolePurpose || "Operational turnaround. Service redesign. Measurable improvement.");
         setHtml("hero-pull-note", buildHeroPullNote(state));
         setText("hero-kicker-copy", state.companyName === defaults.companyName
           ? "Operational leadership across healthcare, manufacturing, leisure and regulated service environments"
-          : `Prepared for ${state.companyName} using the ${state.roleTitle} context already available in the saved application data`);
+          : `Prepared for ${state.companyName}.`);
         renderLines("hero-kicker-notes", buildHeroKickerNotes(state));
         setText("hero-tailored-heading", state.companyName);
         setText("hero-context-line", buildRoleContext(state));
-        setText("hero-company-note", companyIntro);
-        setText("hero-role-note", state.rolePurpose || buildRoleNote(state));
+        setText("hero-company-note", buildCompanyNote(state));
+        setText("hero-role-note", buildRoleNote(state));
         renderLines("hero-focus-list", pickLines(state.keyFocusAreas, state.probablePriorities, 4), "hero-focus-chip");
         renderLines("hero-meta-list", buildHeroMeta(state), "hero-meta-chip");
         renderLines("hero-tone-list", buildToneKeywords(state), "hero-tone-chip");
 
-        setText("intro-note", companyIntro);
+        setText("intro-note", buildCompanyNote(state));
         const introHeading = document.querySelector("#intro .intro-titleblock h2.serif");
         if (introHeading) {
           introHeading.textContent = state.companyName === defaults.companyName
-            ? "Why this company and role stand out."
+            ? "Why this company stands out."
             : `Why ${state.companyName} stands out for this role.`;
         }
         const introSideLabels = document.querySelectorAll("#intro .intro-side-label");
-        if (introSideLabels[0]) introSideLabels[0].textContent = "Company signals";
+        if (introSideLabels[0]) introSideLabels[0].textContent = "Company signal";
         if (introSideLabels[1]) introSideLabels[1].textContent = "Practical context";
         setHtml("intro-lede", state.companyName === defaults.companyName
-          ? "This page stays focused on the company and role context already available in the saved application data."
+          ? "This introduction stays grounded in the company and role details already captured in the application."
           : `Prepared for <em>${state.companyName}</em> and the <em>${state.roleTitle}</em> brief.`);
-        setText("intro-summary", state.companySummary || state.shortCompanyReason || "A tailored company-facing opening that uses the saved application data only.");
+        setText("intro-summary", state.companySummary || state.shortCompanyReason || "A tailored company-facing introduction grounded in the role and company details.");
         setText("intro-detail", buildIntroDetail(state));
         renderLines("intro-traits", companyFacts.length ? companyFacts : workingStyleLines);
         renderLines("intro-strength-lines", pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4).length
@@ -2477,54 +2472,54 @@
 
         setSectionHeader(
           "proof",
-          "Role fit",
-          "Why I’m right for this role.",
-          "A concise fit summary built only from the role and company data already present in the saved application."
+          "Why me",
+          "Why my background fits this role.",
+          "A concise view of the role, the fit and the priorities behind it."
         );
         renderProofCards([
           {
             value: "01",
             label: "Role pitch",
-            copy: rolePitch.join(" ")
+            copy: rolePitch.slice(0, 2).join(" ")
           },
           {
             value: "02",
-            label: "Main priorities",
+            label: "What matters most",
             copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)) || "Not provided"
           },
           {
             value: "03",
-            label: "Requirements",
-            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 5)) || "Not provided"
+            label: "What they are looking for",
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3)) || "Not provided"
           },
           {
             value: "04",
-            label: "Working context",
-            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned), ...cleanArray(state.stakeholderGroups), ...cleanArray(state.teamTypesMentioned)].slice(0, 6)) || "Not provided"
+            label: "How the role works",
+            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned), compactValue(state.workplaceType), compactValue(state.hours)].filter(Boolean).slice(0, 4)) || "Not provided"
           }
         ]);
 
         setSectionHeader(
           "journey",
-          "Business context",
-          "What this role appears designed to achieve.",
-          "The page stays grounded in the saved application data rather than guessing at external company information."
+          "Career story",
+          "The experience behind the fit.",
+          "This section focuses on what the role appears designed to achieve, with the timeline below as supporting evidence."
         );
         renderEditorialCards("journey-context-grid", businessNeedCards);
 
         setSectionHeader(
           "themes",
-          "Team and culture",
-          "The kind of environment this advert suggests.",
-          "A lighter interim view of tone, seniority and working style based only on the job data."
+          "Strengths",
+          "The strengths I bring into roles like this.",
+          "A quieter view of strengths most relevant to this role context."
         );
-        renderEditorialCards("themes-grid", cultureCards);
+        renderEditorialCards("themes-grid", cultureCards.slice(0, 2));
 
         setSectionHeader(
           "tailored",
-          "Wrap-up",
-          "Closing summary.",
-          "A final pass that pulls the company, role and business signals together before the contact details."
+          "Summary",
+          "A final summary for this role.",
+          "This closing section pulls together the company context, the role and the fit."
         );
         setText("tailored-company-line", state.companyName === defaults.companyName ? "Prepared for your team." : `Prepared for ${state.companyName}.`);
         setText("detail-company", state.companyName || defaults.companyName);
@@ -2539,14 +2534,14 @@
           : "The role appears geared toward visible operational control, clear priorities and practical follow-through.");
         setText("role-summary", state.impliedStrategicGoals.length
           ? formatList(cleanArray(state.impliedStrategicGoals).slice(0, 3))
-          : "The closing note stays focused on the saved company and role context, not on external research.");
+          : "A concise view of the role, the fit and the priorities behind it.");
 
         setText("contact-heading", state.companyName === defaults.companyName
-          ? "Open to discussing the opportunity."
-          : `Open to discussing the ${state.roleTitle} opportunity.`);
+          ? "Let's talk."
+          : `Let's talk about the ${state.roleTitle} opportunity.`);
         setText("contact-note-top", state.companyName === defaults.companyName
-          ? "No extra layers. Easy to call, email or connect."
-          : `A simple close for ${state.companyName}, with direct contact details below.`);
+          ? "A direct final step if this feels like a strong fit."
+          : `A direct final step if this feels like a strong fit for ${state.companyName}.`);
         setText("contact-copy", state.companyName === defaults.companyName
           ? "Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support the role."
           : `Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support ${state.companyName} in the ${state.roleTitle} position.`);

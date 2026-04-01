@@ -29,7 +29,6 @@ Example `local-admin/secrets.local.json`:
 {
   "githubToken": "ghp_...",
   "cvBaseUrl": "https://checkloops.co.uk/cv.html",
-  "googleKgApiKey": "",
   "ollamaBaseUrl": "http://localhost:11434",
   "ollamaModel": "llama3.2"
 }

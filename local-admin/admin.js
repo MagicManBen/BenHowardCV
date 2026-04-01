@@ -43,12 +43,10 @@ async function initLocalAdminPage() {
     pipelineMessage:  document.getElementById("pipeline-message"),
     pipelineError:    document.getElementById("pipeline-error"),
     pillParse:        document.getElementById("pill-parse"),
-    pillResearch:     document.getElementById("pill-research"),
     pillGenerate:     document.getElementById("pill-generate"),
     resultsPanel:     document.getElementById("results-panel"),
     resultsTitle:     document.getElementById("results-title"),
     advertResults:    document.getElementById("advert-results"),
-    researchResults:  document.getElementById("research-results"),
     contentResults:   document.getElementById("content-results"),
     debugJson:        document.getElementById("debug-json"),
     confirmButton:    document.getElementById("confirm-button"),
@@ -185,7 +183,6 @@ async function initLocalAdminPage() {
     dom.resultsPanel.hidden = true;
     dom.resultPanel.hidden = true;
     setPill(dom.pillParse, "running");
-    setPill(dom.pillResearch, "waiting");
     setPill(dom.pillGenerate, "waiting");
     dom.pipelineMessage.textContent = "Parsing JSON\u2026";
     dom.pipelinePanel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -208,38 +205,7 @@ async function initLocalAdminPage() {
     dom.resultsPanel.hidden = false;
     dom.resultsTitle.textContent = pendingApplication.companyName + " \u2014 " + pendingApplication.roleTitle;
     dom.advertResults.innerHTML = renderAdvertGroup(pendingApplication);
-
-    /* STEP 2 \u2014 Company research */
-    setPill(dom.pillResearch, "running");
-    dom.pipelineMessage.textContent = "Running company research\u2026";
-
-    try {
-      const researchData = await runCompanyResearch(pendingApplication);
-      pendingApplication.research = researchData;
-
-      const findings = researchData.rawFindings || [];
-      if (findings.length > 0) {
-        try {
-          const filtered = await filterResearchFindings(pendingApplication, findings);
-          pendingApplication.research.filteredFindings = filtered;
-        } catch (_) { /* filtering failed, continue */ }
-      }
-
-      setPill(dom.pillResearch, "done");
-      const count = (pendingApplication.research.filteredFindings && pendingApplication.research.filteredFindings.sourceItems
-        ? pendingApplication.research.filteredFindings.sourceItems
-        : researchData.rawFindings || []).length;
-      dom.pipelineMessage.textContent = "Research done (" + count + " findings). Generating content\u2026";
-
-      renderResearchGroup(dom, pendingApplication.research);
-    } catch (_) {
-      setPill(dom.pillResearch, "skipped");
-      dom.pipelineMessage.textContent = "Research unavailable. Generating content\u2026";
-      dom.researchResults.innerHTML = '<p class="results-group-heading">Company research</p><p class="card-helper">Research API was unavailable \u2014 skipped.</p>';
-      dom.researchResults.hidden = false;
-    }
-
-    /* STEP 3 \u2014 Generate */
+    dom.pipelineMessage.textContent = "Generating tailored content\u2026";
     await runGeneration(dom, pendingApplication);
 
     dom.confirmButton.disabled = false;
@@ -252,8 +218,7 @@ async function initLocalAdminPage() {
     dom.pipelineMessage.textContent = "Generating tailored content\u2026";
 
     try {
-      const filteredFindings = buildFilteredFromCheckboxes(app);
-      const result = await generatePersonalisedContent(app, filteredFindings);
+      const result = await generatePersonalisedContent(app);
       const meta = result.meta || {};
 
       if (!meta.success) {
@@ -282,21 +247,6 @@ async function initLocalAdminPage() {
       dom.confirmStatus.textContent = "You can still publish without generated content.";
     }
   }
-
-  function buildFilteredFromCheckboxes(app) {
-    const research = app.research;
-    if (!research || !research.filteredFindings) return {};
-    const filtered = Object.assign({}, research.filteredFindings);
-    const checkboxes = document.querySelectorAll("#research-results input[type=checkbox]");
-    if (checkboxes.length === 0) return filtered;
-    const sourceItems = filtered.sourceItems || [];
-    const kept = [];
-    checkboxes.forEach(function (cb, i) {
-      if (cb.checked && sourceItems[i]) kept.push(sourceItems[i]);
-    });
-    filtered.sourceItems = kept;
-    return filtered;
-  }
 }
 
 /* ── Render helpers ────────────────────────────────── */
@@ -316,66 +266,6 @@ function renderAdvertGroup(app) {
   }
   parts.push('</div>');
   return parts.join("");
-}
-
-function renderResearchGroup(dom, research) {
-  var filtered = research.filteredFindings;
-  var items = (filtered && filtered.sourceItems) ? filtered.sourceItems : (research.rawFindings || []);
-
-  /* Build the summary line from filtered metadata */
-  var summaryParts = [];
-  if (filtered) {
-    var fields = [
-      ["Name", filtered.canonicalCompanyName],
-      ["Description", filtered.bestEntityDescription],
-      ["Website", filtered.officialWebsite],
-      ["Industry", filtered.industry],
-      ["Type", filtered.companyType],
-      ["HQ", filtered.headquarters],
-    ];
-    for (var f = 0; f < fields.length; f++) {
-      if (fields[f][1]) summaryParts.push("<strong>" + esc(fields[f][0]) + ":</strong> " + esc(fields[f][1]));
-    }
-  }
-
-  /* Nothing useful to show */
-  if (items.length === 0 && summaryParts.length === 0) {
-    dom.researchResults.innerHTML = '<p class="results-group-heading">Company research</p><p class="card-helper">No research findings returned for this company.</p>';
-    dom.researchResults.hidden = false;
-    return;
-  }
-
-  var parts = ['<p class="results-group-heading">Company research</p>'];
-
-  if (summaryParts.length) {
-    parts.push('<p class="card-helper" style="margin-bottom:0.6rem">' + summaryParts.join(" &middot; ") + '</p>');
-  }
-
-  if (items.length === 0) {
-    parts.push('<p class="card-helper">No individual findings to review.</p>');
-  }
-
-  for (var i = 0; i < items.length; i++) {
-    var item = items[i];
-    var id = "research-cb-" + i;
-    var title = item.title || "Untitled";
-    var desc = item.snippet || item.description || "";
-    var meta = [];
-    if (item.confidence > 0) meta.push((item.confidence * 100).toFixed(0) + "%");
-    if (item.sourceName) meta.push(item.sourceName);
-    if (item.relevanceReason) meta.push(item.relevanceReason);
-
-    parts.push('<div class="research-check-item">');
-    parts.push('<input type="checkbox" id="' + id + '" checked>');
-    parts.push('<div>');
-    parts.push('<label class="check-label" for="' + id + '"><strong>' + esc(title) + '</strong></label>');
-    if (desc) parts.push('<div class="research-check-meta">' + esc(desc) + '</div>');
-    if (meta.length) parts.push('<div class="research-check-meta">' + esc(meta.join(" \u00b7 ")) + '</div>');
-    parts.push('</div></div>');
-  }
-
-  dom.researchResults.innerHTML = parts.join("");
-  dom.researchResults.hidden = false;
 }
 
 function renderContentGroup(dom, result) {
@@ -413,7 +303,7 @@ function renderContentGroup(dom, result) {
     for (var j = 0; j < examples.length; j++) {
       var ex = examples[j];
       parts.push(
-        '<div class="research-check-meta" style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">' +
+        '<div class="review-value" style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">' +
         '<strong>' + esc(ex.exampleTitle || "?") + '</strong> \u2014 ' +
         esc(ex.shortLine || ex.whyChosen || "") + '</div>'
       );
@@ -460,33 +350,11 @@ async function publishApplication(application) {
   return payload;
 }
 
-async function runCompanyResearch(application) {
-  var response = await fetch(LOCAL_API_BASE + "/research", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ application: application }),
-  });
-  var payload = await response.json().catch(function () { return {}; });
-  if (!response.ok) throw new Error(payload.error || "Research API returned " + response.status);
-  return payload;
-}
-
-async function filterResearchFindings(application, rawFindings) {
-  var response = await fetch(LOCAL_API_BASE + "/research/filter", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ application: application, rawFindings: rawFindings }),
-  });
-  var payload = await response.json().catch(function () { return {}; });
-  if (!response.ok) throw new Error(payload.error || "Filter API returned " + response.status);
-  return payload;
-}
-
-async function generatePersonalisedContent(application, filteredFindings) {
+async function generatePersonalisedContent(application) {
   var response = await fetch(LOCAL_API_BASE + "/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ application: application, filteredFindings: filteredFindings }),
+    body: JSON.stringify({ application: application }),
   });
   var payload = await response.json().catch(function () { return {}; });
   if (!response.ok) throw new Error(payload.error || "Generate API returned " + response.status);

@@ -3,7 +3,6 @@ Personalised content generation for Stage 3.
 
 Combines:
   - Parsed application/job data
-  - Filtered company research findings
   - Ben evidence-bank examples (selected deterministically)
 
 Then calls Ollama to produce structured personalised CV content.
@@ -180,8 +179,7 @@ SYSTEM_PROMPT = """You are writing personalised CV page content for Ben Howard, 
 
 You will receive:
 1. Parsed job advert data (company name, role title, sector, requirements, and other fields).
-2. Optional filtered company research (may be empty — that is normal).
-3. A shortlist of Ben's evidence-bank examples (real achievements from his career).
+2. A shortlist of Ben's evidence-bank examples (real achievements from his career).
 
 VOICE AND TONE RULES (strict):
 - Write EVERYTHING in first person as Ben ("I", "my", "I've").
@@ -194,9 +192,8 @@ VOICE AND TONE RULES (strict):
 
 SOURCE DISCIPLINE RULES (strict):
 - The job advert/application data is the primary source of truth.
-- Only state company facts that are clearly present in either the advert data or the approved filtered research.
+- Only state company facts that are clearly present in the advert data provided.
 - NEVER invent, guess, or embellish company facts, figures, history, or achievements.
-- If filtered research is empty or says "No filtered research available", rely entirely on the advert.
 - If a field would require guessing, write less rather than writing something weak or fabricated.
 
 HANDLING SPARSE ADVERTS:
@@ -215,7 +212,7 @@ EVIDENCE BANK RULES:
 Return ONLY valid JSON with this exact structure:
 {
   "personalisedOpening": "A first-person opening statement for this specific application (2-3 sentences). Grounded in the role and company context. Not a biography.",
-  "whyThisCompany": "Why I'm drawn to this company and opportunity (2-3 sentences). Only use facts from the advert or approved research. If company detail is thin, focus on the role context instead.",
+  "whyThisCompany": "Why I'm drawn to this company and opportunity (2-3 sentences). Only use facts from the advert. If company detail is thin, focus on the role context instead.",
   "whyThisRole": "Why this specific role fits my experience and what I'm looking for (2-3 sentences). Connect to real strengths without overpromising.",
   "selectedEvidenceExamples": [
     {
@@ -228,15 +225,15 @@ Return ONLY valid JSON with this exact structure:
   ],
   "fitSummary": "A 2-3 sentence first-person summary of why I'm a strong fit for this role overall.",
   "likelyContributionSummary": "What I'd expect to focus on in the first 6-12 months based on what the brief describes (2-3 sentences). Grounded in the advert, not invented promises.",
-  "companyHighlights": ["Only include company facts clearly supported by the advert or approved research. Return fewer items or an empty array if reliable facts are limited."],
+  "companyHighlights": ["Only include company facts clearly supported by the advert. Return fewer items or an empty array if reliable facts are limited."],
   "cultureFitSummary": "How my working style connects to the culture signals in the advert (1-2 sentences, first person).",
   "closingSummary": "A confident first-person closing line for the page (1 sentence).",
   "contentNotes": ["Any notes about content choices, gaps, thin data, or caveats for review."]
 }"""
 
 
-def _build_user_prompt(application, filtered_findings, evidence_rows):
-    """Assemble the user prompt combining all three data sources."""
+def _build_user_prompt(application, evidence_rows):
+    """Assemble the user prompt from the application and evidence bank."""
     sections = []
 
     # Application data
@@ -261,22 +258,6 @@ def _build_user_prompt(application, filtered_findings, evidence_rows):
             sections.append(f"{field}: {', '.join(val)}")
         elif isinstance(val, str) and val.strip():
             sections.append(f"{field}: {val}")
-
-    # Filtered research
-    sections.append("")
-    sections.append("=== COMPANY RESEARCH (FILTERED) ===")
-    if filtered_findings:
-        for key in ["canonicalCompanyName", "bestEntityDescription", "officialWebsite",
-                     "companyType", "industry", "headquarters"]:
-            val = filtered_findings.get(key, "")
-            if val:
-                sections.append(f"{key}: {val}")
-        for key in ["notableFacts", "strategicSignals", "credibilityNotes"]:
-            items = filtered_findings.get(key, [])
-            if items:
-                sections.append(f"{key}: {'; '.join(items)}")
-    else:
-        sections.append("No filtered research available.")
 
     # Evidence bank
     sections.append("")
@@ -314,7 +295,7 @@ def _extract_json_object(text):
     return text[start:end + 1]
 
 
-def call_ollama(base_url, model, application, filtered_findings, evidence_rows):
+def call_ollama(base_url, model, application, evidence_rows):
     """Call Ollama chat and return the parsed JSON response.
 
     Returns (result_dict, error_message_or_none).
@@ -324,7 +305,7 @@ def call_ollama(base_url, model, application, filtered_findings, evidence_rows):
     if not model:
         return None, "Ollama model not configured."
 
-    user_prompt = _build_user_prompt(application, filtered_findings, evidence_rows)
+    user_prompt = _build_user_prompt(application, evidence_rows)
     chat_url = base_url.rstrip("/") + "/api/chat"
 
     request_body = {
@@ -380,7 +361,7 @@ def call_ollama(base_url, model, application, filtered_findings, evidence_rows):
 # Orchestrator – full generation pipeline
 # ---------------------------------------------------------------------------
 
-def generate_personalised_content(application, filtered_findings, config):
+def generate_personalised_content(application, config):
     """Run the full Stage 3 generation pipeline.
 
     1. Select relevant evidence-bank examples
@@ -389,7 +370,6 @@ def generate_personalised_content(application, filtered_findings, config):
 
     Args:
         application: parsed application/job dict
-        filtered_findings: Stage 2 filtered company profile dict
         config: dict with Ollama settings and other options
 
     Returns:
@@ -417,7 +397,7 @@ def generate_personalised_content(application, filtered_findings, config):
 
     # Step 2: Call Ollama
     generated, generation_error = call_ollama(
-        ollama_base_url, ollama_model, application, filtered_findings, evidence_rows,
+        ollama_base_url, ollama_model, application, evidence_rows,
     )
 
     if generation_error:

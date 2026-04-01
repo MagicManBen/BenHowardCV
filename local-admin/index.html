@@ -19,16 +19,8 @@
     /* Result groups */
     .results-group { padding:1rem; border-radius:0.5rem; margin-bottom:1rem; }
     .results-group--advert   { background:#e8f0fe; border-left:4px solid #1a73e8; }
-    .results-group--research { background:#fff8e1; border-left:4px solid #f9a825; }
     .results-group--content  { background:#e8f5e9; border-left:4px solid #2e7d32; }
     .results-group-heading   { font-weight:700; margin:0 0 0.5rem; }
-
-    /* Research checkboxes */
-    .research-check-item { display:flex; gap:0.5rem; align-items:flex-start; padding:0.4rem 0; border-bottom:1px solid rgba(0,0,0,0.06); overflow:hidden; }
-    .research-check-item input[type=checkbox] { margin-top:0.25rem; flex-shrink:0; }
-    .research-check-item > div { flex:1; min-width:0; overflow-wrap:break-word; word-break:break-word; }
-    .check-label { cursor:pointer; display:block; }
-    .research-check-meta { font-size:0.82rem; color:#555; }
 
     /* Review grid */
     .review-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:0.6rem; }
@@ -81,7 +73,6 @@
       <h2>Pipeline</h2>
       <div class="pipeline-pills">
         <span class="pill pill--waiting" id="pill-parse">Parse</span>
-        <span class="pill pill--waiting" id="pill-research">Research</span>
         <span class="pill pill--waiting" id="pill-generate">Generate</span>
       </div>
       <p class="inline-feedback" id="pipeline-message" aria-live="polite"></p>
@@ -93,7 +84,6 @@
       <h2 id="results-title">Results</h2>
 
       <div class="results-group results-group--advert" id="advert-results"></div>
-      <div class="results-group results-group--research" id="research-results" hidden></div>
       <div class="results-group results-group--content" id="content-results" hidden></div>
 
       <details class="debug-panel" style="margin-top:0.75rem;">
@@ -143,6 +133,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=4" defer></script>
+  <script src="admin.js?v=5" defer></script>
 </body>
 </html>

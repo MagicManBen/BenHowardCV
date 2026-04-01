@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 from urllib.request import Request, urlopen
 
 from content_generation import generate_personalised_content
@@ -192,7 +192,8 @@ def upsert_local_application(application):
 
 
 def build_github_contents_url(path):
-  return f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{path}"
+  encoded = quote(path, safe="/")
+  return f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{encoded}"
 
 
 def github_request(path, token, method="GET", payload=None):
@@ -311,7 +312,17 @@ def put_remote_text(path, content, token, message):
   if current_sha:
     request_body["sha"] = current_sha
 
-  status, response = github_request(path, token, method="PUT", payload=request_body)
+  try:
+    status, response = github_request(path, token, method="PUT", payload=request_body)
+  except RuntimeError as exc:
+    return {
+      "path": path,
+      "message": message,
+      "ok": False,
+      "phase": "put",
+      "error": str(exc),
+    }
+
   ok = 200 <= status < 300
   result = {
     "path": path,
@@ -669,13 +680,18 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(500, {"error": "No GitHub token configured."})
       return
 
-    result = upload_cv_to_github(filename, html_content, config["githubToken"])
+    try:
+      result = upload_cv_to_github(filename, html_content, config["githubToken"])
+    except Exception as exc:
+      self.send_json(500, {"error": f"Upload error: {exc}"})
+      return
+
     if not result.get("ok"):
       self.send_json(502, {"error": result.get("error", "Upload failed.")})
       return
 
     safe = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
-    public_url = config["publicCvBaseUrl"].rstrip("/").replace("/cv.html", "") + "/downloads/" + safe + ".html"
+    public_url = config["publicCvBaseUrl"].rstrip("/").replace("/cv.html", "") + "/downloads/" + quote(safe + ".html")
     self.send_json(200, {"ok": True, "path": result["path"], "publicUrl": public_url})
 
   def _handle_generate(self):

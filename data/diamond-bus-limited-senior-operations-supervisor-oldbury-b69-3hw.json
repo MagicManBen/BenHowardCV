@@ -8,7 +8,7 @@
   "employmentType": "Full-time, Permanent",
   "hours": "",
   "workplaceType": "",
-  "shortCompanyReason": "Established bus operator providing local and regional services with a focus on reliability and customer service.",
+  "shortCompanyReason": "Ben is drawn to Diamond Bus Limited due to its established reputation as a reliable service provider in the transport sector, coupled with its focus on customer service. The company's affiliation with Rotala offers a robust platform for strategic growth and operational excellence.",
   "shortRoleReason": "Senior position leading depot operations, driving service quality, and managing operational teams.",
   "companySummary": "",
   "roleSummary": "",
@@ -29,10 +29,10 @@
     "Maintain punctual and reliable bus services",
     "Drive continuous improvement initiatives"
   ],
-  "advertSummary": "Diamond Bus Limited is seeking a Senior Operations Supervisor to lead depot operations in Oldbury. Reporting to the Operations Manager, the role involves managing supervisors, drivers, and traffic office functions, ensuring safe and reliable services, and driving operational improvements. A flexible schedule is required, with occasional night shifts.",
+  "advertSummary": "Ben's extensive experience in operations management and his proven track record in enhancing service quality and team performance make him a strong fit for the Senior Operations Supervisor role at Diamond Bus Limited.",
   "slug": "diamond-bus-limited-senior-operations-supervisor-oldbury-b69-3hw",
-  "personalisedIntro": "Experienced operational leader with a proven track record in transport management, skilled in optimising depot performance, leading teams, and ensuring high service standards.",
-  "whyThisRole": "This role offers the opportunity to take a strategic operational leadership position, influence service quality, and develop high-performing teams within a busy transport environment.",
+  "personalisedIntro": "Ben Howard is an experienced operational leader with a proven track record in transport management, adept at optimising depot performance, leading teams, and ensuring high service standards. His expertise in driving operational improvements makes him an ideal candidate for the Senior Operations Supervisor role at Diamond Bus Limited.",
+  "whyThisRole": "This Senior Operations Supervisor role aligns perfectly with Ben's experience in operational leadership and team management. It offers him the opportunity to influence service quality and develop high-performing teams within a busy transport environment, which matches his career ambitions.",
   "keyFocusAreas": [
     "Team leadership and staff management",
     "Operational planning and compliance",
@@ -55,6 +55,302 @@
   "deliverablesLikely": [],
   "possibleHeadlineFacts": [],
   "matchCategories": [],
-  "createdAt": "2026-04-01T13:28:38.435Z",
-  "updatedAt": "2026-04-01T13:28:38.435Z"
+  "createdAt": "2026-04-01T13:29:14.535Z",
+  "updatedAt": "2026-04-01T13:29:14.535Z",
+  "research": {
+    "rawFindings": [
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "Diamond Bus Company Holding Limited",
+        "snippet": "",
+        "description": "",
+        "url": "",
+        "entityId": "kg:/g/11ftkvjd8g",
+        "confidence": 0.01,
+        "relevanceScore": 13,
+        "matchReason": "KG types: Organization, Thing, Corporation",
+        "raw": {
+          "resultScore": 13,
+          "result": {
+            "name": "Diamond Bus Company Holding Limited",
+            "@id": "kg:/g/11ftkvjd8g",
+            "@type": [
+              "Organization",
+              "Thing",
+              "Corporation"
+            ]
+          },
+          "@type": "EntitySearchResult"
+        }
+      },
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "Emily Fox-Seton",
+        "snippet": "Book by Frances Hodgson Burnett",
+        "description": "Book by Frances Hodgson Burnett",
+        "url": "",
+        "entityId": "kg:/m/06nd_j1",
+        "confidence": 0,
+        "relevanceScore": 2.89,
+        "matchReason": "KG types: Book, Thing",
+        "raw": {
+          "resultScore": 2.892230987548828,
+          "result": {
+            "name": "Emily Fox-Seton",
+            "@id": "kg:/m/06nd_j1",
+            "@type": [
+              "Book",
+              "Thing"
+            ],
+            "description": "Book by Frances Hodgson Burnett"
+          },
+          "@type": "EntitySearchResult"
+        }
+      },
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "KPT Industries Ltd.",
+        "snippet": "Company",
+        "description": "Company",
+        "url": "",
+        "entityId": "kg:/m/0cp8h1s",
+        "confidence": 0,
+        "relevanceScore": 0.06,
+        "matchReason": "KG types: Corporation, Thing, Organization",
+        "raw": {
+          "resultScore": 0.06137418374419212,
+          "result": {
+            "@type": [
+              "Corporation",
+              "Thing",
+              "Organization"
+            ],
+            "description": "Company",
+            "name": "KPT Industries Ltd.",
+            "@id": "kg:/m/0cp8h1s"
+          },
+          "@type": "EntitySearchResult"
+        }
+      },
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "Diamond South East",
+        "snippet": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
+        "description": "",
+        "url": "https://en.wikipedia.org/wiki/Diamond_South_East",
+        "entityId": "kg:/m/03qnftz",
+        "confidence": 0,
+        "relevanceScore": 0.02,
+        "matchReason": "KG types: Thing, Organization",
+        "raw": {
+          "@type": "EntitySearchResult",
+          "resultScore": 0.02259279601275921,
+          "result": {
+            "detailedDescription": {
+              "url": "https://en.wikipedia.org/wiki/Diamond_South_East",
+              "articleBody": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
+              "license": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License"
+            },
+            "@type": [
+              "Thing",
+              "Organization"
+            ],
+            "name": "Diamond South East",
+            "@id": "kg:/m/03qnftz"
+          }
+        }
+      }
+    ],
+    "filteredFindings": {
+      "canonicalCompanyName": "Diamond Bus Company Holding Limited",
+      "bestEntityDescription": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.",
+      "officialWebsite": "",
+      "companyType": "Organization, Thing, Corporation",
+      "industry": "Transport and Logistics",
+      "headquarters": "Oldbury B69 3HW",
+      "regions": [],
+      "parentCompany": "",
+      "notableProductsOrServices": [],
+      "notableFacts": [
+        "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala."
+      ],
+      "strategicSignals": [],
+      "credibilityNotes": [
+        "Found in Google Knowledge Graph (confidence 39%)"
+      ],
+      "sourceItems": [
+        {
+          "sourceName": "Google Knowledge Graph",
+          "sourceType": "knowledge-graph",
+          "title": "Diamond Bus Company Holding Limited",
+          "snippet": "",
+          "url": "",
+          "confidence": 0.39,
+          "relevanceReason": "KG types: Organization, Thing, Corporation"
+        },
+        {
+          "sourceName": "Google Knowledge Graph",
+          "sourceType": "knowledge-graph",
+          "title": "Diamond South East",
+          "snippet": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
+          "url": "https://en.wikipedia.org/wiki/Diamond_South_East",
+          "confidence": 0.21,
+          "relevanceReason": "KG types: Thing, Organization"
+        }
+      ],
+      "meta": {
+        "totalRawFindings": 4,
+        "scoredAboveThreshold": 2,
+        "duplicatesRemoved": -2,
+        "topScore": 0.3875
+      }
+    },
+    "meta": {
+      "companyName": "Diamond Bus Limited",
+      "disambiguatedQuery": "Diamond Bus Limited Transport and Logistics Oldbury B69 3HW",
+      "sector": "Transport and Logistics",
+      "location": "Oldbury B69 3HW",
+      "roleTitle": "Senior Operations Supervisor",
+      "sourcesRun": [
+        "Google Knowledge Graph",
+        "Wikidata",
+        "SEC EDGAR"
+      ],
+      "sourceErrors": {},
+      "totalFindings": 4
+    }
+  },
+  "personalisedContent": {
+    "personalisedOpening": "Ben Howard is an experienced operational leader with a proven track record in transport management, adept at optimising depot performance, leading teams, and ensuring high service standards. His expertise in driving operational improvements makes him an ideal candidate for the Senior Operations Supervisor role at Diamond Bus Limited.",
+    "whyThisCompany": "Ben is drawn to Diamond Bus Limited due to its established reputation as a reliable service provider in the transport sector, coupled with its focus on customer service. The company's affiliation with Rotala offers a robust platform for strategic growth and operational excellence.",
+    "whyThisRole": "This Senior Operations Supervisor role aligns perfectly with Ben's experience in operational leadership and team management. It offers him the opportunity to influence service quality and develop high-performing teams within a busy transport environment, which matches his career ambitions.",
+    "selectedEvidenceExamples": [
+      {
+        "exampleId": "4",
+        "exampleTitle": "Manufacturing scale-up and delivery discipline",
+        "whyChosen": "Demonstrates Ben's ability to strengthen operational performance and manage growth, relevant for leading depot operations.",
+        "suggestedUsage": "Hero metric",
+        "shortLine": "Strengthened operational performance during growth at Copper Alloys Ltd."
+      },
+      {
+        "exampleId": "5",
+        "exampleTitle": "Cross-site continuous improvement across European theme parks",
+        "whyChosen": "Highlights Ben's experience in continuous improvement and operational consistency, crucial for driving improvements at Diamond Bus.",
+        "suggestedUsage": "Supporting point",
+        "shortLine": "Coordinated continuous improvement across multiple sites, enhancing execution standards."
+      },
+      {
+        "exampleId": "2",
+        "exampleTitle": "Google review turnaround",
+        "whyChosen": "Showcases Ben's capability to enhance service delivery and customer satisfaction, aligning with Diamond Bus's focus on reliability and customer service.",
+        "suggestedUsage": "Culture fit",
+        "shortLine": "Transformed NHS Primary Care's Google review score from 2.09 to 4.51."
+      }
+    ],
+    "fitSummary": "Ben's extensive experience in operations management and his proven track record in enhancing service quality and team performance make him a strong fit for the Senior Operations Supervisor role at Diamond Bus Limited.",
+    "likelyContributionSummary": "In the first 6-12 months, Ben would likely drive depot performance improvements, ensure regulatory compliance, and enhance staff engagement, contributing to the reliability and quality of Diamond Bus services.",
+    "companyHighlights": [
+      "Established bus operator with a focus on reliability and customer service",
+      "Subsidiary of Rotala, providing strategic growth opportunities",
+      "Operates in South East England and Greater London"
+    ],
+    "cultureFitSummary": "Ben's proactive approach to operational improvement and customer satisfaction aligns well with Diamond Bus's commitment to reliability and service excellence.",
+    "closingSummary": "Ben Howard is poised to bring significant operational improvements and team leadership to Diamond Bus Limited, driving service quality and customer satisfaction.",
+    "contentNotes": [
+      "Selected evidence examples highlight Ben's operational leadership and service improvement capabilities.",
+      "Focus on Ben's experience in regulated environments and his ability to manage growth and change."
+    ]
+  },
+  "evidenceSelection": {
+    "count": 6,
+    "error": null,
+    "examples": [
+      {
+        "id": "4",
+        "title": "\u201cManufacturing scale-up and delivery discipline\u201d",
+        "employer": "\u201cCopper Alloys Ltd\u201d",
+        "sector": "\u201cSpecialist Manufacturing\u201d",
+        "matchScore": 0.1351
+      },
+      {
+        "id": "8",
+        "title": "\u201cQueue Line Monitoring System\u201d",
+        "employer": "\u201cMerlin Entertainments plc\u201d",
+        "sector": "\u201cLeisure / Attractions\u201d",
+        "matchScore": 0.1351
+      },
+      {
+        "id": "5",
+        "title": "\u201cCross-site continuous improvement across European theme parks\u201d",
+        "employer": "\u201cMerlin Entertainments | Alton Towers Resort\u201d",
+        "sector": "\u201cLeisure / Attractions\u201d",
+        "matchScore": 0.1081
+      },
+      {
+        "id": "3",
+        "title": "\u201cProfit and working-capital improvement\u201d",
+        "employer": "\u201cNHS Primary Care\u201d",
+        "sector": "\u201cPresent\u201d",
+        "matchScore": 0.0811
+      },
+      {
+        "id": "1",
+        "title": "\u201cFounder-build of CheckLoops compliance platform\u201d",
+        "employer": "\u201cCheckLoops\u201d",
+        "sector": "\u201cHealthTech / SaaS / Compliance\u201d",
+        "matchScore": 0.0541
+      },
+      {
+        "id": "2",
+        "title": "\u201cGoogle review turnaround\u201d",
+        "employer": "\u201cNHS Primary Care\u201d",
+        "sector": "\u201cPresent\u201d",
+        "matchScore": 0.0541
+      }
+    ]
+  },
+  "closingSummary": "Ben Howard is poised to bring significant operational improvements and team leadership to Diamond Bus Limited, driving service quality and customer satisfaction.",
+  "genPersonalisedOpening": "Ben Howard is an experienced operational leader with a proven track record in transport management, adept at optimising depot performance, leading teams, and ensuring high service standards. His expertise in driving operational improvements makes him an ideal candidate for the Senior Operations Supervisor role at Diamond Bus Limited.",
+  "genWhyThisCompany": "Ben is drawn to Diamond Bus Limited due to its established reputation as a reliable service provider in the transport sector, coupled with its focus on customer service. The company's affiliation with Rotala offers a robust platform for strategic growth and operational excellence.",
+  "genWhyThisRole": "This Senior Operations Supervisor role aligns perfectly with Ben's experience in operational leadership and team management. It offers him the opportunity to influence service quality and develop high-performing teams within a busy transport environment, which matches his career ambitions.",
+  "genFitSummary": "Ben's extensive experience in operations management and his proven track record in enhancing service quality and team performance make him a strong fit for the Senior Operations Supervisor role at Diamond Bus Limited.",
+  "genLikelyContribution": "In the first 6-12 months, Ben would likely drive depot performance improvements, ensure regulatory compliance, and enhance staff engagement, contributing to the reliability and quality of Diamond Bus services.",
+  "genCultureFit": "Ben's proactive approach to operational improvement and customer satisfaction aligns well with Diamond Bus's commitment to reliability and service excellence.",
+  "genClosingSummary": "Ben Howard is poised to bring significant operational improvements and team leadership to Diamond Bus Limited, driving service quality and customer satisfaction.",
+  "genCompanyHighlights": [
+    "Established bus operator with a focus on reliability and customer service",
+    "Subsidiary of Rotala, providing strategic growth opportunities",
+    "Operates in South East England and Greater London"
+  ],
+  "genEvidenceExamples": [
+    {
+      "exampleId": "4",
+      "exampleTitle": "Manufacturing scale-up and delivery discipline",
+      "whyChosen": "Demonstrates Ben's ability to strengthen operational performance and manage growth, relevant for leading depot operations.",
+      "suggestedUsage": "Hero metric",
+      "shortLine": "Strengthened operational performance during growth at Copper Alloys Ltd."
+    },
+    {
+      "exampleId": "5",
+      "exampleTitle": "Cross-site continuous improvement across European theme parks",
+      "whyChosen": "Highlights Ben's experience in continuous improvement and operational consistency, crucial for driving improvements at Diamond Bus.",
+      "suggestedUsage": "Supporting point",
+      "shortLine": "Coordinated continuous improvement across multiple sites, enhancing execution standards."
+    },
+    {
+      "exampleId": "2",
+      "exampleTitle": "Google review turnaround",
+      "whyChosen": "Showcases Ben's capability to enhance service delivery and customer satisfaction, aligning with Diamond Bus's focus on reliability and customer service.",
+      "suggestedUsage": "Culture fit",
+      "shortLine": "Transformed NHS Primary Care's Google review score from 2.09 to 4.51."
+    }
+  ]
 }

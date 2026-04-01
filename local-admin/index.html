@@ -113,16 +113,21 @@
         <label for="result-url">Short CV URL</label>
         <input id="result-url" type="text" readonly>
       </div>
+      <div class="field-group" style="margin-top:0.5rem">
+        <label for="result-qr-url">QR URL (short redirect)</label>
+        <input id="result-qr-url" type="text" readonly>
+      </div>
       <div class="result-qr-layout">
         <section class="result-qr-card">
           <p class="section-kicker">QR Code</p>
           <div class="result-qr-frame">
-            <img id="result-qr-image" alt="QR code for the short CV URL" hidden>
+            <img id="result-qr-image" alt="QR code for the short redirect URL" hidden>
           </div>
         </section>
         <div class="result-actions">
           <div class="action-row">
-            <button class="button" id="copy-url-button" type="button">Copy URL</button>
+            <button class="button" id="copy-qr-url-button" type="button">Copy QR URL</button>
+            <button class="button button--ghost" id="copy-url-button" type="button">Copy Full URL</button>
             <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open Local CV</a>
             <button class="button button--ghost" id="download-cv-button" type="button">Download CV</button>
           </div>
@@ -133,6 +138,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=5" defer></script>
+  <script src="admin.js?v=6" defer></script>
 </body>
 </html>

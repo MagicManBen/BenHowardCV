@@ -4,6 +4,8 @@ import base64
 import json
 import os
 import re
+import secrets
+import string
 import sys
 import traceback
 from datetime import datetime, timezone
@@ -272,8 +274,76 @@ def put_remote_json(path, payload, token, message):
   return result
 
 
+def generate_short_code(length=8):
+  alphabet = string.ascii_lowercase + string.digits
+  return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+
+def fetch_remote_sha(path, token):
+  """Get the SHA of a file on GitHub, or None if it doesn't exist."""
+  status, payload = github_request(path, token)
+  if status == 404:
+    return None
+  if status < 200 or status >= 300:
+    message = payload.get("message") or f"GitHub API returned {status}"
+    raise RuntimeError(message)
+  return payload.get("sha")
+
+
+def put_remote_text(path, content, token, message):
+  """Push raw text content to a GitHub repo file."""
+  try:
+    current_sha = fetch_remote_sha(path, token)
+  except RuntimeError as exc:
+    return {
+      "path": path,
+      "message": message,
+      "ok": False,
+      "phase": "fetch-sha",
+      "error": str(exc),
+    }
+
+  request_body = {
+    "message": message,
+    "content": base64.b64encode(content.encode("utf-8")).decode("utf-8"),
+    "branch": GITHUB_BRANCH,
+  }
+  if current_sha:
+    request_body["sha"] = current_sha
+
+  status, response = github_request(path, token, method="PUT", payload=request_body)
+  ok = 200 <= status < 300
+  result = {
+    "path": path,
+    "message": message,
+    "ok": ok,
+    "status": status,
+  }
+  if not ok:
+    result["error"] = response.get("message") or f"GitHub API returned {status}"
+  return result
+
+
+def build_redirect_html(ref):
+  """Build a minimal HTML redirect page pointing to /j/?r=<ref>."""
+  safe_ref = ref.replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
+  url = f"/j/?r={safe_ref}"
+  return (
+    '<!DOCTYPE html>'
+    '<html><head>'
+    '<meta charset="UTF-8">'
+    f'<meta http-equiv="refresh" content="0;url={url}">'
+    f'<script>location.replace("{url}")</script>'
+    '</head><body></body></html>\n'
+  )
+
+
 def push_application_to_github(application, token):
   steps = []
+
+  # Generate short code if not already present
+  if not application.get("shortCode"):
+    application["shortCode"] = generate_short_code()
 
   app_result = put_remote_json(
     f"data/{application['ref']}.json",
@@ -329,9 +399,23 @@ def push_application_to_github(application, token):
       "error": index_result.get("error") or "Could not update applications index.",
     }
 
+  # Push short-code redirect file
+  short_code = application.get("shortCode", "")
+  if short_code:
+    redirect_html = build_redirect_html(application["ref"])
+    redirect_result = put_remote_text(
+      f"r/{short_code}/index.html",
+      redirect_html,
+      token,
+      f"Add short redirect: {application.get('companyName', '')} / {application.get('roleTitle', '')}",
+    )
+    steps.append(redirect_result)
+    # Log but don't fail the whole publish if redirect push fails
+
   return {
     "publishedToGitHub": True,
     "steps": steps,
+    "shortCode": short_code,
     "remoteIndexCount": len(remote_items),
     "remoteIndexSha": remote_index_sha,
   }

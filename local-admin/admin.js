@@ -28,6 +28,7 @@ const REVIEW_FIELDS = [
 let toastTimer = null;
 let publicCvBaseUrl = DEFAULT_PUBLIC_CV_BASE_URL;
 let publicJobBaseUrl = new URL("j/", DEFAULT_PUBLIC_CV_BASE_URL).href;
+let publicRedirectBaseUrl = new URL("r/", DEFAULT_PUBLIC_CV_BASE_URL).href;
 
 document.addEventListener("DOMContentLoaded", initLocalAdminPage);
 
@@ -63,6 +64,8 @@ async function initLocalAdminPage() {
     openPreviewLink:  document.getElementById("open-preview-link"),
     downloadCvButton: document.getElementById("download-cv-button"),
     resultQrImage:    document.getElementById("result-qr-image"),
+    resultQrUrl:      document.getElementById("result-qr-url"),
+    copyQrUrlButton:  document.getElementById("copy-qr-url-button"),
     toast:            document.getElementById("toast"),
   };
 
@@ -161,6 +164,19 @@ async function initLocalAdminPage() {
       dom.resultUrl.select();
     }
   });
+
+  if (dom.copyQrUrlButton) {
+    dom.copyQrUrlButton.addEventListener("click", async () => {
+      const url = dom.resultQrUrl ? dom.resultQrUrl.value : "";
+      if (!url) return;
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast(dom, "QR URL copied.");
+      } catch {
+        if (dom.resultQrUrl) { dom.resultQrUrl.focus(); dom.resultQrUrl.select(); }
+      }
+    });
+  }
 
   dom.downloadCvButton.addEventListener("click", () => {
     if (localPrintUrl) window.open(localPrintUrl, "_blank", "noopener,noreferrer");
@@ -323,6 +339,7 @@ async function loadLocalStatus(dom) {
     if (!response.ok) throw new Error(payload.error || "Could not read local server status.");
     publicCvBaseUrl = payload.publicCvBaseUrl || DEFAULT_PUBLIC_CV_BASE_URL;
     publicJobBaseUrl = new URL("j/", publicCvBaseUrl).href;
+    publicRedirectBaseUrl = new URL("r/", publicCvBaseUrl).href;
     if (!payload.hasGithubToken) {
       dom.keysStatus.textContent = "Local server running, but no GitHub token configured.";
       return;
@@ -410,7 +427,11 @@ async function renderPublishedResult(dom, application, publicUrl, localPreviewUr
   dom.resultRef.value = application.ref || "";
   dom.resultUrl.value = publicUrl;
   dom.openPreviewLink.href = localPreviewUrl;
-  try { await renderQrImage(dom.resultQrImage, publicUrl); } catch (_) { dom.resultQrImage.hidden = true; }
+
+  var qrUrl = buildShortQrUrl(application);
+  if (qrUrl && dom.resultQrUrl) dom.resultQrUrl.value = qrUrl;
+  var qrTarget = qrUrl || publicUrl;
+  try { await renderQrImage(dom.resultQrImage, qrTarget); } catch (_) { dom.resultQrImage.hidden = true; }
 }
 
 function buildPublicPreviewUrl(app) {
@@ -418,6 +439,10 @@ function buildPublicPreviewUrl(app) {
 }
 function buildShortJobUrl(app) {
   return publicJobBaseUrl + "?r=" + encodeURIComponent(app.ref || "");
+}
+function buildShortQrUrl(app) {
+  if (!app.shortCode) return "";
+  return publicRedirectBaseUrl + encodeURIComponent(app.shortCode);
 }
 function buildLocalPreviewUrl(app) {
   return new URL("../cv.html#app=" + encodePayload(buildEmbeddedPayload(app)), window.location.href).href;

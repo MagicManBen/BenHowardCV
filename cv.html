@@ -1121,39 +1121,49 @@
 
     .evidence-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 0;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1.2rem;
       border-top: 1px solid var(--line-strong);
+      padding-top: 1.2rem;
     }
 
     .evidence-item {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.6rem 1.2rem;
-      align-items: baseline;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 1rem 1rem 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 2px;
     }
 
     .evidence-item .evidence-marker {
       font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       line-height: 1;
       color: var(--muted);
-      grid-row: 1 / 3;
-      padding-top: 0.15rem;
     }
 
     .evidence-item .evidence-title {
+      font-family: "Cormorant Garamond", Georgia, serif;
       font-weight: 700;
-      font-size: 0.92rem;
+      font-size: 1.2rem;
+      line-height: 1.15;
       color: var(--ink);
     }
 
     .evidence-item .evidence-line {
       color: var(--ink-soft);
-      font-size: 0.9rem;
-      line-height: 1.6;
+      font-size: 0.88rem;
+      line-height: 1.65;
+    }
+
+    .evidence-item .evidence-usage {
+      margin-top: auto;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-style: italic;
     }
 
     .summary-evidence-line {
@@ -1336,10 +1346,6 @@
         width: min(9rem, 100%);
         height: 1px;
         background: linear-gradient(90deg, var(--gold), rgba(18, 18, 18, 0.14) 62%, transparent);
-      }
-
-      .hero-side-rule {
-        /* unchanged */
       }
 
       .hero-left {
@@ -1737,10 +1743,10 @@
       <div class="narrow">
         <div class="section-head" data-reveal>
           <div>
-            <p class="eyebrow">Experience behind the fit</p>
-            <h2 class="serif">Selected examples that support this role.</h2>
+            <p class="eyebrow">Relevant experience</p>
+            <h2 class="serif">Real examples, matched to this brief.</h2>
           </div>
-          <p>Drawn from real projects and outcomes, matched to what this role appears to need.</p>
+          <p>Each example is drawn from a real project or outcome and selected because it connects directly to what this role needs.</p>
         </div>
         <div class="evidence-grid" id="evidence-grid" data-reveal></div>
       </div>
@@ -1768,7 +1774,7 @@
             </div>
             <div class="chapter-image draw-line">
               <div class="mark">I</div>
-              <div class="chapter-caption">Healthcare leadership shown as a steady, practical chapter rather than a polished corporate profile.</div>
+              <div class="chapter-caption">Healthcare operations, patient experience and financial turnaround.</div>
             </div>
           </div>
           <div></div>
@@ -1809,7 +1815,7 @@
             </div>
             <div class="chapter-image draw-line">
               <div class="mark">II</div>
-              <div class="chapter-caption">A chapter built from process discipline, commercial awareness and a quieter kind of operational intensity.</div>
+              <div class="chapter-caption">Manufacturing scale-up, delivery discipline and margin growth.</div>
             </div>
           </div>
         </article>
@@ -1818,12 +1824,12 @@
           <div>
             <p class="eyebrow">Visual pause</p>
             <h3 class="serif">Live operations, improvement and scale.</h3>
-            <p>This is where the page lets the scroll breathe before the most operationally intense chapter.</p>
+            <p>From process discipline and financial control to large-scale live operations and continuous improvement.</p>
             <span class="quote-line"></span>
           </div>
           <div class="chapter-image draw-line" style="margin: 0; padding-top: 0;">
             <div class="mark" style="text-align:right;">III</div>
-            <div class="chapter-caption" style="max-width: 24ch; margin-left: auto;">The page uses the same vocabulary throughout: lines, spacing, typography and measured contrast.</div>
+            <div class="chapter-caption" style="max-width: 24ch; margin-left: auto;">The strongest operational chapters are shown in more detail.</div>
           </div>
         </div>
 
@@ -1835,7 +1841,7 @@
             </div>
             <div class="chapter-image draw-line">
               <div class="mark">IV</div>
-              <div class="chapter-caption">A large live-operations environment translated into a narrative chapter instead of a boxed panel.</div>
+              <div class="chapter-caption">Large-scale guest operations, continuous improvement and major launches.</div>
             </div>
           </div>
           <div></div>
@@ -1875,7 +1881,7 @@
             </div>
             <div class="chapter-image draw-line">
               <div class="mark">V</div>
-              <div class="chapter-caption">The quieter beginning of the story, kept restrained so the strongest operations chapters lead the page.</div>
+              <div class="chapter-caption">Regulated data services, client delivery and process control.</div>
             </div>
           </div>
         </article>
@@ -1941,9 +1947,9 @@
 
         <div class="tailored-grid">
           <div class="tailored-copy" data-reveal>
-            <div class="pullquote serif">This page is tuned to the role without losing the person behind it.</div>
+            <div class="pullquote serif">The right experience for the right role.</div>
             <div class="meta-block">
-              <p id="tailored-rationale">The supplied role context suggests a position where visible leadership, operational judgement and practical delivery matter day to day.</p>
+              <p id="tailored-rationale">Operational leadership grounded in measurable outcomes, cross-functional delivery and practical problem-solving.</p>
             </div>
           </div>
 
@@ -1957,8 +1963,8 @@
               <span id="detail-employment">Not specified</span>
               <span id="detail-salary">Not specified</span>
             </div>
-            <p id="why-this-role" style="margin-top: 0.8rem;">The supplied role context suggests a position where visible leadership, operational judgement and practical delivery matter day to day.</p>
-            <p id="role-summary" style="margin-top: 0.45rem;">A concise view of the role, the fit and the priorities behind it.</p>
+            <p id="why-this-role" style="margin-top: 0.8rem;">Operational leadership built on visible results and practical delivery.</p>
+            <p id="role-summary" style="margin-top: 0.45rem;">Cross-sector experience in turnaround, service design, financial grip and team leadership.</p>
             <div id="summary-evidence-lines" style="margin-top: 0.6rem; display: none;"></div>
           </div>
         </div>
@@ -1997,7 +2003,7 @@
 
           <div class="contact-figure draw-line" data-reveal>
             <div class="mark">BH</div>
-            <div class="contact-caption">A final typographic echo rather than an image close, keeping the page in the same visual language from top to bottom.</div>
+            <div class="contact-caption">Ben T. Howard — operations leadership across healthcare, manufacturing, leisure and regulated services.</div>
           </div>
         </div>
       </div>
@@ -2430,7 +2436,7 @@
           state.shortRoleReason,
           state.rolePurpose
         ].map((value) => compactValue(value)).filter(Boolean);
-        return parts.length ? parts.slice(0, 3).join(" ") : "A concise view of the role, the fit and the priorities behind it.";
+        return parts.length ? parts.slice(0, 3).join(" ") : "Operational leadership grounded in measurable outcomes, cross-functional delivery and practical problem-solving.";
       }
 
       function renderEditorialCards(containerId, cards) {
@@ -2516,17 +2522,26 @@
           title.className = "evidence-title";
           title.textContent = ex.exampleTitle || ex.suggestedUsage || "";
 
-          const line = document.createElement("span");
-          line.className = "evidence-line";
-          line.textContent = ex.shortLine || ex.whyChosen || "";
-
           item.appendChild(marker);
           item.appendChild(title);
-          if (line.textContent) {
-            const spacer = document.createElement("span");
-            spacer.setAttribute("aria-hidden", "true");
-            item.appendChild(spacer);
+
+          if (ex.shortLine) {
+            const line = document.createElement("span");
+            line.className = "evidence-line";
+            line.textContent = ex.shortLine;
             item.appendChild(line);
+          }
+
+          if (ex.whyChosen && ex.whyChosen !== ex.shortLine) {
+            const usage = document.createElement("span");
+            usage.className = "evidence-usage";
+            usage.textContent = ex.whyChosen;
+            item.appendChild(usage);
+          } else if (ex.suggestedUsage && ex.suggestedUsage !== (ex.exampleTitle || "")) {
+            const usage = document.createElement("span");
+            usage.className = "evidence-usage";
+            usage.textContent = ex.suggestedUsage;
+            item.appendChild(usage);
           }
 
           grid.appendChild(item);
@@ -2623,7 +2638,7 @@
           "proof",
           "Why me",
           "Why my background fits this role.",
-          "A concise view of the role, the fit and the priorities behind it."
+          "The strongest results are shown first so the substance lands before the story."
         );
         renderProofCards([
           {
@@ -2657,7 +2672,7 @@
             "proof",
             "Why me",
             "Why my background fits this role.",
-            "Matched to what the brief asks for, with selected experience below."
+            "Matched to what the brief asks for, with hands-on examples below."
           );
         }
 
@@ -2665,7 +2680,7 @@
           "journey",
           "Career story",
           "The experience behind the fit.",
-          "This section focuses on what the role appears designed to achieve, with the timeline below as supporting evidence."
+          "Each chapter is shown in the order that best supports the role, with the most relevant detail first."
         );
         renderEditorialCards("journey-context-grid", businessNeedCards);
 
@@ -2673,7 +2688,7 @@
           "themes",
           "Strengths",
           "The strengths I bring into roles like this.",
-          "A quieter view of strengths most relevant to this role context."
+          "Themes drawn from repeated patterns across healthcare, manufacturing, leisure and regulated environments."
         );
         renderEditorialCards("themes-grid", cultureCards.slice(0, 2));
 
@@ -2686,8 +2701,8 @@
         setSectionHeader(
           "tailored",
           "Summary",
-          "A final summary for this role.",
-          "This closing section pulls together the company context, the role and the fit."
+          "Closing summary.",
+          "The key details for this application, pulled together in one place."
         );
         setText("tailored-company-line", state.companyName === defaults.companyName ? "Prepared for your team." : `Prepared for ${state.companyName}.`);
         setDetailSpan("detail-company", state.companyName, defaults.companyName);
@@ -2700,11 +2715,11 @@
         setText("why-this-role", state.genWhyThisRole
           || (state.likelyBusinessNeeds.length
             ? formatList(cleanArray(state.likelyBusinessNeeds).slice(0, 3))
-            : "The role appears geared toward visible operational control, clear priorities and practical follow-through."));
+            : "Operational leadership built on visible results and practical delivery."));
         setText("role-summary", state.genLikelyContribution
           || (state.impliedStrategicGoals.length
             ? formatList(cleanArray(state.impliedStrategicGoals).slice(0, 3))
-            : "A concise view of the role, the fit and the priorities behind it."));
+            : "Cross-sector experience in turnaround, service design, financial grip and team leadership."));
 
         // Show up to 3 evidence short lines as supporting points in the summary
         const summaryEvidenceEl = document.getElementById("summary-evidence-lines");

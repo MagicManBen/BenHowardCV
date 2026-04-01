@@ -15,6 +15,7 @@ Future refinement:
 
 import csv
 import json
+import socket
 import traceback
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -174,6 +175,7 @@ def _format_evidence_for_prompt(rows):
 
 DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
 DEFAULT_OLLAMA_MODEL = "llama3.2"
+OLLAMA_REQUEST_TIMEOUT_SECONDS = 180
 
 SYSTEM_PROMPT = """You are writing personalised CV page content for Ben Howard, a UK-based senior operations and transformation leader. The content will appear on a tailored employer-facing web page — not a traditional CV document.
 
@@ -332,7 +334,7 @@ def call_ollama(base_url, model, application, evidence_rows):
     )
 
     try:
-        with urlopen(req, timeout=60) as resp:
+        with urlopen(req, timeout=OLLAMA_REQUEST_TIMEOUT_SECONDS) as resp:
             resp_data = json.loads(resp.read().decode("utf-8"))
     except HTTPError as exc:
         error_body = exc.read().decode("utf-8") if exc.fp else ""
@@ -344,6 +346,10 @@ def call_ollama(base_url, model, application, evidence_rows):
         return None, f"Ollama API error ({exc.code}): {msg}"
     except URLError as exc:
         return None, f"Could not reach Ollama: {exc.reason}"
+    except TimeoutError:
+        return None, f"Ollama request timed out after {OLLAMA_REQUEST_TIMEOUT_SECONDS}s."
+    except socket.timeout:
+        return None, f"Ollama request timed out after {OLLAMA_REQUEST_TIMEOUT_SECONDS}s."
     except json.JSONDecodeError as exc:
         return None, f"Invalid JSON from Ollama: {exc}"
 

@@ -234,6 +234,22 @@ async function initLocalAdminPage() {
     dom.pipelineMessage.textContent = "Generating tailored content\u2026";
 
     try {
+      if (app.personalisedContent) {
+        setPill(dom.pillGenerate, "done");
+        dom.pipelineMessage.textContent = "Used pasted personalised content.";
+        renderContentGroup(dom, {
+          generatedContent: app.personalisedContent,
+          evidenceSelection: app.evidenceSelection || { count: 0, error: null, examples: [] },
+          meta: {
+            success: true,
+            source: "pasted-json",
+          },
+        });
+        dom.debugJson.textContent = JSON.stringify(app, null, 2);
+        showToast(dom, "Pasted personalised content loaded.");
+        return;
+      }
+
       const result = await generatePersonalisedContent(app);
       const meta = result.meta || {};
 
@@ -395,6 +411,7 @@ function normaliseApplicationPayload(input) {
   var ref = slugify(baseRef);
   if (!ref) throw new Error("Could not build a usable ref.");
   var now = new Date().toISOString();
+  var providedContent = normaliseProvidedPersonalisedContent(input);
   return {
     ref: ref, companyName: companyName, roleTitle: roleTitle, location: location,
     sector: str(input.sector), salary: str(input.salary),
@@ -416,7 +433,64 @@ function normaliseApplicationPayload(input) {
     likelyBusinessNeeds: arr(input.likelyBusinessNeeds), impliedStrategicGoals: arr(input.impliedStrategicGoals),
     deliverablesLikely: arr(input.deliverablesLikely), possibleHeadlineFacts: arr(input.possibleHeadlineFacts),
     matchCategories: arr(input.matchCategories),
+    personalisedContent: providedContent,
+    evidenceSelection: buildEvidenceSelectionFromContent(providedContent),
     createdAt: str(input.createdAt) || now, updatedAt: now,
+  };
+}
+
+function normaliseProvidedPersonalisedContent(input) {
+  var source = null;
+  if (input.personalisedContent && typeof input.personalisedContent === "object" && !Array.isArray(input.personalisedContent)) {
+    source = input.personalisedContent;
+  } else if (input.generatedContent && typeof input.generatedContent === "object" && !Array.isArray(input.generatedContent)) {
+    source = input.generatedContent;
+  }
+
+  if (!source) return null;
+
+  return {
+    personalisedOpening: str(source.personalisedOpening),
+    whyThisCompany: str(source.whyThisCompany),
+    whyThisRole: str(source.whyThisRole),
+    selectedEvidenceExamples: normaliseEvidenceExamples(source.selectedEvidenceExamples),
+    fitSummary: str(source.fitSummary),
+    likelyContributionSummary: str(source.likelyContributionSummary),
+    companyHighlights: arr(source.companyHighlights),
+    cultureFitSummary: str(source.cultureFitSummary),
+    closingSummary: str(source.closingSummary),
+    contentNotes: arr(source.contentNotes),
+  };
+}
+
+function normaliseEvidenceExamples(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(function (item) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      exampleId: str(item.exampleId),
+      exampleTitle: str(item.exampleTitle),
+      whyChosen: str(item.whyChosen),
+      suggestedUsage: str(item.suggestedUsage),
+      shortLine: str(item.shortLine),
+    };
+  }).filter(Boolean);
+}
+
+function buildEvidenceSelectionFromContent(content) {
+  var examples = content && Array.isArray(content.selectedEvidenceExamples) ? content.selectedEvidenceExamples : [];
+  return {
+    count: examples.length,
+    error: null,
+    examples: examples.map(function (item) {
+      return {
+        id: item.exampleId || "",
+        title: item.exampleTitle || "",
+        employer: "",
+        sector: "",
+        matchScore: 0,
+      };
+    }),
   };
 }
 

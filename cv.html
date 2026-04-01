@@ -1119,6 +1119,53 @@
       font-size: 0.78rem;
     }
 
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .evidence-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.6rem 1.2rem;
+      align-items: baseline;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .evidence-item .evidence-marker {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.3rem;
+      line-height: 1;
+      color: var(--muted);
+      grid-row: 1 / 3;
+      padding-top: 0.15rem;
+    }
+
+    .evidence-item .evidence-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--ink);
+    }
+
+    .evidence-item .evidence-line {
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .summary-evidence-line {
+      display: block;
+      color: var(--ink-soft);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      padding-left: 0.8rem;
+      border-left: 2px solid var(--line);
+      margin-bottom: 0.35rem;
+    }
+
     .tailored-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -1686,6 +1733,19 @@
       </div>
     </section>
 
+    <section class="section" id="evidence-fit" style="display: none;">
+      <div class="narrow">
+        <div class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">Experience behind the fit</p>
+            <h2 class="serif">Selected examples that support this role.</h2>
+          </div>
+          <p>Drawn from real projects and outcomes, matched to what this role appears to need.</p>
+        </div>
+        <div class="evidence-grid" id="evidence-grid" data-reveal></div>
+      </div>
+    </section>
+
     <section class="section" id="journey">
       <div class="narrow">
         <div class="section-head" data-reveal>
@@ -1899,6 +1959,7 @@
             </div>
             <p id="why-this-role" style="margin-top: 0.8rem;">The supplied role context suggests a position where visible leadership, operational judgement and practical delivery matter day to day.</p>
             <p id="role-summary" style="margin-top: 0.45rem;">A concise view of the role, the fit and the priorities behind it.</p>
+            <div id="summary-evidence-lines" style="margin-top: 0.6rem; display: none;"></div>
           </div>
         </div>
       </div>
@@ -2287,12 +2348,12 @@
         return [
           {
             title: "What matters most",
-            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)) || "Not provided",
+            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)),
             tags: pickLines(state.probablePriorities, state.keyFocusAreas, 3)
           },
           {
             title: "What they are looking for",
-            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3)) || "Not provided",
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3)),
             tags: [
               ...cleanArray(state.essentialRequirements).slice(0, 2),
               ...cleanArray(state.preferredRequirements).slice(0, 2)
@@ -2300,7 +2361,7 @@
           },
           {
             title: "How the role works",
-            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned)].slice(0, 5)) || "Not provided",
+            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned)].slice(0, 5)),
             tags: [
               ...cleanArray(state.skillsWanted).slice(0, 2),
               ...cleanArray(state.toolsMethodsMentioned).slice(0, 2)
@@ -2312,53 +2373,53 @@
               ...cleanArray(state.stakeholderGroups),
               ...cleanArray(state.teamTypesMentioned),
               ...cleanArray(state.matchCategories)
-            ].slice(0, 5)) || "Not provided",
+            ].slice(0, 5)),
             tags: [
               ...cleanArray(state.stakeholderGroups).slice(0, 2),
               ...cleanArray(state.teamTypesMentioned).slice(0, 2)
             ]
           }
-        ];
+        ].filter(card => card.copy);
       }
 
       function buildBusinessNeedCards(state) {
         return [
           {
             title: "What the business seems to need",
-            copy: formatList(pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)) || "Not provided",
+            copy: formatList(pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)),
             tags: pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)
           },
           {
             title: "Where the role could help",
-            copy: formatList(cleanArray(state.impliedStrategicGoals).slice(0, 4)) || "Not provided",
+            copy: formatList(cleanArray(state.impliedStrategicGoals).slice(0, 4)),
             tags: cleanArray(state.impliedStrategicGoals).slice(0, 3)
           },
           {
             title: "What this role is likely to produce",
-            copy: formatList(cleanArray(state.deliverablesLikely).slice(0, 4)) || "Not provided",
+            copy: formatList(cleanArray(state.deliverablesLikely).slice(0, 4)),
             tags: cleanArray(state.deliverablesLikely).slice(0, 3)
           }
-        ];
+        ].filter(card => card.copy);
       }
 
       function buildCultureCards(state) {
         return [
           {
             title: "Tone and pace",
-            copy: state.genCultureFit || formatList([...cleanArray(state.toneKeywords), ...cleanArray(state.cultureSignals)].slice(0, 5)) || "Not provided",
+            copy: state.genCultureFit || formatList([...cleanArray(state.toneKeywords), ...cleanArray(state.cultureSignals)].slice(0, 5)),
             tags: [...cleanArray(state.toneKeywords).slice(0, 2), ...cleanArray(state.cultureSignals).slice(0, 2)]
           },
           {
             title: "Seniority and setting",
-            copy: formatList([...cleanArray(state.senioritySignals), compactValue(state.workplaceType)].filter(Boolean).slice(0, 4)) || "Not provided",
+            copy: formatList([...cleanArray(state.senioritySignals), compactValue(state.workplaceType)].filter(Boolean).slice(0, 4)),
             tags: [...cleanArray(state.senioritySignals).slice(0, 2), compactValue(state.workplaceType)].filter(Boolean)
           },
           {
             title: "Teams and stakeholders",
-            copy: formatList([...cleanArray(state.stakeholderGroups), ...cleanArray(state.teamTypesMentioned)].slice(0, 5)) || "Not provided",
+            copy: formatList([...cleanArray(state.stakeholderGroups), ...cleanArray(state.teamTypesMentioned)].slice(0, 5)),
             tags: [...cleanArray(state.stakeholderGroups).slice(0, 2), ...cleanArray(state.teamTypesMentioned).slice(0, 2)]
           }
-        ];
+        ].filter(card => card.copy);
       }
 
       function buildWrapUpSummary(state) {
@@ -2376,6 +2437,12 @@
         const container = document.getElementById(containerId);
         if (!container) return;
         container.innerHTML = "";
+
+        if (!cards.length) {
+          container.style.display = "none";
+          return;
+        }
+        container.style.display = "";
 
         cards.forEach((card) => {
           const article = document.createElement("article");
@@ -2402,16 +2469,67 @@
       }
 
       function renderProofCards(cards) {
+        const validCards = cards.filter(card => card.copy);
         const items = document.querySelectorAll("#proof .proof-item");
         items.forEach((item, index) => {
-          const card = cards[index];
-          if (!card) return;
+          const card = validCards[index];
+          if (!card) {
+            item.style.display = "none";
+            return;
+          }
+          item.style.display = "";
           const valueEl = item.querySelector(".proof-value");
           const labelEl = item.querySelector(".proof-label");
           const copyEl = item.querySelector(".proof-copy");
           if (valueEl) valueEl.textContent = card.value;
           if (labelEl) labelEl.textContent = card.label;
           if (copyEl) copyEl.textContent = card.copy;
+        });
+      }
+
+      function renderEvidenceExamples(examples) {
+        const section = document.getElementById("evidence-fit");
+        const grid = document.getElementById("evidence-grid");
+        if (!section || !grid) return;
+
+        const usable = (examples || [])
+          .filter(ex => ex && (ex.shortLine || ex.whyChosen))
+          .slice(0, 5);
+
+        if (!usable.length) {
+          section.style.display = "none";
+          return;
+        }
+
+        section.style.display = "";
+        grid.innerHTML = "";
+
+        usable.forEach((ex, i) => {
+          const item = document.createElement("div");
+          item.className = "evidence-item";
+
+          const marker = document.createElement("span");
+          marker.className = "evidence-marker";
+          marker.textContent = String(i + 1).padStart(2, "0");
+
+          const title = document.createElement("span");
+          title.className = "evidence-title";
+          title.textContent = ex.exampleTitle || ex.suggestedUsage || "";
+
+          const line = document.createElement("span");
+          line.className = "evidence-line";
+          line.textContent = ex.shortLine || ex.whyChosen || "";
+
+          item.appendChild(marker);
+          item.appendChild(title);
+          if (line.textContent) {
+            const spacer = document.createElement("span");
+            spacer.setAttribute("aria-hidden", "true");
+            item.appendChild(spacer);
+            item.appendChild(line);
+          }
+
+          grid.appendChild(item);
         });
       }
 
@@ -2429,6 +2547,18 @@
       function setText(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
+      }
+
+      function setDetailSpan(id, value, defaultValue, hideIfDefault) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const resolved = value || defaultValue;
+        if (hideIfDefault && (!value || value === defaultValue || value === "Not specified")) {
+          el.style.display = "none";
+        } else {
+          el.style.display = "";
+          el.textContent = resolved;
+        }
       }
 
       function setHtml(id, value) {
@@ -2504,19 +2634,32 @@
           {
             value: "02",
             label: "What matters most",
-            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)) || "Not provided"
+            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3))
           },
           {
             value: "03",
             label: "What they are looking for",
-            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3)) || "Not provided"
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3))
           },
           {
             value: "04",
             label: "How the role works",
-            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned), compactValue(state.workplaceType), compactValue(state.hours)].filter(Boolean).slice(0, 4)) || "Not provided"
+            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned), compactValue(state.workplaceType), compactValue(state.hours)].filter(Boolean).slice(0, 4))
           }
         ]);
+
+        // Render selected evidence examples between proof and career story
+        renderEvidenceExamples(state.genEvidenceExamples);
+
+        // Update proof section header when evidence examples are available
+        if (state.genEvidenceExamples && state.genEvidenceExamples.length) {
+          setSectionHeader(
+            "proof",
+            "Why me",
+            "Why my background fits this role.",
+            "Matched to what the brief asks for, with selected experience below."
+          );
+        }
 
         setSectionHeader(
           "journey",
@@ -2534,6 +2677,12 @@
         );
         renderEditorialCards("themes-grid", cultureCards.slice(0, 2));
 
+        // Hide the themes section entirely if no culture cards were rendered
+        const themesSection = document.getElementById("themes");
+        if (themesSection && !cultureCards.length) {
+          themesSection.style.display = "none";
+        }
+
         setSectionHeader(
           "tailored",
           "Summary",
@@ -2541,12 +2690,12 @@
           "This closing section pulls together the company context, the role and the fit."
         );
         setText("tailored-company-line", state.companyName === defaults.companyName ? "Prepared for your team." : `Prepared for ${state.companyName}.`);
-        setText("detail-company", state.companyName || defaults.companyName);
-        setText("detail-role", state.roleTitle || defaults.roleTitle);
-        setText("detail-location", state.location || defaults.location);
-        setText("detail-sector", state.sector || defaults.sector);
-        setText("detail-employment", state.employmentType || defaults.employmentType);
-        setText("detail-salary", state.salary || defaults.salary);
+        setDetailSpan("detail-company", state.companyName, defaults.companyName);
+        setDetailSpan("detail-role", state.roleTitle, defaults.roleTitle);
+        setDetailSpan("detail-location", state.location, defaults.location);
+        setDetailSpan("detail-sector", state.sector, defaults.sector);
+        setDetailSpan("detail-employment", state.employmentType, defaults.employmentType, true);
+        setDetailSpan("detail-salary", state.salary, defaults.salary, true);
         setText("tailored-rationale", buildWrapUpSummary(state));
         setText("why-this-role", state.genWhyThisRole
           || (state.likelyBusinessNeeds.length
@@ -2556,6 +2705,24 @@
           || (state.impliedStrategicGoals.length
             ? formatList(cleanArray(state.impliedStrategicGoals).slice(0, 3))
             : "A concise view of the role, the fit and the priorities behind it."));
+
+        // Show up to 3 evidence short lines as supporting points in the summary
+        const summaryEvidenceEl = document.getElementById("summary-evidence-lines");
+        if (summaryEvidenceEl) {
+          const summaryExamples = (state.genEvidenceExamples || [])
+            .filter(ex => ex && ex.shortLine)
+            .slice(0, 3);
+          if (summaryExamples.length) {
+            summaryEvidenceEl.style.display = "";
+            summaryEvidenceEl.innerHTML = "";
+            summaryExamples.forEach(ex => {
+              const span = document.createElement("span");
+              span.className = "summary-evidence-line";
+              span.textContent = ex.shortLine;
+              summaryEvidenceEl.appendChild(span);
+            });
+          }
+        }
 
         setText("contact-heading", state.companyName === defaults.companyName
           ? "Let's talk."

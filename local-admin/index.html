@@ -9,47 +9,40 @@
 <body data-page="local-admin">
   <header class="app-header">
     <div class="shell shell--header">
-      <p class="eyebrow">Local admin only</p>
+      <p class="eyebrow">Local admin</p>
       <div class="header-row">
         <div>
-          <h1>Create and publish a job-specific CV</h1>
-          <p class="subtitle">Paste the JSON from your shortcut, review the fields, then write the application files to GitHub for the public CV site.</p>
+          <h1>New application</h1>
+          <p class="subtitle">Paste → Review → Generate → Publish. That's the whole workflow.</p>
         </div>
         <div class="header-actions">
-          <a class="button button--ghost" href="../index.html">Open Dashboard</a>
+          <a class="button button--ghost" href="../index.html">Dashboard</a>
         </div>
       </div>
     </div>
   </header>
 
   <main class="shell main-layout dashboard-layout">
-    <section class="card" aria-labelledby="connection-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Connection</p>
-          <h2 id="connection-title">Local settings</h2>
-        </div>
-      </div>
-      <p class="card-helper">This page talks to the local server on your Mac. The GitHub token stays in a local-only config file and never needs to be entered in the browser.</p>
-      <p class="inline-feedback" id="keys-status"></p>
+    <section class="card" aria-labelledby="connection-title" style="padding-top:0.6rem; padding-bottom:0.6rem;">
+      <p class="inline-feedback" id="keys-status" style="margin:0;"></p>
     </section>
 
     <section class="card" aria-labelledby="input-title">
       <div class="section-heading">
         <div>
           <p class="section-kicker">Step 1</p>
-          <h2 id="input-title">Paste JSON</h2>
+          <h2 id="input-title">Paste the advert JSON</h2>
         </div>
       </div>
-      <p class="card-helper">Paste the JSON returned by your shortcut or AI step. The page validates it and shows the parsed fields before publishing.</p>
+      <p class="card-helper">Paste the JSON from your shortcut. The page will parse it and show you the fields before anything else happens.</p>
       <div class="field-group">
-        <label for="job-json-input">Job JSON</label>
-        <textarea id="job-json-input" rows="18" placeholder='Paste JSON here, for example: {"companyName":"Calex UK","roleTitle":"Central Operations & Quality Manager"}'></textarea>
+        <label for="job-json-input">Advert JSON</label>
+        <textarea id="job-json-input" rows="14" placeholder='Paste JSON here, for example: {"companyName":"Calex UK","roleTitle":"Central Operations & Quality Manager"}'></textarea>
       </div>
       <div class="action-row action-row--spread">
         <div class="action-row">
-          <button class="button" id="review-json-button" type="button">Review JSON</button>
-          <button class="button button--ghost" id="clear-json-button" type="button">Clear Form</button>
+          <button class="button" id="review-json-button" type="button">Review</button>
+          <button class="button button--ghost" id="clear-json-button" type="button">Clear</button>
         </div>
         <p class="inline-feedback" id="review-status" aria-live="polite">Waiting for JSON.</p>
       </div>
@@ -60,21 +53,20 @@
       <div class="section-heading">
         <div>
           <p class="section-kicker">Step 2</p>
-          <h2 id="review-title">Review the parsed fields</h2>
+          <h2 id="review-title">Check the parsed advert</h2>
         </div>
       </div>
-      <p class="card-helper">Check the generated ref, the company details, and the personalised copy before you publish.</p>
+      <p class="card-helper">Make sure the company, role and key fields look right before generating content.</p>
       <div class="review-grid" id="review-preview"></div>
       <details class="debug-panel">
-        <summary>Normalised JSON</summary>
+        <summary>Full JSON</summary>
         <pre class="debug-output" id="raw-json-output">No application loaded yet.</pre>
       </details>
       <div class="action-row action-row--spread">
         <div class="action-row">
-          <button class="button" id="confirm-publish-button" type="button" disabled>Confirm &amp; Publish</button>
           <button class="button button--ghost" id="edit-json-button" type="button">Edit JSON</button>
         </div>
-        <p class="inline-feedback" id="publish-status" aria-live="polite">Ready to publish.</p>
+        <p class="inline-feedback" id="review-status-2" aria-live="polite">Looks good — continue to Step 3.</p>
       </div>
       <p class="error-message" id="publish-error" role="alert" hidden></p>
     </section>
@@ -83,15 +75,15 @@
       <div class="section-heading">
         <div>
           <p class="section-kicker">Step 3</p>
-          <h2 id="generate-title">Generate personalised content</h2>
+          <h2 id="generate-title">Generate tailored content</h2>
         </div>
       </div>
-      <p class="card-helper">Generate tailored CV content using OpenAI, the parsed advert data and Ben's evidence bank. If you have run optional company research, those findings will be included automatically.</p>
+      <p class="card-helper">Creates personalised CV copy from the advert and your evidence bank. If you ran optional company research, it's included automatically.</p>
       <div class="action-row action-row--spread">
         <div class="action-row">
-          <button class="button" id="generate-content-button" type="button" disabled>Generate Personalised Content</button>
+          <button class="button" id="generate-content-button" type="button" disabled>Generate</button>
         </div>
-        <p class="inline-feedback" id="generate-status" aria-live="polite">Review the advert JSON first.</p>
+        <p class="inline-feedback" id="generate-status" aria-live="polite">Review the advert first.</p>
       </div>
       <p class="error-message" id="generate-error" role="alert" hidden></p>
       <div id="generated-content" hidden></div>
@@ -99,33 +91,35 @@
         <summary>Generation JSON</summary>
         <pre class="debug-output" id="generate-raw-json">No generation run yet.</pre>
       </details>
-
-      <div id="apply-panel" hidden style="margin-top:1.5rem">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">Step 4</p>
-            <h3 id="apply-title">Apply generated content</h3>
-          </div>
-        </div>
-        <p class="card-helper">Merge the generated personalised content into the application payload, then publish and preview.</p>
-        <div class="action-row action-row--spread">
-          <div class="action-row">
-            <button class="button" id="apply-content-button" type="button" disabled>Apply &amp; Publish</button>
-          </div>
-          <p class="inline-feedback" id="apply-status" aria-live="polite">Generate content first.</p>
-        </div>
-        <p class="error-message" id="apply-error" role="alert" hidden></p>
-      </div>
     </section>
 
-    <section class="card" id="research-panel" hidden aria-labelledby="research-title">
+    <section class="card" id="apply-panel" hidden aria-labelledby="apply-title">
       <div class="section-heading">
         <div>
-          <p class="section-kicker">Optional</p>
-          <h2 id="research-title">Company research</h2>
+          <p class="section-kicker">Step 4</p>
+          <h2 id="apply-title">Publish</h2>
         </div>
       </div>
-      <p class="card-helper">Optionally run external API lookups to enrich the generated content with company-specific context. This step is not required — generation works from the advert data and evidence bank alone.</p>
+      <p class="card-helper">Applies the generated content and pushes the tailored CV to GitHub Pages.</p>
+      <div class="action-row action-row--spread">
+        <div class="action-row">
+          <button class="button" id="apply-content-button" type="button" disabled>Publish CV</button>
+          <button class="button button--ghost" id="confirm-publish-button" type="button" disabled title="Publish without generated content">Publish without generation</button>
+        </div>
+        <p class="inline-feedback" id="apply-status" aria-live="polite">Generate content first.</p>
+      </div>
+      <p class="error-message" id="apply-error" role="alert" hidden></p>
+      <p class="inline-feedback" id="publish-status" aria-live="polite" hidden></p>
+    </section>
+
+    <section class="card" id="research-panel" hidden aria-labelledby="research-title" style="opacity:0.75;">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker" style="color:var(--muted);">Optional</p>
+          <h2 id="research-title" style="font-size:1.15rem;">Company research</h2>
+        </div>
+      </div>
+      <p class="card-helper">Not required. Runs external API lookups to add company context to the generated content. Generation works fine without this.</p>
       <div class="action-row action-row--spread">
         <div class="action-row">
           <button class="button" id="run-research-button" type="button">Run APIs</button>
@@ -160,8 +154,8 @@
     <section class="card" id="result-panel" hidden aria-labelledby="result-title">
       <div class="section-heading">
         <div>
-          <p class="section-kicker">Result</p>
-          <h2 id="result-title">Published application</h2>
+          <p class="section-kicker">Done</p>
+          <h2 id="result-title">Your CV is live</h2>
         </div>
       </div>
       <div class="field-grid">

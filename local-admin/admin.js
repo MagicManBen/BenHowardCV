@@ -130,7 +130,7 @@ async function initLocalAdminPage() {
     dom.generatePanel.hidden = true;
     dom.generateContentButton.disabled = true;
     dom.generateError.hidden = true;
-    dom.generateStatus.textContent = "Review the advert JSON first.";
+    dom.generateStatus.textContent = "Review the advert first.";
     dom.generatedContent.hidden = true;
     dom.generateDebugPanel.hidden = true;
     dom.generateRawJson.textContent = "No generation run yet.";
@@ -138,23 +138,21 @@ async function initLocalAdminPage() {
     dom.applyContentButton.disabled = true;
     dom.applyError.hidden = true;
     dom.applyStatus.textContent = "Generate content first.";
+    dom.confirmPublishButton.disabled = true;
     dom.reviewError.hidden = true;
     dom.publishError.hidden = true;
     dom.reviewStatus.textContent = "Waiting for JSON.";
-    dom.publishStatus.textContent = "Ready to publish.";
+    dom.publishStatus.textContent = "";
+    dom.publishStatus.hidden = true;
     dom.rawJsonOutput.textContent = "No application loaded yet.";
-    showToast(dom, "JSON form cleared.");
+    showToast(dom, "Cleared.");
   });
 
   dom.jobJsonInput?.addEventListener("input", () => {
     if (!pendingApplication) return;
     pendingApplication = null;
     dom.confirmPublishButton.disabled = true;
-    dom.reviewStatus.textContent = "JSON changed. Review again before publishing.";
-  });
-
-  dom.reviewButton?.addEventListener("click", () => {
-    dom.reviewError.hidden = true;
+    dom.reviewStatus.textContent = "JSON changed — review again.";
     dom.publishError.hidden = true;
 
     const rawText = dom.jobJsonInput.value.trim();
@@ -173,10 +171,13 @@ async function initLocalAdminPage() {
       dom.researchPanel.hidden = false;
       dom.generatePanel.hidden = false;
       dom.generateContentButton.disabled = false;
-      dom.generateStatus.textContent = "Ready to generate personalised content.";
+      dom.generateStatus.textContent = "Ready to generate.";
+      // Show apply panel so the "Publish without generation" fallback is accessible
+      dom.applyPanel.hidden = false;
       dom.confirmPublishButton.disabled = false;
-      dom.reviewStatus.textContent = `Ready to publish ${pendingApplication.companyName} / ${pendingApplication.roleTitle}.`;
-      showToast(dom, "JSON parsed successfully.");
+      dom.applyStatus.textContent = "Generate content first, or publish without it.";
+      dom.reviewStatus.textContent = `Parsed ${pendingApplication.companyName} / ${pendingApplication.roleTitle}.`;
+      showToast(dom, "Advert parsed.");
       dom.reviewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       pendingApplication = null;
@@ -201,7 +202,7 @@ async function initLocalAdminPage() {
 
     dom.confirmPublishButton.disabled = true;
     dom.confirmPublishButton.textContent = "Publishing...";
-    dom.publishStatus.textContent = "Saving locally and pushing to GitHub...";
+    dom.applyStatus.textContent = "Publishing without generated content...";
 
     try {
       const response = await publishApplication(pendingApplication);
@@ -213,10 +214,11 @@ async function initLocalAdminPage() {
 
       await renderPublishedResult(dom, application, publicUrl, localPreviewUrl);
       dom.resultPanel.hidden = false;
+      dom.publishStatus.hidden = false;
       dom.publishStatus.textContent = response.publishedToGitHub
-        ? `Published. Debug log: ${response.debugLogPath || "not reported"}`
-        : `Saved locally. Debug log: ${response.debugLogPath || "not reported"}`;
-      showToast(dom, response.publishedToGitHub ? "Application published." : "Saved locally.");
+        ? `Published (without generation). Debug log: ${response.debugLogPath || "not reported"}`
+        : `Saved locally (without generation). Debug log: ${response.debugLogPath || "not reported"}`;
+      showToast(dom, response.publishedToGitHub ? "CV published." : "Saved locally.");
       dom.resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
       if (!response.publishedToGitHub) {
@@ -225,12 +227,12 @@ async function initLocalAdminPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not publish the application.";
       showError(dom.publishError, message);
-      dom.publishStatus.textContent = error instanceof Error && "debugLogPath" in error && error.debugLogPath
+      dom.applyStatus.textContent = error instanceof Error && "debugLogPath" in error && error.debugLogPath
         ? `Publish failed. Debug log: ${error.debugLogPath}`
         : "Publish failed.";
     } finally {
       dom.confirmPublishButton.disabled = false;
-      dom.confirmPublishButton.textContent = "Confirm & Publish";
+      dom.confirmPublishButton.textContent = "Publish without generation";
     }
   });
 
@@ -324,7 +326,7 @@ async function initLocalAdminPage() {
 
       // If generation hasn't run yet, note that research is now available
       if (!pendingApplication.personalisedContent) {
-        dom.generateStatus.textContent = "Ready to generate. Filtered research will be included.";
+        dom.generateStatus.textContent = "Ready to generate (research included).";
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Filtering request failed.";
@@ -375,14 +377,14 @@ async function initLocalAdminPage() {
       dom.generatedContent.innerHTML = renderGeneratedContent(result);
       dom.generatedContent.hidden = false;
       const hasResearch = pendingApplication.research && pendingApplication.research.filteredFindings;
-      dom.generateStatus.textContent = `Content generated using ${meta.model || "OpenAI"}${hasResearch ? " (with company research)" : " (from advert + evidence bank)"}.`;
-      showToast(dom, "Personalised content generated.");
+      dom.generateStatus.textContent = `Done${hasResearch ? " (with company research)" : ""} — continue to Step 4.`;
+      showToast(dom, "Content generated.");
       dom.generatePanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
       // Enable apply step
       dom.applyPanel.hidden = false;
       dom.applyContentButton.disabled = false;
-      dom.applyStatus.textContent = "Ready to apply generated content and publish.";
+      dom.applyStatus.textContent = "Ready to publish.";
     } catch (error) {
       const message = error instanceof Error ? error.message : "Generation request failed.";
       showError(dom.generateError, message);
@@ -402,9 +404,8 @@ async function initLocalAdminPage() {
     }
 
     dom.applyContentButton.disabled = true;
-    dom.applyContentButton.textContent = "Applying & Publishing...";
-    dom.applyStatus.textContent = "Merging generated content into application...";
-
+      dom.applyContentButton.textContent = "Publishing...";
+      dom.applyStatus.textContent = "Applying content and pushing to GitHub...";
     try {
       // Merge generated content fields into the application
       const gen = pendingApplication.personalisedContent;
@@ -428,7 +429,6 @@ async function initLocalAdminPage() {
       // Now publish
       dom.publishError.hidden = true;
       dom.confirmPublishButton.disabled = true;
-      dom.publishStatus.textContent = "Saving locally and pushing to GitHub...";
 
       const response = await publishApplication(pendingApplication);
       const application = response.application || pendingApplication;
@@ -439,11 +439,12 @@ async function initLocalAdminPage() {
 
       await renderPublishedResult(dom, application, publicUrl, localPreviewUrl);
       dom.resultPanel.hidden = false;
-      dom.applyStatus.textContent = "Generated content applied and published.";
+      dom.applyStatus.textContent = "Published.";
+      dom.publishStatus.hidden = false;
       dom.publishStatus.textContent = response.publishedToGitHub
         ? `Published with generated content. Debug log: ${response.debugLogPath || "not reported"}`
         : `Saved locally with generated content. Debug log: ${response.debugLogPath || "not reported"}`;
-      showToast(dom, response.publishedToGitHub ? "Application published with personalised content." : "Saved locally with personalised content.");
+      showToast(dom, response.publishedToGitHub ? "CV published." : "Saved locally.");
       dom.resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
       if (!response.publishedToGitHub) {
@@ -452,10 +453,10 @@ async function initLocalAdminPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not apply and publish the application.";
       showError(dom.applyError, message);
-      dom.applyStatus.textContent = "Apply & publish failed.";
+      dom.applyStatus.textContent = "Publish failed.";
     } finally {
       dom.applyContentButton.disabled = false;
-      dom.applyContentButton.textContent = "Apply & Publish";
+      dom.applyContentButton.textContent = "Publish CV";
       dom.confirmPublishButton.disabled = false;
     }
   });

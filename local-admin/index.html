@@ -24,9 +24,10 @@
     .results-group-heading   { font-weight:700; margin:0 0 0.5rem; }
 
     /* Research checkboxes */
-    .research-check-item { display:flex; gap:0.5rem; align-items:flex-start; padding:0.4rem 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+    .research-check-item { display:flex; gap:0.5rem; align-items:flex-start; padding:0.4rem 0; border-bottom:1px solid rgba(0,0,0,0.06); overflow:hidden; }
     .research-check-item input[type=checkbox] { margin-top:0.25rem; flex-shrink:0; }
-    .check-label { cursor:pointer; }
+    .research-check-item > div { flex:1; min-width:0; overflow-wrap:break-word; word-break:break-word; }
+    .check-label { cursor:pointer; display:block; }
     .research-check-meta { font-size:0.82rem; color:#555; }
 
     /* Review grid */

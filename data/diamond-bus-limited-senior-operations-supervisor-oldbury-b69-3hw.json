@@ -8,7 +8,7 @@
   "employmentType": "Full-time, Permanent",
   "hours": "",
   "workplaceType": "",
-  "shortCompanyReason": "Diamond Bus Limited's commitment to reliability and customer service aligns with my values as a leader. The chance to contribute to a well-established local and regional service provider is truly appealing.",
+  "shortCompanyReason": "Diamond Bus Limited's commitment to reliability and customer service resonates with my professional values. The company's role in providing essential local and regional transport services is a mission I am eager to support.",
   "shortRoleReason": "Senior position leading depot operations, driving service quality, and managing operational teams.",
   "companySummary": "",
   "roleSummary": "",
@@ -29,10 +29,10 @@
     "Maintain punctual and reliable bus services",
     "Drive continuous improvement initiatives"
   ],
-  "advertSummary": "My proven track record in operational leadership and continuous improvement makes me a strong fit for Diamond Bus Limited. I am well-prepared to lead depot operations and enhance service quality.",
+  "advertSummary": "My experience in operational leadership and continuous improvement positions me well to lead depot operations at Diamond Bus Limited. I am adept at managing teams and enhancing service quality, which are key aspects of this role.",
   "slug": "diamond-bus-limited-senior-operations-supervisor-oldbury-b69-3hw",
-  "personalisedIntro": "Leading depot operations at Diamond Bus Limited presents an exciting opportunity to leverage my extensive experience in transport management. I am passionate about enhancing service quality and driving operational excellence.",
-  "whyThisRole": "This Senior Operations Supervisor role is a perfect match for my skills in team leadership and operational planning. I am eager to apply my experience in managing complex operations to ensure safe and reliable services.",
+  "personalisedIntro": "Joining Diamond Bus Limited as a Senior Operations Supervisor is an exciting prospect for me, given my background in transport management and team leadership. The opportunity to enhance depot performance and drive service quality aligns perfectly with my career focus.",
+  "whyThisRole": "This role is a great fit for my experience in leading operational teams and driving improvements. I am particularly drawn to the chance to influence service quality and develop high-performing teams in a dynamic transport environment.",
   "keyFocusAreas": [
     "Team leadership and staff management",
     "Operational planning and compliance",
@@ -55,43 +55,216 @@
   "deliverablesLikely": [],
   "possibleHeadlineFacts": [],
   "matchCategories": [],
-  "createdAt": "2026-04-01T14:12:22.801Z",
-  "updatedAt": "2026-04-01T14:12:22.801Z",
+  "createdAt": "2026-04-01T19:12:00.389Z",
+  "updatedAt": "2026-04-01T19:12:00.389Z",
+  "research": {
+    "rawFindings": [
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "Diamond Bus Company Holding Limited",
+        "snippet": "",
+        "description": "",
+        "url": "",
+        "entityId": "kg:/g/11ftkvjd8g",
+        "confidence": 0.01,
+        "relevanceScore": 13,
+        "matchReason": "KG types: Corporation, Thing, Organization",
+        "raw": {
+          "resultScore": 13,
+          "@type": "EntitySearchResult",
+          "result": {
+            "@type": [
+              "Corporation",
+              "Thing",
+              "Organization"
+            ],
+            "name": "Diamond Bus Company Holding Limited",
+            "@id": "kg:/g/11ftkvjd8g"
+          }
+        }
+      },
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "Emily Fox-Seton",
+        "snippet": "Book by Frances Hodgson Burnett",
+        "description": "Book by Frances Hodgson Burnett",
+        "url": "",
+        "entityId": "kg:/m/06nd_j1",
+        "confidence": 0,
+        "relevanceScore": 2.89,
+        "matchReason": "KG types: Thing, Book",
+        "raw": {
+          "@type": "EntitySearchResult",
+          "result": {
+            "@type": [
+              "Thing",
+              "Book"
+            ],
+            "name": "Emily Fox-Seton",
+            "description": "Book by Frances Hodgson Burnett",
+            "@id": "kg:/m/06nd_j1"
+          },
+          "resultScore": 2.892230987548828
+        }
+      },
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "KPT Industries Ltd.",
+        "snippet": "Company",
+        "description": "Company",
+        "url": "",
+        "entityId": "kg:/m/0cp8h1s",
+        "confidence": 0,
+        "relevanceScore": 0.06,
+        "matchReason": "KG types: Organization, Thing, Corporation",
+        "raw": {
+          "resultScore": 0.06137418374419212,
+          "@type": "EntitySearchResult",
+          "result": {
+            "@type": [
+              "Organization",
+              "Thing",
+              "Corporation"
+            ],
+            "name": "KPT Industries Ltd.",
+            "description": "Company",
+            "@id": "kg:/m/0cp8h1s"
+          }
+        }
+      },
+      {
+        "sourceName": "Google Knowledge Graph",
+        "sourceType": "knowledge-graph",
+        "query": "Diamond Bus Limited",
+        "title": "Diamond South East",
+        "snippet": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
+        "description": "",
+        "url": "https://en.wikipedia.org/wiki/Diamond_South_East",
+        "entityId": "kg:/m/03qnftz",
+        "confidence": 0,
+        "relevanceScore": 0.02,
+        "matchReason": "KG types: Thing, Organization",
+        "raw": {
+          "@type": "EntitySearchResult",
+          "result": {
+            "@type": [
+              "Thing",
+              "Organization"
+            ],
+            "detailedDescription": {
+              "url": "https://en.wikipedia.org/wiki/Diamond_South_East",
+              "articleBody": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
+              "license": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License"
+            },
+            "name": "Diamond South East",
+            "@id": "kg:/m/03qnftz"
+          },
+          "resultScore": 0.02259279601275921
+        }
+      }
+    ],
+    "filteredFindings": {
+      "canonicalCompanyName": "Diamond Bus Company Holding Limited",
+      "bestEntityDescription": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.",
+      "officialWebsite": "",
+      "companyType": "Corporation, Thing, Organization",
+      "industry": "Transport and Logistics",
+      "headquarters": "Oldbury B69 3HW",
+      "regions": [],
+      "parentCompany": "",
+      "notableProductsOrServices": [],
+      "notableFacts": [
+        "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala."
+      ],
+      "strategicSignals": [],
+      "credibilityNotes": [
+        "Found in Google Knowledge Graph (confidence 39%)"
+      ],
+      "sourceItems": [
+        {
+          "sourceName": "Google Knowledge Graph",
+          "sourceType": "knowledge-graph",
+          "title": "Diamond Bus Company Holding Limited",
+          "snippet": "",
+          "url": "",
+          "confidence": 0.39,
+          "relevanceReason": "KG types: Corporation, Thing, Organization"
+        },
+        {
+          "sourceName": "Google Knowledge Graph",
+          "sourceType": "knowledge-graph",
+          "title": "Diamond South East",
+          "snippet": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
+          "url": "https://en.wikipedia.org/wiki/Diamond_South_East",
+          "confidence": 0.21,
+          "relevanceReason": "KG types: Thing, Organization"
+        }
+      ],
+      "meta": {
+        "totalRawFindings": 4,
+        "scoredAboveThreshold": 2,
+        "duplicatesRemoved": -2,
+        "topScore": 0.3875
+      }
+    },
+    "meta": {
+      "companyName": "Diamond Bus Limited",
+      "disambiguatedQuery": "Diamond Bus Limited Transport and Logistics Oldbury B69 3HW",
+      "sector": "Transport and Logistics",
+      "location": "Oldbury B69 3HW",
+      "roleTitle": "Senior Operations Supervisor",
+      "sourcesRun": [
+        "Google Knowledge Graph",
+        "Wikidata",
+        "SEC EDGAR"
+      ],
+      "sourceErrors": {},
+      "totalFindings": 4
+    }
+  },
   "personalisedContent": {
-    "personalisedOpening": "Leading depot operations at Diamond Bus Limited presents an exciting opportunity to leverage my extensive experience in transport management. I am passionate about enhancing service quality and driving operational excellence.",
-    "whyThisCompany": "Diamond Bus Limited's commitment to reliability and customer service aligns with my values as a leader. The chance to contribute to a well-established local and regional service provider is truly appealing.",
-    "whyThisRole": "This Senior Operations Supervisor role is a perfect match for my skills in team leadership and operational planning. I am eager to apply my experience in managing complex operations to ensure safe and reliable services.",
+    "personalisedOpening": "Joining Diamond Bus Limited as a Senior Operations Supervisor is an exciting prospect for me, given my background in transport management and team leadership. The opportunity to enhance depot performance and drive service quality aligns perfectly with my career focus.",
+    "whyThisCompany": "Diamond Bus Limited's commitment to reliability and customer service resonates with my professional values. The company's role in providing essential local and regional transport services is a mission I am eager to support.",
+    "whyThisRole": "This role is a great fit for my experience in leading operational teams and driving improvements. I am particularly drawn to the chance to influence service quality and develop high-performing teams in a dynamic transport environment.",
     "selectedEvidenceExamples": [
       {
         "exampleId": "4",
         "exampleTitle": "Manufacturing scale-up and delivery discipline",
-        "whyChosen": "This example showcases my ability to strengthen operational performance during periods of growth, which is crucial for improving depot performance.",
+        "whyChosen": "This example showcases my ability to strengthen operational performance during periods of growth, which is crucial for improving depot operations.",
         "suggestedUsage": "hero metric",
         "shortLine": "I strengthened operational performance during a growth phase at Copper Alloys Ltd."
       },
       {
         "exampleId": "5",
         "exampleTitle": "Cross-site continuous improvement across European theme parks",
-        "whyChosen": "This demonstrates my experience in driving continuous improvement initiatives, a key focus area for the role at Diamond Bus Limited.",
+        "whyChosen": "Demonstrates my experience in coordinating continuous improvement activities, directly applicable to driving operational improvements at Diamond Bus.",
         "suggestedUsage": "supporting point",
-        "shortLine": "I coordinated continuous improvement across major sites, enhancing operational consistency."
+        "shortLine": "I coordinated continuous improvement across multiple major sites at Merlin Entertainments."
       },
       {
         "exampleId": "2",
         "exampleTitle": "Google review turnaround",
-        "whyChosen": "Improving service delivery and customer satisfaction is central to this role, and this example highlights my success in turning around service perceptions.",
+        "whyChosen": "Highlights my ability to transform service delivery and enhance customer satisfaction, aligning with the role's focus on maintaining reliable services.",
         "suggestedUsage": "culture fit",
-        "shortLine": "I improved NHS primary care's Google review score from 2.09 to 4.51."
+        "shortLine": "I improved the Google review score from 2.09 to 4.51 in NHS primary care."
       }
     ],
-    "fitSummary": "My proven track record in operational leadership and continuous improvement makes me a strong fit for Diamond Bus Limited. I am well-prepared to lead depot operations and enhance service quality.",
-    "likelyContributionSummary": "Based on what the brief describes, I would focus on improving depot performance and ensuring regulatory compliance. Enhancing staff engagement and maintaining reliable services would also be key priorities.",
-    "companyHighlights": [],
-    "cultureFitSummary": "I thrive in environments that prioritize reliability and customer service, aligning well with Diamond Bus Limited's focus.",
-    "closingSummary": "I'm eager to bring my operational leadership skills to Diamond Bus Limited and drive impactful results.",
+    "fitSummary": "My experience in operational leadership and continuous improvement positions me well to lead depot operations at Diamond Bus Limited. I am adept at managing teams and enhancing service quality, which are key aspects of this role.",
+    "likelyContributionSummary": "Based on what the brief describes, I would focus on enhancing depot performance and ensuring compliance with regulations. I would also prioritize staff engagement and development to maintain punctual and reliable bus services.",
+    "companyHighlights": [
+      "Diamond Bus Limited is an established bus operator with a focus on reliability and customer service."
+    ],
+    "cultureFitSummary": "My proactive approach to operational improvements and team leadership aligns well with Diamond Bus Limited's focus on service quality and reliability.",
+    "closingSummary": "I am eager to contribute my operational leadership skills to Diamond Bus Limited and drive meaningful improvements.",
     "contentNotes": [
-      "Company research was unavailable, so insights are based entirely on the job advert.",
-      "Selected evidence examples highlight operational improvement and team leadership, aligning with role requirements."
+      "The advert provides a clear picture of the role's responsibilities and priorities, allowing for a focused application.",
+      "Company research was limited, so the content primarily draws from the job advert."
     ]
   },
   "evidenceSelection": {
@@ -142,164 +315,38 @@
       }
     ]
   },
-  "research": {
-    "rawFindings": [
-      {
-        "sourceName": "Google Knowledge Graph",
-        "sourceType": "knowledge-graph",
-        "query": "Diamond Bus Limited",
-        "title": "Diamond Bus Company Holding Limited",
-        "snippet": "",
-        "description": "",
-        "url": "",
-        "entityId": "kg:/g/11ftkvjd8g",
-        "confidence": 0.01,
-        "relevanceScore": 13,
-        "matchReason": "KG types: Corporation, Thing, Organization",
-        "raw": {
-          "resultScore": 13,
-          "@type": "EntitySearchResult",
-          "result": {
-            "@id": "kg:/g/11ftkvjd8g",
-            "@type": [
-              "Corporation",
-              "Thing",
-              "Organization"
-            ],
-            "name": "Diamond Bus Company Holding Limited"
-          }
-        }
-      },
-      {
-        "sourceName": "Google Knowledge Graph",
-        "sourceType": "knowledge-graph",
-        "query": "Diamond Bus Limited",
-        "title": "Emily Fox-Seton",
-        "snippet": "Book by Frances Hodgson Burnett",
-        "description": "Book by Frances Hodgson Burnett",
-        "url": "",
-        "entityId": "kg:/m/06nd_j1",
-        "confidence": 0,
-        "relevanceScore": 2.89,
-        "matchReason": "KG types: Book, Thing",
-        "raw": {
-          "result": {
-            "name": "Emily Fox-Seton",
-            "@id": "kg:/m/06nd_j1",
-            "@type": [
-              "Book",
-              "Thing"
-            ],
-            "description": "Book by Frances Hodgson Burnett"
-          },
-          "resultScore": 2.892230987548828,
-          "@type": "EntitySearchResult"
-        }
-      },
-      {
-        "sourceName": "Google Knowledge Graph",
-        "sourceType": "knowledge-graph",
-        "query": "Diamond Bus Limited",
-        "title": "KPT Industries Ltd.",
-        "snippet": "Company",
-        "description": "Company",
-        "url": "",
-        "entityId": "kg:/m/0cp8h1s",
-        "confidence": 0,
-        "relevanceScore": 0.06,
-        "matchReason": "KG types: Corporation, Thing, Organization",
-        "raw": {
-          "result": {
-            "@id": "kg:/m/0cp8h1s",
-            "@type": [
-              "Corporation",
-              "Thing",
-              "Organization"
-            ],
-            "description": "Company",
-            "name": "KPT Industries Ltd."
-          },
-          "resultScore": 0.06137418374419212,
-          "@type": "EntitySearchResult"
-        }
-      },
-      {
-        "sourceName": "Google Knowledge Graph",
-        "sourceType": "knowledge-graph",
-        "query": "Diamond Bus Limited",
-        "title": "Diamond South East",
-        "snippet": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
-        "description": "",
-        "url": "https://en.wikipedia.org/wiki/Diamond_South_East",
-        "entityId": "kg:/m/03qnftz",
-        "confidence": 0,
-        "relevanceScore": 0.02,
-        "matchReason": "KG types: Thing, Organization",
-        "raw": {
-          "resultScore": 0.02259279601275921,
-          "@type": "EntitySearchResult",
-          "result": {
-            "@id": "kg:/m/03qnftz",
-            "@type": [
-              "Thing",
-              "Organization"
-            ],
-            "name": "Diamond South East",
-            "detailedDescription": {
-              "articleBody": "Hallmark Connections Limited, trading as Diamond South East, is a bus operator in South East England and, through the Hotel Hoppa operation, in Greater London. It is a subsidiary of Rotala.\n",
-              "license": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License",
-              "url": "https://en.wikipedia.org/wiki/Diamond_South_East"
-            }
-          }
-        }
-      }
-    ],
-    "filteredFindings": {},
-    "meta": {
-      "companyName": "Diamond Bus Limited",
-      "disambiguatedQuery": "Diamond Bus Limited Transport and Logistics Oldbury B69 3HW",
-      "sector": "Transport and Logistics",
-      "location": "Oldbury B69 3HW",
-      "roleTitle": "Senior Operations Supervisor",
-      "sourcesRun": [
-        "Google Knowledge Graph",
-        "Wikidata",
-        "SEC EDGAR"
-      ],
-      "sourceErrors": {},
-      "totalFindings": 4
-    }
-  },
-  "closingSummary": "I'm eager to bring my operational leadership skills to Diamond Bus Limited and drive impactful results.",
-  "genPersonalisedOpening": "Leading depot operations at Diamond Bus Limited presents an exciting opportunity to leverage my extensive experience in transport management. I am passionate about enhancing service quality and driving operational excellence.",
-  "genWhyThisCompany": "Diamond Bus Limited's commitment to reliability and customer service aligns with my values as a leader. The chance to contribute to a well-established local and regional service provider is truly appealing.",
-  "genWhyThisRole": "This Senior Operations Supervisor role is a perfect match for my skills in team leadership and operational planning. I am eager to apply my experience in managing complex operations to ensure safe and reliable services.",
-  "genFitSummary": "My proven track record in operational leadership and continuous improvement makes me a strong fit for Diamond Bus Limited. I am well-prepared to lead depot operations and enhance service quality.",
-  "genLikelyContribution": "Based on what the brief describes, I would focus on improving depot performance and ensuring regulatory compliance. Enhancing staff engagement and maintaining reliable services would also be key priorities.",
-  "genCultureFit": "I thrive in environments that prioritize reliability and customer service, aligning well with Diamond Bus Limited's focus.",
-  "genClosingSummary": "I'm eager to bring my operational leadership skills to Diamond Bus Limited and drive impactful results.",
-  "genCompanyHighlights": [],
+  "closingSummary": "I am eager to contribute my operational leadership skills to Diamond Bus Limited and drive meaningful improvements.",
+  "genPersonalisedOpening": "Joining Diamond Bus Limited as a Senior Operations Supervisor is an exciting prospect for me, given my background in transport management and team leadership. The opportunity to enhance depot performance and drive service quality aligns perfectly with my career focus.",
+  "genWhyThisCompany": "Diamond Bus Limited's commitment to reliability and customer service resonates with my professional values. The company's role in providing essential local and regional transport services is a mission I am eager to support.",
+  "genWhyThisRole": "This role is a great fit for my experience in leading operational teams and driving improvements. I am particularly drawn to the chance to influence service quality and develop high-performing teams in a dynamic transport environment.",
+  "genFitSummary": "My experience in operational leadership and continuous improvement positions me well to lead depot operations at Diamond Bus Limited. I am adept at managing teams and enhancing service quality, which are key aspects of this role.",
+  "genLikelyContribution": "Based on what the brief describes, I would focus on enhancing depot performance and ensuring compliance with regulations. I would also prioritize staff engagement and development to maintain punctual and reliable bus services.",
+  "genCultureFit": "My proactive approach to operational improvements and team leadership aligns well with Diamond Bus Limited's focus on service quality and reliability.",
+  "genClosingSummary": "I am eager to contribute my operational leadership skills to Diamond Bus Limited and drive meaningful improvements.",
+  "genCompanyHighlights": [
+    "Diamond Bus Limited is an established bus operator with a focus on reliability and customer service."
+  ],
   "genEvidenceExamples": [
     {
       "exampleId": "4",
       "exampleTitle": "Manufacturing scale-up and delivery discipline",
-      "whyChosen": "This example showcases my ability to strengthen operational performance during periods of growth, which is crucial for improving depot performance.",
+      "whyChosen": "This example showcases my ability to strengthen operational performance during periods of growth, which is crucial for improving depot operations.",
       "suggestedUsage": "hero metric",
       "shortLine": "I strengthened operational performance during a growth phase at Copper Alloys Ltd."
     },
     {
       "exampleId": "5",
       "exampleTitle": "Cross-site continuous improvement across European theme parks",
-      "whyChosen": "This demonstrates my experience in driving continuous improvement initiatives, a key focus area for the role at Diamond Bus Limited.",
+      "whyChosen": "Demonstrates my experience in coordinating continuous improvement activities, directly applicable to driving operational improvements at Diamond Bus.",
       "suggestedUsage": "supporting point",
-      "shortLine": "I coordinated continuous improvement across major sites, enhancing operational consistency."
+      "shortLine": "I coordinated continuous improvement across multiple major sites at Merlin Entertainments."
     },
     {
       "exampleId": "2",
       "exampleTitle": "Google review turnaround",
-      "whyChosen": "Improving service delivery and customer satisfaction is central to this role, and this example highlights my success in turning around service perceptions.",
+      "whyChosen": "Highlights my ability to transform service delivery and enhance customer satisfaction, aligning with the role's focus on maintaining reliable services.",
       "suggestedUsage": "culture fit",
-      "shortLine": "I improved NHS primary care's Google review score from 2.09 to 4.51."
+      "shortLine": "I improved the Google review score from 2.09 to 4.51 in NHS primary care."
     }
   ]
 }

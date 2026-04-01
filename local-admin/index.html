@@ -5,6 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ben Howard | Local Admin</title>
   <link rel="stylesheet" href="../styles.css">
+  <style>
+    /* Pipeline pills */
+    .pipeline-pills { display:flex; gap:0.5rem; margin:0.6rem 0; }
+    .pill { display:inline-block; padding:0.25rem 0.75rem; border-radius:999px; font-size:0.8rem; font-weight:600; }
+    .pill--waiting { background:#e2e2e2; color:#888; }
+    .pill--running { background:#fef3cd; color:#856404; animation:pulse 1.2s infinite; }
+    .pill--done    { background:#d4edda; color:#155724; }
+    .pill--error   { background:#f8d7da; color:#721c24; }
+    .pill--skipped { background:#e2e2e2; color:#888; text-decoration:line-through; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+    /* Result groups */
+    .results-group { padding:1rem; border-radius:0.5rem; margin-bottom:1rem; }
+    .results-group--advert   { background:#e8f0fe; border-left:4px solid #1a73e8; }
+    .results-group--research { background:#fff8e1; border-left:4px solid #f9a825; }
+    .results-group--content  { background:#e8f5e9; border-left:4px solid #2e7d32; }
+    .results-group-heading   { font-weight:700; margin:0 0 0.5rem; }
+
+    /* Research checkboxes */
+    .research-check-item { display:flex; gap:0.5rem; align-items:flex-start; padding:0.4rem 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+    .research-check-item input[type=checkbox] { margin-top:0.25rem; flex-shrink:0; }
+    .check-label { cursor:pointer; }
+    .research-check-meta { font-size:0.82rem; color:#555; }
+
+    /* Review grid */
+    .review-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:0.6rem; }
+    .review-item { background:rgba(255,255,255,0.6); padding:0.5rem 0.65rem; border-radius:0.35rem; }
+    .review-label { font-size:0.75rem; font-weight:600; text-transform:uppercase; color:#666; }
+    .review-value { margin:0.15rem 0 0; }
+
+    /* Confirm bar */
+    .confirm-bar { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-top:1rem; padding-top:1rem; border-top:1px solid #ddd; }
+  </style>
 </head>
 <body data-page="local-admin">
   <header class="app-header">
@@ -13,7 +46,7 @@
       <div class="header-row">
         <div>
           <h1>New application</h1>
-          <p class="subtitle">Paste → Review → Generate → Publish. That's the whole workflow.</p>
+          <p class="subtitle">Paste JSON, hit Go, review the results, confirm.</p>
         </div>
         <div class="header-actions">
           <a class="button button--ghost" href="../index.html">Dashboard</a>
@@ -23,141 +56,62 @@
   </header>
 
   <main class="shell main-layout dashboard-layout">
-    <section class="card" aria-labelledby="connection-title" style="padding-top:0.6rem; padding-bottom:0.6rem;">
+    <!-- Connection status -->
+    <section class="card" style="padding-top:0.6rem; padding-bottom:0.6rem;">
       <p class="inline-feedback" id="keys-status" style="margin:0;"></p>
     </section>
 
-    <section class="card" aria-labelledby="input-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Step 1</p>
-          <h2 id="input-title">Paste the advert JSON</h2>
-        </div>
-      </div>
-      <p class="card-helper">Paste the JSON from your shortcut. The page will parse it and show you the fields before anything else happens.</p>
-      <div class="field-group">
-        <label for="job-json-input">Advert JSON</label>
-        <textarea id="job-json-input" rows="14" placeholder='Paste JSON here, for example: {"companyName":"Calex UK","roleTitle":"Central Operations & Quality Manager"}'></textarea>
-      </div>
-      <div class="action-row action-row--spread">
+    <!-- Input -->
+    <section class="card">
+      <h2>Paste the advert JSON</h2>
+      <textarea id="job-json-input" rows="12" placeholder='{"companyName":"Acme Ltd","roleTitle":"Operations Manager", ...}'></textarea>
+      <div class="action-row action-row--spread" style="margin-top:0.75rem;">
         <div class="action-row">
-          <button class="button" id="review-json-button" type="button">Review</button>
-          <button class="button button--ghost" id="clear-json-button" type="button">Clear</button>
+          <button class="button" id="go-button" type="button">Go</button>
+          <button class="button button--ghost" id="clear-button" type="button">Clear</button>
         </div>
-        <p class="inline-feedback" id="review-status" aria-live="polite">Waiting for JSON.</p>
+        <p class="inline-feedback" id="input-status" aria-live="polite">Waiting for JSON.</p>
       </div>
-      <p class="error-message" id="review-error" role="alert" hidden></p>
+      <p class="error-message" id="input-error" role="alert" hidden></p>
     </section>
 
-    <section class="card" id="review-panel" hidden aria-labelledby="review-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Step 2</p>
-          <h2 id="review-title">Check the parsed advert</h2>
-        </div>
+    <!-- Pipeline progress -->
+    <section class="card" id="pipeline-panel" hidden>
+      <h2>Pipeline</h2>
+      <div class="pipeline-pills">
+        <span class="pill pill--waiting" id="pill-parse">Parse</span>
+        <span class="pill pill--waiting" id="pill-research">Research</span>
+        <span class="pill pill--waiting" id="pill-generate">Generate</span>
       </div>
-      <p class="card-helper">Make sure the company, role and key fields look right before generating content.</p>
-      <div class="review-grid" id="review-preview"></div>
-      <details class="debug-panel">
+      <p class="inline-feedback" id="pipeline-message" aria-live="polite"></p>
+      <p class="error-message" id="pipeline-error" role="alert" hidden></p>
+    </section>
+
+    <!-- Results -->
+    <section class="card" id="results-panel" hidden>
+      <h2 id="results-title">Results</h2>
+
+      <div class="results-group results-group--advert" id="advert-results"></div>
+      <div class="results-group results-group--research" id="research-results" hidden></div>
+      <div class="results-group results-group--content" id="content-results" hidden></div>
+
+      <details class="debug-panel" style="margin-top:0.75rem;">
         <summary>Full JSON</summary>
-        <pre class="debug-output" id="raw-json-output">No application loaded yet.</pre>
-      </details>
-      <div class="action-row action-row--spread">
-        <div class="action-row">
-          <button class="button button--ghost" id="edit-json-button" type="button">Edit JSON</button>
-        </div>
-        <p class="inline-feedback" id="review-status-2" aria-live="polite">Looks good — continue to Step 3.</p>
-      </div>
-      <p class="error-message" id="publish-error" role="alert" hidden></p>
-    </section>
-
-    <section class="card" id="generate-panel" hidden aria-labelledby="generate-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Step 3</p>
-          <h2 id="generate-title">Generate tailored content</h2>
-        </div>
-      </div>
-      <p class="card-helper">Creates personalised CV copy from the advert and your evidence bank. If you ran optional company research, it's included automatically.</p>
-      <div class="action-row action-row--spread">
-        <div class="action-row">
-          <button class="button" id="generate-content-button" type="button" disabled>Generate</button>
-        </div>
-        <p class="inline-feedback" id="generate-status" aria-live="polite">Review the advert first.</p>
-      </div>
-      <p class="error-message" id="generate-error" role="alert" hidden></p>
-      <div id="generated-content" hidden></div>
-      <details class="debug-panel" id="generate-debug-panel" hidden>
-        <summary>Generation JSON</summary>
-        <pre class="debug-output" id="generate-raw-json">No generation run yet.</pre>
-      </details>
-    </section>
-
-    <section class="card" id="apply-panel" hidden aria-labelledby="apply-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Step 4</p>
-          <h2 id="apply-title">Publish</h2>
-        </div>
-      </div>
-      <p class="card-helper">Applies the generated content and pushes the tailored CV to GitHub Pages.</p>
-      <div class="action-row action-row--spread">
-        <div class="action-row">
-          <button class="button" id="apply-content-button" type="button" disabled>Publish CV</button>
-          <button class="button button--ghost" id="confirm-publish-button" type="button" disabled title="Publish without generated content">Publish without generation</button>
-        </div>
-        <p class="inline-feedback" id="apply-status" aria-live="polite">Generate content first.</p>
-      </div>
-      <p class="error-message" id="apply-error" role="alert" hidden></p>
-      <p class="inline-feedback" id="publish-status" aria-live="polite" hidden></p>
-    </section>
-
-    <section class="card" id="research-panel" hidden aria-labelledby="research-title" style="opacity:0.75;">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker" style="color:var(--muted);">Optional</p>
-          <h2 id="research-title" style="font-size:1.15rem;">Company research</h2>
-        </div>
-      </div>
-      <p class="card-helper">Not required. Runs external API lookups to add company context to the generated content. Generation works fine without this.</p>
-      <div class="action-row action-row--spread">
-        <div class="action-row">
-          <button class="button" id="run-research-button" type="button">Run APIs</button>
-          <button class="button button--ghost" id="filter-findings-button" type="button" disabled>Filter Findings</button>
-        </div>
-        <p class="inline-feedback" id="research-status" aria-live="polite">Ready to research.</p>
-      </div>
-      <p class="error-message" id="research-error" role="alert" hidden></p>
-      <div id="research-findings" hidden></div>
-      <details class="debug-panel" id="research-debug-panel" hidden>
-        <summary>Raw research JSON</summary>
-        <pre class="debug-output" id="research-raw-json">No research run yet.</pre>
+        <pre class="debug-output" id="debug-json"></pre>
       </details>
 
-      <div id="filtered-panel" hidden>
-        <div class="section-heading" style="margin-top:1.5rem">
-          <div>
-            <p class="section-kicker">Optional</p>
-            <h3 id="filtered-title">Filtered company profile</h3>
-          </div>
-        </div>
-        <p class="inline-feedback" id="filter-status" aria-live="polite"></p>
-        <p class="error-message" id="filter-error" role="alert" hidden></p>
-        <div id="filtered-findings"></div>
-        <details class="debug-panel" id="filtered-debug-panel" hidden>
-          <summary>Filtered JSON</summary>
-          <pre class="debug-output" id="filtered-raw-json">No filtering run yet.</pre>
-        </details>
+      <!-- Confirm bar -->
+      <div class="confirm-bar">
+        <button class="button" id="confirm-button" type="button" disabled>Confirm &amp; Publish</button>
+        <button class="button button--ghost" id="regenerate-button" type="button" hidden>Regenerate</button>
+        <p class="inline-feedback" id="confirm-status" aria-live="polite"></p>
       </div>
+      <p class="error-message" id="confirm-error" role="alert" hidden></p>
     </section>
 
-    <section class="card" id="result-panel" hidden aria-labelledby="result-title">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Done</p>
-          <h2 id="result-title">Your CV is live</h2>
-        </div>
-      </div>
+    <!-- Published result -->
+    <section class="card" id="result-panel" hidden>
+      <h2>Your CV is live</h2>
       <div class="field-grid">
         <div class="field-group"><label>Company</label><input id="result-company" type="text" readonly></div>
         <div class="field-group"><label>Role</label><input id="result-role" type="text" readonly></div>
@@ -174,16 +128,13 @@
           <div class="result-qr-frame">
             <img id="result-qr-image" alt="QR code for the custom CV" hidden>
           </div>
-          <p class="cv-body-copy result-qr-note" id="result-qr-note">Scan this code to open the tailored online CV.</p>
         </section>
-
         <div class="result-actions">
           <div class="action-row">
             <button class="button" id="copy-url-button" type="button">Copy URL</button>
             <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open Local CV</a>
             <button class="button button--ghost" id="download-cv-button" type="button">Download CV</button>
           </div>
-          <p class="card-helper">The copied URL is the public online CV. Open Local CV and Download CV use your local machine immediately, so you do not have to wait for GitHub Pages to deploy.</p>
         </div>
       </div>
     </section>
@@ -191,6 +142,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=2" defer></script>
+  <script src="admin.js?v=3" defer></script>
 </body>
 </html>

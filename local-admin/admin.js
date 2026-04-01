@@ -234,6 +234,8 @@ async function initLocalAdminPage() {
     } catch (_) {
       setPill(dom.pillResearch, "skipped");
       dom.pipelineMessage.textContent = "Research unavailable. Generating content\u2026";
+      dom.researchResults.innerHTML = '<p class="results-group-heading">Company research</p><p class="card-helper">Research API was unavailable \u2014 skipped.</p>';
+      dom.researchResults.hidden = false;
     }
 
     /* STEP 3 \u2014 Generate */
@@ -318,10 +320,9 @@ function renderAdvertGroup(app) {
 function renderResearchGroup(dom, research) {
   var filtered = research.filteredFindings;
   var items = (filtered && filtered.sourceItems) ? filtered.sourceItems : (research.rawFindings || []);
-  if (items.length === 0) { dom.researchResults.hidden = true; return; }
 
-  var parts = ['<p class="results-group-heading">Company research</p>'];
-
+  /* Build the summary line from filtered metadata */
+  var summaryParts = [];
   if (filtered) {
     var fields = [
       ["Name", filtered.canonicalCompanyName],
@@ -331,13 +332,26 @@ function renderResearchGroup(dom, research) {
       ["Type", filtered.companyType],
       ["HQ", filtered.headquarters],
     ];
-    var summaryParts = [];
     for (var f = 0; f < fields.length; f++) {
       if (fields[f][1]) summaryParts.push("<strong>" + esc(fields[f][0]) + ":</strong> " + esc(fields[f][1]));
     }
-    if (summaryParts.length) {
-      parts.push('<p class="card-helper" style="margin-bottom:0.6rem">' + summaryParts.join(" &middot; ") + '</p>');
-    }
+  }
+
+  /* Nothing useful to show */
+  if (items.length === 0 && summaryParts.length === 0) {
+    dom.researchResults.innerHTML = '<p class="results-group-heading">Company research</p><p class="card-helper">No research findings returned for this company.</p>';
+    dom.researchResults.hidden = false;
+    return;
+  }
+
+  var parts = ['<p class="results-group-heading">Company research</p>'];
+
+  if (summaryParts.length) {
+    parts.push('<p class="card-helper" style="margin-bottom:0.6rem">' + summaryParts.join(" &middot; ") + '</p>');
+  }
+
+  if (items.length === 0) {
+    parts.push('<p class="card-helper">No individual findings to review.</p>');
   }
 
   for (var i = 0; i < items.length; i++) {

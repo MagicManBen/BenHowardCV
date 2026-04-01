@@ -8,7 +8,7 @@
   "employmentType": "Full-time",
   "hours": "Monday to Friday, 37 hours per week",
   "workplaceType": "On-site",
-  "shortCompanyReason": "Unitemps' commitment to patient care and operational excellence resonates with my professional values. The opportunity to work with a prestigious healthcare practice and contribute to their quality-focused environment is particularly appealing.",
+  "shortCompanyReason": "Unitemps' commitment to patient care and operational efficiency resonates with my own values. The chance to work with a prestigious healthcare practice is an exciting prospect, offering a professional environment where quality and safety are paramount.",
   "shortRoleReason": "Manage data quality and IT systems to support practice targets",
   "companySummary": "Unitemps is working with a respected healthcare practice focused on patient care and operational efficiency.",
   "roleSummary": "Responsible for maintaining IT systems, ensuring accurate data management, and supporting practice performance targets.",
@@ -27,10 +27,10 @@
     "Monitor and report on practice targets",
     "Support staff with IT and data tasks"
   ],
-  "advertSummary": "My experience in IT management, data quality, and healthcare operations makes me a strong fit for the Data Quality & IT Manager role at Unitemps. I bring a proven track record of enhancing operational efficiency and ensuring compliance in regulated environments.",
+  "advertSummary": "My background in IT management and data quality in healthcare settings makes me a strong fit for this role. I bring a proven track record of enhancing operational efficiency and supporting team performance.",
   "slug": "unitemps-data-quality-it-manager-stone-st15-8ye",
-  "personalisedIntro": "Joining Unitemps as a Data Quality & IT Manager is an exciting opportunity to leverage my extensive experience in IT management and data quality within a healthcare setting. My background in ensuring operational efficiency and compliance aligns well with the role's focus on supporting practice performance and patient care.",
-  "whyThisRole": "This role is a perfect fit for my skills in IT system management and data quality assurance. My experience in healthcare operations, particularly in regulated environments, positions me to effectively support practice targets and enhance patient care through reliable data management.",
+  "personalisedIntro": "Joining Unitemps as a Data Quality & IT Manager feels like a natural progression for my career in operations and transformation. The opportunity to lead IT and data quality in a healthcare setting aligns perfectly with my passion for improving patient care through reliable data systems.",
+  "whyThisRole": "This role fits my experience in managing IT systems and ensuring data quality, particularly in regulated environments. My background in healthcare operations and data-driven improvements positions me well to support practice performance and patient care at Unitemps.",
   "keyFocusAreas": [
     "IT system management",
     "Data quality",
@@ -133,52 +133,45 @@
     "Performance monitoring",
     "Team support"
   ],
-  "createdAt": "2026-04-01T14:22:56.494Z",
-  "updatedAt": "2026-04-01T14:22:56.494Z",
+  "createdAt": "2026-04-01T15:13:07.048Z",
+  "updatedAt": "2026-04-01T15:13:07.048Z",
   "personalisedContent": {
-    "personalisedOpening": "Joining Unitemps as a Data Quality & IT Manager is an exciting opportunity to leverage my extensive experience in IT management and data quality within a healthcare setting. My background in ensuring operational efficiency and compliance aligns well with the role's focus on supporting practice performance and patient care.",
-    "whyThisCompany": "Unitemps' commitment to patient care and operational excellence resonates with my professional values. The opportunity to work with a prestigious healthcare practice and contribute to their quality-focused environment is particularly appealing.",
-    "whyThisRole": "This role is a perfect fit for my skills in IT system management and data quality assurance. My experience in healthcare operations, particularly in regulated environments, positions me to effectively support practice targets and enhance patient care through reliable data management.",
+    "personalisedOpening": "Joining Unitemps as a Data Quality & IT Manager feels like a natural progression for my career in operations and transformation. The opportunity to lead IT and data quality in a healthcare setting aligns perfectly with my passion for improving patient care through reliable data systems.",
+    "whyThisCompany": "Unitemps' commitment to patient care and operational efficiency resonates with my own values. The chance to work with a prestigious healthcare practice is an exciting prospect, offering a professional environment where quality and safety are paramount.",
+    "whyThisRole": "This role fits my experience in managing IT systems and ensuring data quality, particularly in regulated environments. My background in healthcare operations and data-driven improvements positions me well to support practice performance and patient care at Unitemps.",
     "selectedEvidenceExamples": [
-      {
-        "exampleId": "13",
-        "exampleTitle": "Ride compliance and operator progression tracking",
-        "whyChosen": "This example demonstrates my ability to create compliance-tracking systems in safety-critical environments, which is crucial for maintaining data quality and IT systems in healthcare.",
-        "suggestedUsage": "supporting point",
-        "shortLine": "I built a compliance-tracking system to enhance safety and operational efficiency."
-      },
       {
         "exampleId": "6",
         "exampleTitle": "Built live operational dashboard concept for GP practice visibility",
-        "whyChosen": "This showcases my capability in developing tools for healthcare operations, directly relevant to managing IT systems and data quality for practice targets.",
+        "whyChosen": "I've successfully designed systems to enhance visibility and operational efficiency in healthcare settings, directly relevant to managing IT and data quality at Unitemps.",
         "suggestedUsage": "hero metric",
-        "shortLine": "I designed a live dashboard for improved GP practice visibility and operational insight."
+        "shortLine": "I designed a live operational dashboard to improve GP practice visibility and service delivery."
       },
       {
         "exampleId": "3",
         "exampleTitle": "Profit and working-capital improvement",
-        "whyChosen": "My experience in financial control and operational improvement in healthcare aligns with the role's focus on supporting practice performance and ensuring accurate reporting.",
+        "whyChosen": "My experience in financial control and operational improvement in healthcare equips me to enhance data accuracy and reporting for practice targets.",
         "suggestedUsage": "supporting point",
-        "shortLine": "I led operational improvements and financial control in a healthcare setting."
+        "shortLine": "I led operational improvements in a healthcare setting, boosting financial control and reporting accuracy."
       },
       {
         "exampleId": "9",
         "exampleTitle": "Complex annual projects and team leadership",
-        "whyChosen": "Managing complex projects and leading teams in high-security, data-sensitive environments highlights my ability to ensure data confidentiality and effective team communication.",
+        "whyChosen": "Managing sensitive data and leading teams in high-security environments mirrors the confidentiality and team-oriented culture at Unitemps.",
         "suggestedUsage": "culture fit",
-        "shortLine": "I managed a team through complex, data-sensitive projects, maintaining high security standards."
+        "shortLine": "I managed a team handling sensitive data, ensuring compliance and service standards."
       }
     ],
-    "fitSummary": "My experience in IT management, data quality, and healthcare operations makes me a strong fit for the Data Quality & IT Manager role at Unitemps. I bring a proven track record of enhancing operational efficiency and ensuring compliance in regulated environments.",
-    "likelyContributionSummary": "Based on what the brief describes, I would focus on maintaining reliable IT systems and ensuring data accuracy to support practice targets. My initial priorities would include optimizing data management processes, supporting staff with IT tasks, and ensuring compliance with healthcare standards.",
+    "fitSummary": "My background in IT management and data quality in healthcare settings makes me a strong fit for this role. I bring a proven track record of enhancing operational efficiency and supporting team performance.",
+    "likelyContributionSummary": "Based on the brief, I would focus on maintaining robust IT systems and ensuring data accuracy to meet practice targets. Supporting staff with IT and data tasks will be a priority to enhance overall practice performance.",
     "companyHighlights": [
       "Prestigious client focused on patient care and operational efficiency."
     ],
-    "cultureFitSummary": "My approach to work aligns with Unitemps' focus on confidentiality, quality, and team orientation. I thrive in environments that prioritize safety and equality.",
-    "closingSummary": "I'm eager to bring my expertise in IT and data management to support Unitemps' commitment to quality healthcare.",
+    "cultureFitSummary": "I thrive in team-oriented, quality-focused environments where confidentiality and safety are key, aligning well with Unitemps' culture.",
+    "closingSummary": "I'm eager to contribute my expertise in IT and data quality to support Unitemps' mission of delivering exceptional patient care.",
     "contentNotes": [
-      "The advert provides a clear picture of the role's responsibilities and the company's focus, allowing for targeted content.",
-      "Limited specific company details in the advert; focused on role and sector context instead."
+      "The advert provides a clear role focus on IT management and data quality, with limited company-specific details.",
+      "Selected evidence examples emphasize relevant healthcare and data management experience."
     ]
   },
   "evidenceSelection": {
@@ -229,122 +222,38 @@
       }
     ]
   },
-  "research": {
-    "rawFindings": [
-      {
-        "sourceName": "Google Knowledge Graph",
-        "sourceType": "knowledge-graph",
-        "query": "Unitemps",
-        "title": "Unitemps",
-        "snippet": "",
-        "description": "",
-        "url": "",
-        "entityId": "kg:/g/11f01g1tn1",
-        "confidence": 0.01,
-        "relevanceScore": 7,
-        "matchReason": "KG types: Corporation, Thing, Organization",
-        "raw": {
-          "resultScore": 7,
-          "@type": "EntitySearchResult",
-          "result": {
-            "@type": [
-              "Corporation",
-              "Thing",
-              "Organization"
-            ],
-            "name": "Unitemps",
-            "@id": "kg:/g/11f01g1tn1"
-          }
-        }
-      }
-    ],
-    "filteredFindings": {
-      "canonicalCompanyName": "Unitemps",
-      "bestEntityDescription": "",
-      "officialWebsite": "",
-      "companyType": "Corporation, Thing, Organization",
-      "industry": "Healthcare administration",
-      "headquarters": "Stone ST15 8YE",
-      "regions": [],
-      "parentCompany": "",
-      "notableProductsOrServices": [],
-      "notableFacts": [],
-      "strategicSignals": [],
-      "credibilityNotes": [
-        "Found in Google Knowledge Graph (confidence 59%)"
-      ],
-      "sourceItems": [
-        {
-          "sourceName": "Google Knowledge Graph",
-          "sourceType": "knowledge-graph",
-          "title": "Unitemps",
-          "snippet": "",
-          "url": "",
-          "confidence": 0.59,
-          "relevanceReason": "KG types: Corporation, Thing, Organization"
-        }
-      ],
-      "meta": {
-        "totalRawFindings": 1,
-        "scoredAboveThreshold": 1,
-        "duplicatesRemoved": 0,
-        "topScore": 0.5875
-      }
-    },
-    "meta": {
-      "companyName": "Unitemps",
-      "disambiguatedQuery": "Unitemps Healthcare administration Stone ST15 8YE",
-      "sector": "Healthcare administration",
-      "location": "Stone ST15 8YE",
-      "roleTitle": "Data Quality & IT Manager",
-      "sourcesRun": [
-        "Google Knowledge Graph",
-        "Wikidata",
-        "SEC EDGAR"
-      ],
-      "sourceErrors": {},
-      "totalFindings": 1
-    }
-  },
-  "closingSummary": "I'm eager to bring my expertise in IT and data management to support Unitemps' commitment to quality healthcare.",
-  "genPersonalisedOpening": "Joining Unitemps as a Data Quality & IT Manager is an exciting opportunity to leverage my extensive experience in IT management and data quality within a healthcare setting. My background in ensuring operational efficiency and compliance aligns well with the role's focus on supporting practice performance and patient care.",
-  "genWhyThisCompany": "Unitemps' commitment to patient care and operational excellence resonates with my professional values. The opportunity to work with a prestigious healthcare practice and contribute to their quality-focused environment is particularly appealing.",
-  "genWhyThisRole": "This role is a perfect fit for my skills in IT system management and data quality assurance. My experience in healthcare operations, particularly in regulated environments, positions me to effectively support practice targets and enhance patient care through reliable data management.",
-  "genFitSummary": "My experience in IT management, data quality, and healthcare operations makes me a strong fit for the Data Quality & IT Manager role at Unitemps. I bring a proven track record of enhancing operational efficiency and ensuring compliance in regulated environments.",
-  "genLikelyContribution": "Based on what the brief describes, I would focus on maintaining reliable IT systems and ensuring data accuracy to support practice targets. My initial priorities would include optimizing data management processes, supporting staff with IT tasks, and ensuring compliance with healthcare standards.",
-  "genCultureFit": "My approach to work aligns with Unitemps' focus on confidentiality, quality, and team orientation. I thrive in environments that prioritize safety and equality.",
-  "genClosingSummary": "I'm eager to bring my expertise in IT and data management to support Unitemps' commitment to quality healthcare.",
+  "closingSummary": "I'm eager to contribute my expertise in IT and data quality to support Unitemps' mission of delivering exceptional patient care.",
+  "genPersonalisedOpening": "Joining Unitemps as a Data Quality & IT Manager feels like a natural progression for my career in operations and transformation. The opportunity to lead IT and data quality in a healthcare setting aligns perfectly with my passion for improving patient care through reliable data systems.",
+  "genWhyThisCompany": "Unitemps' commitment to patient care and operational efficiency resonates with my own values. The chance to work with a prestigious healthcare practice is an exciting prospect, offering a professional environment where quality and safety are paramount.",
+  "genWhyThisRole": "This role fits my experience in managing IT systems and ensuring data quality, particularly in regulated environments. My background in healthcare operations and data-driven improvements positions me well to support practice performance and patient care at Unitemps.",
+  "genFitSummary": "My background in IT management and data quality in healthcare settings makes me a strong fit for this role. I bring a proven track record of enhancing operational efficiency and supporting team performance.",
+  "genLikelyContribution": "Based on the brief, I would focus on maintaining robust IT systems and ensuring data accuracy to meet practice targets. Supporting staff with IT and data tasks will be a priority to enhance overall practice performance.",
+  "genCultureFit": "I thrive in team-oriented, quality-focused environments where confidentiality and safety are key, aligning well with Unitemps' culture.",
+  "genClosingSummary": "I'm eager to contribute my expertise in IT and data quality to support Unitemps' mission of delivering exceptional patient care.",
   "genCompanyHighlights": [
     "Prestigious client focused on patient care and operational efficiency."
   ],
   "genEvidenceExamples": [
     {
-      "exampleId": "13",
-      "exampleTitle": "Ride compliance and operator progression tracking",
-      "whyChosen": "This example demonstrates my ability to create compliance-tracking systems in safety-critical environments, which is crucial for maintaining data quality and IT systems in healthcare.",
-      "suggestedUsage": "supporting point",
-      "shortLine": "I built a compliance-tracking system to enhance safety and operational efficiency."
-    },
-    {
       "exampleId": "6",
       "exampleTitle": "Built live operational dashboard concept for GP practice visibility",
-      "whyChosen": "This showcases my capability in developing tools for healthcare operations, directly relevant to managing IT systems and data quality for practice targets.",
+      "whyChosen": "I've successfully designed systems to enhance visibility and operational efficiency in healthcare settings, directly relevant to managing IT and data quality at Unitemps.",
       "suggestedUsage": "hero metric",
-      "shortLine": "I designed a live dashboard for improved GP practice visibility and operational insight."
+      "shortLine": "I designed a live operational dashboard to improve GP practice visibility and service delivery."
     },
     {
       "exampleId": "3",
       "exampleTitle": "Profit and working-capital improvement",
-      "whyChosen": "My experience in financial control and operational improvement in healthcare aligns with the role's focus on supporting practice performance and ensuring accurate reporting.",
+      "whyChosen": "My experience in financial control and operational improvement in healthcare equips me to enhance data accuracy and reporting for practice targets.",
       "suggestedUsage": "supporting point",
-      "shortLine": "I led operational improvements and financial control in a healthcare setting."
+      "shortLine": "I led operational improvements in a healthcare setting, boosting financial control and reporting accuracy."
     },
     {
       "exampleId": "9",
       "exampleTitle": "Complex annual projects and team leadership",
-      "whyChosen": "Managing complex projects and leading teams in high-security, data-sensitive environments highlights my ability to ensure data confidentiality and effective team communication.",
+      "whyChosen": "Managing sensitive data and leading teams in high-security environments mirrors the confidentiality and team-oriented culture at Unitemps.",
       "suggestedUsage": "culture fit",
-      "shortLine": "I managed a team through complex, data-sensitive projects, maintaining high security standards."
+      "shortLine": "I managed a team handling sensitive data, ensuring compliance and service standards."
     }
   ]
 }

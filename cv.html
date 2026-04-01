@@ -1665,7 +1665,7 @@
 
         <div class="intro-titleblock" data-reveal>
           <p class="eyebrow">Why this company</p>
-          <h2 class="serif">Built for complex operations that need steadier control and clearer momentum.</h2>
+          <h2 class="serif">Why I stand out for this role.</h2>
         </div>
 
         <div class="intro-side" data-reveal>
@@ -2616,8 +2616,8 @@
         const introHeading = document.querySelector("#intro .intro-titleblock h2.serif");
         if (introHeading) {
           introHeading.textContent = state.companyName === defaults.companyName
-            ? "Why this company stands out."
-            : `Why ${state.companyName} stands out for this role.`;
+            ? "Why I stand out for this role."
+            : `Why I stand out for ${state.companyName}.`;
         }
         const introSideLabels = document.querySelectorAll("#intro .intro-side-label");
         if (introSideLabels[0]) introSideLabels[0].textContent = "Company signal";

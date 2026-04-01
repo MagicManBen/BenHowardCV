@@ -6,7 +6,7 @@ Combines:
   - Filtered company research findings
   - Ben evidence-bank examples (selected deterministically)
 
-Then calls OpenAI to produce structured personalised CV content.
+Then calls Ollama to produce structured personalised CV content.
 
 Future refinement:
   - Tweak the system prompt for tone/style
@@ -170,11 +170,11 @@ def _format_evidence_for_prompt(rows):
 
 
 # ---------------------------------------------------------------------------
-# OpenAI structured generation
+# Ollama structured generation
 # ---------------------------------------------------------------------------
 
-OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
-OPENAI_MODEL = "gpt-4o"
+DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
+DEFAULT_OLLAMA_MODEL = "llama3.2"
 
 SYSTEM_PROMPT = """You are writing personalised CV page content for Ben Howard, a UK-based senior operations and transformation leader. The content will appear on a tailored employer-facing web page — not a traditional CV document.
 
@@ -289,34 +289,62 @@ def _build_user_prompt(application, filtered_findings, evidence_rows):
     return "\n".join(sections)
 
 
-def call_openai(api_key, application, filtered_findings, evidence_rows):
-    """Call OpenAI chat completions and return the parsed JSON response.
+def _extract_json_object(text):
+    """Extract a JSON object from plain text or fenced output."""
+    if not isinstance(text, str):
+        raise ValueError("Model response content was not text.")
+
+    text = text.strip()
+    if not text:
+        raise ValueError("Model returned empty content.")
+
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end < start:
+        raise ValueError("No JSON object found in model response.")
+
+    return text[start:end + 1]
+
+
+def call_ollama(base_url, model, application, filtered_findings, evidence_rows):
+    """Call Ollama chat and return the parsed JSON response.
 
     Returns (result_dict, error_message_or_none).
     """
-    if not api_key:
-        return None, "OpenAI API key not configured in secrets.local.json"
+    if not base_url:
+        return None, "Ollama base URL not configured."
+    if not model:
+        return None, "Ollama model not configured."
 
     user_prompt = _build_user_prompt(application, filtered_findings, evidence_rows)
+    chat_url = base_url.rstrip("/") + "/api/chat"
 
     request_body = {
-        "model": OPENAI_MODEL,
+        "model": model,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ],
-        "temperature": 0.4,
-        "max_tokens": 2000,
-        "response_format": {"type": "json_object"},
+        "stream": False,
+        "options": {
+            "temperature": 0.4,
+        },
     }
 
     body_bytes = json.dumps(request_body).encode("utf-8")
     req = Request(
-        OPENAI_CHAT_URL,
+        chat_url,
         data=body_bytes,
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
             "User-Agent": "BenHowardCV-ContentGen/1.0",
         },
         method="POST",
@@ -329,21 +357,21 @@ def call_openai(api_key, application, filtered_findings, evidence_rows):
         error_body = exc.read().decode("utf-8") if exc.fp else ""
         try:
             err_json = json.loads(error_body)
-            msg = err_json.get("error", {}).get("message", error_body[:300])
+            msg = err_json.get("error") or error_body[:300]
         except json.JSONDecodeError:
             msg = error_body[:300]
-        return None, f"OpenAI API error ({exc.code}): {msg}"
+        return None, f"Ollama API error ({exc.code}): {msg}"
     except URLError as exc:
-        return None, f"Could not reach OpenAI: {exc.reason}"
+        return None, f"Could not reach Ollama: {exc.reason}"
     except json.JSONDecodeError as exc:
-        return None, f"Invalid JSON from OpenAI: {exc}"
+        return None, f"Invalid JSON from Ollama: {exc}"
 
-    # Extract the content from the response
     try:
-        content_str = resp_data["choices"][0]["message"]["content"]
-        result = json.loads(content_str)
-    except (KeyError, IndexError, json.JSONDecodeError) as exc:
-        return None, f"Could not parse OpenAI response: {exc}"
+        content_str = resp_data["message"]["content"]
+        json_str = _extract_json_object(content_str)
+        result = json.loads(json_str)
+    except (KeyError, ValueError, json.JSONDecodeError) as exc:
+        return None, f"Could not parse Ollama response: {exc}"
 
     return result, None
 
@@ -356,18 +384,19 @@ def generate_personalised_content(application, filtered_findings, config):
     """Run the full Stage 3 generation pipeline.
 
     1. Select relevant evidence-bank examples
-    2. Call OpenAI with structured prompt
+    2. Call Ollama with structured prompt
     3. Return the generated content + metadata
 
     Args:
         application: parsed application/job dict
         filtered_findings: Stage 2 filtered company profile dict
-        config: dict with openaiApiKey and other settings
+        config: dict with Ollama settings and other options
 
     Returns:
         dict with generatedContent, evidenceSelection metadata, and debug info.
     """
-    api_key = (config.get("openaiApiKey") or "").strip()
+    ollama_base_url = (config.get("ollamaBaseUrl") or "").strip() or DEFAULT_OLLAMA_BASE_URL
+    ollama_model = (config.get("ollamaModel") or "").strip() or DEFAULT_OLLAMA_MODEL
 
     # Step 1: Select evidence
     evidence_rows, evidence_error = select_evidence_examples(application)
@@ -386,19 +415,20 @@ def generate_personalised_content(application, filtered_findings, config):
         ],
     }
 
-    # Step 2: Call OpenAI
-    generated, openai_error = call_openai(
-        api_key, application, filtered_findings, evidence_rows,
+    # Step 2: Call Ollama
+    generated, generation_error = call_ollama(
+        ollama_base_url, ollama_model, application, filtered_findings, evidence_rows,
     )
 
-    if openai_error:
+    if generation_error:
         return {
             "generatedContent": None,
             "evidenceSelection": evidence_selection,
             "meta": {
                 "success": False,
-                "error": openai_error,
-                "model": OPENAI_MODEL,
+                "error": generation_error,
+                "model": ollama_model,
+                "baseUrl": ollama_base_url,
             },
         }
 
@@ -409,7 +439,8 @@ def generate_personalised_content(application, filtered_findings, config):
         "meta": {
             "success": True,
             "error": None,
-            "model": OPENAI_MODEL,
+            "model": ollama_model,
+            "baseUrl": ollama_base_url,
             "companyName": application.get("companyName", ""),
             "roleTitle": application.get("roleTitle", ""),
         },

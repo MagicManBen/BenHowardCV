@@ -2,6 +2,7 @@
 
 import base64
 import json
+import os
 import re
 import sys
 import traceback
@@ -35,7 +36,13 @@ DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
 
 def load_local_config():
   if not LOCAL_CONFIG_PATH.exists():
-    return {"githubToken": "", "publicCvBaseUrl": DEFAULT_PUBLIC_CV_BASE_URL}
+    return {
+      "githubToken": "",
+      "publicCvBaseUrl": DEFAULT_PUBLIC_CV_BASE_URL,
+      "googleKgApiKey": os.environ.get("GOOGLE_KG_API_KEY", "").strip(),
+      "ollamaBaseUrl": os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
+      "ollamaModel": os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
+    }
 
   try:
     payload = json.loads(LOCAL_CONFIG_PATH.read_text(encoding="utf-8"))
@@ -45,8 +52,9 @@ def load_local_config():
   return {
     "githubToken": str(payload.get("githubToken", "")).strip(),
     "publicCvBaseUrl": str(payload.get("cvBaseUrl", "")).strip() or DEFAULT_PUBLIC_CV_BASE_URL,
-    "googleKgApiKey": str(payload.get("googleKgApiKey", "")).strip(),
-    "openaiApiKey": str(payload.get("openaiApiKey", "")).strip(),
+    "googleKgApiKey": str(payload.get("googleKgApiKey", "")).strip() or os.environ.get("GOOGLE_KG_API_KEY", "").strip(),
+    "ollamaBaseUrl": str(payload.get("ollamaBaseUrl", "")).strip() or os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
+    "ollamaModel": str(payload.get("ollamaModel", "")).strip() or os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
   }
 
 
@@ -608,7 +616,7 @@ class AppHandler(SimpleHTTPRequestHandler):
       })
 
   def _handle_generate(self):
-    """Generate personalised CV content using OpenAI."""
+    """Generate personalised CV content using Ollama."""
     length = int(self.headers.get("Content-Length", "0") or 0)
     raw = self.rfile.read(length).decode("utf-8") if length else ""
 
@@ -631,8 +639,12 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(500, {"error": str(exc)})
       return
 
-    if not config.get("openaiApiKey"):
-      self.send_json(400, {"error": "OpenAI API key not configured in secrets.local.json (add openaiApiKey)"})
+    if not config.get("ollamaBaseUrl"):
+      self.send_json(400, {"error": "Ollama base URL not configured."})
+      return
+
+    if not config.get("ollamaModel"):
+      self.send_json(400, {"error": "Ollama model not configured."})
       return
 
     try:

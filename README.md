@@ -17,6 +17,31 @@ This repo is the online GitHub Pages version of the CV system.
 
 The local admin page now talks to `local_server.py` on your Mac. That local server is the only place that reads your GitHub token. The hosted site only reads the saved files and renders the public CVs.
 
+## Local AI config
+
+Stage 3 generation now uses your local Ollama instance instead of the OpenAI API.
+
+You can configure it in `local-admin/secrets.local.json` or with environment variables.
+
+Example `local-admin/secrets.local.json`:
+
+```json
+{
+  "githubToken": "ghp_...",
+  "cvBaseUrl": "https://checkloops.co.uk/cv.html",
+  "googleKgApiKey": "",
+  "ollamaBaseUrl": "http://localhost:11434",
+  "ollamaModel": "llama3.2"
+}
+```
+
+Environment variable examples:
+
+```bash
+export OLLAMA_BASE_URL=http://localhost:11434
+export OLLAMA_MODEL=llama3.2
+```
+
 ## Start On Mac
 
 Double-click `Start Ben Howard CV.command` in Finder. It will pick a free local port, start `local_server.py`, and open the dashboard plus local admin page on `127.0.0.1`.

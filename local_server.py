@@ -421,6 +421,20 @@ def push_application_to_github(application, token):
   }
 
 
+def upload_cv_to_github(filename, html_content, token):
+  """Push a CV HTML file to the downloads/ folder in the repo."""
+  safe = re.sub(r'[^\w\s().,-]', '', filename).strip()
+  if not safe:
+    safe = "Ben Howard CV"
+  path = "downloads/" + safe + ".html"
+  return put_remote_text(
+    path,
+    html_content,
+    token,
+    "Add CV download: " + safe,
+  )
+
+
 def validate_github_token(token):
   if not token:
     return False, "No GitHub token configured."
@@ -506,12 +520,16 @@ class AppHandler(SimpleHTTPRequestHandler):
 
   def do_POST(self):
     parsed = urlparse(self.path)
-    if parsed.path not in ("/api/publish", "/api/generate"):
+    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv"):
       self.send_error(404)
       return
 
     if parsed.path == "/api/generate":
       self._handle_generate()
+      return
+
+    if parsed.path == "/api/upload-cv":
+      self._handle_upload_cv()
       return
 
     length = int(self.headers.get("Content-Length", "0") or 0)
@@ -624,8 +642,43 @@ class AppHandler(SimpleHTTPRequestHandler):
           "debugLogPath": debug_path,
         },
       )
+  def _handle_upload_cv(self):
+    """Upload a generated CV HTML to the downloads/ folder on GitHub."""
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    filename = str(payload.get("filename", "")).strip()
+    html_content = str(payload.get("content", "")).strip()
+    if not filename or not html_content:
+      self.send_json(400, {"error": "filename and content are required"})
+      return
+
+    try:
+      config = load_local_config()
+    except RuntimeError as exc:
+      self.send_json(500, {"error": str(exc)})
+      return
+
+    if not config["githubToken"]:
+      self.send_json(500, {"error": "No GitHub token configured."})
+      return
+
+    result = upload_cv_to_github(filename, html_content, config["githubToken"])
+    if not result.get("ok"):
+      self.send_json(502, {"error": result.get("error", "Upload failed.")})
+      return
+
+    safe = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
+    public_url = config["publicCvBaseUrl"].rstrip("/").replace("/cv.html", "") + "/downloads/" + safe + ".html"
+    self.send_json(200, {"ok": True, "path": result["path"], "publicUrl": public_url})
+
   def _handle_generate(self):
-    """Generate personalised CV content using Ollama."""
     length = int(self.headers.get("Content-Length", "0") or 0)
     raw = self.rfile.read(length).decode("utf-8") if length else ""
 

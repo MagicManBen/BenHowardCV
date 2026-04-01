@@ -139,8 +139,6 @@ async function initLocalAdminPage() {
       showToast(dom, response.publishedToGitHub ? "CV published." : "Saved locally.");
       dom.resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      window.open(localPreviewUrl, "_blank", "noopener,noreferrer");
-
       if (!response.publishedToGitHub) {
         showError(dom.confirmError, "Saved locally, but GitHub publish did not complete.");
       }
@@ -183,10 +181,16 @@ async function initLocalAdminPage() {
     var roleTitle = dom.resultRole ? dom.resultRole.value : "";
     var companyName = dom.resultCompany ? dom.resultCompany.value : "";
     if (!qrUrl) { showToast(dom, "No short URL available yet."); return; }
+    dom.downloadCvButton.disabled = true;
+    dom.downloadCvButton.textContent = "Uploading\u2026";
     try {
-      await downloadCvWithQr(qrUrl, roleTitle, companyName);
+      var publicUrl = await downloadCvWithQr(qrUrl, roleTitle, companyName);
+      showToast(dom, publicUrl ? "CV saved to GitHub and downloaded." : "CV downloaded.");
     } catch (err) {
       showToast(dom, "Download failed: " + (err.message || err));
+    } finally {
+      dom.downloadCvButton.disabled = false;
+      dom.downloadCvButton.textContent = "Download CV";
     }
   });
 
@@ -607,7 +611,7 @@ async function renderQrImage(img, text) {
 }
 
 async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
-  /* 1. Generate QR code data-URI */
+  /* 1. Generate QR data-URI */
   var qr = new window.QRious({ value: shortUrl, size: 240, level: "M", background: "#ffffff", foreground: "#284a5b" });
   var qrDataUrl = qr.toDataURL();
 
@@ -616,34 +620,61 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
   if (!response.ok) throw new Error("Could not fetch BH CV.html");
   var html = await response.text();
 
-  /* 3. Build the QR block to inject into the second page sidebar */
+  /* 3. Build QR block label */
   var label = companyName
     ? "I have prepared a personalised CV for " + esc(companyName) + ". Scan or tap to view."
     : "I have prepared a more detailed CV tailored for this role. Scan or tap to view.";
 
-  var qrBlock =
-    '<section class="sidebar-card" style="margin-top:auto; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">' +
-      '<h2>Tailored CV</h2>' +
-      '<a href="' + esc(shortUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.45rem; background:#fff; padding:6px; border-radius:6px; line-height:0;">' +
-        '<img src="' + qrDataUrl + '" width="100" height="100" alt="QR code" style="display:block; width:100px; height:100px;">' +
-      '</a>' +
-      '<p style="margin-top:0.45rem; font-size:0.65rem; line-height:1.4; color:rgba(245,245,241,0.88);">' + label + '</p>' +
-    '</section>';
+  function makeQrBlock() {
+    return (
+      '<section class="sidebar-card" style="margin-top:auto; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">'
+      + '<h2>Tailored CV</h2>'
+      + '<a href="' + esc(shortUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.45rem; background:#fff; padding:6px; border-radius:6px; line-height:0;">'
+      + '<img src="' + qrDataUrl + '" width="100" height="100" alt="QR code" style="display:block; width:100px; height:100px;">'
+      + '</a>'
+      + '<p style="margin-top:0.45rem; font-size:0.65rem; line-height:1.4; color:rgba(245,245,241,0.88);">' + label + '</p>'
+      + '</section>'
+    );
+  }
 
-  /* 4. Inject QR block before the closing </aside> of the second page */
-  var secondAsideClose = html.lastIndexOf('</aside>');
-  if (secondAsideClose === -1) throw new Error("Could not find sidebar in BH CV.html");
-  html = html.slice(0, secondAsideClose) + qrBlock + '\n' + html.slice(secondAsideClose);
+  /* 4. Inject into BOTH sidebars (page 1 and page 2) */
+  var positions = [];
+  var search = html;
+  var offset = 0;
+  var idx;
+  while ((idx = search.indexOf('</aside>')) !== -1) {
+    positions.push(offset + idx);
+    offset += idx + 8;
+    search = search.slice(idx + 8);
+  }
+  if (positions.length === 0) throw new Error("Could not find any sidebar in BH CV.html");
+  // Inject from last to first so earlier offsets stay valid
+  for (var i = positions.length - 1; i >= 0; i--) {
+    var pos = positions[i];
+    html = html.slice(0, pos) + makeQrBlock() + '\n' + html.slice(pos);
+  }
 
-  /* 5. Open in a new window and auto-print */
-  var printWin = window.open("", "_blank");
-  if (!printWin) throw new Error("Pop-up blocked. Allow pop-ups and try again.");
-  printWin.document.open();
-  printWin.document.write(html);
-  printWin.document.close();
+  /* 5. Build a safe filename */
+  var safeName = "Ben Howard CV" + (companyName ? " - " + companyName : "");
 
-  /* Wait for fonts & images, then trigger print */
-  printWin.addEventListener("load", function () {
-    setTimeout(function () { printWin.print(); }, 400);
+  /* 6. Upload to GitHub via local server */
+  var uploadRes = await fetch(LOCAL_API_BASE + "/upload-cv", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filename: safeName, content: html }),
   });
+  var uploadPayload = await uploadRes.json().catch(function () { return {}; });
+  if (!uploadRes.ok) throw new Error(uploadPayload.error || "Upload failed.");
+
+  /* 7. Trigger a local file download immediately */
+  var blob = new Blob([html], { type: "text/html" });
+  var blobUrl = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = safeName + ".html";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 1000);
+
+  return uploadPayload.publicUrl || "";
 }

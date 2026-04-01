@@ -627,7 +627,17 @@ function buildEmbeddedPreviewPayload(application) {
     impliedStrategicGoals: Array.isArray(application.impliedStrategicGoals) ? application.impliedStrategicGoals : [],
     deliverablesLikely: Array.isArray(application.deliverablesLikely) ? application.deliverablesLikely : [],
     phf: Array.isArray(application.possibleHeadlineFacts) ? application.possibleHeadlineFacts : [],
-    mc: Array.isArray(application.matchCategories) ? application.matchCategories : []
+    mc: Array.isArray(application.matchCategories) ? application.matchCategories : [],
+    // Generated content (Stage 4)
+    gpo: application.genPersonalisedOpening || "",
+    gwc: application.genWhyThisCompany || "",
+    gwr: application.genWhyThisRole || "",
+    gfs: application.genFitSummary || "",
+    glc: application.genLikelyContribution || "",
+    gcf: application.genCultureFit || "",
+    gcs: application.genClosingSummary || "",
+    gch: Array.isArray(application.genCompanyHighlights) ? application.genCompanyHighlights : [],
+    gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : []
   };
 }
 
@@ -694,7 +704,17 @@ function normaliseEmbeddedApplication(input) {
     impliedStrategicGoals: normaliseStringArray(input.impliedStrategicGoals),
     deliverablesLikely: normaliseStringArray(input.deliverablesLikely),
     possibleHeadlineFacts: normaliseStringArray(input.possibleHeadlineFacts || input.phf),
-    matchCategories: normaliseStringArray(input.matchCategories || input.mc)
+    matchCategories: normaliseStringArray(input.matchCategories || input.mc),
+    // Generated content (Stage 4)
+    genPersonalisedOpening: toCleanString(input.genPersonalisedOpening) || toCleanString(input.gpo),
+    genWhyThisCompany: toCleanString(input.genWhyThisCompany) || toCleanString(input.gwc),
+    genWhyThisRole: toCleanString(input.genWhyThisRole) || toCleanString(input.gwr),
+    genFitSummary: toCleanString(input.genFitSummary) || toCleanString(input.gfs),
+    genLikelyContribution: toCleanString(input.genLikelyContribution) || toCleanString(input.glc),
+    genCultureFit: toCleanString(input.genCultureFit) || toCleanString(input.gcf),
+    genClosingSummary: toCleanString(input.genClosingSummary) || toCleanString(input.gcs),
+    genCompanyHighlights: normaliseStringArray(input.genCompanyHighlights || input.gch),
+    genEvidenceExamples: Array.isArray(input.genEvidenceExamples || input.gee) ? (input.genEvidenceExamples || input.gee) : []
   };
 
   if (!application.companyName || !application.roleTitle) {

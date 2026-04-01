@@ -12,6 +12,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlparse
 from urllib.request import Request, urlopen
 
+from company_research import run_company_research, filter_research_findings
+from content_generation import generate_personalised_content
+
 
 ROOT = Path(__file__).resolve().parent
 PUBLIC_DATA_DIR = ROOT / "data"
@@ -42,6 +45,8 @@ def load_local_config():
   return {
     "githubToken": str(payload.get("githubToken", "")).strip(),
     "publicCvBaseUrl": str(payload.get("cvBaseUrl", "")).strip() or DEFAULT_PUBLIC_CV_BASE_URL,
+    "googleKgApiKey": str(payload.get("googleKgApiKey", "")).strip(),
+    "openaiApiKey": str(payload.get("openaiApiKey", "")).strip(),
   }
 
 
@@ -412,8 +417,20 @@ class AppHandler(SimpleHTTPRequestHandler):
 
   def do_POST(self):
     parsed = urlparse(self.path)
-    if parsed.path != "/api/publish":
+    if parsed.path not in ("/api/publish", "/api/research", "/api/research/filter", "/api/generate"):
       self.send_error(404)
+      return
+
+    if parsed.path == "/api/research":
+      self._handle_research()
+      return
+
+    if parsed.path == "/api/research/filter":
+      self._handle_research_filter()
+      return
+
+    if parsed.path == "/api/generate":
+      self._handle_generate()
       return
 
     length = int(self.headers.get("Content-Length", "0") or 0)
@@ -526,6 +543,106 @@ class AppHandler(SimpleHTTPRequestHandler):
           "debugLogPath": debug_path,
         },
       )
+
+
+  def _handle_research(self):
+    """Run company research APIs and return raw findings."""
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    application = payload.get("application") if isinstance(payload, dict) and isinstance(payload.get("application"), dict) else payload
+    if not isinstance(application, dict) or not application.get("companyName"):
+      self.send_json(400, {"error": "Application payload is missing companyName"})
+      return
+
+    try:
+      config = load_local_config()
+    except RuntimeError as exc:
+      self.send_json(500, {"error": str(exc)})
+      return
+
+    try:
+      research = run_company_research(application, config)
+      self.send_json(200, research)
+    except Exception as exc:
+      self.send_json(500, {
+        "error": f"Research failed: {exc}",
+        "traceback": traceback.format_exc(),
+      })
+
+  def _handle_research_filter(self):
+    """Filter/rank raw findings into a structured company profile."""
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    application = payload.get("application") if isinstance(payload, dict) and isinstance(payload.get("application"), dict) else {}
+    raw_findings = payload.get("rawFindings") if isinstance(payload, dict) and isinstance(payload.get("rawFindings"), list) else []
+
+    if not isinstance(application, dict) or not application.get("companyName"):
+      self.send_json(400, {"error": "Application payload is missing companyName"})
+      return
+
+    if not raw_findings:
+      self.send_json(400, {"error": "No rawFindings provided to filter"})
+      return
+
+    try:
+      filtered = filter_research_findings(application, raw_findings)
+      self.send_json(200, filtered)
+    except Exception as exc:
+      self.send_json(500, {
+        "error": f"Filtering failed: {exc}",
+        "traceback": traceback.format_exc(),
+      })
+
+  def _handle_generate(self):
+    """Generate personalised CV content using OpenAI."""
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    application = payload.get("application") if isinstance(payload, dict) and isinstance(payload.get("application"), dict) else {}
+    filtered_findings = payload.get("filteredFindings") if isinstance(payload, dict) and isinstance(payload.get("filteredFindings"), dict) else {}
+
+    if not isinstance(application, dict) or not application.get("companyName"):
+      self.send_json(400, {"error": "Application payload is missing companyName"})
+      return
+
+    try:
+      config = load_local_config()
+    except RuntimeError as exc:
+      self.send_json(500, {"error": str(exc)})
+      return
+
+    if not config.get("openaiApiKey"):
+      self.send_json(400, {"error": "OpenAI API key not configured in secrets.local.json (add openaiApiKey)"})
+      return
+
+    try:
+      result = generate_personalised_content(application, filtered_findings, config)
+      self.send_json(200, result)
+    except Exception as exc:
+      self.send_json(500, {
+        "error": f"Generation failed: {exc}",
+        "traceback": traceback.format_exc(),
+      })
 
 
 def main():

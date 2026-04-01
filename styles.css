@@ -943,6 +943,106 @@ textarea {
   display: flex;
 }
 
+/* ---------------------------------------------------------------------------
+   Company research panel (Stage 1)
+   --------------------------------------------------------------------------- */
+
+.research-errors {
+  margin-bottom: 1rem;
+}
+
+.research-errors .inline-feedback {
+  color: var(--colour-accent, #c44);
+  margin: 0.25rem 0;
+}
+
+.research-source-group {
+  margin-top: 1.25rem;
+}
+
+.research-source-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.research-count {
+  font-weight: 400;
+  opacity: 0.55;
+  font-size: 0.9em;
+}
+
+.research-finding {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(50, 41, 31, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 0.6rem;
+}
+
+.research-finding-title {
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.research-finding-desc {
+  margin: 0 0 0.25rem;
+  font-size: 0.92rem;
+  opacity: 0.85;
+}
+
+.research-finding-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  opacity: 0.55;
+}
+
+.research-finding-link {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  word-break: break-all;
+}
+
+.research-finding-link a {
+  color: var(--colour-link, #1a73e8);
+}
+
+/* End company research panel */
+
+/* ---------------------------------------------------------------------------
+   Filtered company profile (Stage 2)
+   --------------------------------------------------------------------------- */
+
+.filtered-profile-grid {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.filtered-list-section {
+  margin-top: 1rem;
+}
+
+.filtered-list-heading {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+}
+
+.filtered-list {
+  margin: 0;
+  padding-left: 1.4rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.filtered-list li {
+  margin-bottom: 0.15rem;
+}
+
+/* End filtered profile */
+
 @media print {
   body {
     background: #fff;

@@ -72,7 +72,36 @@ async function initLocalAdminPage() {
     openPreviewLink: document.getElementById("open-preview-link"),
     downloadCvButton: document.getElementById("download-cv-button"),
     resultQrImage: document.getElementById("result-qr-image"),
-    toast: document.getElementById("toast")
+    toast: document.getElementById("toast"),
+    // Research panel
+    researchPanel: document.getElementById("research-panel"),
+    runResearchButton: document.getElementById("run-research-button"),
+    researchStatus: document.getElementById("research-status"),
+    researchError: document.getElementById("research-error"),
+    researchFindings: document.getElementById("research-findings"),
+    researchDebugPanel: document.getElementById("research-debug-panel"),
+    researchRawJson: document.getElementById("research-raw-json"),
+    // Filter panel
+    filterFindingsButton: document.getElementById("filter-findings-button"),
+    filteredPanel: document.getElementById("filtered-panel"),
+    filterStatus: document.getElementById("filter-status"),
+    filterError: document.getElementById("filter-error"),
+    filteredFindings: document.getElementById("filtered-findings"),
+    filteredDebugPanel: document.getElementById("filtered-debug-panel"),
+    filteredRawJson: document.getElementById("filtered-raw-json"),
+    // Generate panel
+    generatePanel: document.getElementById("generate-panel"),
+    generateContentButton: document.getElementById("generate-content-button"),
+    generateStatus: document.getElementById("generate-status"),
+    generateError: document.getElementById("generate-error"),
+    generatedContent: document.getElementById("generated-content"),
+    generateDebugPanel: document.getElementById("generate-debug-panel"),
+    generateRawJson: document.getElementById("generate-raw-json"),
+    // Apply panel
+    applyPanel: document.getElementById("apply-panel"),
+    applyContentButton: document.getElementById("apply-content-button"),
+    applyStatus: document.getElementById("apply-status"),
+    applyError: document.getElementById("apply-error"),
   };
 
   let pendingApplication = null;
@@ -86,6 +115,29 @@ async function initLocalAdminPage() {
     pendingApplication = null;
     dom.reviewPanel.hidden = true;
     dom.resultPanel.hidden = true;
+    dom.researchPanel.hidden = true;
+    dom.researchFindings.hidden = true;
+    dom.researchDebugPanel.hidden = true;
+    dom.researchError.hidden = true;
+    dom.researchStatus.textContent = "Ready to research.";
+    dom.researchRawJson.textContent = "No research run yet.";
+    dom.filterFindingsButton.disabled = true;
+    dom.filteredPanel.hidden = true;
+    dom.filterError.hidden = true;
+    dom.filterStatus.textContent = "";
+    dom.filteredDebugPanel.hidden = true;
+    dom.filteredRawJson.textContent = "No filtering run yet.";
+    dom.generatePanel.hidden = true;
+    dom.generateContentButton.disabled = true;
+    dom.generateError.hidden = true;
+    dom.generateStatus.textContent = "Filter findings first.";
+    dom.generatedContent.hidden = true;
+    dom.generateDebugPanel.hidden = true;
+    dom.generateRawJson.textContent = "No generation run yet.";
+    dom.applyPanel.hidden = true;
+    dom.applyContentButton.disabled = true;
+    dom.applyError.hidden = true;
+    dom.applyStatus.textContent = "Generate content first.";
     dom.reviewError.hidden = true;
     dom.publishError.hidden = true;
     dom.reviewStatus.textContent = "Waiting for JSON.";
@@ -118,6 +170,7 @@ async function initLocalAdminPage() {
       dom.reviewPreview.innerHTML = renderReviewPreview(pendingApplication);
       dom.rawJsonOutput.textContent = JSON.stringify(pendingApplication, null, 2);
       dom.reviewPanel.hidden = false;
+      dom.researchPanel.hidden = false;
       dom.confirmPublishButton.disabled = false;
       dom.reviewStatus.textContent = `Ready to publish ${pendingApplication.companyName} / ${pendingApplication.roleTitle}.`;
       showToast(dom, "JSON parsed successfully.");
@@ -175,6 +228,229 @@ async function initLocalAdminPage() {
     } finally {
       dom.confirmPublishButton.disabled = false;
       dom.confirmPublishButton.textContent = "Confirm & Publish";
+    }
+  });
+
+  dom.runResearchButton?.addEventListener("click", async () => {
+    dom.researchError.hidden = true;
+
+    if (!pendingApplication) {
+      showError(dom.researchError, "Review the JSON first before running research.");
+      return;
+    }
+
+    dom.runResearchButton.disabled = true;
+    dom.runResearchButton.textContent = "Running APIs...";
+    dom.researchStatus.textContent = "Calling research APIs...";
+    dom.researchFindings.hidden = true;
+    dom.researchDebugPanel.hidden = true;
+
+    try {
+      const research = await runCompanyResearch(pendingApplication);
+
+      // Store research on the application object for later stages
+      pendingApplication.research = research;
+
+      dom.researchRawJson.textContent = JSON.stringify(research, null, 2);
+      dom.researchDebugPanel.hidden = false;
+
+      const findings = research.rawFindings || [];
+      const meta = research.meta || {};
+      const sourceErrors = meta.sourceErrors || {};
+
+      if (findings.length === 0 && Object.keys(sourceErrors).length === 0) {
+        dom.researchStatus.textContent = "No findings returned from any source.";
+        dom.researchFindings.innerHTML = '<p class="card-helper">No results found. This may be expected for small or private companies.</p>';
+        dom.researchFindings.hidden = false;
+      } else {
+        const errorCount = Object.keys(sourceErrors).length;
+        const statusParts = [`${findings.length} finding${findings.length !== 1 ? "s" : ""} from ${(meta.sourcesRun || []).length} source${(meta.sourcesRun || []).length !== 1 ? "s" : ""}`];
+        if (errorCount > 0) {
+          statusParts.push(`${errorCount} source error${errorCount !== 1 ? "s" : ""}`);
+        }
+        dom.researchStatus.textContent = statusParts.join(". ") + ".";
+        dom.researchFindings.innerHTML = renderResearchFindings(findings, meta);
+        dom.researchFindings.hidden = false;
+      }
+
+      showToast(dom, `Research complete: ${findings.length} finding${findings.length !== 1 ? "s" : ""}.`);
+
+      // Enable filtering now that raw findings exist
+      dom.filterFindingsButton.disabled = findings.length === 0;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Research request failed.";
+      showError(dom.researchError, message);
+      dom.researchStatus.textContent = "Research failed.";
+    } finally {
+      dom.runResearchButton.disabled = false;
+      dom.runResearchButton.textContent = "Run APIs";
+    }
+  });
+
+  dom.filterFindingsButton?.addEventListener("click", async () => {
+    dom.filterError.hidden = true;
+
+    if (!pendingApplication || !pendingApplication.research || !pendingApplication.research.rawFindings) {
+      showError(dom.filterError, "Run the research APIs first.");
+      return;
+    }
+
+    dom.filterFindingsButton.disabled = true;
+    dom.filterFindingsButton.textContent = "Filtering...";
+    dom.filterStatus.textContent = "Filtering and ranking findings...";
+    dom.filteredPanel.hidden = false;
+    dom.filteredFindings.innerHTML = "";
+    dom.filteredDebugPanel.hidden = true;
+
+    try {
+      const filtered = await filterResearchFindings(pendingApplication, pendingApplication.research.rawFindings);
+
+      // Store on application for later stages
+      pendingApplication.research.filteredFindings = filtered;
+
+      dom.filteredRawJson.textContent = JSON.stringify(filtered, null, 2);
+      dom.filteredDebugPanel.hidden = false;
+
+      const sourceCount = (filtered.sourceItems || []).length;
+      const meta = filtered.meta || {};
+      dom.filterStatus.textContent = `Filtered: ${meta.scoredAboveThreshold || 0} relevant finding${(meta.scoredAboveThreshold || 0) !== 1 ? "s" : ""} from ${meta.totalRawFindings || 0} raw.`;
+      dom.filteredFindings.innerHTML = renderFilteredProfile(filtered);
+
+      showToast(dom, `Filtering complete: ${sourceCount} source item${sourceCount !== 1 ? "s" : ""} retained.`);
+      dom.filteredPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // Enable generation now that filtered findings exist
+      dom.generatePanel.hidden = false;
+      dom.generateContentButton.disabled = false;
+      dom.generateStatus.textContent = "Ready to generate personalised content.";
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Filtering request failed.";
+      showError(dom.filterError, message);
+      dom.filterStatus.textContent = "Filtering failed.";
+    } finally {
+      dom.filterFindingsButton.disabled = false;
+      dom.filterFindingsButton.textContent = "Filter Findings";
+    }
+  });
+
+  dom.generateContentButton?.addEventListener("click", async () => {
+    dom.generateError.hidden = true;
+
+    if (!pendingApplication || !pendingApplication.research || !pendingApplication.research.filteredFindings) {
+      showError(dom.generateError, "Filter the research findings first.");
+      return;
+    }
+
+    dom.generateContentButton.disabled = true;
+    dom.generateContentButton.textContent = "Generating...";
+    dom.generateStatus.textContent = "Calling OpenAI — this may take a few seconds...";
+    dom.generatedContent.hidden = true;
+    dom.generateDebugPanel.hidden = true;
+
+    try {
+      const result = await generatePersonalisedContent(
+        pendingApplication,
+        pendingApplication.research.filteredFindings
+      );
+
+      dom.generateRawJson.textContent = JSON.stringify(result, null, 2);
+      dom.generateDebugPanel.hidden = false;
+
+      const meta = result.meta || {};
+      if (!meta.success) {
+        showError(dom.generateError, meta.error || "Generation did not succeed.");
+        dom.generateStatus.textContent = "Generation failed.";
+        return;
+      }
+
+      // Store on application for later use
+      pendingApplication.personalisedContent = result.generatedContent;
+      pendingApplication.evidenceSelection = result.evidenceSelection;
+
+      dom.generatedContent.innerHTML = renderGeneratedContent(result);
+      dom.generatedContent.hidden = false;
+      dom.generateStatus.textContent = `Content generated using ${meta.model || "OpenAI"}.`;
+      showToast(dom, "Personalised content generated.");
+      dom.generatePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // Enable apply step
+      dom.applyPanel.hidden = false;
+      dom.applyContentButton.disabled = false;
+      dom.applyStatus.textContent = "Ready to apply generated content and publish.";
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Generation request failed.";
+      showError(dom.generateError, message);
+      dom.generateStatus.textContent = "Generation failed.";
+    } finally {
+      dom.generateContentButton.disabled = false;
+      dom.generateContentButton.textContent = "Generate Personalised Content";
+    }
+  });
+
+  dom.applyContentButton?.addEventListener("click", async () => {
+    dom.applyError.hidden = true;
+
+    if (!pendingApplication || !pendingApplication.personalisedContent) {
+      showError(dom.applyError, "Generate personalised content first.");
+      return;
+    }
+
+    dom.applyContentButton.disabled = true;
+    dom.applyContentButton.textContent = "Applying & Publishing...";
+    dom.applyStatus.textContent = "Merging generated content into application...";
+
+    try {
+      // Merge generated content fields into the application
+      const gen = pendingApplication.personalisedContent;
+      if (gen.personalisedOpening) pendingApplication.personalisedIntro = gen.personalisedOpening;
+      if (gen.whyThisCompany) pendingApplication.shortCompanyReason = gen.whyThisCompany;
+      if (gen.whyThisRole) pendingApplication.whyThisRole = gen.whyThisRole;
+      if (gen.fitSummary) pendingApplication.advertSummary = gen.fitSummary;
+      if (gen.closingSummary) pendingApplication.closingSummary = gen.closingSummary;
+
+      // Store generated-only fields directly on the application
+      pendingApplication.genPersonalisedOpening = gen.personalisedOpening || "";
+      pendingApplication.genWhyThisCompany = gen.whyThisCompany || "";
+      pendingApplication.genWhyThisRole = gen.whyThisRole || "";
+      pendingApplication.genFitSummary = gen.fitSummary || "";
+      pendingApplication.genLikelyContribution = gen.likelyContributionSummary || "";
+      pendingApplication.genCultureFit = gen.cultureFitSummary || "";
+      pendingApplication.genClosingSummary = gen.closingSummary || "";
+      pendingApplication.genCompanyHighlights = Array.isArray(gen.companyHighlights) ? gen.companyHighlights : [];
+      pendingApplication.genEvidenceExamples = Array.isArray(gen.selectedEvidenceExamples) ? gen.selectedEvidenceExamples : [];
+
+      // Now publish
+      dom.publishError.hidden = true;
+      dom.confirmPublishButton.disabled = true;
+      dom.publishStatus.textContent = "Saving locally and pushing to GitHub...";
+
+      const response = await publishApplication(pendingApplication);
+      const application = response.application || pendingApplication;
+      const publicUrl = buildPublicPreviewUrl(application);
+
+      localPreviewUrl = buildLocalPreviewUrl(application);
+      localPrintUrl = buildLocalPrintUrl(application);
+
+      await renderPublishedResult(dom, application, publicUrl, localPreviewUrl);
+      dom.resultPanel.hidden = false;
+      dom.applyStatus.textContent = "Generated content applied and published.";
+      dom.publishStatus.textContent = response.publishedToGitHub
+        ? `Published with generated content. Debug log: ${response.debugLogPath || "not reported"}`
+        : `Saved locally with generated content. Debug log: ${response.debugLogPath || "not reported"}`;
+      showToast(dom, response.publishedToGitHub ? "Application published with personalised content." : "Saved locally with personalised content.");
+      dom.resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      if (!response.publishedToGitHub) {
+        showError(dom.applyError, "Saved locally, but GitHub publish did not complete.");
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not apply and publish the application.";
+      showError(dom.applyError, message);
+      dom.applyStatus.textContent = "Apply & publish failed.";
+    } finally {
+      dom.applyContentButton.disabled = false;
+      dom.applyContentButton.textContent = "Apply & Publish";
+      dom.confirmPublishButton.disabled = false;
     }
   });
 
@@ -402,7 +678,17 @@ function buildEmbeddedPreviewPayload(application) {
     impliedStrategicGoals: Array.isArray(application.impliedStrategicGoals) ? application.impliedStrategicGoals : [],
     deliverablesLikely: Array.isArray(application.deliverablesLikely) ? application.deliverablesLikely : [],
     phf: Array.isArray(application.possibleHeadlineFacts) ? application.possibleHeadlineFacts : [],
-    mc: Array.isArray(application.matchCategories) ? application.matchCategories : []
+    mc: Array.isArray(application.matchCategories) ? application.matchCategories : [],
+    // Generated content (Stage 4)
+    gpo: application.genPersonalisedOpening || "",
+    gwc: application.genWhyThisCompany || "",
+    gwr: application.genWhyThisRole || "",
+    gfs: application.genFitSummary || "",
+    glc: application.genLikelyContribution || "",
+    gcf: application.genCultureFit || "",
+    gcs: application.genClosingSummary || "",
+    gch: Array.isArray(application.genCompanyHighlights) ? application.genCompanyHighlights : [],
+    gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : []
   };
 }
 
@@ -462,6 +748,306 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+
+// ---------------------------------------------------------------------------
+// Company research (Stage 1)
+// ---------------------------------------------------------------------------
+
+async function runCompanyResearch(application) {
+  const response = await fetch(`${LOCAL_API_BASE}/research`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ application }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Research API returned ${response.status}`);
+  }
+  return payload;
+}
+
+function renderResearchFindings(findings, meta) {
+  const sourceErrors = meta.sourceErrors || {};
+  const parts = [];
+
+  // Show source errors if any
+  if (Object.keys(sourceErrors).length > 0) {
+    parts.push('<div class="research-errors">');
+    for (const [source, error] of Object.entries(sourceErrors)) {
+      parts.push(`<p class="inline-feedback"><strong>${escapeHtml(source)}:</strong> ${escapeHtml(error)}</p>`);
+    }
+    parts.push("</div>");
+  }
+
+  if (findings.length === 0) {
+    return parts.join("");
+  }
+
+  // Group findings by source
+  const grouped = {};
+  for (const f of findings) {
+    const src = f.sourceName || "Unknown";
+    if (!grouped[src]) grouped[src] = [];
+    grouped[src].push(f);
+  }
+
+  for (const [sourceName, items] of Object.entries(grouped)) {
+    parts.push(`<div class="research-source-group">`);
+    parts.push(`<h3 class="research-source-heading">${escapeHtml(sourceName)} <span class="research-count">(${items.length})</span></h3>`);
+
+    for (const f of items) {
+      parts.push('<article class="research-finding">');
+      parts.push(`<p class="research-finding-title">${escapeHtml(f.title || "Untitled")}</p>`);
+
+      if (f.description || f.snippet) {
+        parts.push(`<p class="research-finding-desc">${escapeHtml(f.snippet || f.description)}</p>`);
+      }
+
+      const meta_bits = [];
+      if (f.confidence > 0) meta_bits.push(`Confidence: ${(f.confidence * 100).toFixed(0)}%`);
+      if (f.matchReason) meta_bits.push(f.matchReason);
+      if (f.entityId) meta_bits.push(`ID: ${f.entityId}`);
+      if (meta_bits.length > 0) {
+        parts.push(`<p class="research-finding-meta">${escapeHtml(meta_bits.join(" · "))}</p>`);
+      }
+
+      if (f.url) {
+        parts.push(`<p class="research-finding-link"><a href="${escapeHtml(f.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(f.url)}</a></p>`);
+      }
+
+      parts.push("</article>");
+    }
+
+    parts.push("</div>");
+  }
+
+  // Stage 2 hook: filtering controls added above
+  // Stage 3 hook: add OpenAI generation trigger here
+
+  return parts.join("");
+}
+
+// ---------------------------------------------------------------------------
+// Company research filtering (Stage 2)
+// ---------------------------------------------------------------------------
+
+async function filterResearchFindings(application, rawFindings) {
+  const response = await fetch(`${LOCAL_API_BASE}/research/filter`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ application, rawFindings }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Filter API returned ${response.status}`);
+  }
+  return payload;
+}
+
+function renderFilteredProfile(profile) {
+  const parts = [];
+
+  // Summary fields
+  const fields = [
+    ["Canonical name", profile.canonicalCompanyName],
+    ["Description", profile.bestEntityDescription],
+    ["Official website", profile.officialWebsite],
+    ["Company type", profile.companyType],
+    ["Industry", profile.industry],
+    ["Headquarters", profile.headquarters],
+    ["Parent company", profile.parentCompany],
+  ];
+
+  parts.push('<div class="filtered-profile-grid">');
+  for (const [label, value] of fields) {
+    if (!value) continue;
+    const isUrl = value.startsWith("http://") || value.startsWith("https://");
+    const display = isUrl
+      ? `<a href="${escapeHtml(value)}" target="_blank" rel="noopener noreferrer">${escapeHtml(value)}</a>`
+      : escapeHtml(value);
+    parts.push(`
+      <article class="review-item">
+        <span class="review-label">${escapeHtml(label)}</span>
+        <p class="review-value">${display}</p>
+      </article>
+    `);
+  }
+  parts.push("</div>");
+
+  // List fields
+  const listFields = [
+    ["Regions", profile.regions],
+    ["Notable products / services", profile.notableProductsOrServices],
+    ["Notable facts", profile.notableFacts],
+    ["Strategic signals", profile.strategicSignals],
+    ["Credibility notes", profile.credibilityNotes],
+  ];
+
+  for (const [label, items] of listFields) {
+    if (!Array.isArray(items) || items.length === 0) continue;
+    parts.push(`<div class="filtered-list-section">`);
+    parts.push(`<h4 class="filtered-list-heading">${escapeHtml(label)}</h4>`);
+    parts.push("<ul class=\"filtered-list\">");
+    for (const item of items) {
+      parts.push(`<li>${escapeHtml(item)}</li>`);
+    }
+    parts.push("</ul></div>");
+  }
+
+  // Source items
+  const sourceItems = profile.sourceItems || [];
+  if (sourceItems.length > 0) {
+    parts.push('<div class="research-source-group">');
+    parts.push(`<h4 class="filtered-list-heading">Retained sources <span class="research-count">(${sourceItems.length})</span></h4>`);
+    for (const s of sourceItems) {
+      parts.push('<article class="research-finding">');
+      parts.push(`<p class="research-finding-title">${escapeHtml(s.title || "Untitled")} <span class="research-count">— ${escapeHtml(s.sourceName)}</span></p>`);
+      if (s.snippet) {
+        parts.push(`<p class="research-finding-desc">${escapeHtml(s.snippet)}</p>`);
+      }
+      const bits = [];
+      if (s.confidence > 0) bits.push(`Score: ${(s.confidence * 100).toFixed(0)}%`);
+      if (s.relevanceReason) bits.push(s.relevanceReason);
+      if (bits.length > 0) {
+        parts.push(`<p class="research-finding-meta">${escapeHtml(bits.join(" · "))}</p>`);
+      }
+      if (s.url) {
+        parts.push(`<p class="research-finding-link"><a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.url)}</a></p>`);
+      }
+      parts.push("</article>");
+    }
+    parts.push("</div>");
+  }
+
+  // Stage 3 hook: add OpenAI generation button/trigger here
+
+  if (parts.length === 0 || (profile.sourceItems || []).length === 0) {
+    parts.push('<p class="card-helper">No useful company information could be extracted from the raw findings.</p>');
+  }
+
+  return parts.join("");
+}
+
+// ---------------------------------------------------------------------------
+// Personalised content generation (Stage 3)
+// ---------------------------------------------------------------------------
+
+async function generatePersonalisedContent(application, filteredFindings) {
+  const response = await fetch(`${LOCAL_API_BASE}/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ application, filteredFindings }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Generate API returned ${response.status}`);
+  }
+  return payload;
+}
+
+function renderGeneratedContent(result) {
+  const content = result.generatedContent || {};
+  const evidence = result.evidenceSelection || {};
+  const parts = [];
+
+  // Text fields
+  const textFields = [
+    ["Personalised opening", content.personalisedOpening],
+    ["Why this company", content.whyThisCompany],
+    ["Why this role", content.whyThisRole],
+    ["Fit summary", content.fitSummary],
+    ["Likely contribution", content.likelyContributionSummary],
+    ["Culture fit", content.cultureFitSummary],
+    ["Closing summary", content.closingSummary],
+  ];
+
+  parts.push('<div class="filtered-profile-grid">');
+  for (const [label, value] of textFields) {
+    if (!value) continue;
+    parts.push(`
+      <article class="review-item">
+        <span class="review-label">${escapeHtml(label)}</span>
+        <p class="review-value">${escapeHtml(value)}</p>
+      </article>
+    `);
+  }
+  parts.push("</div>");
+
+  // Company highlights
+  const highlights = content.companyHighlights || [];
+  if (highlights.length > 0) {
+    parts.push('<div class="filtered-list-section">');
+    parts.push('<h4 class="filtered-list-heading">Company highlights</h4>');
+    parts.push('<ul class="filtered-list">');
+    for (const h of highlights) {
+      parts.push(`<li>${escapeHtml(h)}</li>`);
+    }
+    parts.push("</ul></div>");
+  }
+
+  // Selected evidence examples
+  const examples = content.selectedEvidenceExamples || [];
+  if (examples.length > 0) {
+    parts.push('<div class="research-source-group">');
+    parts.push(`<h4 class="filtered-list-heading">Selected evidence examples <span class="research-count">(${examples.length})</span></h4>`);
+    for (const ex of examples) {
+      parts.push('<article class="research-finding">');
+      parts.push(`<p class="research-finding-title">${escapeHtml(ex.exampleTitle || "Untitled")} <span class="research-count">— ID ${escapeHtml(String(ex.exampleId || "?"))}</span></p>`);
+      if (ex.shortLine) {
+        parts.push(`<p class="research-finding-desc"><strong>${escapeHtml(ex.shortLine)}</strong></p>`);
+      }
+      if (ex.whyChosen) {
+        parts.push(`<p class="research-finding-desc">${escapeHtml(ex.whyChosen)}</p>`);
+      }
+      const bits = [];
+      if (ex.suggestedUsage) bits.push(`Usage: ${ex.suggestedUsage}`);
+      if (bits.length > 0) {
+        parts.push(`<p class="research-finding-meta">${escapeHtml(bits.join(" · "))}</p>`);
+      }
+      parts.push("</article>");
+    }
+    parts.push("</div>");
+  }
+
+  // Evidence selection summary
+  if (evidence.count > 0) {
+    parts.push('<div class="filtered-list-section">');
+    parts.push(`<h4 class="filtered-list-heading">Evidence bank shortlist <span class="research-count">(${evidence.count} considered)</span></h4>`);
+    parts.push('<ul class="filtered-list">');
+    for (const ex of (evidence.examples || [])) {
+      parts.push(`<li>${escapeHtml(ex.title || "?")} (${escapeHtml(ex.employer || "?")}) — match: ${((ex.matchScore || 0) * 100).toFixed(0)}%</li>`);
+    }
+    parts.push("</ul></div>");
+    if (evidence.error) {
+      parts.push(`<p class="inline-feedback">${escapeHtml(evidence.error)}</p>`);
+    }
+  }
+
+  // Content notes
+  const notes = content.contentNotes || [];
+  if (notes.length > 0) {
+    parts.push('<div class="filtered-list-section">');
+    parts.push('<h4 class="filtered-list-heading">Content notes</h4>');
+    parts.push('<ul class="filtered-list">');
+    for (const n of notes) {
+      parts.push(`<li>${escapeHtml(n)}</li>`);
+    }
+    parts.push("</ul></div>");
+  }
+
+  if (!content.personalisedOpening && examples.length === 0) {
+    parts.push('<p class="card-helper">No personalised content was generated. Check the debug JSON for details.</p>');
+  }
+
+  return parts.join("");
+}
+
+// ---------------------------------------------------------------------------
+// QR code rendering
+// ---------------------------------------------------------------------------
 
 async function renderQrImage(img, text) {
   if (!img || !window.QRious) {

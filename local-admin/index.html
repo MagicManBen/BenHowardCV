@@ -79,6 +79,84 @@
       <p class="error-message" id="publish-error" role="alert" hidden></p>
     </section>
 
+    <section class="card" id="research-panel" hidden aria-labelledby="research-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Step 3</p>
+          <h2 id="research-title">Company research</h2>
+        </div>
+      </div>
+      <p class="card-helper">Run external API lookups to gather company information. Results are raw findings that can be reviewed and filtered in Stage 2.</p>
+      <div class="action-row action-row--spread">
+        <div class="action-row">
+          <button class="button" id="run-research-button" type="button">Run APIs</button>
+          <button class="button button--ghost" id="filter-findings-button" type="button" disabled>Filter Findings</button>
+        </div>
+        <p class="inline-feedback" id="research-status" aria-live="polite">Ready to research.</p>
+      </div>
+      <p class="error-message" id="research-error" role="alert" hidden></p>
+      <div id="research-findings" hidden></div>
+      <details class="debug-panel" id="research-debug-panel" hidden>
+        <summary>Raw research JSON</summary>
+        <pre class="debug-output" id="research-raw-json">No research run yet.</pre>
+      </details>
+
+      <div id="filtered-panel" hidden>
+        <div class="section-heading" style="margin-top:1.5rem">
+          <div>
+            <p class="section-kicker">Step 3b</p>
+            <h3 id="filtered-title">Filtered company profile</h3>
+          </div>
+        </div>
+        <p class="inline-feedback" id="filter-status" aria-live="polite"></p>
+        <p class="error-message" id="filter-error" role="alert" hidden></p>
+        <div id="filtered-findings"></div>
+        <details class="debug-panel" id="filtered-debug-panel" hidden>
+          <summary>Filtered JSON</summary>
+          <pre class="debug-output" id="filtered-raw-json">No filtering run yet.</pre>
+        </details>
+      </div>
+
+      <div id="generate-panel" hidden>
+        <div class="section-heading" style="margin-top:1.5rem">
+          <div>
+            <p class="section-kicker">Step 4</p>
+            <h3 id="generate-title">Personalised content</h3>
+          </div>
+        </div>
+        <p class="card-helper">Generate tailored CV content using OpenAI, the parsed advert, filtered research, and Ben's evidence bank.</p>
+        <div class="action-row action-row--spread">
+          <div class="action-row">
+            <button class="button" id="generate-content-button" type="button" disabled>Generate Personalised Content</button>
+          </div>
+          <p class="inline-feedback" id="generate-status" aria-live="polite">Filter findings first.</p>
+        </div>
+        <p class="error-message" id="generate-error" role="alert" hidden></p>
+        <div id="generated-content" hidden></div>
+        <details class="debug-panel" id="generate-debug-panel" hidden>
+          <summary>Generation JSON</summary>
+          <pre class="debug-output" id="generate-raw-json">No generation run yet.</pre>
+        </details>
+
+        <div id="apply-panel" hidden style="margin-top:1.5rem">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">Step 5</p>
+              <h3 id="apply-title">Apply generated content</h3>
+            </div>
+          </div>
+          <p class="card-helper">Merge the generated personalised content into the application payload, then publish and preview.</p>
+          <div class="action-row action-row--spread">
+            <div class="action-row">
+              <button class="button" id="apply-content-button" type="button" disabled>Apply &amp; Publish</button>
+            </div>
+            <p class="inline-feedback" id="apply-status" aria-live="polite">Generate content first.</p>
+          </div>
+          <p class="error-message" id="apply-error" role="alert" hidden></p>
+        </div>
+      </div>
+    </section>
+
     <section class="card" id="result-panel" hidden aria-labelledby="result-title">
       <div class="section-heading">
         <div>

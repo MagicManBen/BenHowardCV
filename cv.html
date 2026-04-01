@@ -2091,7 +2091,17 @@
           impliedStrategicGoals: cleanArray(data.impliedStrategicGoals),
           deliverablesLikely: cleanArray(data.deliverablesLikely),
           possibleHeadlineFacts: cleanArray(data.possibleHeadlineFacts || data.phf),
-          matchCategories: cleanArray(data.matchCategories || data.mc)
+          matchCategories: cleanArray(data.matchCategories || data.mc),
+          // Generated content (Stage 4) — optional, backwards compatible
+          genPersonalisedOpening: cleanString(data.genPersonalisedOpening || data.gpo),
+          genWhyThisCompany: cleanString(data.genWhyThisCompany || data.gwc),
+          genWhyThisRole: cleanString(data.genWhyThisRole || data.gwr),
+          genFitSummary: cleanString(data.genFitSummary || data.gfs),
+          genLikelyContribution: cleanString(data.genLikelyContribution || data.glc),
+          genCultureFit: cleanString(data.genCultureFit || data.gcf),
+          genClosingSummary: cleanString(data.genClosingSummary || data.gcs),
+          genCompanyHighlights: cleanArray(data.genCompanyHighlights || data.gch),
+          genEvidenceExamples: Array.isArray(data.genEvidenceExamples || data.gee) ? (data.genEvidenceExamples || data.gee) : []
         };
       }
 
@@ -2138,6 +2148,9 @@
       }
 
       function buildHeroStatement(state) {
+        if (state.genPersonalisedOpening) {
+          return state.genPersonalisedOpening;
+        }
         if (state.companyName !== defaults.companyName) {
           return `Thank you for reviewing my CV. I wanted to give you a clearer picture of why ${state.companyName} and this role stood out to me, and why my operations background could be relevant here.`;
         }
@@ -2153,6 +2166,7 @@
       }
 
       function buildTailoredAngle(state) {
+        if (state.genWhyThisRole) return state.genWhyThisRole;
         const priorities = pickLines(state.probablePriorities, state.keyFocusAreas, 3);
         if (priorities.length) {
           return `The brief points to ${formatList(priorities)}, which aligns well with my background in operational control and measurable improvement.`;
@@ -2173,7 +2187,8 @@
       }
 
       function buildCompanyNote(state) {
-        return state.headlineAttraction
+        return state.genWhyThisCompany
+          || state.headlineAttraction
           || state.shortCompanyReason
           || state.companySummary
           || "Service-led organisation where reliability, standards and customer experience matter.";
@@ -2242,7 +2257,8 @@
       }
 
       function buildCompanyAttraction(state) {
-        return state.headlineAttraction
+        return state.genWhyThisCompany
+          || state.headlineAttraction
           || state.shortCompanyReason
           || state.companySummary
           || "A tailored view that keeps the company and role context front and centre.";
@@ -2329,7 +2345,7 @@
         return [
           {
             title: "Tone and pace",
-            copy: formatList([...cleanArray(state.toneKeywords), ...cleanArray(state.cultureSignals)].slice(0, 5)) || "Not provided",
+            copy: state.genCultureFit || formatList([...cleanArray(state.toneKeywords), ...cleanArray(state.cultureSignals)].slice(0, 5)) || "Not provided",
             tags: [...cleanArray(state.toneKeywords).slice(0, 2), ...cleanArray(state.cultureSignals).slice(0, 2)]
           },
           {
@@ -2346,6 +2362,7 @@
       }
 
       function buildWrapUpSummary(state) {
+        if (state.genFitSummary) return state.genFitSummary;
         const parts = [
           state.headlineAttraction,
           state.shortCompanyReason,
@@ -2463,12 +2480,14 @@
         setHtml("intro-lede", state.companyName === defaults.companyName
           ? "This introduction stays grounded in the company and role details already captured in the application."
           : `Prepared for <em>${state.companyName}</em> and the <em>${state.roleTitle}</em> brief.`);
-        setText("intro-summary", state.companySummary || state.shortCompanyReason || "A tailored company-facing introduction grounded in the role and company details.");
+        setText("intro-summary", state.genWhyThisCompany || state.companySummary || state.shortCompanyReason || "A tailored company-facing introduction grounded in the role and company details.");
         setText("intro-detail", buildIntroDetail(state));
         renderLines("intro-traits", companyFacts.length ? companyFacts : workingStyleLines);
-        renderLines("intro-strength-lines", pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4).length
-          ? pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4)
-          : baseStrengthLines);
+        renderLines("intro-strength-lines", state.genCompanyHighlights.length
+          ? state.genCompanyHighlights.slice(0, 4)
+          : (pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4).length
+            ? pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4)
+            : baseStrengthLines));
 
         setSectionHeader(
           "proof",
@@ -2529,12 +2548,14 @@
         setText("detail-employment", state.employmentType || defaults.employmentType);
         setText("detail-salary", state.salary || defaults.salary);
         setText("tailored-rationale", buildWrapUpSummary(state));
-        setText("why-this-role", state.likelyBusinessNeeds.length
-          ? formatList(cleanArray(state.likelyBusinessNeeds).slice(0, 3))
-          : "The role appears geared toward visible operational control, clear priorities and practical follow-through.");
-        setText("role-summary", state.impliedStrategicGoals.length
-          ? formatList(cleanArray(state.impliedStrategicGoals).slice(0, 3))
-          : "A concise view of the role, the fit and the priorities behind it.");
+        setText("why-this-role", state.genWhyThisRole
+          || (state.likelyBusinessNeeds.length
+            ? formatList(cleanArray(state.likelyBusinessNeeds).slice(0, 3))
+            : "The role appears geared toward visible operational control, clear priorities and practical follow-through."));
+        setText("role-summary", state.genLikelyContribution
+          || (state.impliedStrategicGoals.length
+            ? formatList(cleanArray(state.impliedStrategicGoals).slice(0, 3))
+            : "A concise view of the role, the fit and the priorities behind it."));
 
         setText("contact-heading", state.companyName === defaults.companyName
           ? "Let's talk."
@@ -2542,9 +2563,10 @@
         setText("contact-note-top", state.companyName === defaults.companyName
           ? "A direct final step if this feels like a strong fit."
           : `A direct final step if this feels like a strong fit for ${state.companyName}.`);
-        setText("contact-copy", state.companyName === defaults.companyName
-          ? "Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support the role."
-          : `Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support ${state.companyName} in the ${state.roleTitle} position.`);
+        setText("contact-copy", state.genClosingSummary
+          || (state.companyName === defaults.companyName
+            ? "Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support the role."
+            : `Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support ${state.companyName} in the ${state.roleTitle} position.`));
       }
 
       function initReveal() {

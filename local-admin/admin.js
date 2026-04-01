@@ -109,6 +109,7 @@ async function initLocalAdminPage() {
     dom.confirmStatus.textContent = "Pushing to GitHub\u2026";
 
     try {
+      const publishApplicationData = sanitizeApplicationForPublish(pendingApplication);
       const gen = pendingApplication.personalisedContent || {};
       if (gen.personalisedOpening) pendingApplication.personalisedIntro = gen.personalisedOpening;
       if (gen.whyThisCompany) pendingApplication.shortCompanyReason = gen.whyThisCompany;
@@ -126,7 +127,7 @@ async function initLocalAdminPage() {
       pendingApplication.genCompanyHighlights = Array.isArray(gen.companyHighlights) ? gen.companyHighlights : [];
       pendingApplication.genEvidenceExamples = Array.isArray(gen.selectedEvidenceExamples) ? gen.selectedEvidenceExamples : [];
 
-      const response = await publishApplication(pendingApplication);
+      const response = await publishApplication(publishApplicationData);
       const application = response.application || pendingApplication;
       const publicUrl = buildShortJobUrl(application);
 
@@ -429,6 +430,8 @@ function normaliseApplicationPayload(input) {
     sector: str(input.sector), salary: str(input.salary),
     employmentType: str(input.employmentType), hours: str(input.hours),
     workplaceType: str(input.workplaceType),
+    cvText: str(input.cvText) || str(input.candidateCvText) || str(input.candidateCv),
+    cvSummary: str(input.cvSummary) || str(input.candidateCvSummary),
     shortCompanyReason: str(input.shortCompanyReason), shortRoleReason: str(input.shortRoleReason),
     companySummary: str(input.companySummary), roleSummary: str(input.roleSummary),
     headlineAttraction: str(input.headlineAttraction), rolePurpose: str(input.rolePurpose),
@@ -451,12 +454,34 @@ function normaliseApplicationPayload(input) {
   };
 }
 
+function sanitizeApplicationForPublish(application) {
+  var payload = {};
+  for (var key in application) {
+    if (Object.prototype.hasOwnProperty.call(application, key)) {
+      payload[key] = application[key];
+    }
+  }
+  delete payload.cvText;
+  delete payload.cvSummary;
+  delete payload.candidateCv;
+  delete payload.candidateCvText;
+  delete payload.candidateCvSummary;
+  return payload;
+}
+
 function normaliseProvidedPersonalisedContent(input) {
   var source = null;
   if (input.personalisedContent && typeof input.personalisedContent === "object" && !Array.isArray(input.personalisedContent)) {
     source = input.personalisedContent;
   } else if (input.generatedContent && typeof input.generatedContent === "object" && !Array.isArray(input.generatedContent)) {
     source = input.generatedContent;
+  } else if (
+    input.personalisedOpening || input.whyThisCompany || input.whyThisRole ||
+    input.fitSummary || input.likelyContributionSummary || input.companyHighlights ||
+    input.cultureFitSummary || input.closingSummary || input.selectedEvidenceExamples ||
+    input.contentNotes
+  ) {
+    source = input;
   }
 
   if (!source) return null;
@@ -657,7 +682,7 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
   /* 5. Build a safe filename */
   var safeName = "Ben Howard CV" + (companyName ? " - " + companyName : "");
 
-  /* 6. Upload to GitHub via local server */
+  /* 6. Upload HTML to GitHub via local server */
   var uploadRes = await fetch(LOCAL_API_BASE + "/upload-cv", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -666,15 +691,18 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
   var uploadPayload = await uploadRes.json().catch(function () { return {}; });
   if (!uploadRes.ok) throw new Error(uploadPayload.error || "Upload failed.");
 
-  /* 7. Trigger a local file download immediately */
-  var blob = new Blob([html], { type: "text/html" });
-  var blobUrl = URL.createObjectURL(blob);
-  var a = document.createElement("a");
-  a.href = blobUrl;
-  a.download = safeName + ".html";
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 1000);
+  /* 7. Open in new window and trigger print-to-PDF */
+  var printHtml = html.replace('</body>', '<script>window.onload=function(){window.print();}<\/script></body>');
+  var pdfBlob = new Blob([printHtml], { type: 'text/html' });
+  var blobUrl = URL.createObjectURL(pdfBlob);
+  var win = window.open(blobUrl, '_blank');
+  if (win) {
+    win.addEventListener('afterprint', function () {
+      URL.revokeObjectURL(blobUrl);
+    });
+  } else {
+    setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 30000);
+  }
 
   return uploadPayload.publicUrl || "";
 }

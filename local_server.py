@@ -5,8 +5,12 @@ import json
 import os
 import re
 import secrets
+import shutil
 import string
+import subprocess
 import sys
+import tempfile
+import time
 import traceback
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -14,6 +18,78 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, quote, urlparse
 from urllib.request import Request, urlopen
+
+CHROME_CANDIDATES = [
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/Applications/Chromium.app/Contents/MacOS/Chromium",
+  shutil.which("chromium") or "",
+  shutil.which("google-chrome") or "",
+]
+
+
+def find_chrome():
+  for path in CHROME_CANDIDATES:
+    if path and os.path.isfile(path):
+      return path
+  return None
+
+
+def generate_pdf_from_html(html_content):
+  """Convert HTML string to PDF bytes using Chrome headless. Returns (pdf_bytes, error_str)."""
+  chrome = find_chrome()
+  if not chrome:
+    return None, "Chrome/Chromium not found."
+
+  with tempfile.TemporaryDirectory() as tmp:
+    html_path = os.path.join(tmp, "cv.html")
+    pdf_path = os.path.join(tmp, "cv.pdf")
+    Path(html_path).write_text(html_content, encoding="utf-8")
+
+    cmd = [
+      chrome,
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--run-all-compositor-stages-before-draw",
+      "--virtual-time-budget=5000",
+      f"--print-to-pdf={pdf_path}",
+      f"--user-data-dir={tmp}/profile",
+      f"file://{html_path}",
+    ]
+    env = {**os.environ, "DISPLAY": ""}  # Avoid display issues
+    try:
+      proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
+        close_fds=True,
+        start_new_session=True,
+        env=env,
+      )
+    except OSError as exc:
+      return None, str(exc)
+
+    # Poll for completion up to 90 seconds
+    deadline = 90
+    interval = 0.5
+    elapsed = 0.0
+    while elapsed < deadline:
+      retcode = proc.poll()
+      if retcode is not None:
+        break
+      time.sleep(interval)
+      elapsed += interval
+    else:
+      proc.kill()
+      return None, "Chrome timed out after 90 seconds."
+
+    if not os.path.exists(pdf_path):
+      return None, f"Chrome exited with code {retcode} but produced no PDF."
+    return Path(pdf_path).read_bytes(), None
 
 from content_generation import generate_personalised_content
 
@@ -531,7 +607,7 @@ class AppHandler(SimpleHTTPRequestHandler):
 
   def do_POST(self):
     parsed = urlparse(self.path)
-    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv"):
+    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf"):
       self.send_error(404)
       return
 
@@ -541,6 +617,10 @@ class AppHandler(SimpleHTTPRequestHandler):
 
     if parsed.path == "/api/upload-cv":
       self._handle_upload_cv()
+      return
+
+    if parsed.path == "/api/pdf":
+      self._handle_pdf()
       return
 
     length = int(self.headers.get("Content-Length", "0") or 0)
@@ -693,6 +773,38 @@ class AppHandler(SimpleHTTPRequestHandler):
     safe = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
     public_url = config["publicCvBaseUrl"].rstrip("/").replace("/cv.html", "") + "/downloads/" + quote(safe + ".html")
     self.send_json(200, {"ok": True, "path": result["path"], "publicUrl": public_url})
+
+  def _handle_pdf(self):
+    """Convert posted HTML to PDF using Chrome headless and return as a download."""
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    html_content = str(payload.get("content", "")).strip()
+    filename = str(payload.get("filename", "Ben Howard CV")).strip() or "Ben Howard CV"
+    if not html_content:
+      self.send_json(400, {"error": "content is required"})
+      return
+
+    pdf_bytes, error = generate_pdf_from_html(html_content)
+    if error:
+      self.send_json(500, {"error": f"PDF generation failed: {error}"})
+      return
+
+    safe_name = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
+    content_disposition = f'attachment; filename="{safe_name}.pdf"'
+    self.send_response(200)
+    self.send_header("Content-Type", "application/pdf")
+    self.send_header("Content-Length", str(len(pdf_bytes)))
+    self.send_header("Content-Disposition", content_disposition)
+    self.send_header("Cache-Control", "no-store")
+    self.end_headers()
+    self.wfile.write(pdf_bytes)
 
   def _handle_generate(self):
     length = int(self.headers.get("Content-Length", "0") or 0)

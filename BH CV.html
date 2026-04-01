@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ben T. Howard | Senior Operations and Transformation Leader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #ffffff;
+            --canvas: #d7c2a0;
+            --ink: #2f2f31;
+            --muted: #76797d;
+            --gold: #b7984a;
+            --gold-soft: rgba(183, 152, 74, 0.14);
+            --teal: #33596b;
+            --teal-deep: #284a5b;
+            --line: #d9d9d9;
+            --soft-bar: #f1f3f5;
+            --shadow: 0 24px 48px rgba(39, 31, 18, 0.16);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 17px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Source Sans 3", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                linear-gradient(180deg, #d5c0a0 0%, #d5c0a0 52%, #f3f3f3 52%, #f3f3f3 100%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        p,
+        li {
+            margin: 0;
+            font-size: 0.79rem;
+            line-height: 1.48;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 1rem;
+        }
+
+        li + li {
+            margin-top: 0.18rem;
+        }
+
+        .document {
+            display: grid;
+            gap: 18px;
+            padding: 22px 0;
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: var(--paper);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            break-after: page;
+            page-break-after: always;
+        }
+
+        .page:last-child {
+            break-after: auto;
+            page-break-after: auto;
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 32%;
+            height: 100%;
+        }
+
+        .main-column {
+            padding: 9mm 10mm 8mm 11mm;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar {
+            padding: 10mm 7mm 9mm 7mm;
+            background: linear-gradient(180deg, var(--teal) 0%, var(--teal-deep) 100%);
+            color: #f5f5f1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 1.25rem;
+        }
+
+        .masthead {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 0.55rem;
+        }
+
+        .name-lockup {
+            text-align: center;
+        }
+
+        .name-lockup h1 {
+            font-family: "Montserrat", sans-serif;
+            font-size: 2.08rem;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .role-title {
+            margin-top: 0.42rem;
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.59rem;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: #3a3d41;
+            text-indent: 0.25em;
+        }
+
+        .summary-block {
+            margin-top: 0.95rem;
+        }
+
+        .summary-copy {
+            color: #505458;
+            font-size: 0.86rem;
+            line-height: 1.52;
+        }
+
+        .section-block {
+            margin-top: 1rem;
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-heading {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 1.05rem;
+            margin-bottom: 0.64rem;
+            padding: 0.17rem 0.6rem 0.15rem 0.82rem;
+            background: linear-gradient(90deg, var(--soft-bar) 0%, rgba(241, 243, 245, 0.58) 100%);
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.63rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+        }
+
+        .role-list {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-heading::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--gold);
+        }
+
+        .role-entry + .role-entry {
+            margin-top: 0.92rem;
+            padding-top: 0.9rem;
+            border-top: 1px solid var(--line);
+        }
+
+        .role-header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.8rem;
+            align-items: baseline;
+        }
+
+        .role-name {
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: none;
+            line-height: 1.15;
+        }
+
+        .role-meta {
+            margin-top: 0.18rem;
+            color: #666a6f;
+            font-size: 0.72rem;
+        }
+
+        .role-date {
+            color: #666a6f;
+            font-size: 0.69rem;
+            white-space: nowrap;
+            text-align: right;
+            font-weight: 600;
+            padding-top: 0.08rem;
+        }
+
+        .role-entry ul {
+            margin-top: 0.5rem;
+        }
+
+        .role-entry li::marker,
+        .sidebar-list li::marker {
+            color: var(--gold);
+        }
+
+        .continuation-intro {
+            margin-bottom: 0.55rem;
+        }
+
+        .continuation-intro p {
+            color: var(--muted);
+        }
+
+        .sidebar-card + .sidebar-card {
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .sidebar-card h2 {
+            display: inline-block;
+            padding: 0.19rem 0.52rem 0.13rem;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--teal-deep);
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.53rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-card p,
+        .sidebar-card li {
+            color: rgba(245, 245, 241, 0.92);
+            font-size: 0.77rem;
+            line-height: 1.5;
+        }
+
+        .sidebar-card p + p,
+        .sidebar-card ul,
+        .sidebar-card .mini-entry-list {
+            margin-top: 0.5rem;
+        }
+
+        .contact-lines {
+            display: grid;
+            gap: 0.48rem;
+        }
+
+        .contact-lines strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .mini-entry {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .mini-entry + .mini-entry {
+            margin-top: 0.9rem;
+        }
+
+        .mini-entry h3 {
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.57rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: none;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .mini-entry:first-child h3 {
+            font-size: 0.61rem;
+            letter-spacing: 0.08em;
+        }
+
+        .mini-entry:first-child p:first-of-type {
+            font-weight: 700;
+        }
+
+        .mini-entry p {
+            margin-top: 0.12rem;
+        }
+
+        .sidebar-list {
+            padding-left: 1rem;
+        }
+
+        .sidebar-list.tight li + li {
+            margin-top: 0.28rem;
+        }
+
+
+        .note-card {
+            padding-top: 0.1rem;
+        }
+
+        .note-card p {
+            color: rgba(245, 245, 241, 0.84);
+        }
+
+        .note-card strong {
+            color: #ffffff;
+        }
+
+
+        @media (max-width: 960px) {
+            .document {
+                padding: 0;
+                gap: 0;
+            }
+
+            .page {
+                width: 100%;
+                height: auto;
+                box-shadow: none;
+            }
+
+            .page-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-column,
+            .sidebar {
+                padding: 1.25rem;
+            }
+
+            .masthead {
+                justify-content: flex-start;
+            }
+
+            .name-lockup {
+                text-align: left;
+            }
+
+            .name-lockup h1 {
+                text-indent: 0;
+                font-size: 1.7rem;
+            }
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            html,
+            body {
+                margin: 0;
+                background: #ffffff;
+            }
+
+            .document {
+                padding: 0;
+                gap: 0;
+            }
+
+            .page {
+                width: 210mm;
+                height: 297mm;
+                box-shadow: none;
+            }
+
+            .page-grid {
+                grid-template-columns: minmax(0, 1fr) 32%;
+            }
+
+            .main-column {
+                padding: 9mm 10mm 8mm 11mm;
+            }
+
+            .sidebar {
+                display: flex;
+                padding: 10mm 7mm 9mm 7mm;
+                justify-content: flex-start;
+                gap: 1.25rem;
+            }
+
+            .masthead {
+                justify-content: center;
+            }
+
+            .name-lockup {
+                text-align: center;
+            }
+
+            .name-lockup h1 {
+                font-size: 2.08rem;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <main class="document">
+        <section class="page">
+            <div class="page-grid">
+                <div class="main-column">
+                    <header class="masthead">
+                        <div class="name-lockup">
+                            <h1>Ben Howard</h1>
+                            <p class="role-title">Senior Operations and Transformation Leader</p>
+                        </div>
+                    </header>
+
+                    <section class="summary-block">
+                        <div class="section-heading">Professional Profile</div>
+                        <p class="summary-copy">Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. Delivers operational turnaround, service redesign, financial control and performance improvement in complex, fast-moving environments. Combines strategic oversight with hands-on delivery across governance, workforce planning, reporting and service execution. Known for bringing structure, commercial grip and measurable results.</p>
+                    </section>
+
+                    <section class="section-block">
+                        <div class="section-heading">Professional Experience</div>
+
+                        <div class="role-list">
+                            <article class="role-entry">
+                                <div class="role-header">
+                                    <div>
+                                        <h2 class="role-name">Operations, Development and Transformation Manager</h2>
+                                        <p class="role-meta">NHS Primary Care</p>
+                                    </div>
+                                    <p class="role-date">2024 - Present</p>
+                                </div>
+                                <ul>
+                                    <li>Leading operational performance, transformation and service control across clinical, administrative and patient-facing functions, supporting delivery across a £1.56m annual income base.</li>
+                                    <li>Improved patient experience by increasing Google review score from 2.09 to 4.51 and raising five-star reviews from 19.8% to 81.3% across 209 reviews received during this period.</li>
+                                    <li>Supported a £149.9k improvement in profit before appropriation, released £33.3k of working capital through a 40.3% reduction in debtor balances and helped increase cash at bank by £172.6k year on year.</li>
+                                    <li>Built senior reporting across workflow, room utilisation, payroll and contractual income, including reconciliation of 64 PCSE remittance files covering £2.83m.</li>
+                                </ul>
+                            </article>
+
+                            <article class="role-entry">
+                                <div class="role-header">
+                                    <div>
+                                        <h2 class="role-name">Operations Manager</h2>
+                                        <p class="role-meta">Copper Alloys Ltd</p>
+                                    </div>
+                                    <p class="role-date">2022 - 2024</p>
+                                </div>
+                                <ul>
+                                    <li>Led day-to-day operations within a specialist manufacturing environment during a scale-up phase, supporting disciplined delivery across production, people, systems and customer requirements.</li>
+                                    <li>Contributed to operational improvements during a period in which gross profit margin increased from 29% to 39% and orders won rose by 60%.</li>
+                                    <li>Improved operational resilience through changes to processes, equipment, capacity and ways of working, supporting business growth in a precision manufacturing setting.</li>
+                                    <li>Used sales, delivery and KPI reporting to monitor performance, maintain customer service levels and strengthen execution across the operation.</li>
+                                </ul>
+                            </article>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="sidebar">
+                    <section class="sidebar-card">
+                        <h2>Contact</h2>
+                        <div class="contact-lines">
+                            <p><strong>Phone</strong><br><a href="tel:07507789672">07507 789672</a></p>
+                            <p><strong>Email</strong><br><a href="mailto:benhowardmagic@hotmail.com">benhowardmagic@hotmail.com</a></p>
+                            <p><strong>Location</strong><br>Leek, Staffordshire</p>
+                        </div>
+                    </section>
+
+                    <section class="sidebar-card">
+                        <h2>Education</h2>
+                        <div class="mini-entry-list">
+                            <article class="mini-entry">
+                                <h3>Executive MBA</h3>
+                                <p>Aston University</p>
+                                <p>2020 - 2023</p>
+                            </article>
+                            <article class="mini-entry">
+                                <h3>Level 5 Apprenticeship, Operations Departmental Manager</h3>
+                                <p>Staffordshire University</p>
+                                <p>2018 - 2020</p>
+                            </article>
+                            <article class="mini-entry">
+                                <h3>Level 5 Diploma in Organisational Leadership</h3>
+                                <p>Institute of Leadership and Management</p>
+                                <p>2018 - 2020</p>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="sidebar-card">
+                        <h2>Core Skills</h2>
+                        <ul class="sidebar-list">
+                            <li>Operational Performance</li>
+                            <li>Service Improvement and Redesign</li>
+                            <li>KPI Governance and Reporting</li>
+                            <li>Financial Control and Budget Oversight</li>
+                            <li>Patient Access and Service Delivery</li>
+                            <li>Workforce Utilisation and Planning</li>
+                            <li>Change Delivery and Stakeholder Engagement</li>
+                            <li>Power BI, EMIS, Accurx</li>
+                        </ul>
+                    </section>
+
+                </aside>
+            </div>
+        </section>
+
+        <section class="page">
+            <div class="page-grid">
+                <div class="main-column">
+                    <section class="continuation-intro">
+                        <div class="section-heading">Professional Experience</div>
+                    </section>
+
+                    <section class="section-block">
+                        <div class="role-list">
+                            <article class="role-entry">
+                                <div class="role-header">
+                                    <div>
+                                        <h2 class="role-name">Operations & Continuous Improvement Manager</h2>
+                                        <p class="role-meta">Merlin Entertainments | Alton Towers Resort</p>
+                                    </div>
+                                    <p class="role-date">2016 - 2022</p>
+                                </div>
+                                <ul>
+                                    <li>Progressed through operational and continuous improvement roles, combining frontline resort operations with cross-site transformation delivery across five major European theme park sites.</li>
+                                    <li>Managed live operations across major attraction launches and seasonal events, including the opening of Wicker Man, a £16m investment and the UK's first new wooden rollercoaster in over 20 years.</li>
+                                    <li>Led cross-site improvement activity across Alton Towers, Chessington, Gardaland, Heide Park and Thorpe Park, using operational data and frontline insight to strengthen operating standards.</li>
+                                    <li>Coordinated live operations across teams of more than 300 in a KPI-led guest-experience environment, using live feedback tools and digital ride-time information to support operational decision-making.</li>
+                                </ul>
+                            </article>
+
+                            <article class="role-entry">
+                                <div class="role-header">
+                                    <div>
+                                        <h2 class="role-name">Product Executive</h2>
+                                        <p class="role-meta">Experian</p>
+                                    </div>
+                                    <p class="role-date">2010 - 2016</p>
+                                </div>
+                                <ul>
+                                    <li>Supported business-critical delivery and client service within a regulated, data-sensitive corporate environment.</li>
+                                    <li>Coordinated workload allocation and training across a 12-person function to maintain service standards and processing performance.</li>
+                                    <li>Built early capability in stakeholder management, process control and performance-led delivery within a structured corporate setting.</li>
+                                </ul>
+                            </article>
+                        </div>
+                    </section>
+                </div>
+
+                <aside class="sidebar">
+                    <section class="sidebar-card">
+                        <h2>Sector Experience</h2>
+                        <ul class="sidebar-list">
+                            <li>NHS and healthcare operations</li>
+                            <li>Specialist manufacturing</li>
+                            <li>Leisure, attractions and visitor operations</li>
+                            <li>Regulated data and corporate services</li>
+                        </ul>
+                    </section>
+
+                    <section class="sidebar-card">
+                        <h2>Leadership Themes</h2>
+                        <ul class="sidebar-list tight">
+                            <li>Operational turnaround and stabilisation</li>
+                            <li>Service redesign and customer experience improvement</li>
+                            <li>Commercial grip, reporting and financial control</li>
+                            <li>Cross-functional leadership in complex environments</li>
+                        </ul>
+                    </section>
+
+
+                </aside>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

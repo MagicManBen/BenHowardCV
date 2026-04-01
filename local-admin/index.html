@@ -110,12 +110,12 @@
         <div class="field-group"><label>Ref</label><input id="result-ref" type="text" readonly></div>
       </div>
       <div class="field-group" style="margin-top:1rem">
-        <label for="result-url">Short CV URL</label>
-        <input id="result-url" type="text" readonly>
+        <label for="result-qr-url">Short URL</label>
+        <input id="result-qr-url" type="text" readonly>
       </div>
       <div class="field-group" style="margin-top:0.5rem">
-        <label for="result-qr-url">QR URL (short redirect)</label>
-        <input id="result-qr-url" type="text" readonly>
+        <label for="result-url">Full CV URL</label>
+        <input id="result-url" type="text" readonly>
       </div>
       <div class="result-qr-layout">
         <section class="result-qr-card">
@@ -126,10 +126,12 @@
         </section>
         <div class="result-actions">
           <div class="action-row">
-            <button class="button" id="copy-qr-url-button" type="button">Copy QR URL</button>
-            <button class="button button--ghost" id="copy-url-button" type="button">Copy Full URL</button>
-            <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open Local CV</a>
+            <button class="button" id="copy-qr-url-button" type="button">Copy URL</button>
+            <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open URL</a>
             <button class="button button--ghost" id="download-cv-button" type="button">Download CV</button>
+          </div>
+          <div class="action-row" style="margin-top:0.5rem">
+            <button class="button button--ghost" id="copy-url-button" type="button">Copy Full URL</button>
           </div>
         </div>
       </div>
@@ -138,6 +140,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=6" defer></script>
+  <script src="admin.js?v=7" defer></script>
 </body>
 </html>

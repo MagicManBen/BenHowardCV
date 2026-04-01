@@ -178,8 +178,16 @@ async function initLocalAdminPage() {
     });
   }
 
-  dom.downloadCvButton.addEventListener("click", () => {
-    if (localPrintUrl) window.open(localPrintUrl, "_blank", "noopener,noreferrer");
+  dom.downloadCvButton.addEventListener("click", async () => {
+    var qrUrl = dom.resultQrUrl ? dom.resultQrUrl.value : "";
+    var roleTitle = dom.resultRole ? dom.resultRole.value : "";
+    var companyName = dom.resultCompany ? dom.resultCompany.value : "";
+    if (!qrUrl) { showToast(dom, "No short URL available yet."); return; }
+    try {
+      await downloadCvWithQr(qrUrl, roleTitle, companyName);
+    } catch (err) {
+      showToast(dom, "Download failed: " + (err.message || err));
+    }
   });
 
   /* ── Pipeline ─────────────────────────────────────── */
@@ -500,11 +508,12 @@ async function renderPublishedResult(dom, application, publicUrl, localPreviewUr
   dom.resultLocation.value = application.location || "";
   dom.resultRef.value = application.ref || "";
   dom.resultUrl.value = publicUrl;
-  dom.openPreviewLink.href = localPreviewUrl;
 
   var qrUrl = buildShortQrUrl(application);
   if (qrUrl && dom.resultQrUrl) dom.resultQrUrl.value = qrUrl;
-  var qrTarget = qrUrl || publicUrl;
+  var shortUrl = qrUrl || publicUrl;
+  dom.openPreviewLink.href = shortUrl;
+  var qrTarget = shortUrl;
   try { await renderQrImage(dom.resultQrImage, qrTarget); } catch (_) { dom.resultQrImage.hidden = true; }
 }
 
@@ -595,4 +604,46 @@ async function renderQrImage(img, text) {
   var qr = new window.QRious({ value: text, size: 300, level: "M", background: "white", foreground: "black" });
   img.src = qr.toDataURL();
   img.hidden = false;
+}
+
+async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
+  /* 1. Generate QR code data-URI */
+  var qr = new window.QRious({ value: shortUrl, size: 240, level: "M", background: "#ffffff", foreground: "#284a5b" });
+  var qrDataUrl = qr.toDataURL();
+
+  /* 2. Fetch the base CV HTML */
+  var response = await fetch("../BH%20CV.html?t=" + Date.now(), { cache: "no-store" });
+  if (!response.ok) throw new Error("Could not fetch BH CV.html");
+  var html = await response.text();
+
+  /* 3. Build the QR block to inject into the second page sidebar */
+  var label = companyName
+    ? "I have prepared a personalised CV for " + esc(companyName) + ". Scan or tap to view."
+    : "I have prepared a more detailed CV tailored for this role. Scan or tap to view.";
+
+  var qrBlock =
+    '<section class="sidebar-card" style="margin-top:auto; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">' +
+      '<h2>Tailored CV</h2>' +
+      '<a href="' + esc(shortUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.45rem; background:#fff; padding:6px; border-radius:6px; line-height:0;">' +
+        '<img src="' + qrDataUrl + '" width="100" height="100" alt="QR code" style="display:block; width:100px; height:100px;">' +
+      '</a>' +
+      '<p style="margin-top:0.45rem; font-size:0.65rem; line-height:1.4; color:rgba(245,245,241,0.88);">' + label + '</p>' +
+    '</section>';
+
+  /* 4. Inject QR block before the closing </aside> of the second page */
+  var secondAsideClose = html.lastIndexOf('</aside>');
+  if (secondAsideClose === -1) throw new Error("Could not find sidebar in BH CV.html");
+  html = html.slice(0, secondAsideClose) + qrBlock + '\n' + html.slice(secondAsideClose);
+
+  /* 5. Open in a new window and auto-print */
+  var printWin = window.open("", "_blank");
+  if (!printWin) throw new Error("Pop-up blocked. Allow pop-ups and try again.");
+  printWin.document.open();
+  printWin.document.write(html);
+  printWin.document.close();
+
+  /* Wait for fonts & images, then trigger print */
+  printWin.addEventListener("load", function () {
+    setTimeout(function () { printWin.print(); }, 400);
+  });
 }

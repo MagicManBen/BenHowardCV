@@ -19,4 +19,4 @@ The local admin page now talks to `local_server.py` on your Mac. That local serv
 
 ## Start On Mac
 
-Double-click `Start Ben Howard CV.command` in Finder, or run `python3 local_server.py`, to start the local server and open the dashboard plus local admin page.
+Double-click `Start Ben Howard CV.command` in Finder. It will pick a free local port, start `local_server.py`, and open the dashboard plus local admin page on `127.0.0.1`.

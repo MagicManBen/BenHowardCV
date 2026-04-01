@@ -1,23 +1,43 @@
 #!/bin/zsh
 
-set -e
+set -euo pipefail
 
 cd "$(dirname "$0")"
 
-PORT=8000
-PUBLIC_URL="http://localhost:${PORT}/"
-ADMIN_URL="http://localhost:${PORT}/local-admin/"
+find_free_port() {
+  local port="$1"
+  while lsof -nP -iTCP:"${port}" -sTCP:LISTEN >/dev/null 2>&1; do
+    port=$((port + 1))
+  done
+  print -r -- "${port}"
+}
 
-if lsof -ti tcp:${PORT} >/dev/null 2>&1; then
-  open "${PUBLIC_URL}"
-  open "${ADMIN_URL}"
-  exit 0
-fi
+PORT="$(find_free_port 8000)"
+BASE_URL="http://127.0.0.1:${PORT}"
+PUBLIC_URL="${BASE_URL}/"
+ADMIN_URL="${BASE_URL}/local-admin/"
+LOG_FILE="/tmp/benhowardcv-http.log"
 
-python3 local_server.py "${PORT}" >/tmp/benhowardcv-http.log 2>&1 &
+python3 local_server.py "${PORT}" >"${LOG_FILE}" 2>&1 &
 SERVER_PID=$!
 
-sleep 1
+cleanup() {
+  kill "${SERVER_PID}" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT INT TERM
+
+for _ in {1..50}; do
+  if curl -fsS "${BASE_URL}/api/status" >/dev/null 2>&1; then
+    break
+  fi
+  if ! kill -0 "${SERVER_PID}" >/dev/null 2>&1; then
+    print -u2 -- "Ben Howard CV server failed to start. Check ${LOG_FILE}."
+    exit 1
+  fi
+  sleep 0.1
+done
+
+print -r -- "Ben Howard CV running at ${PUBLIC_URL}"
 open "${PUBLIC_URL}"
 open "${ADMIN_URL}"
 

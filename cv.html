@@ -246,38 +246,222 @@
       opacity: 0.7;
     }
 
-    .hero-grid {
+    .hero-section {
+      padding-top: clamp(2rem, 5vw, 4rem);
+      padding-bottom: clamp(4.4rem, 9vw, 7.6rem);
+    }
+
+    .hero-editorial {
       display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
-      gap: clamp(2rem, 6vw, 4rem);
+      grid-template-columns: minmax(0, 1.28fr) minmax(250px, 0.72fr);
+      grid-template-areas:
+        "top top"
+        "left panel"
+        "proof proof"
+        "foot foot";
+      gap: 1.4rem 2rem;
+      align-items: start;
+    }
+
+    .hero-topline {
+      grid-area: top;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.8rem;
       align-items: end;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line-strong);
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
     }
 
-    .hero-copy {
+    .hero-topline strong {
+      color: var(--gold);
+      font-weight: 800;
+    }
+
+    .hero-topline-right {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.9rem;
+    }
+
+    .hero-left {
+      grid-area: left;
       display: grid;
-      gap: 1.1rem;
+      grid-template-columns: 3.4rem minmax(0, 1fr);
+      gap: 1.2rem 1.5rem;
+      align-items: start;
+      min-width: 0;
     }
 
-    .hero-title {
-      max-width: 8.5ch;
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(4.35rem, 11vw, 7.9rem);
-      line-height: 0.82;
+    .hero-main-column {
+      min-width: 0;
+      display: grid;
+      gap: 0;
+    }
+
+    .hero-kicker-block {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(190px, 0.65fr);
+      gap: 1rem 1.2rem;
+      padding: 0.9rem 0 1.15rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-kicker-copy {
+      max-width: 26ch;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      line-height: 1.5;
       font-weight: 700;
     }
 
+    .hero-kicker-notes {
+      display: grid;
+      gap: 0.45rem;
+      align-content: start;
+      justify-items: start;
+    }
+
+    .hero-kicker-notes span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.9rem;
+      padding: 0.32rem 0.58rem;
+      border: 1px solid rgba(18, 18, 18, 0.09);
+      color: var(--muted);
+      font-size: 0.68rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .hero-statement-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(190px, 0.5fr);
+      gap: 1.2rem 1.35rem;
+      align-items: end;
+      padding: 1rem 0 0.9rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-statement {
+      max-width: 23ch;
+      color: var(--ink-soft);
+      font-size: 1.02rem;
+      line-height: 1.8;
+    }
+
+    .hero-pull-note {
+      padding-top: 0.2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.7;
+    }
+
+    .hero-pull-note strong {
+      display: block;
+      margin-bottom: 0.28rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.68rem;
+    }
+
+    .hero-topline span:last-child {
+      justify-self: end;
+    }
+
+    .hero-side-label {
+      justify-items: center;
+      align-content: start;
+      gap: 0.85rem;
+      min-height: 100%;
+      padding-top: 1.2rem;
+      border-right: 1px solid var(--line);
+    }
+
+    .hero-side-label span {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .hero-side-rule {
+      width: 1px;
+      height: clamp(8rem, 14vw, 11rem);
+      background: linear-gradient(180deg, var(--gold), rgba(18, 18, 18, 0.14) 62%, transparent);
+    }
+
+    .hero-name-wrap {
+      display: grid;
+      gap: 0.75rem;
+      padding-top: 0.15rem;
+      min-width: 0;
+    }
+
+    .hero-overline {
+      max-width: 34ch;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .hero-title {
+      max-width: 7.6ch;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(4.9rem, 12vw, 8.8rem);
+      line-height: 0.78;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+    }
+
     .hero-role {
-      max-width: 28ch;
-      color: #222;
-      font-size: clamp(1.12rem, 2vw, 1.42rem);
-      line-height: 1.42;
+      max-width: 18ch;
+      color: #1f1d1a;
+      font-size: clamp(0.98rem, 1.45vw, 1.18rem);
+      line-height: 1.3;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-top: 0.2rem;
+    }
+
+    .hero-positioning {
+      max-width: 30ch;
+      color: var(--gold);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.21em;
+      font-weight: 800;
+      line-height: 1.7;
+      margin-top: 0.25rem;
     }
 
     .hero-summary {
-      max-width: 56ch;
-      color: var(--ink-soft);
-      font-size: 1rem;
-      line-height: 1.86;
+      display: none;
+    }
+
+    .hero-tailored-panel {
+      grid-area: panel;
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+      padding-top: 1rem;
+      padding-left: 1.1rem;
+      border-left: 1px solid var(--line);
     }
 
     .hero-rule,
@@ -307,152 +491,205 @@
       transform: scaleX(1);
     }
 
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem 0.75rem;
-      margin-top: 0.1rem;
-      padding-top: 0.35rem;
-      border-top: 1px solid var(--line);
-    }
-
-    .hero-meta span {
-      color: var(--muted);
-      font-size: 0.82rem;
-      padding-bottom: 0.2rem;
-      border-bottom: 1px solid rgba(18, 18, 18, 0.06);
-    }
-
-    .hero-note {
-      max-width: 40ch;
-      color: #1c1c1c;
-      font-size: 0.95rem;
-    }
-
-    .hero-plate {
-      position: relative;
-      min-height: 32rem;
-      padding: 1rem 0 1.1rem 1.25rem;
-      border-top: 1px solid var(--line-strong);
-      border-bottom: 1px solid var(--line-strong);
-      isolation: isolate;
-    }
-
-    .hero-plate::before {
-      content: "";
-      position: absolute;
-      left: 19%;
-      top: 0;
-      width: 1px;
-      height: 100%;
-      background: linear-gradient(180deg, transparent, rgba(18, 18, 18, 0.16) 15%, rgba(18, 18, 18, 0.16) 85%, transparent);
-    }
-
-    .hero-plate::after {
-      content: "";
-      position: absolute;
-      right: 0;
-      top: 2rem;
-      width: 65%;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(18, 18, 18, 0.12), transparent);
-    }
-
-    .hero-monogram {
-      position: absolute;
-      right: 0;
-      top: 1.8rem;
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(5rem, 18vw, 9rem);
-      line-height: 0.8;
-      letter-spacing: -0.08em;
-      color: rgba(18, 18, 18, 0.08);
-      pointer-events: none;
-      transform: translateY(calc(var(--scroll-y) * -0.03));
-    }
-
-    .hero-panel {
+    .hero-tailored-header {
       display: grid;
-      gap: 1rem;
-      align-content: end;
-      min-height: 100%;
+      gap: 0.42rem;
     }
 
-    .hero-kicker-block {
-      display: grid;
-      gap: 0.55rem;
-      align-content: start;
-      max-width: 24rem;
-      margin-top: auto;
-    }
-
-    .hero-kicker-label {
+    .hero-tailored-label {
       color: var(--gold);
       text-transform: uppercase;
       letter-spacing: 0.18em;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 800;
     }
 
-    .hero-context-line {
-      font-size: 1.1rem;
-      color: #212121;
-      line-height: 1.6;
+    .hero-tailored-heading {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2.15rem, 4.1vw, 3.7rem);
+      line-height: 0.92;
+      color: var(--ink);
     }
 
-    .hero-panel-grid {
+    .hero-context-line {
+      color: var(--ink);
+      font-size: 0.95rem;
+      line-height: 1.52;
+    }
+
+    .hero-detail-list {
       display: grid;
       gap: 0.7rem;
-      margin-top: 1rem;
+      padding-top: 0.15rem;
       border-top: 1px solid var(--line);
-      padding-top: 1rem;
     }
 
-    .hero-panel-grid .row {
-      display: flex;
-      gap: 0.85rem;
-      align-items: baseline;
-      justify-content: space-between;
+    .hero-detail-list .row {
+      display: grid;
+      gap: 0.25rem;
       padding-bottom: 0.55rem;
       border-bottom: 1px solid rgba(18, 18, 18, 0.08);
     }
 
-    .hero-panel-grid .row strong {
-      flex: 0 0 auto;
-      min-width: 6.2rem;
+    .hero-detail-list .row strong {
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       color: var(--muted);
     }
 
-    .hero-panel-grid .row span {
-      text-align: right;
+    .hero-detail-list .row span {
       color: var(--ink);
-      font-size: 0.95rem;
-      line-height: 1.45;
+      font-size: 0.9rem;
+      line-height: 1.52;
     }
 
-    .hero-panel-copy {
-      margin-top: 0.8rem;
-      padding-top: 0.85rem;
+    .hero-priority-block {
+      display: grid;
       border-top: 1px solid var(--line);
-      color: var(--ink-soft);
-      font-size: 0.92rem;
-      line-height: 1.7;
+      padding-top: 0.85rem;
+      gap: 0.55rem;
     }
 
-    .hero-plate .draw-line,
+    .hero-margin-label {
+      color: var(--gold);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .hero-focus-list {
+      display: grid;
+      gap: 0.2rem;
+    }
+
+    .hero-focus-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      padding: 0.28rem 0;
+      color: var(--ink);
+      font-size: 0.92rem;
+      line-height: 1.42;
+    }
+
+    .hero-focus-chip::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 0.52rem;
+      height: 0.52rem;
+      margin-top: 0.4rem;
+      border-radius: 999px;
+      background: rgba(169, 137, 79, 0.14);
+      border: 1px solid rgba(169, 137, 79, 0.55);
+    }
+
+    .hero-proof-strip {
+      grid-area: proof;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+      margin-top: 0.2rem;
+    }
+
+    .hero-proof-item {
+      display: grid;
+      gap: 0.45rem;
+      min-height: 7.6rem;
+      padding: 0.95rem 1rem 1rem;
+      border-right: 1px solid var(--line);
+      align-content: start;
+    }
+
+    .hero-proof-item:last-child {
+      border-right: 0;
+    }
+
+    .hero-proof-value {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2rem, 3.8vw, 3rem);
+      line-height: 0.9;
+      color: var(--ink);
+    }
+
+    .hero-proof-copy {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.52;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 800;
+    }
+
+    .hero-foot {
+      grid-area: foot;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 0.82fr);
+      gap: 1rem 1.6rem;
+      align-items: start;
+      padding-top: 0.95rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .hero-meta-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.9rem;
+      padding: 0.38rem 0.62rem;
+      border: 1px solid rgba(18, 18, 18, 0.1);
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.38);
+    }
+
+    .hero-tone-wrap {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .hero-tone-wrap strong {
+      color: var(--gold);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .hero-tone-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .hero-tone-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.9rem;
+      padding: 0.4rem 0.65rem;
+      border: 1px solid rgba(169, 137, 79, 0.2);
+      background: rgba(169, 137, 79, 0.08);
+      color: var(--ink);
+      font-size: 0.74rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
     .section-head .draw-line,
     .chapter-image .draw-line {
       display: block;
-    }
-
-    .intro-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
-      gap: clamp(1.8rem, 5vw, 3rem);
-      align-items: start;
     }
 
     .section-head {
@@ -476,73 +713,159 @@
       color: var(--ink-soft);
     }
 
-    .intro-copy {
+    .intro-section {
+      padding-top: clamp(4.4rem, 8vw, 7rem);
+    }
+
+    .intro-editorial {
       display: grid;
-      gap: 1rem;
+      grid-template-columns: 3.6rem minmax(0, 0.95fr) minmax(220px, 0.7fr);
+      grid-template-areas:
+        "rail title side"
+        "rail body side";
+      gap: 1.2rem 1.45rem;
+      align-items: start;
+    }
+
+    .intro-rail {
+      grid-area: rail;
+      display: grid;
+      justify-items: center;
+      gap: 0.85rem;
+      min-height: 100%;
+      padding-top: 0.3rem;
+      border-right: 1px solid var(--line);
+    }
+
+    .intro-rail span {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .intro-rail .mini-rule {
+      width: 1px;
+      height: clamp(8rem, 16vw, 12rem);
+      background: rgba(18, 18, 18, 0.14);
+    }
+
+    .intro-titleblock {
+      grid-area: title;
+      display: grid;
+      gap: 0.55rem;
+      padding-bottom: 0.95rem;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .intro-titleblock h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2.2rem, 4.8vw, 4rem);
+      line-height: 0.92;
+      max-width: 8ch;
+    }
+
+    .intro-side {
+      grid-area: side;
+      display: grid;
+      gap: 0.9rem;
+      align-content: start;
+      padding-top: 0.25rem;
+      padding-left: 0.9rem;
+      border-left: 1px solid var(--line);
+    }
+
+    .intro-side-block {
+      display: grid;
+      gap: 0.55rem;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .intro-side-block:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .intro-side-label {
+      color: var(--gold);
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .intro-side p {
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .intro-pull {
+      display: none;
     }
 
     .lede {
-      max-width: 30ch;
+      max-width: 22ch;
       font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(1.55rem, 3vw, 2rem);
-      line-height: 1.08;
+      font-size: clamp(2rem, 3.6vw, 2.95rem);
+      line-height: 1.02;
       color: var(--ink);
+    }
+
+    .lede em {
+      color: var(--gold);
+      font-style: normal;
+    }
+
+    .intro-body {
+      grid-area: body;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(210px, 0.78fr);
+      gap: 1.2rem 1.45rem;
+      align-items: start;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .intro-main {
+      display: grid;
+      gap: 0.7rem;
+      max-width: 31rem;
+    }
+
+    .intro-main p:first-child {
+      font-size: 1rem;
+    }
+
+    .intro-aside {
+      display: grid;
+      gap: 0.8rem;
+      align-content: start;
+    }
+
+    .intro-aside-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.68rem;
+      font-weight: 800;
     }
 
     .intro-lines {
       display: grid;
-      gap: 0.55rem;
-      max-width: 46ch;
-      margin-top: 0.2rem;
+      gap: 0.6rem;
     }
 
     .intro-lines span {
-      padding-bottom: 0.35rem;
+      padding-bottom: 0.42rem;
       border-bottom: 1px solid rgba(18, 18, 18, 0.08);
-    }
-
-    .intro-side {
-      display: grid;
-      gap: 1rem;
-      align-content: start;
-    }
-
-    .sketch-plate {
-      position: relative;
-      min-height: 14rem;
-      padding: 1rem 0 1.1rem;
-      border-top: 1px solid var(--line-strong);
-      border-bottom: 1px solid var(--line-strong);
-    }
-
-    .sketch-plate::before {
-      content: "";
-      position: absolute;
-      left: 20%;
-      top: 0;
-      width: 1px;
-      height: 100%;
-      background: linear-gradient(180deg, transparent, rgba(18, 18, 18, 0.12) 15%, rgba(18, 18, 18, 0.12) 85%, transparent);
-    }
-
-    .sketch-plate .mark {
-      position: absolute;
-      right: 0;
-      top: 0.5rem;
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(4rem, 11vw, 6rem);
-      color: rgba(18, 18, 18, 0.08);
-      letter-spacing: -0.08em;
-      line-height: 1;
-    }
-
-    .plate-caption {
-      margin-top: 0.75rem;
-      padding-top: 0.65rem;
-      border-top: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.55;
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
 
     .proof-grid {
@@ -933,13 +1256,92 @@
     }
 
     @media (max-width: 1060px) {
-      .hero-grid,
-      .intro-grid,
       .section-head,
       .visual-break,
       .tailored-grid,
       .contact-grid {
         grid-template-columns: 1fr;
+      }
+
+      .hero-editorial {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "top"
+          "left"
+          "panel"
+          "proof"
+          "foot";
+      }
+
+      .hero-side-label {
+        justify-items: start;
+        gap: 0.7rem;
+        min-height: auto;
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero-side-label span {
+        writing-mode: initial;
+        transform: none;
+      }
+
+      .hero-side-rule {
+        width: min(9rem, 100%);
+        height: 1px;
+        background: linear-gradient(90deg, var(--gold), rgba(18, 18, 18, 0.14) 62%, transparent);
+      }
+
+      .hero-side-rule {
+        /* unchanged */
+      }
+
+      .hero-left {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-kicker-block,
+      .hero-statement-grid,
+      .hero-foot,
+      .intro-body,
+      .intro-editorial {
+        grid-template-columns: 1fr;
+      }
+
+      .intro-editorial {
+        grid-template-areas:
+          "title"
+          "rail"
+          "pull"
+          "side"
+          "body";
+      }
+
+      .intro-rail {
+        justify-items: start;
+        gap: 0.7rem;
+        min-height: auto;
+        padding-top: 0;
+        padding-bottom: 0.2rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .intro-rail span {
+        writing-mode: initial;
+        transform: none;
+      }
+
+      .intro-rail .mini-rule {
+        width: min(10rem, 100%);
+        height: 1px;
+      }
+
+      .intro-side {
+        padding-left: 0;
+        border-left: 0;
       }
 
       .masthead-inner {
@@ -1009,17 +1411,26 @@
         border-bottom: 0;
       }
 
-      .hero-title {
+      .hero-title,
+      .intro-titleblock h2 {
         max-width: none;
       }
 
-      .hero-plate {
-        min-height: 24rem;
+      .hero-topline {
+        grid-template-columns: 1fr;
       }
 
-      .hero-monogram {
-        right: -0.25rem;
-        font-size: clamp(4.5rem, 28vw, 7.5rem);
+      .hero-proof-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-proof-item {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero-proof-item:last-child {
+        border-bottom: 0;
       }
 
       .chapter-row {
@@ -1065,12 +1476,6 @@
         opacity: 1;
         transform: none;
       }
-
-      .hero-monogram,
-      .hero-plate::before,
-      .hero-plate::after {
-        transform: none !important;
-      }
     }
   </style>
 </head>
@@ -1102,82 +1507,147 @@
   </header>
 
   <main class="page" id="main-content">
-    <section class="section">
-      <div class="shell hero-grid">
-        <div class="hero-copy" data-reveal>
-          <p class="eyebrow" id="hero-kicker">Prepared for your team</p>
-          <h1 class="hero-title serif" id="hero-name">Ben T. Howard</h1>
-          <p class="hero-role" id="hero-role">Senior Operations and Transformation Leader</p>
-          <p class="hero-summary" id="hero-summary">Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services.</p>
-          <div class="hero-rule draw-line"></div>
-          <div class="hero-meta" aria-label="Quick facts">
-            <span>Leek, Staffordshire</span>
-            <span>Executive MBA</span>
-            <span>Operational turnaround</span>
-            <span>Service and performance improvement</span>
+    <section class="section hero-section">
+      <div class="shell hero-editorial">
+        <div class="hero-topline draw-line" data-reveal>
+          <span id="hero-kicker"><strong>Tailored profile</strong> / operations and transformation leadership</span>
+          <div class="hero-topline-right">
+            <span id="hero-topline-meta-1">Healthcare, manufacturing, leisure, regulated services</span>
+            <span id="hero-topline-meta-2">United Kingdom</span>
           </div>
-          <p class="hero-note" id="hero-tailored">This page is designed as a long-form visual CV rather than a formal profile document.</p>
         </div>
 
-        <div class="hero-plate draw-line" data-reveal>
-          <div class="hero-monogram">BH</div>
-          <div class="hero-panel">
+        <div class="hero-left" data-reveal>
+          <div class="hero-side-label">
+            <span>Profile</span>
+            <div class="hero-side-rule draw-line"></div>
+          </div>
+
+          <div class="hero-main-column">
             <div class="hero-kicker-block">
-              <div class="hero-kicker-label">Prepared for</div>
-              <div class="hero-context-line" id="hero-context-line">A tailored role and company context appears here.</div>
-            </div>
-
-            <div class="hero-panel-grid">
-              <div class="row">
-                <strong>Company</strong>
-                <span id="hero-company">Your team</span>
-              </div>
-              <div class="row">
-                <strong>Role</strong>
-                <span id="hero-role-context">Operations leadership opportunity</span>
-              </div>
-              <div class="row">
-                <strong>Angle</strong>
-                <span id="hero-angle">A restrained, editorial view of the same CV content.</span>
+              <div class="hero-kicker-copy">Operational leadership across healthcare, manufacturing, leisure and regulated service environments</div>
+              <div class="hero-kicker-notes" id="hero-kicker-notes">
+                <span>Leek, Staffordshire</span>
+                <span>Executive MBA</span>
               </div>
             </div>
 
-            <div class="hero-panel-copy">
-              A long scrolling narrative shaped to feel more like a crafted editorial CV than a conventional document.
+            <div class="hero-name-wrap">
+              <h1 class="hero-title serif" id="hero-name">Ben T. Howard</h1>
+              <p class="hero-role" id="hero-role">Operations and Transformation Leader</p>
+              <p class="hero-positioning" id="hero-positioning">Operational turnaround. Service redesign. Measurable improvement.</p>
+            </div>
+
+            <div class="hero-statement-grid">
+              <p class="hero-statement" id="hero-statement">I lead turnaround, redesign and measurable improvement across complex operations. Most useful where teams need clearer standards, tighter reporting and stronger follow-through.</p>
+              <div class="hero-pull-note" id="hero-pull-note"><strong>At a glance</strong>Structured operator with cross-sector experience in service delivery, workforce planning, reporting and performance improvement.</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-tailored-panel" data-reveal>
+          <div class="hero-tailored-header">
+            <span class="hero-tailored-label">Prepared for</span>
+            <p class="hero-tailored-heading" id="hero-tailored-heading">Your team</p>
+            <p class="hero-context-line" id="hero-context-line">Operations leadership opportunity · United Kingdom</p>
+          </div>
+          <div class="hero-detail-list">
+            <div class="row">
+              <strong>Company context</strong>
+              <span id="hero-company-note">Service-led organisation where reliability, standards and customer experience matter.</span>
+            </div>
+            <div class="row">
+              <strong>Role context</strong>
+              <span id="hero-role-note">Leadership brief centred on performance, accountability and day-to-day operational control.</span>
+            </div>
+          </div>
+          <div class="hero-priority-block">
+            <span class="hero-margin-label">Immediate fit</span>
+            <div class="hero-focus-list" id="hero-focus-list">
+              <span class="hero-focus-chip">Operational performance</span>
+              <span class="hero-focus-chip">Team leadership</span>
+              <span class="hero-focus-chip">Service quality</span>
+              <span class="hero-focus-chip">Continuous improvement</span>
+            </div>
+          </div>
+        </aside>
+
+        <div class="hero-proof-strip" data-reveal>
+          <article class="hero-proof-item">
+            <span class="hero-proof-value">2.09 to 4.51</span>
+            <span class="hero-proof-copy">Review score improvement</span>
+          </article>
+          <article class="hero-proof-item">
+            <span class="hero-proof-value">£149.9k</span>
+            <span class="hero-proof-copy">Profit improvement</span>
+          </article>
+          <article class="hero-proof-item">
+            <span class="hero-proof-value">300+</span>
+            <span class="hero-proof-copy">Live operations teams coordinated</span>
+          </article>
+        </div>
+
+        <div class="hero-foot" data-reveal>
+          <div class="hero-meta" id="hero-meta-list" aria-label="Quick facts">
+            <span class="hero-meta-chip">Leek, Staffordshire</span>
+            <span class="hero-meta-chip">Executive MBA</span>
+            <span class="hero-meta-chip">KPI governance</span>
+            <span class="hero-meta-chip">Workforce planning</span>
+          </div>
+          <div class="hero-tone-wrap">
+            <strong>Tone</strong>
+            <div class="hero-tone-list" id="hero-tone-list">
+              <span class="hero-tone-chip">Leadership</span>
+              <span class="hero-tone-chip">Accountable</span>
+              <span class="hero-tone-chip">Collaborative</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="intro">
-      <div class="narrow">
-        <div class="section-head" data-reveal>
-          <div>
-            <p class="eyebrow">Introduction</p>
-            <h2 class="serif">Who I am, before the chronology starts.</h2>
-          </div>
-          <p id="intro-note">A more editorial, human and visual retelling of the same CV content.</p>
+    <section class="section intro-section" id="intro">
+      <div class="narrow intro-editorial">
+        <div class="intro-rail" data-reveal>
+          <span>Operating style</span>
+          <div class="mini-rule draw-line"></div>
         </div>
 
-        <div class="intro-grid">
-          <div class="intro-copy" data-reveal>
-            <p class="lede">I build structure, rhythm and measurable improvement in operational environments where service, people, process and delivery all need to hold together.</p>
-            <div class="mini-rule draw-line"></div>
-            <div class="intro-lines">
-              <span>Calm, accountable, systems-minded leadership.</span>
-              <span>Hands-on delivery across healthcare, manufacturing and live operations.</span>
-              <span>Better reporting, clearer processes and stronger follow-through.</span>
+        <div class="intro-titleblock" data-reveal>
+          <p class="eyebrow">About me</p>
+          <h2 class="serif">Built for complex operations that need steadier control and clearer momentum.</h2>
+        </div>
+
+        <div class="intro-side" data-reveal>
+          <div class="intro-side-block">
+            <span class="intro-side-label">Sector range</span>
+            <p id="intro-note">Healthcare, manufacturing, leisure and regulated services.</p>
+          </div>
+          <div class="intro-side-block">
+            <span class="intro-side-label">Working style</span>
+            <div class="intro-lines" id="intro-traits">
+              <span>Calm under pressure</span>
+              <span>Clear standards and accountability</span>
+              <span>Hands-on with reporting</span>
+              <span>Improvement with follow-through</span>
             </div>
-            <p id="intro-summary">Combines strategic oversight with practical execution across governance, workforce planning, reporting and service delivery.</p>
+          </div>
+        </div>
+
+        <div class="intro-body" data-reveal>
+          <div class="intro-main">
+            <p id="intro-summary">I usually work where service delivery, workforce planning, reporting and financial control need to move together, and where leaders need a steadier operating rhythm rather than more noise.</p>
+            <p id="intro-detail">That has included NHS primary care, specialist manufacturing, visitor operations and regulated services, with a repeated focus on service redesign, KPI visibility, practical follow-through and measurable improvement.</p>
           </div>
 
-          <div class="intro-side" data-reveal>
-            <div class="sketch-plate draw-line">
-              <div class="mark">01</div>
-            </div>
-            <div class="plate-caption">
-              Warm paper, fine rules and measured spacing do the work here. The page is designed to feel like a made object, not a UI shell.
+          <div class="intro-aside">
+            <span class="intro-aside-label">Best used for</span>
+            <div class="mini-rule draw-line"></div>
+            <div class="intro-lines" id="intro-strength-lines">
+              <span>Operational turnaround and stabilisation</span>
+              <span>Service redesign and improvement</span>
+              <span>KPI governance and reporting</span>
+              <span>Workforce planning and financial control</span>
             </div>
           </div>
         </div>
@@ -1228,6 +1698,8 @@
           </div>
           <p>The strongest arc runs through healthcare operations, specialist manufacturing and major live sites.</p>
         </div>
+
+        <div class="themes-grid" id="journey-context-grid" data-reveal></div>
       </div>
 
       <div class="spine narrow">
@@ -1363,7 +1835,7 @@
           <p>Less like a dashboard, more like annotations at the edge of the page.</p>
         </div>
 
-        <div class="themes-grid">
+        <div class="themes-grid" id="themes-grid">
           <article class="theme-item" data-reveal>
             <h3>Leadership themes</h3>
             <p>Operational turnaround and stabilisation, service redesign, commercial grip, financial control and cross-functional leadership.</p>
@@ -1491,25 +1963,59 @@
         sector: "Operations",
         salary: "Not specified",
         employmentType: "Not specified",
-        shortCompanyReason: "A role-aware CV view with no external company enrichment.",
-        shortRoleReason: "A restrained presentation of my experience using only the role context already supplied.",
+        shortCompanyReason: "Service-led organisation where reliability, standards and customer experience matter.",
+        shortRoleReason: "Leadership role centred on people, performance and day-to-day operational control.",
+        hours: "",
+        workplaceType: "",
+        companySummary: "",
+        roleSummary: "",
+        headlineAttraction: "",
+        rolePurpose: "",
+        travelRequired: "",
         advertSummary: "",
         personalisedIntro: "",
-        whyThisRole: "The supplied role context suggests a position where visible leadership, operational judgement and practical delivery matter day to day.",
-        toneKeywords: ["structured", "accountable", "calm", "operational"],
+        whyThisRole: "The brief points to a role where leadership, operational performance and service quality need to move together.",
+        toneKeywords: ["leadership", "accountable", "collaborative", "operational excellence"],
         probablePriorities: [
           "Operational performance and follow-through",
-          "People leadership and accountability",
+          "Team leadership and accountability",
           "Service quality and delivery standards"
         ],
         keyFocusAreas: [
-          "Performance reporting",
+          "KPI governance and reporting",
           "Continuous improvement",
           "Cross-functional coordination"
-        ]
+        ],
+        companyPridePoints: [],
+        coreResponsibilities: [],
+        essentialRequirements: [],
+        preferredRequirements: [],
+        skillsWanted: [],
+        toolsMethodsMentioned: [],
+        stakeholderGroups: [],
+        teamTypesMentioned: [],
+        senioritySignals: [],
+        cultureSignals: [],
+        likelyBusinessNeeds: [],
+        impliedStrategicGoals: [],
+        deliverablesLikely: [],
+        possibleHeadlineFacts: [],
+        matchCategories: []
       };
 
-      const baseSummary = "Senior operations and transformation leader with experience across NHS primary care, specialist manufacturing, leisure operations and regulated data services. Delivers operational turnaround, service redesign, financial control and performance improvement in complex, fast-moving environments.";
+      const workingStyleLines = [
+        "Calm under pressure",
+        "Clear standards and accountability",
+        "Hands-on with reporting",
+        "Improvement with follow-through"
+      ];
+
+      const baseStrengthLines = [
+        "Operational turnaround and stabilisation",
+        "Service redesign and improvement",
+        "KPI governance and reporting",
+        "Workforce planning and financial control"
+      ];
 
       function cleanString(value) {
         return typeof value === "string" ? value.trim() : "";
@@ -1559,14 +2065,36 @@
           sector: cleanString(data.sector || data.s) || defaults.sector,
           salary: cleanString(data.salary || data.y) || defaults.salary,
           employmentType: cleanString(data.employmentType || data.e) || defaults.employmentType,
+          hours: cleanString(data.hours || data.h) || defaults.hours,
+          workplaceType: cleanString(data.workplaceType || data.wp) || defaults.workplaceType,
           shortCompanyReason: cleanString(data.shortCompanyReason || data.n) || defaults.shortCompanyReason,
           shortRoleReason: cleanString(data.shortRoleReason || data.o) || defaults.shortRoleReason,
+          companySummary: cleanString(data.companySummary || data.cs) || defaults.companySummary,
+          roleSummary: cleanString(data.roleSummary || data.rs) || defaults.roleSummary,
+          headlineAttraction: cleanString(data.headlineAttraction || data.ha) || defaults.headlineAttraction,
+          rolePurpose: cleanString(data.rolePurpose || data.rp) || defaults.rolePurpose,
+          travelRequired: cleanString(data.travelRequired) || defaults.travelRequired,
           advertSummary: cleanString(data.advertSummary || data.a) || defaults.advertSummary,
           personalisedIntro: cleanString(data.personalisedIntro || data.i) || defaults.personalisedIntro,
           whyThisRole: cleanString(data.whyThisRole || data.w) || defaults.whyThisRole,
           toneKeywords: cleanArray(data.toneKeywords || data.t).length ? cleanArray(data.toneKeywords || data.t) : defaults.toneKeywords,
           probablePriorities: cleanArray(data.probablePriorities || data.p).length ? cleanArray(data.probablePriorities || data.p) : defaults.probablePriorities,
-          keyFocusAreas: cleanArray(data.keyFocusAreas || data.f).length ? cleanArray(data.keyFocusAreas || data.f) : defaults.keyFocusAreas
+          keyFocusAreas: cleanArray(data.keyFocusAreas || data.f).length ? cleanArray(data.keyFocusAreas || data.f) : defaults.keyFocusAreas,
+          companyPridePoints: cleanArray(data.companyPridePoints || data.cpp),
+          coreResponsibilities: cleanArray(data.coreResponsibilities),
+          essentialRequirements: cleanArray(data.essentialRequirements),
+          preferredRequirements: cleanArray(data.preferredRequirements),
+          skillsWanted: cleanArray(data.skillsWanted),
+          toolsMethodsMentioned: cleanArray(data.toolsMethodsMentioned),
+          stakeholderGroups: cleanArray(data.stakeholderGroups),
+          teamTypesMentioned: cleanArray(data.teamTypesMentioned),
+          senioritySignals: cleanArray(data.senioritySignals),
+          cultureSignals: cleanArray(data.cultureSignals),
+          likelyBusinessNeeds: cleanArray(data.likelyBusinessNeeds),
+          impliedStrategicGoals: cleanArray(data.impliedStrategicGoals),
+          deliverablesLikely: cleanArray(data.deliverablesLikely),
+          possibleHeadlineFacts: cleanArray(data.possibleHeadlineFacts || data.phf),
+          matchCategories: cleanArray(data.matchCategories || data.mc)
         };
       }
 
@@ -1582,20 +2110,308 @@
         return response.json();
       }
 
-      function buildIntroCopy(state) {
-        const intro = state.personalisedIntro ? ` ${state.personalisedIntro}` : "";
-        const roleLead = state.companyName !== defaults.companyName
-          ? `This version is tailored for ${state.companyName}'s ${state.roleTitle} role`
-          : "This version is tailored to the supplied role context";
-        return `${baseSummary} ${roleLead}, with emphasis on structure, service, performance and delivery.${intro}`;
+      function compactValue(value) {
+        return value && value !== "Not specified" ? value : "";
+      }
+
+      function formatList(values) {
+        const items = values.filter(Boolean);
+        if (!items.length) return "";
+        if (items.length === 1) return items[0];
+        if (items.length === 2) return `${items[0]} and ${items[1]}`;
+        return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+      }
+
+      function pickLines(primary, secondary, limit) {
+        const first = primary.filter(Boolean);
+        const second = secondary.filter(Boolean);
+        return (first.length ? first : second).slice(0, limit);
+      }
+
+      function renderLines(id, values, className = "") {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = "";
+        values.filter(Boolean).forEach((value) => {
+          const line = document.createElement("span");
+          if (className) line.className = className;
+          line.textContent = value;
+          el.appendChild(line);
+        });
+      }
+
+      function buildHeroStatement(state) {
+        const priorities = pickLines(state.probablePriorities, state.keyFocusAreas, 3);
+        if (state.companyName !== defaults.companyName && priorities.length) {
+          return `I lead turnaround, redesign and measurable improvement across complex operations. Relevant here where ${formatList(priorities)} matter day to day.`;
+        }
+        return "I lead turnaround, redesign and measurable improvement across complex operations. Most useful where teams need clearer standards, tighter reporting and stronger follow-through.";
+      }
+
+      function buildHeroPullNote(state) {
+        const focusAreas = pickLines(state.keyFocusAreas, state.probablePriorities, 2);
+        if (state.companyName !== defaults.companyName && focusAreas.length) {
+          return `<strong>Role angle</strong>${state.roleTitle} with emphasis on ${focusAreas.join(" and ")}.`;
+        }
+        return "<strong>At a glance</strong>Structured operator with cross-sector experience in service delivery, workforce planning, reporting and performance improvement.";
       }
 
       function buildTailoredAngle(state) {
-        const parts = [];
-        if (state.companyName && state.companyName !== defaults.companyName) parts.push(`Prepared for ${state.companyName}.`);
-        if (state.roleTitle && state.roleTitle !== defaults.roleTitle) parts.push(`Positioned for the ${state.roleTitle} role.`);
-        if (state.sector && state.sector !== defaults.sector) parts.push(`Framed with emphasis on ${state.sector.toLowerCase()}.`);
-        return parts.join(" ") || "A restrained role-aware view based only on the supplied application context.";
+        const priorities = pickLines(state.probablePriorities, state.keyFocusAreas, 3);
+        if (priorities.length) {
+          return `The brief points to ${formatList(priorities)}, which aligns well with my background in operational control and measurable improvement.`;
+        }
+        return "The brief points to visible leadership, operational control and measurable improvement.";
+      }
+
+      function buildRoleContext(state) {
+        return [state.roleTitle, compactValue(state.location)].filter(Boolean).join(" · ");
+      }
+
+      function buildToplineMetaOne(state) {
+        return compactValue(state.sector) || "Operations";
+      }
+
+      function buildToplineMetaTwo(state) {
+        return compactValue(state.location) || compactValue(state.employmentType) || "United Kingdom";
+      }
+
+      function buildCompanyNote(state) {
+        return state.shortCompanyReason || "Service-led organisation where reliability, standards and customer experience matter.";
+      }
+
+      function buildRoleNote(state) {
+        if (state.shortRoleReason) return state.shortRoleReason;
+        const focusAreas = pickLines(state.keyFocusAreas, state.probablePriorities, 3);
+        if (focusAreas.length) {
+          return `Leadership role centred on ${formatList(focusAreas)}.`;
+        }
+        return "Leadership role centred on people, performance and day-to-day operational control.";
+      }
+
+      function buildHeroMeta(state) {
+        const values = [
+          compactValue(state.location),
+          compactValue(state.sector),
+          compactValue(state.employmentType),
+          compactValue(state.salary)
+        ].filter(Boolean);
+        return values.slice(0, 4);
+      }
+
+      function buildHeroKickerNotes(state) {
+        const values = [
+          compactValue(state.location),
+          "Executive MBA",
+          compactValue(state.sector)
+        ].filter(Boolean);
+        return values.slice(0, 3);
+      }
+
+      function buildToneKeywords(state) {
+        return state.toneKeywords.filter(Boolean).slice(0, 4);
+      }
+
+      function buildIntroNote(state) {
+        if (state.sector && state.sector !== defaults.sector) {
+          return `Cross-sector experience with direct relevance to ${state.sector.toLowerCase()}.`;
+        }
+        return "Healthcare, manufacturing, leisure and regulated services.";
+      }
+
+      function buildIntroDetail(state) {
+        const facts = pickLines(
+          [
+            compactValue(state.workplaceType),
+            compactValue(state.hours),
+            compactValue(state.travelRequired),
+            compactValue(state.location),
+            compactValue(state.sector)
+          ],
+          [],
+          5
+        );
+        const companyNotes = pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 3);
+        const lines = [];
+        if (facts.length) {
+          lines.push(`Practical context: ${formatList(facts)}.`);
+        }
+        if (companyNotes.length) {
+          lines.push(`Notable advert signals: ${formatList(companyNotes)}.`);
+        }
+        if (!lines.length) {
+          lines.push("The page stays focused on the company and role data already present in the saved application.");
+        }
+        return lines.join(" ");
+      }
+
+      function buildCompanyAttraction(state) {
+        return state.headlineAttraction
+          || state.shortCompanyReason
+          || state.companySummary
+          || "A tailored view that keeps the company and role context front and centre.";
+      }
+
+      function buildCompanyFactLines(state) {
+        return [
+          compactValue(state.location),
+          compactValue(state.sector),
+          compactValue(state.workplaceType),
+          compactValue(state.hours),
+          compactValue(state.travelRequired)
+        ].filter(Boolean).slice(0, 4);
+      }
+
+      function buildRolePitch(state) {
+        const lines = [
+          state.shortRoleReason,
+          state.roleSummary,
+          state.rolePurpose,
+          state.advertSummary
+        ].map((value) => compactValue(value)).filter(Boolean);
+        return lines.length ? lines : [buildTailoredAngle(state)];
+      }
+
+      function buildRequirementCards(state) {
+        return [
+          {
+            title: "Main priorities",
+            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)) || "Not provided",
+            tags: pickLines(state.probablePriorities, state.keyFocusAreas, 3)
+          },
+          {
+            title: "Essential / preferred",
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 5)) || "Not provided",
+            tags: [
+              ...cleanArray(state.essentialRequirements).slice(0, 2),
+              ...cleanArray(state.preferredRequirements).slice(0, 2)
+            ]
+          },
+          {
+            title: "Skills and methods",
+            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned)].slice(0, 5)) || "Not provided",
+            tags: [
+              ...cleanArray(state.skillsWanted).slice(0, 2),
+              ...cleanArray(state.toolsMethodsMentioned).slice(0, 2)
+            ]
+          },
+          {
+            title: "People involved",
+            copy: formatList([
+              ...cleanArray(state.stakeholderGroups),
+              ...cleanArray(state.teamTypesMentioned),
+              ...cleanArray(state.matchCategories)
+            ].slice(0, 5)) || "Not provided",
+            tags: [
+              ...cleanArray(state.stakeholderGroups).slice(0, 2),
+              ...cleanArray(state.teamTypesMentioned).slice(0, 2)
+            ]
+          }
+        ];
+      }
+
+      function buildBusinessNeedCards(state) {
+        return [
+          {
+            title: "Likely business needs",
+            copy: formatList(pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)) || "Not provided",
+            tags: pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)
+          },
+          {
+            title: "Strategic goals",
+            copy: formatList(cleanArray(state.impliedStrategicGoals).slice(0, 4)) || "Not provided",
+            tags: cleanArray(state.impliedStrategicGoals).slice(0, 3)
+          },
+          {
+            title: "Likely deliverables",
+            copy: formatList(cleanArray(state.deliverablesLikely).slice(0, 4)) || "Not provided",
+            tags: cleanArray(state.deliverablesLikely).slice(0, 3)
+          }
+        ];
+      }
+
+      function buildCultureCards(state) {
+        return [
+          {
+            title: "Tone and pace",
+            copy: formatList([...cleanArray(state.toneKeywords), ...cleanArray(state.cultureSignals)].slice(0, 5)) || "Not provided",
+            tags: [...cleanArray(state.toneKeywords).slice(0, 2), ...cleanArray(state.cultureSignals).slice(0, 2)]
+          },
+          {
+            title: "Seniority and setting",
+            copy: formatList([...cleanArray(state.senioritySignals), compactValue(state.workplaceType)].filter(Boolean).slice(0, 4)) || "Not provided",
+            tags: [...cleanArray(state.senioritySignals).slice(0, 2), compactValue(state.workplaceType)].filter(Boolean)
+          },
+          {
+            title: "Teams and stakeholders",
+            copy: formatList([...cleanArray(state.stakeholderGroups), ...cleanArray(state.teamTypesMentioned)].slice(0, 5)) || "Not provided",
+            tags: [...cleanArray(state.stakeholderGroups).slice(0, 2), ...cleanArray(state.teamTypesMentioned).slice(0, 2)]
+          }
+        ];
+      }
+
+      function buildWrapUpSummary(state) {
+        const parts = [
+          state.headlineAttraction,
+          state.shortCompanyReason,
+          state.shortRoleReason,
+          state.rolePurpose
+        ].map((value) => compactValue(value)).filter(Boolean);
+        return parts.length ? parts.slice(0, 3).join(" ") : "This remains a company-first summary built only from the saved application data.";
+      }
+
+      function renderEditorialCards(containerId, cards) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = "";
+
+        cards.forEach((card) => {
+          const article = document.createElement("article");
+          article.className = "theme-item";
+          const heading = document.createElement("h3");
+          heading.textContent = card.title;
+          const copy = document.createElement("p");
+          copy.textContent = card.copy;
+          const tags = document.createElement("div");
+          tags.className = "theme-tags";
+          (card.tags || []).filter(Boolean).slice(0, 4).forEach((tag) => {
+            const span = document.createElement("span");
+            span.textContent = tag;
+            tags.appendChild(span);
+          });
+
+          article.appendChild(heading);
+          article.appendChild(copy);
+          if (tags.childElementCount) {
+            article.appendChild(tags);
+          }
+          container.appendChild(article);
+        });
+      }
+
+      function renderProofCards(cards) {
+        const items = document.querySelectorAll("#proof .proof-item");
+        items.forEach((item, index) => {
+          const card = cards[index];
+          if (!card) return;
+          const valueEl = item.querySelector(".proof-value");
+          const labelEl = item.querySelector(".proof-label");
+          const copyEl = item.querySelector(".proof-copy");
+          if (valueEl) valueEl.textContent = card.value;
+          if (labelEl) labelEl.textContent = card.label;
+          if (copyEl) copyEl.textContent = card.copy;
+        });
+      }
+
+      function setSectionHeader(sectionId, eyebrow, heading, note) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        const eyebrowEl = section.querySelector(".eyebrow");
+        const headingEl = section.querySelector("h2.serif");
+        const noteEl = section.querySelector(".section-head > p");
+        if (eyebrowEl && eyebrow) eyebrowEl.textContent = eyebrow;
+        if (headingEl && heading) headingEl.textContent = heading;
+        if (noteEl && note) noteEl.textContent = note;
       }
 
       function setText(id, value) {
@@ -1603,41 +2419,137 @@
         if (el) el.textContent = value;
       }
 
+      function setHtml(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = value;
+      }
+
       function applyState(state) {
         document.title = `Ben T. Howard | ${state.roleTitle}`;
-        setText("top-context-line", state.companyName === defaults.companyName ? "Prepared for your team" : `Prepared for ${state.companyName}`);
-        setText("hero-kicker", state.companyName === defaults.companyName ? "Prepared as a tailored CV website" : `Prepared for ${state.companyName}`);
-        setText("hero-summary", buildIntroCopy(state));
-        setText("hero-tailored", buildTailoredAngle(state));
-        setText("hero-context-line", state.companyName === defaults.companyName
-          ? "A carefully designed long-form CV site that unfolds through the scroll."
-          : `An editorial CV prepared in consideration for ${state.companyName}'s ${state.roleTitle} role.`);
-        setText("hero-company", state.companyName);
-        setText("hero-role-context", state.roleTitle);
-        setText("hero-angle", buildTailoredAngle(state));
-        setText("intro-note", state.companyName === defaults.companyName ? "A more editorial, human and visual retelling of the same CV content." : `Tuned for ${state.companyName} using only the role and company values already supplied.`);
-        setText("intro-summary", buildIntroCopy(state));
-        setText("proof-note", state.companyName === defaults.companyName
-          ? "The clearest outcomes are shown before the longer story so the substance lands immediately."
-          : `Selected proof points from my CV that map credibly to the ${state.roleTitle} brief at ${state.companyName}.`);
-        setText("tailored-heading", state.companyName === defaults.companyName
-          ? "A restrained role-aware view, tuned to your context."
-          : `Prepared for ${state.companyName}, with the ${state.roleTitle} brief in view.`);
-        setText("tailored-note", state.advertSummary || "This section uses only the role and company values already present in the URL or saved application data.");
+
+        const companyIntro = buildCompanyAttraction(state);
+        const companyFacts = buildCompanyFactLines(state);
+        const rolePitch = buildRolePitch(state);
+        const requirementCards = buildRequirementCards(state);
+        const businessNeedCards = buildBusinessNeedCards(state);
+        const cultureCards = buildCultureCards(state);
+
+        setText("top-context-line", state.companyName === defaults.companyName ? "Prepared for your next role" : `Prepared for ${state.companyName}`);
+        setText("hero-kicker", state.companyName === defaults.companyName
+          ? "Tailored profile / operations and transformation leadership"
+          : `Tailored for ${state.companyName} / operations and transformation leadership`);
+        setText("hero-topline-meta-1", buildToplineMetaOne(state));
+        setText("hero-topline-meta-2", buildToplineMetaTwo(state));
+        setText("hero-statement", state.headlineAttraction || buildHeroStatement(state));
+        setText("hero-positioning", state.rolePurpose || state.headlineAttraction || "Operational turnaround. Service redesign. Measurable improvement.");
+        setHtml("hero-pull-note", buildHeroPullNote(state));
+        setText("hero-kicker-copy", state.companyName === defaults.companyName
+          ? "Operational leadership across healthcare, manufacturing, leisure and regulated service environments"
+          : `Prepared for ${state.companyName} using the ${state.roleTitle} context already available in the saved application data`);
+        renderLines("hero-kicker-notes", buildHeroKickerNotes(state));
+        setText("hero-tailored-heading", state.companyName);
+        setText("hero-context-line", buildRoleContext(state));
+        setText("hero-company-note", companyIntro);
+        setText("hero-role-note", state.rolePurpose || buildRoleNote(state));
+        renderLines("hero-focus-list", pickLines(state.keyFocusAreas, state.probablePriorities, 4), "hero-focus-chip");
+        renderLines("hero-meta-list", buildHeroMeta(state), "hero-meta-chip");
+        renderLines("hero-tone-list", buildToneKeywords(state), "hero-tone-chip");
+
+        setText("intro-note", companyIntro);
+        const introHeading = document.querySelector("#intro .intro-titleblock h2.serif");
+        if (introHeading) {
+          introHeading.textContent = state.companyName === defaults.companyName
+            ? "Why this company and role stand out."
+            : `Why ${state.companyName} stands out for this role.`;
+        }
+        const introSideLabels = document.querySelectorAll("#intro .intro-side-label");
+        if (introSideLabels[0]) introSideLabels[0].textContent = "Company signals";
+        if (introSideLabels[1]) introSideLabels[1].textContent = "Practical context";
+        setHtml("intro-lede", state.companyName === defaults.companyName
+          ? "This page stays focused on the company and role context already available in the saved application data."
+          : `Prepared for <em>${state.companyName}</em> and the <em>${state.roleTitle}</em> brief.`);
+        setText("intro-summary", state.companySummary || state.shortCompanyReason || "A tailored company-facing opening that uses the saved application data only.");
+        setText("intro-detail", buildIntroDetail(state));
+        renderLines("intro-traits", companyFacts.length ? companyFacts : workingStyleLines);
+        renderLines("intro-strength-lines", pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4).length
+          ? pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4)
+          : baseStrengthLines);
+
+        setSectionHeader(
+          "proof",
+          "Role fit",
+          "Why I’m right for this role.",
+          "A concise fit summary built only from the role and company data already present in the saved application."
+        );
+        renderProofCards([
+          {
+            value: "01",
+            label: "Role pitch",
+            copy: rolePitch.join(" ")
+          },
+          {
+            value: "02",
+            label: "Main priorities",
+            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)) || "Not provided"
+          },
+          {
+            value: "03",
+            label: "Requirements",
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 5)) || "Not provided"
+          },
+          {
+            value: "04",
+            label: "Working context",
+            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned), ...cleanArray(state.stakeholderGroups), ...cleanArray(state.teamTypesMentioned)].slice(0, 6)) || "Not provided"
+          }
+        ]);
+
+        setSectionHeader(
+          "journey",
+          "Business context",
+          "What this role appears designed to achieve.",
+          "The page stays grounded in the saved application data rather than guessing at external company information."
+        );
+        renderEditorialCards("journey-context-grid", businessNeedCards);
+
+        setSectionHeader(
+          "themes",
+          "Team and culture",
+          "The kind of environment this advert suggests.",
+          "A lighter interim view of tone, seniority and working style based only on the job data."
+        );
+        renderEditorialCards("themes-grid", cultureCards);
+
+        setSectionHeader(
+          "tailored",
+          "Wrap-up",
+          "Closing summary.",
+          "A final pass that pulls the company, role and business signals together before the contact details."
+        );
         setText("tailored-company-line", state.companyName === defaults.companyName ? "Prepared for your team." : `Prepared for ${state.companyName}.`);
-        setText("detail-company", state.companyName);
-        setText("detail-role", state.roleTitle);
+        setText("detail-company", state.companyName || defaults.companyName);
+        setText("detail-role", state.roleTitle || defaults.roleTitle);
         setText("detail-location", state.location || defaults.location);
         setText("detail-sector", state.sector || defaults.sector);
         setText("detail-employment", state.employmentType || defaults.employmentType);
         setText("detail-salary", state.salary || defaults.salary);
-        setText("tailored-rationale", buildTailoredAngle(state));
-        setText("why-this-role", state.whyThisRole || defaults.whyThisRole);
-        setText("role-summary", [state.shortCompanyReason, state.shortRoleReason].filter(Boolean).join(" ") || "A restrained summary of the company and role rationale from the supplied application data.");
+        setText("tailored-rationale", buildWrapUpSummary(state));
+        setText("why-this-role", state.likelyBusinessNeeds.length
+          ? formatList(cleanArray(state.likelyBusinessNeeds).slice(0, 3))
+          : "The role appears geared toward visible operational control, clear priorities and practical follow-through.");
+        setText("role-summary", state.impliedStrategicGoals.length
+          ? formatList(cleanArray(state.impliedStrategicGoals).slice(0, 3))
+          : "The closing note stays focused on the saved company and role context, not on external research.");
+
         setText("contact-heading", state.companyName === defaults.companyName
           ? "Open to discussing the opportunity."
           : `Open to discussing the ${state.roleTitle} opportunity.`);
-        setText("contact-copy", `Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support ${state.companyName} in the ${state.roleTitle} position.`);
+        setText("contact-note-top", state.companyName === defaults.companyName
+          ? "No extra layers. Easy to call, email or connect."
+          : `A simple close for ${state.companyName}, with direct contact details below.`);
+        setText("contact-copy", state.companyName === defaults.companyName
+          ? "Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support the role."
+          : `Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support ${state.companyName} in the ${state.roleTitle} position.`);
       }
 
       function initReveal() {

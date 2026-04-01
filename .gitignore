@@ -3,3 +3,4 @@ __pycache__/
 local-admin/secrets.local.json
 local-admin/secrets.local.js
 local-cache/
+debug/

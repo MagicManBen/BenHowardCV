@@ -153,6 +153,10 @@ async function initLocalAdminPage() {
     pendingApplication = null;
     dom.confirmPublishButton.disabled = true;
     dom.reviewStatus.textContent = "JSON changed — review again.";
+  });
+
+  dom.reviewButton?.addEventListener("click", () => {
+    dom.reviewError.hidden = true;
     dom.publishError.hidden = true;
 
     const rawText = dom.jobJsonInput.value.trim();

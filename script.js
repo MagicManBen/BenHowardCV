@@ -9,6 +9,7 @@ const LOCAL_ADMIN_URL = new URL("local-admin/", window.location.href).href;
 const IS_LOCAL_RUNTIME = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const LOCAL_API_BASE = "/api";
 const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : CV_BASE_URL;
+const PUBLIC_JOB_BASE_URL = new URL("j/", PUBLIC_CV_BASE_URL).href;
 const APPLICATIONS_STORE_KEY = "cv_applications_local";
 const APPLICATIONS_INDEX_PATH = "data/applications.json";
 
@@ -116,7 +117,7 @@ function initDashboardPage() {
     try {
       application = await resolveApplicationForPreview(ref);
     } catch {
-      showToast(dom, "Could not load the saved application data.");
+      showToast(dom, "Could not load that application.");
       return;
     }
 
@@ -124,7 +125,7 @@ function initDashboardPage() {
     const printUrl = buildPrintUrl(application);
 
     if (action === "copy-url") {
-      const publicUrl = buildPublicPreviewUrl(application);
+      const publicUrl = buildShortJobUrl(application);
       try {
         await navigator.clipboard.writeText(publicUrl);
         showToast(dom, "URL copied.");
@@ -406,7 +407,7 @@ function renderReviewPreview(application) {
 }
 
 async function renderPublishedResult(dom, application) {
-  const url = buildPreviewUrl(application);
+  const url = buildShortJobUrl(application);
 
   dom.resultCompany.value = application.companyName || "";
   dom.resultRole.value = application.roleTitle || "";
@@ -523,7 +524,7 @@ function renderSavedApplicationCard(application) {
         <button class="saved-action" type="button" data-action="open-pdf" data-ref="${escapeHtml(application.ref)}">PDF view</button>
         <button class="saved-action" type="button" data-action="copy-url" data-ref="${escapeHtml(application.ref)}">Copy URL</button>
       </div>
-      <p class="saved-application-meta">URL generated from the saved application data when you open or copy it.</p>
+      <p class="saved-application-meta">Open or copy the tailored link for this application.</p>
     </article>
   `;
 }
@@ -544,6 +545,11 @@ async function resolveApplicationForPreview(ref) {
 function buildPublicPreviewUrl(application) {
   const payload = buildEmbeddedPreviewPayload(application);
   return `${PUBLIC_CV_BASE_URL}#app=${encodeApplicationPayload(payload)}`;
+}
+
+function buildShortJobUrl(application) {
+  const ref = application && application.ref ? application.ref : "";
+  return `${PUBLIC_JOB_BASE_URL}?r=${encodeURIComponent(ref)}`;
 }
 
 function buildPreviewUrl(refOrApplication) {
@@ -760,7 +766,7 @@ function loadPreviewApplication() {
 
   if (embeddedApplication) {
     renderPreviewApplication(embeddedApplication);
-    const previewUrl = buildPublicPreviewUrl(embeddedApplication);
+    const previewUrl = buildShortJobUrl(embeddedApplication);
     showPreviewLoading();
     renderQrImage(previewDom.qrImage, previewUrl)
       .then(() => {
@@ -780,7 +786,7 @@ function loadPreviewApplication() {
     return;
   }
 
-  showPreviewError("Missing preview data", "Open this page with a #app=... payload. This page now renders personalised content only from the URL.");
+  showPreviewError("Missing preview data", "Open this page with a valid application link.");
 }
 
 function showPreviewLoading() {

@@ -27,6 +27,7 @@ const REVIEW_FIELDS = [
 
 let toastTimer = null;
 let publicCvBaseUrl = DEFAULT_PUBLIC_CV_BASE_URL;
+let publicJobBaseUrl = new URL("j/", DEFAULT_PUBLIC_CV_BASE_URL).href;
 
 document.addEventListener("DOMContentLoaded", initLocalAdminPage);
 
@@ -126,7 +127,7 @@ async function initLocalAdminPage() {
 
       const response = await publishApplication(pendingApplication);
       const application = response.application || pendingApplication;
-      const publicUrl = buildPublicPreviewUrl(application);
+      const publicUrl = buildShortJobUrl(application);
 
       localPreviewUrl = buildLocalPreviewUrl(application);
       localPrintUrl = buildLocalPrintUrl(application);
@@ -431,6 +432,7 @@ async function loadLocalStatus(dom) {
     var payload = await response.json();
     if (!response.ok) throw new Error(payload.error || "Could not read local server status.");
     publicCvBaseUrl = payload.publicCvBaseUrl || DEFAULT_PUBLIC_CV_BASE_URL;
+    publicJobBaseUrl = new URL("j/", publicCvBaseUrl).href;
     if (!payload.hasGithubToken) {
       dom.keysStatus.textContent = "Local server running, but no GitHub token configured.";
       return;
@@ -545,6 +547,9 @@ async function renderPublishedResult(dom, application, publicUrl, localPreviewUr
 
 function buildPublicPreviewUrl(app) {
   return publicCvBaseUrl + "#app=" + encodePayload(buildEmbeddedPayload(app));
+}
+function buildShortJobUrl(app) {
+  return publicJobBaseUrl + "?r=" + encodeURIComponent(app.ref || "");
 }
 function buildLocalPreviewUrl(app) {
   return new URL("../cv.html#app=" + encodePayload(buildEmbeddedPayload(app)), window.location.href).href;

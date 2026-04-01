@@ -130,7 +130,7 @@ async function initLocalAdminPage() {
     dom.generatePanel.hidden = true;
     dom.generateContentButton.disabled = true;
     dom.generateError.hidden = true;
-    dom.generateStatus.textContent = "Filter findings first.";
+    dom.generateStatus.textContent = "Review the advert JSON first.";
     dom.generatedContent.hidden = true;
     dom.generateDebugPanel.hidden = true;
     dom.generateRawJson.textContent = "No generation run yet.";
@@ -171,6 +171,9 @@ async function initLocalAdminPage() {
       dom.rawJsonOutput.textContent = JSON.stringify(pendingApplication, null, 2);
       dom.reviewPanel.hidden = false;
       dom.researchPanel.hidden = false;
+      dom.generatePanel.hidden = false;
+      dom.generateContentButton.disabled = false;
+      dom.generateStatus.textContent = "Ready to generate personalised content.";
       dom.confirmPublishButton.disabled = false;
       dom.reviewStatus.textContent = `Ready to publish ${pendingApplication.companyName} / ${pendingApplication.roleTitle}.`;
       showToast(dom, "JSON parsed successfully.");
@@ -319,10 +322,10 @@ async function initLocalAdminPage() {
       showToast(dom, `Filtering complete: ${sourceCount} source item${sourceCount !== 1 ? "s" : ""} retained.`);
       dom.filteredPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      // Enable generation now that filtered findings exist
-      dom.generatePanel.hidden = false;
-      dom.generateContentButton.disabled = false;
-      dom.generateStatus.textContent = "Ready to generate personalised content.";
+      // If generation hasn't run yet, note that research is now available
+      if (!pendingApplication.personalisedContent) {
+        dom.generateStatus.textContent = "Ready to generate. Filtered research will be included.";
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Filtering request failed.";
       showError(dom.filterError, message);
@@ -336,8 +339,8 @@ async function initLocalAdminPage() {
   dom.generateContentButton?.addEventListener("click", async () => {
     dom.generateError.hidden = true;
 
-    if (!pendingApplication || !pendingApplication.research || !pendingApplication.research.filteredFindings) {
-      showError(dom.generateError, "Filter the research findings first.");
+    if (!pendingApplication) {
+      showError(dom.generateError, "Review the advert JSON first.");
       return;
     }
 
@@ -348,9 +351,11 @@ async function initLocalAdminPage() {
     dom.generateDebugPanel.hidden = true;
 
     try {
+      // Pass filtered research if available, otherwise empty object
+      const filteredFindings = (pendingApplication.research && pendingApplication.research.filteredFindings) || {};
       const result = await generatePersonalisedContent(
         pendingApplication,
-        pendingApplication.research.filteredFindings
+        filteredFindings
       );
 
       dom.generateRawJson.textContent = JSON.stringify(result, null, 2);
@@ -369,7 +374,8 @@ async function initLocalAdminPage() {
 
       dom.generatedContent.innerHTML = renderGeneratedContent(result);
       dom.generatedContent.hidden = false;
-      dom.generateStatus.textContent = `Content generated using ${meta.model || "OpenAI"}.`;
+      const hasResearch = pendingApplication.research && pendingApplication.research.filteredFindings;
+      dom.generateStatus.textContent = `Content generated using ${meta.model || "OpenAI"}${hasResearch ? " (with company research)" : " (from advert + evidence bank)"}.`;
       showToast(dom, "Personalised content generated.");
       dom.generatePanel.scrollIntoView({ behavior: "smooth", block: "start" });
 

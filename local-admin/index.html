@@ -110,18 +110,15 @@
         <div class="field-group"><label>Ref</label><input id="result-ref" type="text" readonly></div>
       </div>
       <div class="field-group" style="margin-top:1rem">
-        <label for="result-qr-url">Short URL</label>
+        <label for="result-qr-url">URL</label>
         <input id="result-qr-url" type="text" readonly>
       </div>
-      <div class="field-group" style="margin-top:0.5rem">
-        <label for="result-url">Full CV URL</label>
-        <input id="result-url" type="text" readonly>
-      </div>
+      <input id="result-url" type="hidden">
       <div class="result-qr-layout">
         <section class="result-qr-card">
           <p class="section-kicker">QR Code</p>
           <div class="result-qr-frame">
-            <img id="result-qr-image" alt="QR code for the short redirect URL" hidden>
+            <img id="result-qr-image" alt="QR code" hidden>
           </div>
         </section>
         <div class="result-actions">
@@ -130,9 +127,6 @@
             <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open URL</a>
             <button class="button button--ghost" id="download-cv-button" type="button">Save CV as PDF</button>
           </div>
-          <div class="action-row" style="margin-top:0.5rem">
-            <button class="button button--ghost" id="copy-url-button" type="button">Copy Full URL</button>
-          </div>
         </div>
       </div>
     </section>
@@ -140,6 +134,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=12" defer></script>
+  <script src="admin.js?v=13" defer></script>
 </body>
 </html>

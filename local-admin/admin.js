@@ -131,7 +131,7 @@ async function initLocalAdminPage() {
 
       const response = await publishApplication(publishApplicationData);
       const application = response.application || pendingApplication;
-      const publicUrl = buildShortJobUrl(application);
+      const publicUrl = buildShortQrUrl(application) || buildPublicPreviewUrl(application);
 
       localPreviewUrl = buildLocalPreviewUrl(application);
       localPrintUrl = buildLocalPrintUrl(application);
@@ -524,12 +524,9 @@ async function renderPublishedResult(dom, application, publicUrl, localPreviewUr
   dom.resultRef.value = application.ref || "";
   dom.resultUrl.value = publicUrl;
 
-  var qrUrl = buildShortQrUrl(application);
-  if (qrUrl && dom.resultQrUrl) dom.resultQrUrl.value = qrUrl;
-  var shortUrl = qrUrl || publicUrl;
-  dom.openPreviewLink.href = shortUrl;
-  var qrTarget = shortUrl;
-  try { await renderQrImage(dom.resultQrImage, qrTarget); } catch (_) { dom.resultQrImage.hidden = true; }
+  if (dom.resultQrUrl) dom.resultQrUrl.value = publicUrl;
+  dom.openPreviewLink.href = publicUrl;
+  try { await renderQrImage(dom.resultQrImage, publicUrl); } catch (_) { dom.resultQrImage.hidden = true; }
 }
 
 function buildPublicPreviewUrl(app) {
@@ -677,18 +674,15 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
   var uploadPayload = await uploadRes.json().catch(function () { return {}; });
   if (!uploadRes.ok) throw new Error(uploadPayload.error || "Upload failed.");
 
-  /* 7. Open in new window and trigger print-to-PDF */
-  var printHtml = html.replace('</body>', '<script>window.onload=function(){window.print();}<\/script></body>');
-  var pdfBlob = new Blob([printHtml], { type: 'text/html' });
-  var blobUrl = URL.createObjectURL(pdfBlob);
-  var win = window.open(blobUrl, '_blank');
-  if (win) {
-    win.addEventListener('afterprint', function () {
-      URL.revokeObjectURL(blobUrl);
-    });
-  } else {
-    setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 30000);
+  /* 7. Download via the uploaded Supabase URL */
+  var publicUrl = uploadPayload.publicUrl || "";
+  if (publicUrl) {
+    var a = document.createElement("a");
+    a.href = publicUrl;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.click();
   }
 
-  return uploadPayload.publicUrl || "";
+  return publicUrl;
 }

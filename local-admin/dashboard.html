@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ben Howard | Dashboard</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    /* Tabs */
+    .tabs { display:flex; gap:0; border-bottom:2px solid #ddd; margin-bottom:1.5rem; }
+    .tab { padding:0.6rem 1.2rem; font-weight:600; font-size:0.9rem; cursor:pointer; border:none; background:none; color:#666; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color 0.15s, border-color 0.15s; }
+    .tab:hover { color:#1a1a1a; }
+    .tab--active { color:#1a1a1a; border-bottom-color:#1a1a1a; }
+
+    /* Tab panels */
+    .tab-panel { display:none; }
+    .tab-panel--active { display:block; }
+
+    /* Application tracker table */
+    .tracker-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    .tracker-table th { text-align:left; padding:0.5rem 0.6rem; border-bottom:2px solid #ddd; font-size:0.75rem; text-transform:uppercase; color:#666; font-weight:700; }
+    .tracker-table td { padding:0.5rem 0.6rem; border-bottom:1px solid #eee; vertical-align:top; }
+    .tracker-table tr:hover td { background:rgba(0,0,0,0.02); }
+    .tracker-table a { color:#1a73e8; text-decoration:none; }
+    .tracker-table a:hover { text-decoration:underline; }
+    .tracker-empty { text-align:center; padding:2rem; color:#888; }
+
+    /* Search form */
+    .search-row { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:end; }
+    .search-row .field-group { flex:1; min-width:140px; }
+    .search-row .field-group--small { flex:0 0 100px; min-width:80px; }
+    .search-actions { display:flex; gap:0.5rem; align-items:end; padding-bottom:0.15rem; }
+
+    /* Cookie field */
+    .cookie-field textarea { width:100%; height:3.5rem; font-family:monospace; font-size:0.75rem; resize:vertical; }
+    .cookie-toggle { font-size:0.8rem; color:#1a73e8; cursor:pointer; background:none; border:none; padding:0; text-decoration:underline; }
+
+    /* Job cards */
+    .job-cards { display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem; }
+    .job-card { background:#fff; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.8rem 1rem; transition:border-color 0.15s; }
+    .job-card:hover { border-color:#1a73e8; }
+    .job-card__title { font-weight:700; font-size:0.95rem; margin:0; }
+    .job-card__title a { color:#1a1a1a; text-decoration:none; }
+    .job-card__title a:hover { color:#1a73e8; text-decoration:underline; }
+    .job-card__company { font-size:0.85rem; color:#333; margin:0.15rem 0; }
+    .job-card__meta { font-size:0.8rem; color:#666; margin:0.15rem 0; display:flex; gap:1rem; flex-wrap:wrap; }
+    .job-card__snippet { font-size:0.82rem; color:#444; margin:0.4rem 0 0; line-height:1.5; }
+    .job-card__badge { display:inline-block; font-size:0.7rem; font-weight:600; padding:0.15rem 0.5rem; border-radius:999px; }
+    .job-card__badge--new { background:#d4edda; color:#155724; }
+    .job-card__badge--sponsored { background:#fef3cd; color:#856404; }
+
+    /* Pagination */
+    .pagination { display:flex; gap:0.5rem; align-items:center; justify-content:center; margin-top:1rem; }
+    .pagination button { padding:0.4rem 0.8rem; }
+
+    /* Status bar */
+    .search-status { font-size:0.82rem; color:#666; margin-top:0.6rem; min-height:1.2em; }
+    .search-status--error { color:#c0392b; }
+  </style>
+</head>
+<body data-page="dashboard">
+  <header class="app-header">
+    <div class="shell shell--header">
+      <p class="eyebrow">Dashboard</p>
+      <div class="header-row">
+        <div>
+          <h1>Job Tracker</h1>
+          <p class="subtitle">Track applications and search for new opportunities.</p>
+        </div>
+        <div class="header-actions">
+          <a class="button button--ghost" href="index.html">New Application</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell main-layout dashboard-layout">
+    <!-- Connection status -->
+    <section class="card" style="padding-top:0.6rem; padding-bottom:0.6rem;">
+      <p class="inline-feedback" id="status-bar" style="margin:0;">Connecting&hellip;</p>
+    </section>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab tab--active" data-tab="tracker">My Applications</button>
+      <button class="tab" data-tab="search">Job Search</button>
+    </div>
+
+    <!-- Tab: My Applications -->
+    <section class="tab-panel tab-panel--active" id="panel-tracker">
+      <div id="tracker-content">
+        <p class="tracker-empty">Loading applications&hellip;</p>
+      </div>
+    </section>
+
+    <!-- Tab: Job Search -->
+    <section class="tab-panel" id="panel-search">
+      <!-- Cookie config (collapsed by default) -->
+      <section class="card cookie-field" id="cookie-section">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="font-weight:600; font-size:0.85rem;">Indeed Cookies</label>
+          <button class="cookie-toggle" id="cookie-toggle">Show</button>
+        </div>
+        <textarea id="cookie-input" placeholder="Paste your Indeed cookie string from DevTools (Application → Cookies → uk.indeed.com)" hidden></textarea>
+        <p style="font-size:0.75rem; color:#888; margin:0.3rem 0 0;">Required for searching. Cookies are stored in your browser only.</p>
+      </section>
+
+      <!-- Search form -->
+      <section class="card">
+        <div class="search-row">
+          <div class="field-group">
+            <label for="search-keywords">Keywords</label>
+            <input id="search-keywords" type="text" placeholder="e.g. operations manager">
+          </div>
+          <div class="field-group">
+            <label for="search-location">Location</label>
+            <input id="search-location" type="text" placeholder="e.g. ST13 5QR" value="ST13 5QR">
+          </div>
+          <div class="field-group field-group--small">
+            <label for="search-radius">Radius</label>
+            <select id="search-radius">
+              <option value="5">5 mi</option>
+              <option value="10">10 mi</option>
+              <option value="15">15 mi</option>
+              <option value="25" selected>25 mi</option>
+              <option value="50">50 mi</option>
+            </select>
+          </div>
+          <div class="search-actions">
+            <button class="button" id="search-button" type="button">Search</button>
+          </div>
+        </div>
+        <p class="search-status" id="search-status"></p>
+      </section>
+
+      <!-- Search results -->
+      <div id="search-results" class="job-cards"></div>
+      <div class="pagination" id="pagination" hidden>
+        <button class="button button--ghost" id="prev-page" type="button">&larr; Previous</button>
+        <span id="page-info"></span>
+        <button class="button button--ghost" id="next-page" type="button">Next &rarr;</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="dashboard.js?v=1" defer></script>
+</body>
+</html>

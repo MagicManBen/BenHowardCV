@@ -96,6 +96,7 @@
       color: var(--ink);
       line-height: 0.94;
       letter-spacing: -0.03em;
+      text-wrap: balance;
     }
 
     .serif {
@@ -140,7 +141,7 @@
     }
 
     .section {
-      padding: clamp(3.75rem, 8vw, 6.5rem) 0;
+      padding: clamp(3.25rem, 7vw, 5.75rem) 0;
     }
 
     .section + .section {
@@ -167,18 +168,18 @@
     }
 
     .hero-section {
-      padding-top: clamp(2rem, 5vw, 4rem);
-      padding-bottom: clamp(4.4rem, 9vw, 7.6rem);
+      padding-top: clamp(1.75rem, 4vw, 3.25rem);
+      padding-bottom: clamp(3.75rem, 8vw, 6.25rem);
     }
 
     .hero-editorial {
       display: grid;
-      grid-template-columns: minmax(0, 1.28fr) minmax(250px, 0.72fr);
+      grid-template-columns: minmax(0, 1.38fr) minmax(280px, 0.62fr);
       grid-template-areas:
         "top top"
         "left panel"
         "foot foot";
-      gap: 1.4rem 2rem;
+      gap: 1.15rem 1.75rem;
       align-items: start;
     }
 
@@ -211,8 +212,8 @@
     .hero-left {
       grid-area: left;
       display: grid;
-      grid-template-columns: 3.4rem minmax(0, 1fr);
-      gap: 1.2rem 1.5rem;
+      grid-template-columns: 3.2rem minmax(0, 1fr);
+      gap: 1rem 1.25rem;
       align-items: start;
       min-width: 0;
     }
@@ -225,14 +226,14 @@
 
     .hero-kicker-block {
       display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(190px, 0.65fr);
-      gap: 1rem 1.2rem;
-      padding: 0.9rem 0 1.15rem;
+      grid-template-columns: minmax(0, 1.25fr) minmax(210px, 0.75fr);
+      gap: 0.95rem 1.25rem;
+      padding: 0.8rem 0 1rem;
       border-bottom: 1px solid var(--line);
     }
 
     .hero-kicker-copy {
-      max-width: 26ch;
+      max-width: 30ch;
       color: var(--muted);
       font-size: 0.78rem;
       text-transform: uppercase;
@@ -264,15 +265,15 @@
 
     .hero-statement-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(190px, 0.5fr);
-      gap: 1.2rem 1.35rem;
+      grid-template-columns: minmax(0, 1.05fr) minmax(210px, 0.72fr);
+      gap: 1rem 1.25rem;
       align-items: end;
-      padding: 1rem 0 0.9rem;
+      padding: 0.9rem 0 0.8rem;
       border-bottom: 1px solid var(--line);
     }
 
     .hero-statement {
-      max-width: 23ch;
+      max-width: 28ch;
       color: var(--ink-soft);
       font-size: 1.02rem;
       line-height: 1.8;
@@ -376,10 +377,10 @@
     .hero-tailored-panel {
       grid-area: panel;
       display: grid;
-      gap: 1rem;
+      gap: 0.9rem;
       align-content: start;
-      padding-top: 1rem;
-      padding-left: 1.1rem;
+      padding-top: 0.85rem;
+      padding-left: 1rem;
       border-left: 1px solid var(--line);
     }
 
@@ -428,6 +429,7 @@
       font-size: clamp(2.15rem, 4.1vw, 3.7rem);
       line-height: 0.92;
       color: var(--ink);
+      max-width: 10ch;
     }
 
     .hero-context-line {
@@ -446,7 +448,7 @@
     .hero-detail-list .row {
       display: grid;
       gap: 0.25rem;
-      padding-bottom: 0.55rem;
+      padding-bottom: 0.5rem;
       border-bottom: 1px solid rgba(18, 18, 18, 0.08);
     }
 
@@ -547,9 +549,9 @@
       grid-area: foot;
       display: grid;
       grid-template-columns: 1fr;
-      gap: 1rem 1.6rem;
+      gap: 0.9rem 1.4rem;
       align-items: start;
-      padding-top: 0.95rem;
+      padding-top: 0.85rem;
       border-top: 1px solid var(--line);
     }
 
@@ -612,36 +614,36 @@
 
     .section-head {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
-      gap: 1rem;
-      align-items: end;
-      margin-bottom: 2rem;
+      grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.6fr);
+      gap: 1.15rem 1.6rem;
+      align-items: start;
+      margin-bottom: 1.5rem;
     }
 
     .section-head h2 {
       font-family: "Cormorant Garamond", Georgia, serif;
       font-size: clamp(2.35rem, 5.4vw, 4.8rem);
       line-height: 0.92;
-      max-width: 11ch;
+      max-width: 13ch;
     }
 
     .section-head p {
       justify-self: end;
-      max-width: 34ch;
+      max-width: 32ch;
       color: var(--ink-soft);
     }
 
     .intro-section {
-      padding-top: clamp(4.4rem, 8vw, 7rem);
+      padding-top: clamp(3.5rem, 7vw, 6rem);
     }
 
     .intro-editorial {
       display: grid;
-      grid-template-columns: 3.6rem minmax(0, 0.95fr) minmax(220px, 0.7fr);
+      grid-template-columns: 3.2rem minmax(0, 1.08fr) minmax(240px, 0.84fr);
       grid-template-areas:
         "rail title side"
         "rail body side";
-      gap: 1.2rem 1.45rem;
+      gap: 1rem 1.35rem;
       align-items: start;
     }
 
@@ -683,7 +685,7 @@
       font-family: "Cormorant Garamond", Georgia, serif;
       font-size: clamp(2.2rem, 4.8vw, 4rem);
       line-height: 0.92;
-      max-width: 8ch;
+      max-width: 10ch;
     }
 
     .intro-side {
@@ -691,8 +693,8 @@
       display: grid;
       gap: 0.9rem;
       align-content: start;
-      padding-top: 0.25rem;
-      padding-left: 0.9rem;
+      padding-top: 0.2rem;
+      padding-left: 1rem;
       border-left: 1px solid var(--line);
     }
 
@@ -742,17 +744,17 @@
     .intro-body {
       grid-area: body;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(210px, 0.78fr);
-      gap: 1.2rem 1.45rem;
+      grid-template-columns: minmax(0, 1.08fr) minmax(240px, 0.72fr);
+      gap: 1rem 1.35rem;
       align-items: start;
-      padding-top: 1rem;
+      padding-top: 0.85rem;
       border-top: 1px solid var(--line);
     }
 
     .intro-main {
       display: grid;
-      gap: 0.7rem;
-      max-width: 31rem;
+      gap: 0.8rem;
+      max-width: 38rem;
     }
 
     .intro-main p:first-child {
@@ -797,8 +799,8 @@
     .proof-item {
       display: grid;
       align-content: start;
-      min-height: 13.5rem;
-      padding: 1.05rem 1rem 1.15rem;
+      min-height: 12rem;
+      padding: 0.95rem 0.95rem 1rem;
       border-right: 1px solid var(--line);
     }
 
@@ -1006,8 +1008,8 @@
 
     .themes-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.4rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.2rem;
       border-top: 1px solid var(--line-strong);
     }
 
@@ -1022,7 +1024,7 @@
     }
 
     .theme-item p {
-      max-width: 28ch;
+      max-width: 30ch;
       margin-bottom: 0.85rem;
     }
 
@@ -1098,8 +1100,8 @@
 
     .tailored-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 2rem;
+      grid-template-columns: minmax(0, 1.06fr) minmax(280px, 0.94fr);
+      gap: 1.4rem 2rem;
       align-items: start;
     }
 
@@ -1107,57 +1109,63 @@
       font-family: "Cormorant Garamond", Georgia, serif;
       font-size: clamp(2rem, 4vw, 3.35rem);
       line-height: 0.95;
-      max-width: 12ch;
+      max-width: 13ch;
       padding-top: 0.1rem;
     }
 
     .tailored-copy {
       display: grid;
-      gap: 1rem;
+      gap: 0.85rem;
     }
 
     .tailored-copy .meta-block {
-      padding-top: 0.85rem;
+      padding-top: 0.7rem;
       border-top: 1px solid var(--line);
     }
 
     .tailored-list {
       display: grid;
-      gap: 0.55rem;
-      margin-top: 0.35rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem 1rem;
+      margin-top: 0.25rem;
     }
 
     .tailored-list span {
-      padding-bottom: 0.35rem;
+      padding-bottom: 0.3rem;
       border-bottom: 1px solid rgba(18, 18, 18, 0.08);
       color: var(--ink);
     }
 
     .contact-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.86fr);
-      gap: 2rem;
-      align-items: end;
+      grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.72fr);
+      gap: 1.5rem 1.8rem;
+      align-items: stretch;
     }
 
     .contact-card {
       display: grid;
-      gap: 1rem;
+      gap: 0.85rem;
       border-top: 1px solid var(--line-strong);
-      padding-top: 1rem;
+      padding-top: 0.9rem;
     }
 
     .contact-card h2 {
       font-family: "Cormorant Garamond", Georgia, serif;
       font-size: clamp(2.35rem, 5vw, 4.4rem);
       line-height: 0.92;
-      max-width: 8ch;
+      max-width: 10.5ch;
+    }
+
+    .contact-copy {
+      max-width: 38ch;
     }
 
     .contact-lines {
       display: grid;
-      gap: 0.65rem;
-      margin-top: 0.15rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem 1rem;
+      margin-top: 0.1rem;
     }
 
     .contact-line {
@@ -1165,8 +1173,12 @@
       flex-wrap: wrap;
       gap: 0.35rem 0.65rem;
       align-items: baseline;
-      padding-bottom: 0.55rem;
+      padding-bottom: 0.45rem;
       border-bottom: 1px solid rgba(18, 18, 18, 0.08);
+    }
+
+    .contact-line:last-child {
+      grid-column: 1 / -1;
     }
 
     .contact-line strong {
@@ -1178,6 +1190,8 @@
     }
 
     .contact-figure {
+      display: grid;
+      align-content: space-between;
       padding: 1rem 0;
       border-top: 1px solid var(--line-strong);
       border-bottom: 1px solid var(--line-strong);
@@ -1232,9 +1246,7 @@
 
     @media (max-width: 1060px) {
       .section-head,
-      .visual-break,
-      .tailored-grid,
-      .contact-grid {
+      .visual-break {
         grid-template-columns: 1fr;
       }
 
@@ -1323,7 +1335,7 @@
       }
 
       .themes-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .spine::before {
@@ -1353,7 +1365,15 @@
       }
     }
 
+    @media (max-width: 860px) {
+      .tailored-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 720px) {
+      .themes-grid,
       .proof-grid {
         grid-template-columns: 1fr;
       }
@@ -1387,6 +1407,15 @@
 
       .hero-proof-item:last-child {
         border-bottom: 0;
+      }
+
+      .tailored-list,
+      .contact-lines {
+        grid-template-columns: 1fr;
+      }
+
+      .contact-line:last-child {
+        grid-column: auto;
       }
 
       .chapter-row {
@@ -2397,8 +2426,8 @@
         setText("intro-summary", state.genWhyThisCompany || state.companySummary || state.shortCompanyReason || "A tailored company-facing introduction grounded in the role and company details.");
         setText("intro-detail", buildIntroDetail(state));
         renderLines("intro-traits", companyFacts.length ? companyFacts : workingStyleLines);
-        renderLines("intro-strength-lines", state.genCompanyHighlights.length
-          ? state.genCompanyHighlights.slice(0, 4)
+        renderLines("intro-strength-lines", cleanArray(state.genCompanyHighlights).length
+          ? cleanArray(state.genCompanyHighlights).slice(0, 4)
           : (pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4).length
             ? pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4)
             : baseStrengthLines));

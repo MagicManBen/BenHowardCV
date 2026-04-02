@@ -80,7 +80,8 @@
     target.innerHTML = summary + '<div class="jobs-grid">' + cards + "</div>";
   }
 
-  function renderApplicationsTable(targetId, applications, cvBase) {
+  function renderApplicationsTable(targetId, applications, cvBase, options) {
+    options = options || {};
     var target = document.getElementById(targetId);
     if (!target) return;
     if (!applications || !applications.length) {
@@ -89,14 +90,23 @@
     }
 
     var rows = applications.map(function(app) {
-      var cvUrl = app.short_code ? cvBase + "?sc=" + encodeURIComponent(app.short_code) : cvBase + "?ref=" + encodeURIComponent(app.ref);
-      var created = app.created_at ? fmtDate(app.created_at) : "";
+      var ref = app.ref || "";
+      var company = app.company_name || app.companyName || ref;
+      var role = app.role_title || app.roleTitle || "";
+      var location = app.location || "";
+      var shortCode = app.short_code || app.shortCode || "";
+      var createdRaw = app.created_at || app.createdAt || "";
+      var cvUrl = shortCode ? cvBase + "?sc=" + encodeURIComponent(shortCode) : cvBase + "?ref=" + encodeURIComponent(ref);
+      var created = createdRaw ? fmtDate(createdRaw) : "";
+      var deleteCell = options.showDelete
+        ? '<button class="table-delete-btn app-delete-btn" data-ref="' + esc(ref) + '" data-company="' + esc(company) + '">Delete</button>'
+        : '<a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer">View CV</a>';
       return "<tr>"
-        + '<td><a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(app.company_name || app.ref) + "</a></td>"
-        + "<td>" + esc(app.role_title || "") + "</td>"
-        + "<td>" + esc(app.location || "") + "</td>"
+        + '<td><a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(company) + "</a></td>"
+        + "<td>" + esc(role) + "</td>"
+        + "<td>" + esc(location) + "</td>"
         + "<td>" + esc(created) + "</td>"
-        + '<td><a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer">View CV</a></td>'
+        + "<td>" + deleteCell + "</td>"
         + "</tr>";
     }).join("");
 

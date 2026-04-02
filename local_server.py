@@ -13,6 +13,7 @@ import sys
 import tempfile
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -101,6 +102,9 @@ LOCAL_ADMIN_DIR = ROOT / "local-admin"
 LOCAL_CACHE_DIR = ROOT / "local-cache"
 LOCAL_CACHE_DATA_DIR = LOCAL_CACHE_DIR / "data"
 LOCAL_CONFIG_PATH = LOCAL_ADMIN_DIR / "secrets.local.json"
+JOB_SEARCH_PREFERENCES_PATH = LOCAL_ADMIN_DIR / "job-search-preferences.json"
+CV_HTML_PATH = ROOT / "BH CV.html"
+OPENCODE_QUOTA_PATH = ROOT / "support" / "opencode-quota"
 DEBUG_DIR = ROOT / "debug"
 PUBLISH_DEBUG_DIR = DEBUG_DIR / "publish"
 PUBLISH_DEBUG_INDEX = DEBUG_DIR / "publish.log"
@@ -570,6 +574,11 @@ def fetch_reed_jobs(api_key, keywords="", location="", distance=25, results_to_t
       "postDate": job.get("date") or "",
       "expirationDate": job.get("expirationDate") or "",
       "applications": job.get("applications"),
+      "minimumSalary": job.get("minimumSalary"),
+      "maximumSalary": job.get("maximumSalary"),
+      "salaryType": job.get("salaryType") or "",
+      "currency": job.get("currency") or "GBP",
+      "type": job.get("jobType") or "",
     })
 
   return {
@@ -622,6 +631,8 @@ def fetch_adzuna_jobs(app_id, api_key, what="", where="", distance=50, max_days_
       "category": category.get("label") or "",
       "contractType": job.get("contract_type") or "",
       "contractTime": job.get("contract_time") or "",
+      "salaryMin": job.get("salary_min"),
+      "salaryMax": job.get("salary_max"),
     })
 
   return {
@@ -673,6 +684,29 @@ def indeed_compensation_summary(compensation):
     return f"{currency_symbol}{int(min_amount):,} - {currency_symbol}{int(max_amount):,} / {interval}".strip()
   amount = min_amount if min_amount is not None else max_amount
   return f"{currency_symbol}{int(amount):,} / {interval}".strip()
+
+
+def indeed_compensation_details(compensation):
+  if not isinstance(compensation, dict):
+    return {"min": None, "max": None, "currency": "", "interval": ""}
+  source = compensation.get("baseSalary") or ((compensation.get("estimated") or {}).get("baseSalary"))
+  if not isinstance(source, dict):
+    return {"min": None, "max": None, "currency": "", "interval": ""}
+  unit = str(source.get("unitOfWork") or "").upper()
+  interval_map = {
+    "YEAR": "year",
+    "MONTH": "month",
+    "WEEK": "week",
+    "DAY": "day",
+    "HOUR": "hour",
+  }
+  salary_range = source.get("range") if isinstance(source.get("range"), dict) else {}
+  return {
+    "min": salary_range.get("min"),
+    "max": salary_range.get("max"),
+    "currency": compensation.get("currencyCode") or ((compensation.get("estimated") or {}).get("currencyCode")) or "",
+    "interval": interval_map.get(unit, unit.lower()),
+  }
 
 
 def indeed_job_types(attributes):
@@ -801,6 +835,7 @@ def fetch_indeed_jobs(search_term="", location="", distance=25, results_wanted=2
       location_data = job.get("location") or {}
       formatted = location_data.get("formatted") or {}
       description_html = ((job.get("description") or {}).get("html")) or ""
+      compensation = indeed_compensation_details(job.get("compensation") or {})
       jobs.append({
         "id": f"in-{job_key}",
         "title": job.get("title") or "",
@@ -808,6 +843,10 @@ def fetch_indeed_jobs(search_term="", location="", distance=25, results_wanted=2
         "location": formatted.get("long") or formatted.get("short") or ", ".join([part for part in [location_data.get("city"), location_data.get("admin1Code"), location_data.get("countryCode")] if part]),
         "date_posted": datetime.fromtimestamp((job.get("datePublished") or 0) / 1000).strftime("%Y-%m-%d") if job.get("datePublished") else "",
         "salary": indeed_compensation_summary(job.get("compensation") or {}),
+        "salary_min": compensation["min"],
+        "salary_max": compensation["max"],
+        "salary_currency": compensation["currency"],
+        "salary_interval": compensation["interval"],
         "job_url": job_url,
         "job_url_direct": ((job.get("recruit") or {}).get("viewJobUrl")) or "",
         "description": html_to_text(description_html),
@@ -815,6 +854,7 @@ def fetch_indeed_jobs(search_term="", location="", distance=25, results_wanted=2
         "remote": indeed_is_remote(job),
         "job_type": indeed_job_types(job.get("attributes") or []),
         "company_industry": ((((job.get("employer") or {}).get("dossier")) or {}).get("employerDetails") or {}).get("industry") or "",
+        "attributes": job.get("attributes") or [],
       })
       if len(jobs) >= results_wanted:
         break
@@ -826,6 +866,660 @@ def fetch_indeed_jobs(search_term="", location="", distance=25, results_wanted=2
     "source": "JobSpy-inspired Indeed GraphQL integration",
     "repo": "https://github.com/speedyapply/JobSpy",
     "country": country_meta["label"],
+  }
+
+
+def job_search_default_preferences():
+  return {
+    "profileName": "Ben Howard",
+    "homeLocation": {
+      "label": "Leek, Staffordshire",
+      "postcode": "ST13 5QR",
+      "radiusMiles": 50,
+      "priorityLocationTerms": [
+        "leek",
+        "st13",
+        "staffordshire",
+        "stoke",
+        "newcastle-under-lyme",
+        "ashbourne",
+        "buxton",
+        "uttoxeter",
+        "congleton",
+        "macclesfield",
+      ],
+    },
+    "searchDefaults": {
+      "keywords": "practice manager OR operations manager OR operations director OR transformation manager OR service improvement manager OR continuous improvement manager OR digital transformation manager OR systems improvement manager OR power bi",
+      "location": "Leek, Staffordshire",
+      "radiusMiles": 50,
+      "postedWithinDays": 30,
+      "minimumSalaryAnnual": 30000,
+      "perSourceLimit": 25,
+      "sortBy": "best_fit",
+      "remoteOnly": False,
+      "hideLowFit": True,
+      "showUnknownSalary": True,
+    },
+    "sources": {
+      "indeed": True,
+      "reed": True,
+      "nhs": True,
+      "adzuna": True,
+    },
+    "priorityRules": [
+      {
+        "label": "GP Practice Leadership",
+        "weight": 90,
+        "keywords": [
+          "practice manager",
+          "gp practice",
+          "gp surgery",
+          "medical practice",
+          "primary care",
+          "practice operations",
+          "patient services manager",
+        ],
+      },
+      {
+        "label": "Operations / Transformation Leadership",
+        "weight": 60,
+        "keywords": [
+          "operations manager",
+          "operations director",
+          "director of operations",
+          "associate director of operations",
+          "transformation manager",
+          "service improvement manager",
+          "continuous improvement manager",
+          "operational excellence",
+        ],
+      },
+      {
+        "label": "Digital / Systems Improvement",
+        "weight": 42,
+        "keywords": [
+          "digital transformation",
+          "systems improvement",
+          "process improvement",
+          "power bi",
+          "workflow",
+          "emis",
+          "accurx",
+          "service redesign",
+        ],
+      },
+    ],
+    "cvKeywords": [
+      "nhs primary care",
+      "operations",
+      "transformation",
+      "continuous improvement",
+      "service redesign",
+      "kpi reporting",
+      "financial control",
+      "workforce planning",
+      "patient access",
+      "power bi",
+      "emis",
+      "accurx",
+      "manufacturing operations",
+    ],
+    "excludeKeywords": [
+      "healthcare assistant",
+      "staff nurse",
+      "registered nurse",
+      "clinical fellow",
+      "consultant",
+      "occupational therapist",
+      "physiotherapist",
+      "radiographer",
+      "pharmacist",
+      "dentist",
+      "doctor",
+      "gp partner",
+      "care assistant",
+      "support worker",
+      "midwife",
+    ],
+  }
+
+
+def deep_merge_dicts(base, override):
+  result = dict(base)
+  for key, value in (override or {}).items():
+    if isinstance(value, dict) and isinstance(result.get(key), dict):
+      result[key] = deep_merge_dicts(result[key], value)
+    else:
+      result[key] = value
+  return result
+
+
+def load_job_search_preferences():
+  defaults = job_search_default_preferences()
+  stored = read_json(JOB_SEARCH_PREFERENCES_PATH, {})
+  if not isinstance(stored, dict):
+    return defaults
+  return deep_merge_dicts(defaults, stored)
+
+
+def extract_list_section(html_source, heading):
+  match = re.search(rf"<h2>{re.escape(heading)}</h2>(.*?)</section>", html_source, re.IGNORECASE | re.DOTALL)
+  if not match:
+    return []
+  return [html_to_text(item).strip() for item in re.findall(r"<li>(.*?)</li>", match.group(1), re.IGNORECASE | re.DOTALL) if html_to_text(item).strip()]
+
+
+def extract_cv_profile():
+  if not CV_HTML_PATH.exists():
+    return {
+      "summary": "",
+      "roleTitles": [],
+      "skills": [],
+      "sectors": [],
+      "leadershipThemes": [],
+    }
+
+  html_source = CV_HTML_PATH.read_text(encoding="utf-8")
+  summary_match = re.search(r'class="summary-copy">(.*?)</p>', html_source, re.IGNORECASE | re.DOTALL)
+  role_titles = [html_to_text(item).strip() for item in re.findall(r'class="role-name">(.*?)</h2>', html_source, re.IGNORECASE | re.DOTALL)]
+  return {
+    "summary": html_to_text(summary_match.group(1) if summary_match else ""),
+    "roleTitles": role_titles,
+    "skills": extract_list_section(html_source, "Core Skills"),
+    "sectors": extract_list_section(html_source, "Sector Experience"),
+    "leadershipThemes": extract_list_section(html_source, "Leadership Themes"),
+  }
+
+
+def parse_flexible_date(value):
+  text = str(value or "").strip()
+  if not text:
+    return None
+  for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S", "%d/%m/%Y"):
+    try:
+      return datetime.strptime(text[:26], fmt)
+    except ValueError:
+      continue
+  try:
+    return datetime.fromisoformat(text.replace("Z", "+00:00"))
+  except ValueError:
+    return None
+
+
+def datetime_to_timestamp(value):
+  parsed = parse_flexible_date(value)
+  return parsed.timestamp() if parsed else 0
+
+
+def normalise_token(value):
+  return re.sub(r"[^a-z0-9]+", "", str(value or "").lower())
+
+
+def normalise_phrase(value):
+  return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", str(value or "").lower())).strip()
+
+
+def annualise_salary_bounds(min_amount, max_amount, interval):
+  if min_amount in ("", None) and max_amount in ("", None):
+    return None, None
+  factor = {
+    "year": 1,
+    "annum": 1,
+    "month": 12,
+    "week": 52,
+    "day": 260,
+    "hour": 1950,
+  }.get(str(interval or "year").strip().lower(), 1)
+  min_value = float(min_amount) * factor if min_amount not in ("", None) else None
+  max_value = float(max_amount) * factor if max_amount not in ("", None) else None
+  return min_value, max_value
+
+
+def salary_bounds_from_text(text):
+  raw = str(text or "").strip()
+  if not raw:
+    return None, None
+  lowered = raw.lower()
+  if "negotiable" in lowered:
+    return None, None
+  matches = re.findall(r"(\d[\d,]*(?:\.\d+)?)", raw)
+  if not matches:
+    return None, None
+  values = [float(item.replace(",", "")) for item in matches]
+  interval = "year"
+  if "hour" in lowered:
+    interval = "hour"
+  elif "day" in lowered:
+    interval = "day"
+  elif "week" in lowered:
+    interval = "week"
+  elif "month" in lowered:
+    interval = "month"
+  min_value = values[0]
+  max_value = values[1] if len(values) > 1 else values[0]
+  return annualise_salary_bounds(min_value, max_value, interval)
+
+
+def remote_state_from_text(*parts):
+  haystack = " ".join(str(part or "") for part in parts).lower()
+  is_hybrid = "hybrid" in haystack
+  is_remote = any(token in haystack for token in ("remote", "work from home", "wfh"))
+  return is_remote, is_hybrid
+
+
+def employer_type(company, title, description):
+  haystack = " ".join([str(company or ""), str(title or ""), str(description or "")]).lower()
+  company_text = str(company or "").lower()
+  if any(token in haystack for token in ("gp practice", "gp surgery", "medical centre", "medical center", "doctor surgery")):
+    return "GP Practice"
+  if "primary care" in haystack:
+    return "Primary Care"
+  if "nhs england" in company_text:
+    return "NHS England"
+  if "nhs" in company_text and "trust" in company_text:
+    return "NHS Trust"
+  if "nhs" in company_text or ("nhs" in haystack and any(token in haystack for token in ("foundation trust", "nhs trust", "hospital", "integrated care board"))):
+    return "NHS"
+  if "hospice" in haystack:
+    return "Hospice"
+  return ""
+
+
+def extract_nhs_band(*parts):
+  haystack = " ".join(str(part or "") for part in parts)
+  match = re.search(r"\bband\s*([1-9][a-z]?)\b", haystack, re.IGNORECASE)
+  return f"Band {match.group(1).upper()}" if match else ""
+
+
+def location_fit_score(location, preferences, is_remote=False, is_hybrid=False):
+  if is_remote:
+    return 72
+  location_text = normalise_phrase(location)
+  terms = ((preferences.get("homeLocation") or {}).get("priorityLocationTerms") or [])
+  score = 0
+  for index, term in enumerate(terms):
+    if term in location_text:
+      score = max(score, max(20, 100 - index * 8))
+  if "west midlands" in location_text:
+    score = max(score, 25)
+  if is_hybrid:
+    score = max(score, 50)
+  return score
+
+
+def source_badge_label(source_key):
+  return {
+    "indeed": "Indeed",
+    "reed": "Reed",
+    "nhs": "NHS Jobs",
+    "adzuna": "Adzuna",
+  }.get(source_key, source_key.title())
+
+
+def normalise_search_job(job, source_key):
+  title = str(job.get("title") or "").strip()
+  company = str(job.get("company") or job.get("employer") or "").strip()
+  description = str(job.get("description") or "").strip()
+  salary_text = str(job.get("salary") or "").strip()
+  location = str(job.get("location") or "").strip()
+  is_remote, is_hybrid = remote_state_from_text(title, company, location, description, job.get("type"), job.get("category"))
+  if source_key == "indeed":
+    is_remote = bool(job.get("remote")) or is_remote
+
+  if source_key == "reed":
+    salary_min_annual, salary_max_annual = annualise_salary_bounds(job.get("minimumSalary"), job.get("maximumSalary"), job.get("salaryType") or "year")
+  elif source_key == "adzuna":
+    salary_min_annual, salary_max_annual = annualise_salary_bounds(job.get("salaryMin"), job.get("salaryMax"), "year")
+  elif source_key == "indeed":
+    salary_min_annual, salary_max_annual = annualise_salary_bounds(job.get("salary_min"), job.get("salary_max"), job.get("salary_interval") or "year")
+  else:
+    salary_min_annual, salary_max_annual = salary_bounds_from_text(salary_text)
+
+  employer_kind = employer_type(company, title, description)
+  band = extract_nhs_band(title, description, salary_text)
+  return {
+    "dedupeKey": f"{normalise_token(title)}|{normalise_token(company)}",
+    "sourceKey": source_key,
+    "sourceLabel": source_badge_label(source_key),
+    "sourceKeys": [source_key],
+    "sourceLabels": [source_badge_label(source_key)],
+    "sourceCount": 1,
+    "title": title,
+    "company": company,
+    "location": location,
+    "salaryText": salary_text,
+    "salaryMinAnnual": salary_min_annual,
+    "salaryMaxAnnual": salary_max_annual,
+    "salaryKnown": salary_min_annual is not None or salary_max_annual is not None,
+    "url": str(job.get("job_url") or job.get("url") or "").strip(),
+    "applyUrl": str(job.get("job_url_direct") or job.get("externalUrl") or "").strip(),
+    "description": description,
+    "postedAt": str(job.get("date_posted") or job.get("postDate") or job.get("created") or "").strip(),
+    "closingAt": str(job.get("expirationDate") or job.get("closeDate") or "").strip(),
+    "employmentType": str(job.get("type") or job.get("contractTime") or "").strip(),
+    "contractType": str(job.get("contractType") or "").strip(),
+    "category": str(job.get("category") or job.get("company_industry") or "").strip(),
+    "employerType": employer_kind,
+    "nhsBand": band,
+    "isRemote": is_remote,
+    "isHybrid": is_hybrid,
+  }
+
+
+def merge_duplicate_jobs(jobs):
+  merged = {}
+  duplicates_removed = 0
+  for job in jobs:
+    existing = merged.get(job["dedupeKey"])
+    if not existing:
+      merged[job["dedupeKey"]] = dict(job)
+      continue
+    duplicates_removed += 1
+    existing["sourceKeys"] = sorted(set(existing["sourceKeys"] + job["sourceKeys"]))
+    existing["sourceLabels"] = [source_badge_label(item) for item in existing["sourceKeys"]]
+    existing["sourceCount"] = len(existing["sourceKeys"])
+    for field in ("salaryText", "url", "applyUrl", "employmentType", "contractType", "category", "nhsBand", "employerType", "location", "closingAt"):
+      if not existing.get(field) and job.get(field):
+        existing[field] = job[field]
+    if len(job.get("description") or "") > len(existing.get("description") or ""):
+      existing["description"] = job.get("description") or ""
+    if datetime_to_timestamp(job.get("postedAt")) > datetime_to_timestamp(existing.get("postedAt")):
+      existing["postedAt"] = job.get("postedAt") or existing.get("postedAt")
+    existing["isRemote"] = existing.get("isRemote") or job.get("isRemote")
+    existing["isHybrid"] = existing.get("isHybrid") or job.get("isHybrid")
+    existing["salaryMinAnnual"] = existing.get("salaryMinAnnual") if existing.get("salaryMinAnnual") is not None else job.get("salaryMinAnnual")
+    existing["salaryMaxAnnual"] = existing.get("salaryMaxAnnual") if existing.get("salaryMaxAnnual") is not None else job.get("salaryMaxAnnual")
+    existing["salaryKnown"] = existing.get("salaryKnown") or job.get("salaryKnown")
+  return list(merged.values()), duplicates_removed
+
+
+def match_rule(haystack, title_text, rule):
+  keywords = [normalise_phrase(item) for item in rule.get("keywords") or [] if str(item).strip()]
+  title_hits = [keyword for keyword in keywords if keyword and keyword in title_text]
+  body_hits = [keyword for keyword in keywords if keyword and keyword in haystack and keyword not in title_hits]
+  if title_hits:
+    return rule.get("weight", 0), rule.get("label", ""), title_hits[:2]
+  if body_hits:
+    return int(rule.get("weight", 0) * 0.65), rule.get("label", ""), body_hits[:2]
+  return 0, "", []
+
+
+def score_job(job, preferences, cv_profile):
+  title_text = normalise_phrase(job.get("title"))
+  haystack = normalise_phrase(" ".join([
+    job.get("title", ""),
+    job.get("company", ""),
+    job.get("location", ""),
+    job.get("description", ""),
+    job.get("employmentType", ""),
+    job.get("contractType", ""),
+    job.get("category", ""),
+    job.get("employerType", ""),
+  ]))
+  score = 0
+  reasons = []
+
+  gp_context = any(term in haystack for term in ("gp practice", "gp surgery", "primary care", "medical practice", "medical centre", "medical center"))
+  if (("practice manager" in title_text or "patient services manager" in title_text) and ("best practice manager" not in title_text or gp_context)) or (gp_context and any(term in title_text for term in ("manager", "operations", "patient services"))):
+    score += 90
+    reasons.append("GP Practice Leadership")
+
+  for rule in preferences.get("priorityRules") or []:
+    if rule.get("label") == "GP Practice Leadership":
+      continue
+    rule_score, label, hits = match_rule(haystack, title_text, rule)
+    if rule_score:
+      score += rule_score
+      reasons.append(label if not hits else f"{label}: {', '.join(hits)}")
+
+  if job.get("employerType") in {"GP Practice", "Primary Care"}:
+    score += 20
+    reasons.append(job["employerType"])
+  elif job.get("employerType") in {"NHS Trust", "NHS England", "NHS"}:
+    score += 12
+    reasons.append(job["employerType"])
+
+  for keyword in preferences.get("cvKeywords") or []:
+    normalized = normalise_phrase(keyword)
+    if normalized and normalized in haystack:
+      score += 4
+
+  for title in cv_profile.get("roleTitles") or []:
+    title_words = [word for word in normalise_phrase(title).split(" ") if len(word) > 4]
+    overlap = sum(1 for word in title_words if word in haystack)
+    if overlap >= 2:
+      score += 6
+
+  salary_floor = ((preferences.get("searchDefaults") or {}).get("minimumSalaryAnnual") or 0)
+  salary_max = job.get("salaryMaxAnnual") or job.get("salaryMinAnnual")
+  if salary_max is not None and salary_floor:
+    if salary_max >= salary_floor:
+      score += min(12, int((salary_max - salary_floor) / 10000) + 4)
+      reasons.append("Salary clears floor")
+    else:
+      score -= 45
+      reasons.append("Salary below floor")
+  elif salary_floor:
+    reasons.append("Salary not stated")
+
+  if job.get("isRemote"):
+    score += 4
+  if job.get("isHybrid"):
+    score += 3
+
+  location_score = location_fit_score(job.get("location", ""), preferences, is_remote=job.get("isRemote"), is_hybrid=job.get("isHybrid"))
+  score += int(location_score / 8)
+
+  exclude_hits = [term for term in (preferences.get("excludeKeywords") or []) if normalise_phrase(term) in haystack]
+  management_present = any(term in haystack for term in ("manager", "director", "lead", "head of"))
+  if exclude_hits and not management_present:
+    score -= 80
+    reasons.append("Role appears clinically focused")
+
+  score = max(0, min(100, score))
+  if score >= 80:
+    tier = "Top Match"
+  elif score >= 60:
+    tier = "Strong Match"
+  elif score >= 40:
+    tier = "Worth Reviewing"
+  else:
+    tier = "Low Match"
+
+  tags = [{"label": tier, "tone": "brand" if score >= 80 else ("accent" if score >= 60 else "neutral")}]
+  if job.get("employerType"):
+    tags.append({"label": job["employerType"], "tone": "neutral"})
+  if job.get("nhsBand"):
+    tags.append({"label": job["nhsBand"], "tone": "neutral"})
+  if job.get("isRemote"):
+    tags.append({"label": "Remote", "tone": "brand"})
+  elif job.get("isHybrid"):
+    tags.append({"label": "Hybrid", "tone": "brand"})
+  if salary_max is not None:
+    if salary_max >= 50000:
+      tags.append({"label": "£50k+", "tone": "accent"})
+    elif salary_max >= salary_floor and salary_floor:
+      tags.append({"label": "£30k+", "tone": "accent"})
+  if job.get("sourceCount", 1) > 1:
+    tags.append({"label": f"{job['sourceCount']} sources", "tone": "neutral"})
+
+  job["locationScore"] = location_score
+  job["matchScore"] = score
+  job["matchTier"] = tier
+  job["matchReasons"] = reasons[:4]
+  job["tags"] = tags
+  return job
+
+
+def sort_search_jobs(jobs, sort_by):
+  if sort_by == "salary_desc":
+    return sorted(jobs, key=lambda job: (job.get("salaryMaxAnnual") or job.get("salaryMinAnnual") or -1, job.get("matchScore", 0), datetime_to_timestamp(job.get("postedAt"))), reverse=True)
+  if sort_by == "newest":
+    return sorted(jobs, key=lambda job: (datetime_to_timestamp(job.get("postedAt")), job.get("matchScore", 0)), reverse=True)
+  if sort_by == "closest":
+    return sorted(jobs, key=lambda job: (job.get("locationScore", 0), job.get("matchScore", 0), datetime_to_timestamp(job.get("postedAt"))), reverse=True)
+  return sorted(jobs, key=lambda job: (job.get("matchScore", 0), job.get("salaryMaxAnnual") or job.get("salaryMinAnnual") or -1, datetime_to_timestamp(job.get("postedAt"))), reverse=True)
+
+
+def filter_ranked_jobs(jobs, preferences, remote_only=False, min_salary=None, sources=None, hide_low_fit=False, show_unknown_salary=True):
+  source_set = set(sources or [])
+  filtered = []
+  for job in jobs:
+    if source_set and not any(source in source_set for source in job.get("sourceKeys", [])):
+      continue
+    if remote_only and not (job.get("isRemote") or job.get("isHybrid")):
+      continue
+    if hide_low_fit and job.get("matchScore", 0) < 40:
+      continue
+    if min_salary:
+      salary_max = job.get("salaryMaxAnnual") or job.get("salaryMinAnnual")
+      if salary_max is None and not show_unknown_salary:
+        continue
+      if salary_max is not None and salary_max < min_salary:
+        continue
+    filtered.append(job)
+  return filtered
+
+
+def fetch_nhs_jobs(config, keyword="", location="", distance=50, limit=25, page=1, sort="publicationDateDesc"):
+  settings = supabase_settings(config)
+  if not settings["url"] or not settings["anonKey"]:
+    raise RuntimeError("No Supabase anon key configured for NHS search.")
+  status, payload = http_request_json(
+    settings["url"].rstrip("/") + "/functions/v1/search-nhs-jobs",
+    method="POST",
+    headers={
+      "apikey": settings["anonKey"],
+      "Authorization": f"Bearer {settings['anonKey']}",
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+    payload={
+      "keyword": keyword,
+      "location": location,
+      "distance": int(distance or 50),
+      "page": int(page or 1),
+      "limit": max(1, min(int(limit or 25), 100)),
+      "sort": sort or "publicationDateDesc",
+    },
+    timeout=25,
+  )
+  if status < 200 or status >= 300:
+    raise RuntimeError(payload.get("error") or payload.get("message") or f"NHS search returned {status}")
+  return payload
+
+
+def build_job_search_payload(params=None):
+  params = params or {}
+  config = load_local_config()
+  preferences = load_job_search_preferences()
+  cv_profile = extract_cv_profile()
+  defaults = preferences.get("searchDefaults") or {}
+  sources_config = preferences.get("sources") or {}
+
+  keywords = str(params.get("q") or defaults.get("keywords") or "").strip()
+  location = str(params.get("location") or params.get("l") or defaults.get("location") or (preferences.get("homeLocation") or {}).get("label") or "").strip()
+  radius = int(params.get("distance") or params.get("radius") or defaults.get("radiusMiles") or 50)
+  posted_within_days = int(params.get("days") or defaults.get("postedWithinDays") or 30)
+  per_source_limit = int(params.get("limit") or defaults.get("perSourceLimit") or 25)
+  sort_by = str(params.get("sort") or defaults.get("sortBy") or "best_fit").strip()
+  remote_only = str(params.get("remote") or "").strip().lower() in {"1", "true", "yes", "on"}
+  hide_low_fit = str(params.get("hide_low_fit") or defaults.get("hideLowFit") or "").strip().lower() in {"1", "true", "yes", "on"}
+  min_salary = int(params.get("min_salary") or defaults.get("minimumSalaryAnnual") or 0)
+  show_unknown_salary = str(params.get("show_unknown_salary") or defaults.get("showUnknownSalary", True)).strip().lower() not in {"0", "false", "no", "off"}
+  source_param = str(params.get("sources") or "").strip()
+  selected_sources = [item.strip().lower() for item in source_param.split(",") if item.strip()] or [key for key, enabled in sources_config.items() if enabled]
+
+  fetch_tasks = {}
+  with ThreadPoolExecutor(max_workers=4) as executor:
+    if "indeed" in selected_sources:
+      fetch_tasks[executor.submit(fetch_indeed_jobs, search_term=keywords, location=location, distance=radius, results_wanted=per_source_limit, country="UK", hours_old=posted_within_days * 24)] = "indeed"
+    if "reed" in selected_sources:
+      fetch_tasks[executor.submit(fetch_reed_jobs, config.get("reedApiKey", ""), keywords=keywords, location=location, distance=radius, results_to_take=per_source_limit)] = "reed"
+    if "nhs" in selected_sources:
+      fetch_tasks[executor.submit(fetch_nhs_jobs, config, keyword=keywords, location=location, distance=radius, limit=per_source_limit)] = "nhs"
+    if "adzuna" in selected_sources:
+      fetch_tasks[executor.submit(fetch_adzuna_jobs, config.get("adzunaAppId", ""), config.get("adzunaApiKey", ""), what=keywords, where=location, distance=radius, max_days_old=posted_within_days, sort_by="date", results_per_page=per_source_limit)] = "adzuna"
+
+    source_status = []
+    source_jobs = []
+    raw_source_counts = {}
+    for future in as_completed(fetch_tasks):
+      source_key = fetch_tasks[future]
+      try:
+        payload = future.result()
+        jobs = payload.get("jobs") or []
+        raw_source_counts[source_key] = len(jobs)
+        source_status.append({
+          "sourceKey": source_key,
+          "sourceLabel": source_badge_label(source_key),
+          "ok": True,
+          "count": len(jobs),
+          "message": payload.get("source") or "Loaded",
+          "requiresApiKey": payload.get("requiresApiKey", False),
+          "fallbackUrl": payload.get("fallbackUrl", ""),
+        })
+        source_jobs.extend(normalise_search_job(job, source_key) for job in jobs)
+      except Exception as exc:
+        raw_source_counts[source_key] = 0
+        source_status.append({
+          "sourceKey": source_key,
+          "sourceLabel": source_badge_label(source_key),
+          "ok": False,
+          "count": 0,
+          "message": str(exc),
+        })
+
+  deduped_jobs, duplicates_removed = merge_duplicate_jobs(source_jobs)
+  ranked_jobs = [score_job(job, preferences, cv_profile) for job in deduped_jobs]
+  sorted_jobs = sort_search_jobs(ranked_jobs, sort_by)
+
+  tier_counts = {}
+  for job in sorted_jobs:
+    tier_counts[job["matchTier"]] = tier_counts.get(job["matchTier"], 0) + 1
+
+  return {
+    "criteria": {
+      "keywords": keywords,
+      "location": location,
+      "radiusMiles": radius,
+      "postedWithinDays": posted_within_days,
+      "minimumSalaryAnnual": min_salary,
+      "sortBy": sort_by,
+      "remoteOnly": remote_only,
+      "hideLowFit": hide_low_fit,
+      "showUnknownSalary": show_unknown_salary,
+      "sources": selected_sources,
+    },
+    "preferences": preferences,
+    "cvProfile": cv_profile,
+    "jobs": sorted_jobs,
+    "stats": {
+      "rawCount": len(source_jobs),
+      "dedupedCount": len(deduped_jobs),
+      "visibleCount": len(sorted_jobs),
+      "duplicatesRemoved": duplicates_removed,
+      "rawSourceCounts": raw_source_counts,
+      "tierCounts": tier_counts,
+    },
+    "sourceStatus": sorted(source_status, key=lambda item: item["sourceLabel"]),
+    "preferencesPath": str(JOB_SEARCH_PREFERENCES_PATH.relative_to(ROOT)),
+    "cvPath": str(CV_HTML_PATH.relative_to(ROOT)),
+  }
+
+
+def opencode_quota_status():
+  package = read_json(OPENCODE_QUOTA_PATH / "package.json", {})
+  return {
+    "installed": bool(package),
+    "path": str(OPENCODE_QUOTA_PATH.relative_to(ROOT)) if OPENCODE_QUOTA_PATH.exists() else "",
+    "version": package.get("version", ""),
+    "name": package.get("name", ""),
+    "hasOpencodeCli": bool(shutil.which("opencode")),
+    "nodeVersion": subprocess.run(["node", "-v"], capture_output=True, text=True, check=False).stdout.strip() if shutil.which("node") else "",
+    "npmVersion": subprocess.run(["npm", "-v"], capture_output=True, text=True, check=False).stdout.strip() if shutil.which("npm") else "",
+    "repo": "https://github.com/slkiser/opencode-quota",
   }
 
 
@@ -1109,6 +1803,24 @@ def upsert_local_application(application):
   write_json(LOCAL_CACHE_DATA_DIR / "applications.json", local_index)
 
 
+def delete_local_application(ref):
+  ref = str(ref or "").strip().lower()
+  local_path = LOCAL_CACHE_DATA_DIR / f"{ref}.json"
+  existed = local_path.exists()
+  if local_path.exists():
+    local_path.unlink()
+
+  previous_index = read_local_index()
+  local_index = [item for item in previous_index if str(item.get("ref", "")).strip().lower() != ref]
+  if len(local_index) != len(previous_index):
+    write_json(LOCAL_CACHE_DATA_DIR / "applications.json", merge_application_lists(local_index))
+  return {
+    "deletedLocalFile": existed,
+    "deletedFromLocalIndex": len(local_index) != len(previous_index),
+    "localIndexCount": len(local_index),
+  }
+
+
 def build_github_contents_url(path):
   encoded = quote(path, safe="/")
   return f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{encoded}"
@@ -1251,6 +1963,121 @@ def put_remote_text(path, content, token, message):
   if not ok:
     result["error"] = response.get("message") or f"GitHub API returned {status}"
   return result
+
+
+def delete_remote_path(path, token, message):
+  try:
+    current_sha = fetch_remote_sha(path, token)
+  except RuntimeError as exc:
+    return {
+      "path": path,
+      "message": message,
+      "ok": False,
+      "phase": "fetch-sha",
+      "error": str(exc),
+    }
+
+  if not current_sha:
+    return {
+      "path": path,
+      "message": message,
+      "ok": True,
+      "status": 404,
+      "skipped": True,
+      "reason": "File does not exist",
+    }
+
+  request_body = {
+    "message": message,
+    "sha": current_sha,
+    "branch": GITHUB_BRANCH,
+  }
+
+  try:
+    status, response = github_request(path, token, method="DELETE", payload=request_body)
+  except RuntimeError as exc:
+    return {
+      "path": path,
+      "message": message,
+      "ok": False,
+      "phase": "delete",
+      "error": str(exc),
+    }
+
+  ok = 200 <= status < 300
+  result = {
+    "path": path,
+    "message": message,
+    "ok": ok,
+    "status": status,
+    "response": response,
+  }
+  if not ok:
+    result["error"] = response.get("message") or f"GitHub API returned {status}"
+  return result
+
+
+def delete_supabase_application(ref, config):
+  if not has_supabase_access(config):
+    return {
+      "deletedFromSupabase": False,
+      "skipped": True,
+      "reason": "No Supabase service role key configured.",
+    }
+
+  encoded_ref = quote(str(ref).strip().lower(), safe="")
+  status, payload = supabase_request_json(config, f"/rest/v1/{SUPABASE_APPLICATIONS_TABLE}?ref=eq.{encoded_ref}", method="DELETE")
+  ok = 200 <= status < 300
+  return {
+    "deletedFromSupabase": ok,
+    "status": status,
+    "response": payload,
+    "error": None if ok else (payload.get("message") or f"Supabase API returned {status}"),
+  }
+
+
+def delete_application_from_github(ref, short_code, token, found=False):
+  if not token:
+    return {
+      "deletedFromGitHub": False,
+      "skipped": True,
+      "reason": "No GitHub token configured.",
+    }
+  if not found:
+    return {
+      "deletedFromGitHub": False,
+      "skipped": True,
+      "reason": "Application not found in configured sources.",
+    }
+
+  steps = []
+  delete_app = delete_remote_path(f"data/{ref}.json", token, f"Delete application: {ref}")
+  steps.append(delete_app)
+
+  try:
+    remote_index, _ = fetch_remote_json(APPLICATIONS_INDEX_PATH, token)
+    remote_items = remote_index if isinstance(remote_index, list) else []
+    merged = [item for item in remote_items if str(item.get("ref", "")).strip().lower() != str(ref).strip().lower()]
+    index_result = put_remote_json(APPLICATIONS_INDEX_PATH, merged, token, f"Remove application from index: {ref}")
+    steps.append(index_result)
+  except RuntimeError as exc:
+    steps.append({
+      "path": APPLICATIONS_INDEX_PATH,
+      "ok": False,
+      "error": str(exc),
+      "phase": "update-index",
+    })
+
+  if short_code:
+    delete_redirect = delete_remote_path(f"r/{short_code}/index.html", token, f"Delete short redirect: {short_code}")
+    steps.append(delete_redirect)
+
+  ok = all(step.get("ok") for step in steps if not step.get("skipped"))
+  return {
+    "deletedFromGitHub": ok,
+    "steps": steps,
+    "error": None if ok else next((step.get("error") for step in steps if step.get("error")), "GitHub delete failed"),
+  }
 
 
 def build_redirect_html(ref):
@@ -1497,6 +2324,31 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(200, payload)
       return
 
+    if parsed.path == "/api/job-search-preferences":
+      try:
+        self.send_json(
+          200,
+          {
+            "preferences": load_job_search_preferences(),
+            "cvProfile": extract_cv_profile(),
+            "preferencesPath": str(JOB_SEARCH_PREFERENCES_PATH.relative_to(ROOT)),
+            "cvPath": str(CV_HTML_PATH.relative_to(ROOT)),
+          },
+        )
+      except Exception as exc:
+        self.send_json(500, {"error": str(exc)})
+      return
+
+    if parsed.path == "/api/job-search":
+      params = {key: values[0] for key, values in parse_qs(parsed.query).items()}
+      try:
+        self.send_json(200, build_job_search_payload(params))
+      except ValueError as exc:
+        self.send_json(400, {"error": f"Invalid search parameters: {exc}"})
+      except Exception as exc:
+        self.send_json(502, {"error": str(exc)})
+      return
+
     if parsed.path == "/api/reed-search":
       params = parse_qs(parsed.query)
       try:
@@ -1508,6 +2360,32 @@ class AppHandler(SimpleHTTPRequestHandler):
           distance=int((params.get("distance", ["25"])[0] or "25").strip()),
           results_to_take=int((params.get("limit", ["50"])[0] or "50").strip()),
           results_to_skip=int((params.get("skip", ["0"])[0] or "0").strip()),
+        )
+      except ValueError as exc:
+        self.send_json(400, {"error": f"Invalid search parameters: {exc}"})
+        return
+      except RuntimeError as exc:
+        self.send_json(500, {"error": str(exc)})
+        return
+      except Exception as exc:
+        self.send_json(502, {"error": str(exc)})
+        return
+
+      self.send_json(200, payload)
+      return
+
+    if parsed.path == "/api/nhs-search":
+      params = parse_qs(parsed.query)
+      try:
+        config = load_local_config()
+        payload = fetch_nhs_jobs(
+          config,
+          keyword=(params.get("q", [""])[0] or "").strip(),
+          location=(params.get("l", [""])[0] or "").strip(),
+          distance=int((params.get("distance", ["50"])[0] or "50").strip()),
+          limit=int((params.get("limit", ["50"])[0] or "50").strip()),
+          page=int((params.get("page", ["1"])[0] or "1").strip()),
+          sort=(params.get("sort", ["publicationDateDesc"])[0] or "publicationDateDesc").strip(),
         )
       except ValueError as exc:
         self.send_json(400, {"error": f"Invalid search parameters: {exc}"})
@@ -1551,6 +2429,10 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(200, payload)
       return
 
+    if parsed.path == "/api/opencode-quota-status":
+      self.send_json(200, opencode_quota_status())
+      return
+
     if self.is_blocked_path(parsed.path):
       self.send_error(404)
       return
@@ -1567,7 +2449,7 @@ class AppHandler(SimpleHTTPRequestHandler):
 
   def do_POST(self):
     parsed = urlparse(self.path)
-    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf"):
+    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf", "/api/delete-application"):
       self.send_error(404)
       return
 
@@ -1581,6 +2463,10 @@ class AppHandler(SimpleHTTPRequestHandler):
 
     if parsed.path == "/api/pdf":
       self._handle_pdf()
+      return
+
+    if parsed.path == "/api/delete-application":
+      self._handle_delete_application()
       return
 
     length = int(self.headers.get("Content-Length", "0") or 0)
@@ -1795,6 +2681,63 @@ class AppHandler(SimpleHTTPRequestHandler):
         "error": (supabase_result or {}).get("error") or (github_result or {}).get("error") or "Upload failed.",
         "supabaseResult": supabase_result,
         "githubResult": github_result,
+      },
+    )
+
+  def _handle_delete_application(self):
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    ref = str(payload.get("ref", "")).strip().lower()
+    if not ref:
+      self.send_json(400, {"error": "ref is required"})
+      return
+
+    try:
+      config = load_local_config()
+    except RuntimeError as exc:
+      self.send_json(500, {"error": str(exc)})
+      return
+
+    application = read_application_by_ref(ref, config) or {}
+    found = bool(application)
+    short_code = str(application.get("shortCode", "")).strip()
+
+    try:
+      local_result = delete_local_application(ref)
+      supabase_result = delete_supabase_application(ref, config) if found else {
+        "deletedFromSupabase": False,
+        "skipped": True,
+        "reason": "Application not found in configured sources.",
+      }
+      github_result = delete_application_from_github(ref, short_code, config.get("githubToken", ""), found=found)
+    except Exception as exc:
+      self.send_json(500, {"error": str(exc)})
+      return
+
+    failed = []
+    if not supabase_result.get("deletedFromSupabase") and not supabase_result.get("skipped"):
+      failed.append("supabase")
+    if not github_result.get("deletedFromGitHub") and not github_result.get("skipped"):
+      failed.append("github")
+
+    status = 200 if not failed else 502
+    self.send_json(
+      status,
+      {
+        "deleted": not failed,
+        "ref": ref,
+        "shortCode": short_code,
+        "localResult": local_result,
+        "supabaseResult": supabase_result,
+        "githubResult": github_result,
+        "error": None if not failed else ("Delete partially failed: " + ", ".join(failed)),
       },
     )
 

@@ -334,6 +334,7 @@ code {
   gap: 0.35rem;
 }
 
+.field--span-1 { grid-column: span 1; }
 .field--span-2 { grid-column: span 2; }
 .field--span-3 { grid-column: span 3; }
 .field--span-4 { grid-column: span 4; }
@@ -544,6 +545,29 @@ textarea:focus {
   text-decoration: underline;
 }
 
+.table-delete-btn {
+  appearance: none;
+  border: 1px solid rgba(178, 76, 76, 0.25);
+  background: rgba(178, 76, 76, 0.08);
+  color: #9d2f2f;
+  border-radius: var(--radius-pill);
+  padding: 0.4rem 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.table-delete-btn:hover {
+  background: rgba(178, 76, 76, 0.15);
+  border-color: rgba(178, 76, 76, 0.38);
+}
+
+.table-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .usage-grid {
   display: grid;
   gap: 1rem;
@@ -598,7 +622,242 @@ textarea:focus {
   font-size: 0.92rem;
 }
 
+.page-hero--search {
+  display: grid;
+  gap: 1rem;
+}
+
+.hero-note-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.hero-note {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-small);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(50, 41, 31, 0.08);
+}
+
+.hero-note strong {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
+.hero-note span {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.status-bar--split {
+  justify-content: space-between;
+}
+
+.search-workspace,
+.result-overview {
+  display: grid;
+  gap: 1rem;
+}
+
+.workspace-head {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.workspace-actions {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.search-grid--wide {
+  align-items: end;
+}
+
+.toggle-cluster,
+.source-filter-bar {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-heading {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(50, 41, 31, 0.08);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.toggle-pill input {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.search-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-summary--muted {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.results-shell--stacked {
+  gap: 1.2rem;
+}
+
+.group-block {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.jobs-grid--stacked {
+  gap: 1rem;
+}
+
+.job-card--ranked {
+  padding: 1.1rem 1.15rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 245, 238, 0.95));
+}
+
+.job-card__top {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.job-card__title-block {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.job-card__sources {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.source-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.32rem 0.58rem;
+  border-radius: var(--radius-pill);
+  background: rgba(13, 108, 91, 0.08);
+  color: var(--brand-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fit-score {
+  flex: 0 0 auto;
+  width: 74px;
+  min-height: 74px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+  color: #fff;
+  box-shadow: 0 14px 24px rgba(13, 108, 91, 0.18);
+}
+
+.fit-score__value {
+  font-family: "Space Grotesk", "Avenir Next", sans-serif;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.fit-score__label {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.78;
+}
+
+.tag-row {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+
+.match-panel {
+  margin-top: 0.8rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-small);
+  background: rgba(13, 108, 91, 0.06);
+  border: 1px solid rgba(13, 108, 91, 0.08);
+}
+
+.match-panel strong {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand-strong);
+}
+
+.match-panel ul {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--text-soft);
+}
+
+.match-panel pre {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: #1f1d1a;
+  color: #f6efe4;
+  overflow-x: auto;
+}
+
+.match-panel code {
+  font-family: "SFMono-Regular", "SF Mono", Consolas, monospace;
+}
+
 @media (max-width: 900px) {
+  .hero-note-grid {
+    grid-template-columns: 1fr;
+  }
+
   .search-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
@@ -608,13 +867,26 @@ textarea:focus {
   .field--span-5,
   .field--span-4,
   .field--span-3,
-  .field--span-2 {
+  .field--span-2,
+  .field--span-1 {
     grid-column: span 6;
   }
 
   .field--span-2.field--compact,
   .field--span-3.field--compact {
     grid-column: span 3;
+  }
+
+  .job-card__top {
+    flex-direction: column;
+  }
+
+  .fit-score {
+    width: 100%;
+    min-height: auto;
+    grid-template-columns: auto auto;
+    gap: 0.45rem;
+    padding: 0.9rem 1rem;
   }
 }
 
@@ -642,12 +914,21 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .workspace-actions,
+  .search-summary-bar,
+  .toggle-cluster,
+  .source-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .field--span-8,
   .field--span-6,
   .field--span-5,
   .field--span-4,
   .field--span-3,
   .field--span-2,
+  .field--span-1,
   .field--span-2.field--compact,
   .field--span-3.field--compact {
     grid-column: auto;

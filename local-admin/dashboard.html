@@ -10,7 +10,7 @@
   <nav class="dash-nav">
     <a href="dashboard.html" class="active">Applied Jobs</a>
     <a href="indeed.html">Indeed</a>
-    <a href="jobspy.html">Multi-Site</a>
+    <a href="jobspy.html">Job Search</a>
     <a href="reed.html">Reed</a>
     <a href="nhs.html">NHS Jobs</a>
     <a href="adzuna.html">Adzuna</a>
@@ -38,8 +38,6 @@
 
   <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
-    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
     var CV_BASE = "https://checkloops.co.uk/cv.html";
 
     document.addEventListener("DOMContentLoaded", init);
@@ -47,15 +45,15 @@
     async function init() {
       await checkSupabase();
       await loadApplications();
+      bindDeleteActions();
     }
 
     async function checkSupabase() {
       try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        if (!res.ok) throw new Error(res.status);
-        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
+        var res = await fetch("/api/status");
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || ("Status failed (" + res.status + ")"));
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", data.supabaseAccessOk ? "green" : "amber", data.supabaseAccessOk ? "Connected" : "Optional");
       } catch (e) {
         JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "red", e.message);
       }
@@ -63,15 +61,44 @@
 
     async function loadApplications() {
       try {
-        var url = SUPABASE_URL + "/rest/v1/applications?select=ref,company_name,role_title,location,short_code,created_at&order=created_at.desc";
-        var res = await fetch(url, {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON, Accept: "application/json" }
-        });
+        var res = await fetch("/api/applications");
         var data = await res.json();
         if (!res.ok) throw new Error((data && data.message) || res.status);
-        JobBoardUI.renderApplicationsTable("results", data, CV_BASE);
+        JobBoardUI.renderApplicationsTable("results", data, CV_BASE, { showDelete: true });
       } catch (e) {
         document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(e.message) + "</p>";
+      }
+    }
+
+    function bindDeleteActions() {
+      document.getElementById("results").addEventListener("click", async function(event) {
+        var button = event.target.closest(".app-delete-btn");
+        if (!button) return;
+        var ref = button.getAttribute("data-ref");
+        if (!ref) return;
+        var company = button.getAttribute("data-company") || ref;
+        if (!window.confirm('Delete application "' + company + '"? This removes it from local cache, Supabase and GitHub.')) return;
+        await deleteApplication(ref, button);
+      });
+    }
+
+    async function deleteApplication(ref, button) {
+      var original = button.textContent;
+      button.disabled = true;
+      button.textContent = "Deleting...";
+      try {
+        var res = await fetch("/api/delete-application", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ref: ref })
+        });
+        var data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || ("Delete failed (" + res.status + ")"));
+        await loadApplications();
+      } catch (error) {
+        alert("Delete failed: " + error.message);
+        button.disabled = false;
+        button.textContent = original;
       }
     }
   </script>

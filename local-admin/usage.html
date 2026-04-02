@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — API Usage</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .usage-grid { display:grid; grid-template-columns:1fr; gap:1rem; margin-top:1rem; }
+    .usage-card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:1rem 1.2rem; }
+    .usage-card h2 { margin:0 0 0.4rem; font-size:1rem; display:flex; align-items:center; gap:0.5rem; }
+    .usage-card .tag { font-size:0.65rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:3px; text-transform:uppercase; }
+    .tag--free { background:#d4edda; color:#155724; }
+    .tag--paid { background:#f8d7da; color:#721c24; }
+    .tag--blocked { background:#fff3cd; color:#856404; }
+    .tag--available { background:#cce5ff; color:#004085; }
+    .usage-table { width:100%; border-collapse:collapse; margin-top:0.5rem; font-size:0.82rem; }
+    .usage-table th { text-align:left; font-weight:600; color:#555; padding:0.3rem 0.6rem; border-bottom:1px solid #e0e0e0; }
+    .usage-table td { padding:0.3rem 0.6rem; border-bottom:1px solid #f0f0f0; }
+    .usage-table td:first-child { color:#333; font-weight:500; }
+    .usage-table td:last-child { color:#666; }
+    .advice { margin-top:0.5rem; padding:0.5rem 0.7rem; background:#fff8e1; border-left:3px solid #f1c40f; font-size:0.8rem; border-radius:0 4px 4px 0; }
+    .advice--danger { background:#fce4ec; border-left-color:#e74c3c; }
+    .advice--ok { background:#e8f5e9; border-left-color:#2ecc40; }
+    .supa-stat { display:inline-block; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:4px; padding:0.2rem 0.6rem; margin:0.15rem 0.3rem 0.15rem 0; font-size:0.8rem; }
+    .supa-stat strong { color:#1a73e8; }
+  </style>
+</head>
+<body>
+  <nav class="dash-nav">
+    <a href="dashboard.html">Applied Jobs</a>
+    <a href="indeed.html">Indeed</a>
+    <a href="nhs.html">NHS Jobs</a>
+    <a href="google.html">Google Jobs</a>
+    <a href="usage.html" class="active">Usage</a>
+    <a href="index.html" style="margin-left:auto; color:#999;">← New Application</a>
+  </nav>
+
+  <div class="page-shell">
+    <h1 class="page-title">API Usage &amp; Limits</h1>
+    <p class="page-subtitle">Overview of each service's quotas, costs, and current status.</p>
+
+    <div class="usage-grid">
+
+      <!-- Supabase -->
+      <div class="usage-card">
+        <h2>Supabase <span class="tag tag--free">Free tier</span></h2>
+        <table class="usage-table">
+          <tr><th>Metric</th><th>Allowance (Free Plan)</th><th>Status</th></tr>
+          <tr><td>Database rows</td><td>Unlimited (500 MB storage)</td><td id="supa-db">checking…</td></tr>
+          <tr><td>Edge Function invocations</td><td>500,000/month</td><td id="supa-edge">—</td></tr>
+          <tr><td>Edge Function runtime</td><td>100 hours/month (wall-clock)</td><td>—</td></tr>
+          <tr><td>Storage</td><td>1 GB total</td><td>—</td></tr>
+          <tr><td>Bandwidth</td><td>5 GB/month</td><td>—</td></tr>
+          <tr><td>Auth MAU</td><td>50,000/month</td><td>N/A (using anon key)</td></tr>
+          <tr><td>Resets</td><td>Monthly (calendar)</td><td>—</td></tr>
+          <tr><td>Cost</td><td colspan="2">$0 — no billing required</td></tr>
+        </table>
+        <div id="supa-stats" style="margin-top:0.5rem;"></div>
+        <div class="advice advice--ok">Supabase Free tier is generous. At current usage, you are well within limits.</div>
+      </div>
+
+      <!-- NHS Jobs -->
+      <div class="usage-card">
+        <h2>NHS Jobs API <span class="tag tag--free">Free / public</span></h2>
+        <table class="usage-table">
+          <tr><th>Metric</th><th>Details</th></tr>
+          <tr><td>Authentication</td><td>None required — public XML API</td></tr>
+          <tr><td>Rate limit</td><td>Not documented — appears unrestricted</td></tr>
+          <tr><td>Quota</td><td>No known quota</td></tr>
+          <tr><td>Max per request</td><td>100 results (API-enforced)</td></tr>
+          <tr><td>Cost</td><td>$0 — forever free, government service</td></tr>
+          <tr><td>Data</td><td>All NHS England vacancies, updated in real-time</td></tr>
+          <tr><td>Notes</td><td>Only accepts single place names or postcodes for location (no commas)</td></tr>
+        </table>
+        <div class="advice advice--ok">Completely free with no billing. Use as much as needed.</div>
+      </div>
+
+      <!-- Indeed -->
+      <div class="usage-card">
+        <h2>Indeed <span class="tag tag--blocked">Blocked</span></h2>
+        <table class="usage-table">
+          <tr><th>Metric</th><th>Details</th></tr>
+          <tr><td>Method</td><td>Server-side scraping via Supabase Edge Function</td></tr>
+          <tr><td>Status</td><td style="color:#e74c3c; font-weight:600;">403 — blocked by IP detection</td></tr>
+          <tr><td>Cause</td><td>Indeed detects cloud/datacenter IPs regardless of cookies</td></tr>
+          <tr><td>Official API</td><td>Indeed shut down their public API in 2018</td></tr>
+          <tr><td>Cost</td><td>N/A</td></tr>
+        </table>
+        <div class="advice">Server-side Indeed scraping is not viable from cloud IPs. Use Indeed directly in your browser, or consider <strong>Reed.co.uk API</strong> (free, 25,000 calls/day, real UK jobs).</div>
+      </div>
+
+      <!-- Google CTS -->
+      <div class="usage-card">
+        <h2>Google Cloud Talent Solution <span class="tag tag--paid">Paid / not recommended</span></h2>
+        <table class="usage-table">
+          <tr><th>Metric</th><th>Details</th></tr>
+          <tr><td>Pricing</td><td style="color:#e74c3c; font-weight:600;">$2.50 per 1,000 search requests</td></tr>
+          <tr><td>Billing required</td><td>Yes — won't work without a GCP billing account</td></tr>
+          <tr><td>Free tier</td><td>None documented — billing must be enabled for any usage</td></tr>
+          <tr><td>What it searches</td><td style="color:#e74c3c;">Only jobs in YOUR project's tenants — NOT public Google listings</td></tr>
+          <tr><td>Project</td><td>first-bit-483922-s5 (#160469505712)</td></tr>
+          <tr><td>Current status</td><td id="google-status">checking…</td></tr>
+        </table>
+        <div class="advice advice--danger">
+          <strong>Do NOT enable billing.</strong> CTS is a B2B API for running your own job board. It only searches jobs you've manually ingested into your project — it will NOT show public Google job listings. Even with billing enabled, searches will return empty results.
+        </div>
+      </div>
+
+      <!-- Alternatives -->
+      <div class="usage-card">
+        <h2>Recommended alternatives <span class="tag tag--available">Available</span></h2>
+        <table class="usage-table">
+          <tr><th>Service</th><th>Cost</th><th>Limit</th><th>Notes</th></tr>
+          <tr><td><a href="https://www.reed.co.uk/developers" target="_blank">Reed.co.uk API</a></td><td>Free</td><td>25,000/day</td><td>Real UK jobs, official API, easy registration</td></tr>
+          <tr><td><a href="https://developer.adzuna.com/" target="_blank">Adzuna API</a></td><td>Free tier</td><td>Varies</td><td>Multi-country job aggregator, free for developers</td></tr>
+          <tr><td><a href="https://findajob.dwp.gov.uk/" target="_blank">Find a Job (DWP)</a></td><td>Free</td><td>Unknown</td><td>UK government job board, has RSS feeds</td></tr>
+        </table>
+        <div class="advice advice--ok">Reed.co.uk is the best free alternative — large UK job database with a proper API and generous limits.</div>
+      </div>
+
+    </div>
+
+    <!-- Debug box -->
+    <div class="debug-box">
+      <div class="debug-header">
+        <span>Debug — API Status Checks</span>
+        <button onclick="copyDebug()">Copy All</button>
+      </div>
+      <pre class="debug-pre" id="debug-output">Loading…</pre>
+    </div>
+  </div>
+
+  <script>
+    var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
+    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
+
+    var debugData = {};
+
+    document.addEventListener("DOMContentLoaded", init);
+
+    async function init() {
+      await Promise.all([checkSupabase(), checkGoogle()]);
+      debugLog(debugData);
+    }
+
+    async function checkSupabase() {
+      try {
+        // Count applications
+        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref", {
+          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
+        });
+        if (!res.ok) throw new Error(res.status);
+        var rows = await res.json();
+        var count = rows.length;
+        document.getElementById("supa-db").textContent = count + " applications stored";
+        document.getElementById("supa-db").style.color = "#2ecc40";
+
+        // Count cookies
+        var res2 = await fetch(SUPABASE_URL + "/rest/v1/cookies?select=source,updated_at", {
+          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
+        });
+        var cookies = res2.ok ? await res2.json() : [];
+
+        var statsHtml = '<span class="supa-stat">Applications: <strong>' + count + '</strong></span>';
+        statsHtml += '<span class="supa-stat">Cookie entries: <strong>' + cookies.length + '</strong></span>';
+        cookies.forEach(function(c) {
+          var age = c.updated_at ? timeSince(new Date(c.updated_at)) : "unknown";
+          statsHtml += '<span class="supa-stat">' + esc(c.source) + ' cookies: <strong>' + age + ' old</strong></span>';
+        });
+        document.getElementById("supa-stats").innerHTML = statsHtml;
+
+        debugData.supabase = { applications: count, cookies: cookies };
+      } catch (e) {
+        document.getElementById("supa-db").textContent = "Error: " + e.message;
+        document.getElementById("supa-db").style.color = "#e74c3c";
+        debugData.supabase = { error: e.message };
+      }
+    }
+
+    async function checkGoogle() {
+      try {
+        var res = await fetch(SUPABASE_URL + "/functions/v1/search-google-jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "status" })
+        });
+        var data = await res.json();
+        var el = document.getElementById("google-status");
+        if (data.connected) {
+          el.textContent = "OAuth connected — but billing not enabled (403)";
+          el.style.color = "#f1c40f";
+        } else {
+          el.textContent = "OAuth not connected";
+          el.style.color = "#999";
+        }
+        debugData.google = data;
+      } catch (e) {
+        document.getElementById("google-status").textContent = "Edge function unreachable";
+        debugData.google = { error: e.message };
+      }
+    }
+
+    function timeSince(date) {
+      var s = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (s < 60) return s + "s";
+      if (s < 3600) return Math.floor(s / 60) + "m";
+      if (s < 86400) return Math.floor(s / 3600) + "h";
+      return Math.floor(s / 86400) + "d";
+    }
+
+    function debugLog(obj) { document.getElementById("debug-output").textContent = JSON.stringify(obj, null, 2); }
+    function copyDebug() {
+      navigator.clipboard.writeText(document.getElementById("debug-output").textContent).then(function() {
+        var btn = document.querySelector(".debug-header button");
+        btn.textContent = "Copied!"; setTimeout(function() { btn.textContent = "Copy All"; }, 1500);
+      });
+    }
+    function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
+  </script>
+</body>
+</html>

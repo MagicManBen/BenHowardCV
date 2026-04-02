@@ -12,6 +12,7 @@
     <a href="indeed.html">Indeed</a>
     <a href="nhs.html" class="active">NHS Jobs</a>
     <a href="google.html">Google Jobs</a>
+    <a href="usage.html">Usage</a>
     <a href="index.html" style="margin-left:auto; color:#999;">← New Application</a>
   </nav>
 
@@ -31,22 +32,19 @@
       <div class="field"><label for="q">Keywords</label><input id="q" value="practice manager OR operations manager OR continuous improvement"></div>
       <div class="field"><label for="loc">Location</label><input id="loc" value="Leek, Staffordshire"></div>
       <div class="field field--small"><label for="dist">Distance (mi)</label><input id="dist" type="number" value="45" min="1" max="100"></div>
-      <div class="field field--small"><label for="pg">Page</label><input id="pg" type="number" value="1" min="1"></div>
-      <div class="field field--small"><label for="lim">Limit</label>
-        <select id="lim"><option value="10">10</option><option value="20" selected>20</option><option value="50">50</option></select>
-      </div>
       <button id="search-btn" onclick="doSearch()">Search NHS</button>
+    </div>
+
+    <!-- Progress bar for multi-page fetch -->
+    <div id="fetch-progress" style="display:none; margin-bottom:0.6rem;">
+      <div style="background:#e0e0e0; border-radius:4px; overflow:hidden; height:6px;">
+        <div id="progress-bar" style="background:#1a73e8; height:100%; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <span id="progress-text" style="font-size:0.78rem; color:#666;"></span>
     </div>
 
     <!-- Results -->
     <div id="results"></div>
-
-    <!-- Pagination -->
-    <div class="pagination" id="pagination" style="display:none;">
-      <button onclick="pageNav(-1)">← Previous</button>
-      <span id="page-info"></span>
-      <button onclick="pageNav(1)">Next →</button>
-    </div>
 
     <!-- Debug box -->
     <div class="debug-box">
@@ -62,7 +60,6 @@
     var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
     var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
     var EDGE_FN = SUPABASE_URL + "/functions/v1/search-nhs-jobs";
-    var lastTotalPages = 1;
 
     document.addEventListener("DOMContentLoaded", init);
 
@@ -103,55 +100,72 @@
       var btn = document.getElementById("search-btn");
       btn.disabled = true; btn.textContent = "Searching…";
       document.getElementById("results").innerHTML = '<p class="empty-msg">Searching NHS Jobs…</p>';
-      document.getElementById("pagination").style.display = "none";
+
+      var progressEl = document.getElementById("fetch-progress");
+      var progressBar = document.getElementById("progress-bar");
+      var progressText = document.getElementById("progress-text");
 
       try {
-        var body = {
-          keyword: document.getElementById("q").value,
-          location: document.getElementById("loc").value,
-          distance: document.getElementById("dist").value,
-          page: parseInt(document.getElementById("pg").value, 10) || 1,
-          limit: parseInt(document.getElementById("lim").value, 10) || 20,
-          sort: "publicationDateDesc"
-        };
-        debugLog({ request: body, endpoint: EDGE_FN });
+        var keyword = document.getElementById("q").value;
+        var location = document.getElementById("loc").value;
+        var distance = document.getElementById("dist").value;
 
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
-        });
-        var data = await res.json();
-        debugLog({ request: body, response: data });
+        // Fetch first page to get totalPages
+        var allJobs = [];
+        var page = 1;
+        var totalPages = 1;
+        var totalResults = 0;
+        var lastResponse = null;
 
-        if (data.error) {
-          document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
-          return;
+        progressEl.style.display = "block";
+        progressBar.style.width = "0%";
+        progressText.textContent = "Fetching page 1…";
+
+        while (page <= totalPages) {
+          var body = {
+            keyword: keyword,
+            location: location,
+            distance: distance,
+            page: page,
+            limit: 100,
+            sort: "publicationDateDesc"
+          };
+
+          var res = await fetch(EDGE_FN, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          var data = await res.json();
+          lastResponse = data;
+
+          if (data.error) {
+            document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
+            debugLog({ request: body, response: data });
+            return;
+          }
+
+          totalPages = data.totalPages || 1;
+          totalResults = data.totalResults || 0;
+          allJobs = allJobs.concat(data.jobs || []);
+
+          var pct = Math.round((page / totalPages) * 100);
+          progressBar.style.width = pct + "%";
+          progressText.textContent = "Fetched page " + page + " of " + totalPages + " (" + allJobs.length + " jobs so far)";
+
+          page++;
         }
 
-        lastTotalPages = data.totalPages || 1;
-        renderJobs(data.jobs || [], data.totalResults || 0, body.page, lastTotalPages);
+        debugLog({ totalPages: totalPages, totalResults: totalResults, jobsFetched: allJobs.length, lastPageResponse: lastResponse });
+        progressText.textContent = "Done — " + allJobs.length + " jobs loaded from " + totalPages + " page(s)";
 
-        // Pagination
-        if (lastTotalPages > 1) {
-          document.getElementById("pagination").style.display = "flex";
-          document.getElementById("page-info").textContent = "Page " + body.page + " of " + lastTotalPages + " (" + (data.totalResults || 0) + " total)";
-        }
+        renderJobs(allJobs, totalResults);
       } catch (e) {
         document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
         debugLog({ error: e.message });
       } finally {
         btn.disabled = false; btn.textContent = "Search NHS";
       }
-    }
-
-    function pageNav(dir) {
-      var pg = document.getElementById("pg");
-      var n = parseInt(pg.value, 10) + dir;
-      if (n < 1) n = 1;
-      if (n > lastTotalPages) n = lastTotalPages;
-      pg.value = n;
-      doSearch();
     }
 
     function renderJobs(jobs, total) {

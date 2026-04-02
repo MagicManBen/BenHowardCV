@@ -3,38 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Indeed</title>
+  <title>Dashboard — Indeed (RapidAPI)</title>
   <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .usage-gauge { display:inline-flex; align-items:center; gap:0.5rem; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:6px; padding:0.4rem 0.8rem; margin:0.5rem 0; font-size:0.82rem; }
+    .gauge-bar { width:120px; height:10px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
+    .gauge-fill { height:100%; border-radius:5px; transition:width 0.5s; }
+    .gauge-fill--ok { background:#2ecc40; }
+    .gauge-fill--warn { background:#f1c40f; }
+    .gauge-fill--danger { background:#e74c3c; }
+    .gauge-text { font-weight:600; }
+    .rate-info { font-size:0.78rem; color:#888; }
+  </style>
 </head>
 <body>
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
     <a href="indeed.html" class="active">Indeed</a>
+    <a href="reed.html">Reed</a>
     <a href="nhs.html">NHS Jobs</a>
-    <a href="google.html">Google Jobs</a>
+    <a href="adzuna.html">Adzuna</a>
     <a href="usage.html">Usage</a>
     <a href="index.html" style="margin-left:auto; color:#999;">← New Application</a>
   </nav>
 
   <div class="page-shell">
     <h1 class="page-title">Indeed Search</h1>
-    <p class="page-subtitle">Scrape Indeed UK via Supabase Edge Function. Requires cookie capture via Tampermonkey.</p>
+    <p class="page-subtitle">Via RapidAPI Indeed Scraper. <strong style="color:#e74c3c;">Limit: 1 request/day</strong> on free plan — use wisely!</p>
 
     <!-- Status lights -->
     <div class="status-bar">
       <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">checking…</span></div>
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-cookies"></span> Indeed Cookies: <span id="lbl-cookies">checking…</span></div>
       <div class="status-item"><span class="status-dot status-dot--grey" id="dot-edge"></span> Edge Function: <span id="lbl-edge">checking…</span></div>
+    </div>
+
+    <!-- Usage gauge -->
+    <div id="usage-box" style="display:none;">
+      <div class="usage-gauge">
+        <span>Daily quota:</span>
+        <div class="gauge-bar"><div class="gauge-fill gauge-fill--ok" id="gauge-fill" style="width:100%"></div></div>
+        <span class="gauge-text" id="gauge-text">—</span>
+      </div>
+      <div class="rate-info" id="rate-info"></div>
     </div>
 
     <!-- Search form -->
     <div class="search-form">
-      <div class="field"><label for="q">Keywords</label><input id="q" value="practice manager OR operations manager OR continuous improvement"></div>
-      <div class="field"><label for="loc">Location</label><input id="loc" value="Leek, Staffordshire"></div>
+      <div class="field"><label for="q">Keywords</label><input id="q" value="Practice Manager OR operations manager OR continuous improvement"></div>
+      <div class="field"><label for="loc">Location</label><input id="loc" value="Staffordshire"></div>
       <div class="field field--small"><label for="rad">Radius</label>
-        <select id="rad"><option value="5">5 mi</option><option value="10">10 mi</option><option value="15">15 mi</option><option value="25">25 mi</option><option value="30">30 mi</option><option value="45" selected>45 mi</option><option value="50">50 mi</option></select>
+        <select id="rad"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="25">25</option><option value="50" selected>50</option><option value="100">100</option></select>
       </div>
-      <div class="field field--small"><label for="pg">Page</label><input id="pg" type="number" value="0" min="0"></div>
+      <div class="field field--small"><label for="days">Days</label>
+        <select id="days"><option value="1">1</option><option value="3">3</option><option value="7" selected>7</option><option value="14">14</option></select>
+      </div>
+      <div class="field field--small"><label for="rows">Max</label><input id="rows" type="number" value="15" min="1" max="50"></div>
+      <div class="field field--small"><label for="sort">Sort</label>
+        <select id="sort"><option value="relevance">Relevance</option><option value="date">Date</option></select>
+      </div>
       <button id="search-btn" onclick="doSearch()">Search Indeed</button>
     </div>
 
@@ -47,25 +73,20 @@
         <span>Debug — Raw API Response</span>
         <button onclick="copyDebug()">Copy All</button>
       </div>
-      <pre class="debug-pre" id="debug-output">Waiting for search…</pre>
+      <pre class="debug-pre" id="debug-output">Click Search to begin. Remember: 1 request/day limit!</pre>
     </div>
-
-    <p style="margin-top:1rem; font-size:0.8rem; color:#888;">
-      <strong>Tampermonkey script:</strong> Install <a href="indeed-cookie-capture.user.js">indeed-cookie-capture.user.js</a>
-      then log in to <a href="https://uk.indeed.com" target="_blank">uk.indeed.com</a>. Cookies auto-save to Supabase.
-    </p>
   </div>
 
   <script>
     var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
     var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
-    var EDGE_FN = SUPABASE_URL + "/functions/v1/scrape-indeed";
+    var EDGE_FN = SUPABASE_URL + "/functions/v1/search-indeed-rapid";
 
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
       await checkSupabase();
-      await checkCookies();
+      setStatus("dot-edge", "lbl-edge", "green", "Ready (search-indeed-rapid)");
     }
 
     async function checkSupabase() {
@@ -80,51 +101,42 @@
       }
     }
 
-    async function checkCookies() {
-      try {
-        setStatus("dot-edge", "lbl-edge", "yellow", "testing…");
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: "", location: "", radius: "1", page: 0 })
-        });
-        var data = await res.json();
-        setStatus("dot-edge", "lbl-edge", "green", "Reachable");
-
-        if (data.needsCookies) {
-          setStatus("dot-cookies", "lbl-cookies", "red", "No cookies — log in to Indeed + install Tampermonkey script");
-        } else if (data.statusCode === 403 || (data.error && data.error.includes("403"))) {
-          // 403 = Indeed blocking the server IP, cookies exist but IP is blocked
-          var cookieInfo = data.cookieSource ? " (cookies: " + data.cookieSource + ", " + (data.cookieAge || "?") + ")" : "";
-          setStatus("dot-cookies", "lbl-cookies", "yellow", "Cookies OK but Indeed blocks server IP" + cookieInfo);
-        } else if (data.blocked) {
-          setStatus("dot-cookies", "lbl-cookies", "red", "Captcha/challenge — cookies may have expired");
-        } else {
-          var msg = "Available";
-          if (data.cookieSource) msg += " (source: " + data.cookieSource + ")";
-          if (data.cookieAge) msg += " — " + data.cookieAge + " old";
-          setStatus("dot-cookies", "lbl-cookies", "green", msg);
-        }
-        debugLog({ statusCheck: data });
-      } catch (e) {
-        setStatus("dot-edge", "lbl-edge", "red", e.message);
-        setStatus("dot-cookies", "lbl-cookies", "grey", "Cannot check");
+    function updateGauge(rl) {
+      if (!rl || !rl.limit) return;
+      document.getElementById("usage-box").style.display = "block";
+      var limit = parseInt(rl.limit) || 1;
+      var remaining = parseInt(rl.remaining);
+      if (isNaN(remaining)) remaining = limit;
+      var used = limit - remaining;
+      var pct = Math.round((remaining / limit) * 100);
+      var fill = document.getElementById("gauge-fill");
+      fill.style.width = pct + "%";
+      fill.className = "gauge-fill " + (pct > 50 ? "gauge-fill--ok" : pct > 10 ? "gauge-fill--warn" : "gauge-fill--danger");
+      document.getElementById("gauge-text").textContent = remaining + " / " + limit + " remaining";
+      var info = "Used today: " + used + " of " + limit;
+      if (rl.reset) {
+        var rd = new Date(parseInt(rl.reset) * 1000);
+        info += " · Resets: " + rd.toLocaleString("en-GB");
       }
+      document.getElementById("rate-info").textContent = info;
     }
 
     async function doSearch() {
       var btn = document.getElementById("search-btn");
-      btn.disabled = true; btn.textContent = "Searching…";
-      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching Indeed…</p>';
+      btn.disabled = true; btn.textContent = "Searching… (10-30s)";
+      document.getElementById("results").innerHTML = '<p class="empty-msg">Scraping Indeed via RapidAPI… this may take 10-30 seconds.</p>';
 
       try {
         var body = {
           query: document.getElementById("q").value,
           location: document.getElementById("loc").value,
           radius: document.getElementById("rad").value,
-          page: parseInt(document.getElementById("pg").value, 10) || 0
+          fromDays: document.getElementById("days").value,
+          maxRows: parseInt(document.getElementById("rows").value) || 15,
+          sort: document.getElementById("sort").value,
+          jobType: "fulltime",
+          country: "uk"
         };
-        debugLog({ request: body, endpoint: EDGE_FN });
 
         var res = await fetch(EDGE_FN, {
           method: "POST",
@@ -134,29 +146,19 @@
         var data = await res.json();
         debugLog({ request: body, response: data });
 
-        if (data.needsCookies || data.blocked) {
-          document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error || "Cookies needed") + '</p>';
-          setStatus("dot-cookies", "lbl-cookies", "red", data.error || "Cookies needed");
-          return;
-        }
+        if (data.rateLimits) updateGauge(data.rateLimits);
 
-        if (data.statusCode === 403) {
-          document.getElementById("results").innerHTML =
-            '<div style="padding:1rem; background:#fff3cd; border:1px solid #ffc107; border-radius:6px;">'
-            + '<p style="margin:0 0 0.5rem; font-weight:600;">⚠ Indeed blocked the request (403 Security Check)</p>'
-            + '<p style="margin:0; font-size:0.85rem;">Indeed detects cloud server IPs and blocks them regardless of cookies. '
-            + 'Cookies are captured OK (' + esc(data.cookieSource || "?") + ', ' + esc(data.cookieAge || "?") + ') but the request comes from Supabase\'s server, not your browser.</p>'
-            + '<p style="margin:0.5rem 0 0; font-size:0.85rem;"><strong>Workaround:</strong> Use Indeed directly in your browser, or we can add a browser-extension-based scraper later.</p>'
-            + '</div>';
-          return;
-        }
-
-        if (data.error && !data.jobs) {
+        if (data.error) {
           document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
           return;
         }
+        if (!data.ok) {
+          document.getElementById("results").innerHTML = '<p class="error-msg">API returned status ' + data.status + '</p>';
+          return;
+        }
 
-        renderJobs(data.jobs || [], data.totalResults || 0);
+        var jobs = extractJobs(data.data);
+        renderJobs(jobs);
       } catch (e) {
         document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
         debugLog({ error: e.message });
@@ -165,21 +167,37 @@
       }
     }
 
-    function renderJobs(jobs, total) {
+    function extractJobs(d) {
+      if (!d) return [];
+      if (Array.isArray(d)) return d;
+      if (d.jobs && Array.isArray(d.jobs)) return d.jobs;
+      if (d.results && Array.isArray(d.results)) return d.results;
+      if (d.data && Array.isArray(d.data)) return d.data;
+      return [];
+    }
+
+    function renderJobs(jobs) {
       if (!jobs.length) {
-        document.getElementById("results").innerHTML = '<p class="empty-msg">No results.</p>';
+        document.getElementById("results").innerHTML = '<p class="empty-msg">No results returned. Check debug output for details.</p>';
         return;
       }
-      var html = '<p class="result-count">' + total + ' total results, showing ' + jobs.length + '</p>';
+      var html = '<p class="result-count">' + jobs.length + ' jobs found</p>';
       jobs.forEach(function(j) {
+        var title = j.title || j.jobTitle || j.name || "Untitled";
+        var company = j.company || j.companyName || j.employer || "";
+        var loc = j.location || j.locationName || "";
+        var salary = j.salary || j.formattedSalary || "";
+        var url = j.url || j.link || j.jobUrl || "#";
+        var date = j.date || j.postDate || j.datePosted || "";
+        var desc = j.description || j.snippet || "";
         var badges = "";
-        if (j.isNew) badges += ' <span class="badge badge--new">New</span>';
-        if (j.isSponsored) badges += ' <span class="badge" style="background:#fef3cd;color:#856404;">Sponsored</span>';
-        var meta = [j.location, j.salary, j.jobTypes ? j.jobTypes.join(", ") : ""].filter(Boolean).join(" · ");
+        if (date && isRecent(date, 3)) badges += ' <span class="badge badge--new">New</span>';
+
         html += '<div class="job-card">'
-          + '<h3><a href="' + esc(j.url) + '" target="_blank">' + esc(j.title) + '</a>' + badges + '</h3>'
-          + '<div class="meta">' + esc(j.company) + (j.companyRating ? ' ★' + Number(j.companyRating).toFixed(1) : '') + ' · ' + esc(meta) + '</div>'
-          + (j.snippet ? '<div class="snippet">' + esc(j.snippet) + '</div>' : '')
+          + '<h3><a href="' + esc(url) + '" target="_blank">' + esc(title) + '</a>' + badges + '</h3>'
+          + '<div class="meta">' + [company, loc, salary].filter(Boolean).map(esc).join(" · ") + '</div>'
+          + (date ? '<div class="meta">Posted: ' + esc(date) + '</div>' : '')
+          + (desc ? '<div class="snippet">' + esc(desc.substring(0, 200)) + '</div>' : '')
           + '</div>';
       });
       document.getElementById("results").innerHTML = html;
@@ -197,6 +215,7 @@
       });
     }
     function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
+    function isRecent(s, days) { try { return (Date.now() - new Date(s).getTime()) < days * 86400000; } catch(e) { return false; } }
   </script>
 </body>
 </html>

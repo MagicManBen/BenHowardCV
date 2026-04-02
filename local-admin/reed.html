@@ -3,29 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — NHS Jobs</title>
+  <title>Dashboard — Reed</title>
   <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .usage-gauge { display:inline-flex; align-items:center; gap:0.5rem; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:6px; padding:0.4rem 0.8rem; margin:0.5rem 0; font-size:0.82rem; }
+    .gauge-bar { width:120px; height:10px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
+    .gauge-fill { height:100%; border-radius:5px; transition:width 0.5s; }
+    .gauge-fill--ok { background:#2ecc40; }
+    .gauge-fill--warn { background:#f1c40f; }
+    .gauge-fill--danger { background:#e74c3c; }
+    .gauge-text { font-weight:600; }
+    .rate-info { font-size:0.78rem; color:#888; }
+    .load-more-btn { display:block; margin:0.5rem auto; padding:0.5rem 1.5rem; background:#1a73e8; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:0.85rem; }
+    .load-more-btn:hover { background:#1557b0; }
+  </style>
 </head>
 <body>
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
     <a href="indeed.html">Indeed</a>
-    <a href="reed.html">Reed</a>
-    <a href="nhs.html" class="active">NHS Jobs</a>
+    <a href="reed.html" class="active">Reed</a>
+    <a href="nhs.html">NHS Jobs</a>
     <a href="adzuna.html">Adzuna</a>
     <a href="usage.html">Usage</a>
     <a href="index.html" style="margin-left:auto; color:#999;">← New Application</a>
   </nav>
 
   <div class="page-shell">
-    <h1 class="page-title">NHS Jobs Search</h1>
-    <p class="page-subtitle">Public NHS Jobs XML API — no authentication required.</p>
+    <h1 class="page-title">Reed Job Search</h1>
+    <p class="page-subtitle">Reed.co.uk API — <strong style="color:#2ecc40;">25,000 requests/day</strong> free.</p>
 
     <!-- Status lights -->
     <div class="status-bar">
       <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">checking…</span></div>
       <div class="status-item"><span class="status-dot status-dot--grey" id="dot-edge"></span> Edge Function: <span id="lbl-edge">checking…</span></div>
-      <div class="status-item"><span class="status-dot status-dot--green" id="dot-nhs"></span> NHS API: <span id="lbl-nhs">Public (always available)</span></div>
     </div>
 
     <!-- Search form -->
@@ -33,10 +44,10 @@
       <div class="field"><label for="q">Keywords</label><input id="q" value="practice manager OR operations manager OR continuous improvement"></div>
       <div class="field"><label for="loc">Location</label><input id="loc" value="Leek, Staffordshire"></div>
       <div class="field field--small"><label for="dist">Distance (mi)</label><input id="dist" type="number" value="45" min="1" max="100"></div>
-      <button id="search-btn" onclick="doSearch()">Search NHS</button>
+      <button id="search-btn" onclick="doSearch()">Search Reed</button>
     </div>
 
-    <!-- Progress bar for multi-page fetch -->
+    <!-- Progress bar -->
     <div id="fetch-progress" style="display:none; margin-bottom:0.6rem;">
       <div style="background:#e0e0e0; border-radius:4px; overflow:hidden; height:6px;">
         <div id="progress-bar" style="background:#1a73e8; height:100%; width:0%; transition:width 0.3s;"></div>
@@ -53,20 +64,20 @@
         <span>Debug — Raw API Response</span>
         <button onclick="copyDebug()">Copy All</button>
       </div>
-      <pre class="debug-pre" id="debug-output">Waiting for search…</pre>
+      <pre class="debug-pre" id="debug-output">Click Search to begin.</pre>
     </div>
   </div>
 
   <script>
     var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
     var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
-    var EDGE_FN = SUPABASE_URL + "/functions/v1/search-nhs-jobs";
+    var EDGE_FN = SUPABASE_URL + "/functions/v1/search-reed";
 
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
       await checkSupabase();
-      await checkEdge();
+      setStatus("dot-edge", "lbl-edge", "green", "Ready (search-reed)");
     }
 
     async function checkSupabase() {
@@ -81,55 +92,39 @@
       }
     }
 
-    async function checkEdge() {
-      try {
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ keyword: "test", location: "London", distance: "5", limit: 1, page: 1 })
-        });
-        var data = await res.json();
-        if (data.error) throw new Error(data.error);
-        setStatus("dot-edge", "lbl-edge", "green", "Reachable (test returned " + (data.totalResults || 0) + " results)");
-        debugLog({ edgeCheck: data });
-      } catch (e) {
-        setStatus("dot-edge", "lbl-edge", "red", e.message);
-      }
-    }
-
     async function doSearch() {
       var btn = document.getElementById("search-btn");
       btn.disabled = true; btn.textContent = "Searching…";
-      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching NHS Jobs…</p>';
+      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching Reed…</p>';
 
       var progressEl = document.getElementById("fetch-progress");
       var progressBar = document.getElementById("progress-bar");
       var progressText = document.getElementById("progress-text");
 
       try {
-        var keyword = document.getElementById("q").value;
+        var keywords = document.getElementById("q").value;
         var location = document.getElementById("loc").value;
-        var distance = document.getElementById("dist").value;
+        var distance = parseInt(document.getElementById("dist").value) || 45;
 
-        // Fetch first page to get totalPages
+        // Fetch all results (100 per page)
         var allJobs = [];
-        var page = 1;
-        var totalPages = 1;
+        var skip = 0;
         var totalResults = 0;
-        var lastResponse = null;
+        var pageNum = 0;
+        var lastData = null;
 
         progressEl.style.display = "block";
         progressBar.style.width = "0%";
         progressText.textContent = "Fetching page 1…";
 
-        while (page <= totalPages) {
+        while (true) {
+          pageNum++;
           var body = {
-            keyword: keyword,
+            keywords: keywords,
             location: location,
-            distance: distance,
-            page: page,
-            limit: 100,
-            sort: "publicationDateDesc"
+            distanceFromLocation: distance,
+            resultsToTake: 100,
+            resultsToSkip: skip
           };
 
           var res = await fetch(EDGE_FN, {
@@ -138,7 +133,7 @@
             body: JSON.stringify(body)
           });
           var data = await res.json();
-          lastResponse = data;
+          lastData = data;
 
           if (data.error) {
             document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
@@ -146,26 +141,27 @@
             return;
           }
 
-          totalPages = data.totalPages || 1;
           totalResults = data.totalResults || 0;
-          allJobs = allJobs.concat(data.jobs || []);
+          var jobs = data.jobs || [];
+          allJobs = allJobs.concat(jobs);
 
-          var pct = Math.round((page / totalPages) * 100);
-          progressBar.style.width = pct + "%";
-          progressText.textContent = "Fetched page " + page + " of " + totalPages + " (" + allJobs.length + " jobs so far)";
+          var pct = totalResults > 0 ? Math.round((allJobs.length / totalResults) * 100) : 100;
+          progressBar.style.width = Math.min(pct, 100) + "%";
+          progressText.textContent = "Fetched " + allJobs.length + " of " + totalResults + " jobs (page " + pageNum + ")";
 
-          page++;
+          // Stop if no more results
+          if (jobs.length < 100 || allJobs.length >= totalResults) break;
+          skip += 100;
         }
 
-        debugLog({ totalPages: totalPages, totalResults: totalResults, jobsFetched: allJobs.length, lastPageResponse: lastResponse });
-        progressText.textContent = "Done — " + allJobs.length + " jobs loaded from " + totalPages + " page(s)";
-
+        debugLog({ totalResults: totalResults, jobsFetched: allJobs.length, pages: pageNum, lastPage: lastData });
+        progressText.textContent = "Done — " + allJobs.length + " jobs loaded";
         renderJobs(allJobs, totalResults);
       } catch (e) {
         document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
         debugLog({ error: e.message });
       } finally {
-        btn.disabled = false; btn.textContent = "Search NHS";
+        btn.disabled = false; btn.textContent = "Search Reed";
       }
     }
 
@@ -177,15 +173,16 @@
       var html = '<p class="result-count">' + total + ' total results, showing ' + jobs.length + '</p>';
       jobs.forEach(function(j) {
         var badges = "";
-        if (isRecent(j.postDate, 3)) badges += ' <span class="badge badge--new">New</span>';
-        if (j.closeDate && isClosingSoon(j.closeDate)) badges += ' <span class="badge badge--closing">Closes ' + esc(fmtDate(j.closeDate)) + '</span>';
+        if (j.postDate && isRecent(j.postDate, 3)) badges += ' <span class="badge badge--new">New</span>';
+        if (j.expirationDate && isClosingSoon(j.expirationDate)) badges += ' <span class="badge badge--closing">Closes ' + esc(fmtDate(j.expirationDate)) + '</span>';
+        if (j.applications !== undefined) badges += ' <span class="badge" style="background:#e8eaf6;color:#283593;">' + j.applications + ' apps</span>';
 
-        var meta = [j.location, j.salary, j.type].filter(Boolean).join(" · ");
+        var meta = [j.employer, j.location, j.salary].filter(Boolean).join(" · ");
         html += '<div class="job-card">'
           + '<h3><a href="' + esc(j.url) + '" target="_blank">' + esc(j.title) + '</a>' + badges + '</h3>'
-          + '<div class="meta">' + esc(j.employer) + ' · ' + esc(meta) + '</div>'
+          + '<div class="meta">' + esc(meta) + '</div>'
           + (j.postDate ? '<div class="meta">Posted: ' + esc(fmtDate(j.postDate)) + '</div>' : '')
-          + (j.description ? '<div class="snippet">' + esc(j.description) + '</div>' : '')
+          + (j.description ? '<div class="snippet">' + esc(j.description.substring(0, 200)) + '</div>' : '')
           + '</div>';
       });
       document.getElementById("results").innerHTML = html;
@@ -204,8 +201,8 @@
     }
     function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
     function fmtDate(s) { try { return new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); } catch(e) { return s; } }
-    function isRecent(s, days) { if (!s) return false; return (Date.now() - new Date(s).getTime()) < days * 86400000; }
-    function isClosingSoon(s) { if (!s) return false; var d = (new Date(s).getTime() - Date.now()) / 86400000; return d >= 0 && d <= 7; }
+    function isRecent(s, days) { try { return (Date.now() - new Date(s).getTime()) < days * 86400000; } catch(e) { return false; } }
+    function isClosingSoon(s) { try { var d = (new Date(s).getTime() - Date.now()) / 86400000; return d >= 0 && d <= 7; } catch(e) { return false; } }
   </script>
 </body>
 </html>

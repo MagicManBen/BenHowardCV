@@ -92,8 +92,12 @@
 
         if (data.needsCookies) {
           setStatus("dot-cookies", "lbl-cookies", "red", "No cookies — log in to Indeed + install Tampermonkey script");
+        } else if (data.statusCode === 403 || (data.error && data.error.includes("403"))) {
+          // 403 = Indeed blocking the server IP, cookies exist but IP is blocked
+          var cookieInfo = data.cookieSource ? " (cookies: " + data.cookieSource + ", " + (data.cookieAge || "?") + ")" : "";
+          setStatus("dot-cookies", "lbl-cookies", "yellow", "Cookies OK but Indeed blocks server IP" + cookieInfo);
         } else if (data.blocked) {
-          setStatus("dot-cookies", "lbl-cookies", "red", "Blocked/expired — re-login to Indeed");
+          setStatus("dot-cookies", "lbl-cookies", "red", "Captcha/challenge — cookies may have expired");
         } else {
           var msg = "Available";
           if (data.cookieSource) msg += " (source: " + data.cookieSource + ")";
@@ -132,6 +136,17 @@
         if (data.needsCookies || data.blocked) {
           document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error || "Cookies needed") + '</p>';
           setStatus("dot-cookies", "lbl-cookies", "red", data.error || "Cookies needed");
+          return;
+        }
+
+        if (data.statusCode === 403) {
+          document.getElementById("results").innerHTML =
+            '<div style="padding:1rem; background:#fff3cd; border:1px solid #ffc107; border-radius:6px;">'
+            + '<p style="margin:0 0 0.5rem; font-weight:600;">⚠ Indeed blocked the request (403 Security Check)</p>'
+            + '<p style="margin:0; font-size:0.85rem;">Indeed detects cloud server IPs and blocks them regardless of cookies. '
+            + 'Cookies are captured OK (' + esc(data.cookieSource || "?") + ', ' + esc(data.cookieAge || "?") + ') but the request comes from Supabase\'s server, not your browser.</p>'
+            + '<p style="margin:0.5rem 0 0; font-size:0.85rem;"><strong>Workaround:</strong> Use Indeed directly in your browser, or we can add a browser-extension-based scraper later.</p>'
+            + '</div>';
           return;
         }
 

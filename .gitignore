@@ -6,3 +6,9 @@ local-admin/secrets.local.json
 local-admin/secrets.local.js
 *.log
 __pycache__/
+
+# Dev artifacts — HAR files contain captured secrets
+*.har
+*.zip
+Indeed Scraper copy/
+cookies.json

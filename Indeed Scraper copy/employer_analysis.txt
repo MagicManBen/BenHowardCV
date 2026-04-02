@@ -1,0 +1,3589 @@
+Total requests captured: 640
+
+======================================================================
+  DOMAINS CONTACTED
+======================================================================
+   279  d3oklwo3y1bx83.cloudfront.net
+   122  apis.indeed.com
+    63  www.facebook.com
+    41  www.google.com
+    39  one-host-datadog-rum.indeed.com
+    31  www.google.co.uk
+    30  googleads.g.doubleclick.net
+    15  www.googleadservices.com
+     6  t.indeed.com
+     5  region1.analytics.google.com
+     3  encserv.indeed.com
+     3  employers.indeed.com
+     2  segmentation.indeed.com
+     1  browser-intake-datadoghq.com
+
+======================================================================
+  API / RPC ENDPOINTS
+======================================================================
+  GET employers.indeed.com/api/catws/resume/v2/download
+  GET employers.indeed.com/api/v2/iq/job/answers
+  GET segmentation.indeed.com/api/v1/configuration
+  OPTIONS segmentation.indeed.com/api/v1/configuration
+  POST apis.indeed.com/graphql
+  POST browser-intake-datadoghq.com/api/v2/logs
+  POST one-host-datadog-rum.indeed.com/api/datadog-rum/
+  POST t.indeed.com/signals/v1/log
+
+======================================================================
+  GRAPHQL OPERATIONS
+======================================================================
+
+  Operation: GetEstimatedJobResultCount
+  Variables: {
+    "input": {
+        "filter": {
+            "allOf": [
+                {
+                    "anyOf": [
+                        {
+                            "not": {
+                                "hostedJobStatus": [
+                                    "CLOSED",
+                                    "PAUSED"
+                                ]
+                            }
+                        },
+                        {
+                            "hostedJobStatus": [
+                  
+  Query: query GetEstimatedJobResultCount($input: FindEmployerJobsInput!) {
+  findEmployerJobs(input: $input) {
+    estimatedTotalResultsCount
+    __typename
+  }
+}
+...
+  Response keys: ['findEmployerJobs']
+  Response preview:
+{
+  "data": {
+    "findEmployerJobs": {
+      "estimatedTotalResultsCount": 8,
+      "__typename": "FindEmployerJobsPayload"
+    }
+  }
+}
+
+  Operation: Jmfe_JobDetails_EmployerEntity
+  Variables: {
+    "nexus_accommodation_contact1": true,
+    "nexus_accommodation_contact2": true,
+    "P_jobman_jdr_hiring_plan_performance_active": true,
+    "P_jobman_experience_credit_awareness_active": true
+}
+  Query: query Jmfe_JobDetails_EmployerEntity($nexus_accommodation_contact1: Boolean!, $nexus_accommodation_contact2: Boolean!, $P_jobman_jdr_hiring_plan_performance_active: Boolean! = false, $P_jobman_experience_credit_awareness_active: Boolean! = false) {
+  currentEmployerEntity {
+    result {
+      id
+   ...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "hostedJobsEnabled": true,
+        "__typename": "EmployerEntity",
+        "traits": {
+          "hasDradisVerifiedSource": false,
+          "__typename": "EmployerTraits",
+          "hasExternalVerifiedSource": false
+        },
+        "talentSubscriptionsConnection": {
+          "subscriptions": [],
+          "__typename": "TalentSubscriptionsConnection"
+        },
+        "billingCountry": "GB",
+        "businessDetails": {
+          "accommodationsContact": {
+            "email": null,
+            "phone": null,
+            "url": null,
+            "__typename": "AccommodationsContact"
+          },
+         
+
+  Operation: Jmfe_JobDetails_Node
+  Variables: {
+    "nodeId": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+    "messagingTagJobPostStatusInput": {
+        "surfaceContexts": [
+            {
+                "placementId": "indeed",
+                "statusCommunicationSettings": {
+                    "communicationLocale": "en",
+                    "communicationInterfaceName": "DradisIndeedMessage"
+                }
+            }
+        ]
+    },
+    "sponsor_reopen_modal_2025_revamp1": 
+  Query: query Jmfe_JobDetails_Node($nodeId: ID!, $messagingTagJobPostStatusInput: EmployerJobJobPostStatusInput!, $sponsor_reopen_modal_2025_revamp1: Boolean!, $sponsor_packaging_configuration_migration1: Boolean!, $P_visapi_migration_visibility_level1_active: Boolean! = false, $P_jobman_jdr_hiring_plan_per...
+  Response keys: ['node']
+  Response preview:
+{
+  "data": {
+    "node": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "__typename": "EmployerJob",
+      "jobData": {
+        "id": "699dcb42bbac624530669a72",
+        "title": "General Practitioner",
+        "country": "GB",
+        "advertisingLocations": [
+          {
+            "active": true,
+            "location": "Stoke-on-Trent ST1 3RX",
+            "__typename": "PublishedAdvertisingLocation",
+            "jobKey": "eda36203d4951440",
+            "publicJobPageUrl": "http://uk.indeed.com/job/general-practitioner-eda36203d4951440"
+          }
+        ],
+        "legacyId": "1011f9eafc0d",
+        "jobKey": "eda36203d4951440",
+        "employerJob": {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveW
+
+  Operation: Sponsor_EmployerAlertsModule_HostedJobPost
+  Variables: {
+    "ids": [
+        "1011f9eafc0d"
+    ],
+    "inVisibilityMigration": false
+}
+  Query: query Sponsor_EmployerAlertsModule_HostedJobPost($ids: [ID!]!, $inVisibilityMigration: Boolean!) {
+  hostedJobPostsByLegacyIds(ids: $ids) {
+    results {
+      hostedJobPost {
+        id
+        title
+        employerJob {
+          id
+          hostedCampaigns: campaignsConnection(
+            inpu...
+  Response keys: ['hostedJobPostsByLegacyIds']
+  Response preview:
+{
+  "data": {
+    "hostedJobPostsByLegacyIds": {
+      "results": [
+        {
+          "hostedJobPost": {
+            "id": "699dcb42bbac624530669a72",
+            "title": "General Practitioner",
+            "employerJob": {
+              "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+              "hostedCampaigns": {
+                "edges": [],
+                "__typename": "EmployerJobCampaignsConnection"
+              },
+              "__typename": "EmployerJob"
+            },
+            "hostedJobPostVisibility": {
+              "level": "UNKNOWN",
+              "__typename": "HostedJobPostVisibilityResult"
+            },
+            "messagingTag": {
+              "estimatedVisibility": "UNRESTRICTED",
+              "__ty
+
+  Operation: Sponsor_EmployerAlertsModule_EmployerUser
+  Variables: {}
+  Query: query Sponsor_EmployerAlertsModule_EmployerUser {
+  currentEmployerUser {
+    id
+    permissions {
+      bill {
+        create
+        update
+        read
+        __typename
+      }
+      __typename
+    }
+    ...Sponmods_MonthlyBudgetLimitBanner_CurrentEmployerUser
+    __typename
+  }
+}
+
+fragment Spo...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "permissions": {
+        "bill": {
+          "create": false,
+          "update": false,
+          "read": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "__typename": "EmployerUserPermissions",
+        "employerEntity": {
+          "update": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        }
+      },
+      "__typename": "EmployerUser"
+    }
+  }
+}
+
+  Operation: Sponsor_EmployerAlertsModule_EmployerEntity
+  Variables: {
+    "hasBillingReadPermission": false
+}
+  Query: query Sponsor_EmployerAlertsModule_EmployerEntity($hasBillingReadPermission: Boolean!) {
+  currentEmployerEntity {
+    result {
+      id
+      activeBillingAccount @include(if: $hasBillingReadPermission) {
+        id
+        billingTaxInfo {
+          billingTaxDetailList {
+            taxId
+       ...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "legacyMoneyInfo": {
+          "billingState": "BILLING_APPROVED",
+          "__typename": "EmployerLegacyMoneyInfo"
+        },
+        "isPrimaryEmployer": false,
+        "primaryUser": {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9iZGY1NDAxNjc1MTI1MzYzNGExNzMxYjFkM2IyMWRjODpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+          "account": {
+            "id": "bdf54016751253634a1731b1d3b21dc8",
+            "accountProfile": {
+              "email": {
+                "emailAddress": "yvonne.bell@stokeccg.nhs.uk",
+                "__typename": "Email"
+              },
+              "__typen
+
+  Operation: PremiumJobSummary_FccKey
+  Variables: {
+    "jobKeys": [
+        "eda36203d4951440"
+    ]
+}
+  Query: query PremiumJobSummary_FccKey($jobKeys: [ID!]) {
+  jobData(jobKeys: $jobKeys) {
+    results {
+      job {
+        employer {
+          employerDossierIdentifier {
+            key
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    ...
+  Response keys: ['jobData']
+  Response preview:
+{
+  "data": {
+    "jobData": {
+      "results": [
+        {
+          "job": {
+            "employer": {
+              "employerDossierIdentifier": {
+                "key": "e1359d95702b292e",
+                "__typename": "EmployerDossierIdentifier"
+              },
+              "__typename": "Employer"
+            },
+            "__typename": "Job"
+          },
+          "__typename": "JobDataResult"
+        }
+      ],
+      "__typename": "JobDataPayload"
+    }
+  }
+}
+
+  Operation: PremiumJobSummary_Claimed
+  Variables: {
+    "employerKeys": [
+        "e1359d95702b292e"
+    ]
+}
+  Query: query PremiumJobSummary_Claimed($employerKeys: [ID!]) {
+  myEmployerClaims(employerKeys: $employerKeys) {
+    employerClaims {
+      employer {
+        claimed
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['myEmployerClaims']
+  Response preview:
+{
+  "data": {
+    "myEmployerClaims": {
+      "employerClaims": [],
+      "__typename": "EmployerClaimsResult"
+    }
+  }
+}
+
+  Operation: FindCurrentEmployerEntity
+  Variables: {}
+  Query: query FindCurrentEmployerEntity {
+  currentEmployerEntity {
+    result {
+      id
+      traits {
+        hasHostedJobs
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  findEmployerJobs(input: {filter: {hostedJobStatus: [ACTIVE, PAUSED]}, limit: 2}) {
+    results {
+      employe...
+  Response keys: ['currentEmployerEntity', 'findEmployerJobs']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "traits": {
+          "hasHostedJobs": true,
+          "__typename": "EmployerTraits"
+        },
+        "__typename": "EmployerEntity"
+      },
+      "__typename": "CurrentEmployerEntityPayload"
+    },
+    "findEmployerJobs": {
+      "results": [
+        {
+          "employerJob": {
+            "jobData": {
+              "id": "673b304cb76bcd7c7ce7df91",
+              "__typename": "HostedJobPost"
+            },
+            "__typename": "EmployerJob"
+          },
+          "__typename": "FindEmployerJobsResult"
+        },
+        {
+          "employerJob": {
+            "jobData": {
+              "id": "661940
+
+  Operation: PassportAccount
+  Variables: {
+    "checkEmployerEntity": false
+}
+  Query: query PassportAccount($checkEmployerEntity: Boolean!) {
+  currentUser {
+    account {
+      ... on PassportAccount {
+        id
+        accountProfile {
+          isEmployer
+          __typename
+        }
+        employerUsersConnection {
+          users {
+            id
+            __typename
+     ...
+  Response keys: ['currentUser']
+  Response preview:
+{
+  "data": {
+    "currentUser": {
+      "account": {
+        "id": "caff09b8f56eff8a970d4a8e27065e8a",
+        "accountProfile": {
+          "isEmployer": true,
+          "__typename": "AccountProfile"
+        },
+        "employerUsersConnection": {
+          "users": [
+            {
+              "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+              "__typename": "EmployerUser"
+            }
+          ],
+          "__typename": "EmployerUsersConnection"
+        },
+        "__typename": "PassportAccount"
+      },
+      "__typename": "CurrentUserPayload"
+    }
+  }
+}
+
+  Operation: GetEmployerJobPostByEmployerJobId
+  Variables: {
+    "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+}
+  Query: query GetEmployerJobPostByEmployerJobId($id: ID!) {
+  employerJob: node(id: $id) {
+    ... on EmployerJob {
+      id
+      candidateSyncEnrollment {
+        status
+        metaData {
+          tpiaConfig
+          __typename
+        }
+        __typename
+      }
+      jobPostStatus {
+        surfaceS...
+  Response keys: ['employerJob']
+  Response preview:
+{
+  "data": {
+    "employerJob": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "candidateSyncEnrollment": null,
+      "jobPostStatus": {
+        "surfaceStatuses": [
+          {
+            "isSponsorshipRequired": false,
+            "isSponsorshipTargeted": false,
+            "isSponsorshipApplied": false,
+            "__typename": "JobPostSurfaceStatus"
+          }
+        ],
+        "__typename": "JobPostStatus"
+      },
+      "jobData": {
+        "id": "699dcb42bbac624530669a72",
+        "title": "General Practitioner",
+        "company": "Harley Street Medical Centre",
+        "jobAddress": "Harley Street",
+        "jobLocation": {
+          "postalCode": "ST1 3RX",
+          "__typename": "JobLocation"
+        
+
+  Operation: getCurrentEmployerEntity
+  Variables: {
+    "hostedEmployerAttributes": [
+        "campaignSource",
+        "acmeCompanyDescription",
+        "acmeSquareLogoFileName",
+        "advCompanyMetadataIndustrySector",
+        "hasSubmittedCompanyInfo"
+    ]
+}
+  Query: fragment Sponmods_AvailablePromosAndCreditsAlert_EmployerEntity on EmployerEntity {
+  id
+  billingCountry
+  currency
+  isPrimaryEmployer
+  __typename
+}
+
+fragment EmployerEntityFields on EmployerEntity {
+  id
+  billingCountry
+  currency
+  hostedJobsEnabled
+  isPrimaryEmployer
+  language
+  name
+  busi...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "hostedEmployerAttributes": [],
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "billingCountry": "GB",
+        "currency": "GBP",
+        "hostedJobsEnabled": true,
+        "isPrimaryEmployer": false,
+        "language": "en",
+        "name": "Harley Street Medical Centre",
+        "businessDetails": {
+          "industry": null,
+          "isAdAgency": false,
+          "type": "DIRECT_EMPLOYER",
+          "url": "",
+          "__typename": "EmployerBusinessDetails"
+        },
+        "jobPostingConfig": {
+          "hasHostedApplyUrl": false,
+          "minJobLocOverride": null,
+          "__typename": "EmployerJobPostingConfig"
+        },
+        "
+
+  Operation: getdraftJobPosts
+  Variables: {
+    "jobIds": [
+        ""
+    ]
+}
+  Query: query getdraftJobPosts($jobIds: [ID!]!) {
+  draftJobPosts(ids: $jobIds) {
+    results {
+      draftJobPost {
+        id
+        country
+        language
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['draftJobPosts']
+  Response preview:
+{
+  "data": {
+    "draftJobPosts": {
+      "results": [],
+      "__typename": "DraftJobPostsPayload"
+    }
+  }
+}
+
+  Operation: JobPosting_JobIdExistenceVerifier_EmployerJobQuery
+  Variables: {
+    "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+}
+  Query: query JobPosting_JobIdExistenceVerifier_EmployerJobQuery($id: ID!) {
+  employerJob: node(id: $id) {
+    ... on EmployerJob {
+      id
+      currentDraftJobData {
+        id
+        __typename
+      }
+      jobData {
+        source {
+          isExternal
+          __typename
+        }
+        __typen...
+  Response keys: ['employerJob']
+  Response preview:
+{
+  "data": {
+    "employerJob": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "currentDraftJobData": null,
+      "jobData": {
+        "source": {
+          "isExternal": false,
+          "__typename": "EmployerJobDataSource"
+        },
+        "__typename": "HostedJobPost"
+      },
+      "__typename": "EmployerJob"
+    }
+  }
+}
+
+  Operation: createDraftJobPostFromEmployerJob
+  Variables: {
+    "input": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+        "publishAsNewJob": false
+    }
+}
+  Query: mutation createDraftJobPostFromEmployerJob($input: CreateDraftJobPostFromEmployerJobInput!) {
+  createDraftJobPostFromEmployerJob(input: $input) {
+    result {
+      draftJobPost {
+        id
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['createDraftJobPostFromEmployerJob']
+  Response preview:
+{
+  "data": {
+    "createDraftJobPostFromEmployerJob": {
+      "result": {
+        "draftJobPost": {
+          "id": "699dcb42bbac624530669a72",
+          "__typename": "DraftJobPost"
+        },
+        "__typename": "CreateDraftJobPostFromEmployerJobResult"
+      },
+      "__typename": "CreateDraftJobPostFromEmployerJobPayload"
+    }
+  }
+}
+
+  Operation: getdraftJobPosts
+  Variables: {
+    "jobIds": [
+        "699dcb42bbac624530669a72"
+    ]
+}
+  Query: fragment DraftJobPostFields on DraftJobPost {
+  id
+  origin
+  claimedApplyUrl
+  advertisingLocations {
+    location
+    active
+    __typename
+  }
+  allDescriptions {
+    html
+    text
+    __typename
+  }
+  applyMethod {
+    method
+    ... on JobPostEmailApplyMethod {
+      emails
+      __typename
+   ...
+  Response keys: ['draftJobPosts']
+  Response preview:
+{
+  "data": {
+    "draftJobPosts": {
+      "results": [
+        {
+          "draftJobPost": {
+            "id": "699dcb42bbac624530669a72",
+            "origin": "HOSTED",
+            "claimedApplyUrl": null,
+            "advertisingLocations": [
+              {
+                "location": "Stoke-on-Trent ST1 3RX",
+                "active": true,
+                "__typename": "AdvertisingLocation"
+              }
+            ],
+            "allDescriptions": {
+              "html": "<div class=\"jd-appended-job-description\">\n  <div class=\"jd-section-employer\">\n    <div class=\"jd-description-text\">\n      <p><b>General Practitioner</b><br/><b>4 to 6 Sessions per Week</b><br/><b>Fixed-Term 6-Month Contract with View to Extend</b><br/><b>Harley Street Medical Centre</b></p><p>Harley St
+
+  Operation: getdraftJobPosts
+  Variables: {
+    "jobIds": [
+        "699dcb42bbac624530669a72"
+    ]
+}
+  Query: query getdraftJobPosts($jobIds: [ID!]!) {
+  draftJobPosts(ids: $jobIds) {
+    results {
+      draftJobPost {
+        id
+        country
+        language
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['draftJobPosts']
+  Response preview:
+{
+  "data": {
+    "draftJobPosts": {
+      "results": [
+        {
+          "draftJobPost": {
+            "id": "699dcb42bbac624530669a72",
+            "country": "GB",
+            "language": "en",
+            "__typename": "DraftJobPost"
+          },
+          "__typename": "DraftJobPostsResult"
+        }
+      ],
+      "__typename": "DraftJobPostsPayload"
+    }
+  }
+}
+
+  Operation: HostedJobDetails
+  Variables: {
+    "ids": [
+        "699dcb42bbac624530669a72"
+    ]
+}
+  Query: query HostedJobDetails($ids: [ID!]!) {
+  hostedJobPosts(ids: $ids) {
+    results {
+      hostedJobPost {
+        id
+        legacyId
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['hostedJobPosts']
+  Response preview:
+{
+  "data": {
+    "hostedJobPosts": {
+      "results": [
+        {
+          "hostedJobPost": {
+            "id": "699dcb42bbac624530669a72",
+            "legacyId": "1011f9eafc0d",
+            "__typename": "HostedJobPost"
+          },
+          "__typename": "HostedJobPostsResult"
+        }
+      ],
+      "__typename": "HostedJobPostsPayload"
+    }
+  }
+}
+
+  Operation: jobPostStatusesMessagingTags
+  Variables: {
+    "input": {
+        "jobDataSourcePreferences": {
+            "jobData": [
+                {
+                    "title": "",
+                    "company": "",
+                    "country": "GB",
+                    "language": "en",
+                    "description": ""
+                }
+            ],
+            "forceRecomputeVisibility": true,
+            "jobDataSource": [
+                "REQUEST_INPUT"
+            ]
+        },
+        "surfaceContexts": [
+            {
+           
+  Query: query jobPostStatusesMessagingTags($input: JobPostStatusesInput!) {
+  jobPostStatuses(input: $input) {
+    results {
+      jobPostStatus {
+        globalStatus {
+          visibilityLevel
+          __typename
+        }
+        surfaceStatuses {
+          statusCommunication {
+            messagingTa...
+  Response keys: ['jobPostStatuses']
+  Response preview:
+{
+  "data": {
+    "jobPostStatuses": {
+      "results": [
+        {
+          "jobPostStatus": {
+            "globalStatus": {
+              "visibilityLevel": "UNRESTRICTED",
+              "__typename": "JobPostGlobalStatus"
+            },
+            "surfaceStatuses": [
+              {
+                "statusCommunication": {
+                  "messagingTagMatches": [],
+                  "__typename": "JobPostStatusCommunication"
+                },
+                "__typename": "JobPostSurfaceStatus"
+              }
+            ],
+            "__typename": "JobPostStatus"
+          },
+          "__typename": "JobPostStatusResult"
+        }
+      ],
+      "__typename": "JobPostStatusesPayload"
+    }
+  }
+}
+
+  Operation: GetLastHostedEmployerJob
+  Variables: {}
+  Query: fragment HostedJobPostFields on HostedJobPost {
+  id
+  legacyId
+  title
+  company
+  dateCreated
+  advertisingLocations {
+    location
+    __typename
+  }
+  jobAddress
+  attributes(keys: ["confidentialJob"]) {
+    key
+    value
+    __typename
+  }
+  __typename
+}
+
+query GetLastHostedEmployerJob {
+  find...
+  Response keys: ['findEmployerJobs']
+  Response preview:
+{
+  "data": {
+    "findEmployerJobs": {
+      "results": [
+        {
+          "employerJob": {
+            "jobData": {
+              "id": "699dcb42bbac624530669a72",
+              "legacyId": "1011f9eafc0d",
+              "title": "General Practitioner",
+              "company": "Harley Street Medical Centre",
+              "dateCreated": "2026-02-24T16:01:17.000Z",
+              "advertisingLocations": [
+                {
+                  "location": "Stoke-on-Trent ST1 3RX",
+                  "__typename": "PublishedAdvertisingLocation"
+                }
+              ],
+              "jobAddress": "Harley Street",
+              "attributes": [],
+              "__typename": "HostedJobPost"
+            },
+            "__typename": "EmployerJob"
+          },
+          "__typename": "Fi
+
+  Operation: LocalizedJobTypesQuery
+  Variables: {
+    "locale": "en-GB"
+}
+  Query: query LocalizedJobTypesQuery($locale: String!) {
+  getLocalizedJobTypes(locale: $locale) {
+    result {
+      jobType
+      jobTypeDisplay
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['getLocalizedJobTypes']
+  Response preview:
+{
+  "data": {
+    "getLocalizedJobTypes": {
+      "result": [
+        {
+          "jobType": "FULL_TIME",
+          "jobTypeDisplay": "Full-time",
+          "__typename": "LocalizedJobType"
+        },
+        {
+          "jobType": "PART_TIME",
+          "jobTypeDisplay": "Part-time",
+          "__typename": "LocalizedJobType"
+        },
+        {
+          "jobType": "TEMPORARY",
+          "jobTypeDisplay": "Temporary",
+          "__typename": "LocalizedJobType"
+        },
+        {
+          "jobType": "CONTRACT",
+          "jobTypeDisplay": "Contract",
+          "__typename": "LocalizedJobType"
+        },
+        {
+          "jobType": "INTERNSHIP",
+          "jobTypeDisplay": "Internship",
+          "__typename": "LocalizedJobType"
+        },
+        {
+          "jobType": "COMMISSION"
+
+  Operation: GetAvailableCountrySites
+  Variables: {}
+  Query: query GetAvailableCountrySites {
+  availableCountrySites {
+    results {
+      countryCode
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['availableCountrySites']
+  Response preview:
+{
+  "data": {
+    "availableCountrySites": {
+      "results": [
+        {
+          "countryCode": "GB",
+          "__typename": "CountrySite"
+        },
+        {
+          "countryCode": "AR",
+          "__typename": "CountrySite"
+        },
+        {
+          "countryCode": "AU",
+          "__typename": "CountrySite"
+        },
+        {
+          "countryCode": "AT",
+          "__typename": "CountrySite"
+        },
+        {
+          "countryCode": "BH",
+          "__typename": "CountrySite"
+        },
+        {
+          "countryCode": "BE",
+          "__typename": "CountrySite"
+        },
+        {
+          "countryCode": "BR",
+          "__typename": "CountrySite"
+        },
+        {
+          "countryCode": "CA",
+          "__typename": "CountrySite"
+        },
+        {
+      
+
+  Operation: GetCampaignsConnection
+  Variables: {
+    "ids": [
+        "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+    ]
+}
+  Query: query GetCampaignsConnection($ids: [ID!]!) {
+  nodes(ids: $ids) {
+    ... on EmployerJob {
+      campaignsConnection {
+        edges {
+          node {
+            status
+            budget {
+              limit {
+                amountLocal
+                currency
+                __typename
+      ...
+  Response keys: ['nodes']
+  Response preview:
+{
+  "data": {
+    "nodes": [
+      {
+        "campaignsConnection": {
+          "edges": [],
+          "__typename": "EmployerJobCampaignsConnection"
+        },
+        "__typename": "EmployerJob"
+      }
+    ]
+  }
+}
+
+  Operation: SaveDraftJobPost
+  Variables: {
+    "input": {
+        "id": "699dcb42bbac624530669a72",
+        "patch": {
+            "taxonomyAttributesPatchByCustomClass": [
+                {
+                    "operation": "REMOVE",
+                    "value": {
+                        "attributes": [],
+                        "customClassUuid": "f9dde7ac-b536-493d-ac13-2914188757f3"
+                    }
+                },
+                {
+                    "operation": "REMOVE",
+                    "value": {
+                   
+  Query: fragment DraftJobPostFields on DraftJobPost {
+  id
+  origin
+  claimedApplyUrl
+  advertisingLocations {
+    location
+    active
+    __typename
+  }
+  allDescriptions {
+    html
+    text
+    __typename
+  }
+  applyMethod {
+    method
+    ... on JobPostEmailApplyMethod {
+      emails
+      __typename
+   ...
+  Response keys: ['patchDraftJobPost']
+  Response preview:
+{
+  "data": {
+    "patchDraftJobPost": {
+      "result": {
+        "draftJobPost": {
+          "id": "699dcb42bbac624530669a72",
+          "origin": "HOSTED",
+          "claimedApplyUrl": null,
+          "advertisingLocations": [
+            {
+              "location": "Stoke-on-Trent ST1 3RX",
+              "active": true,
+              "__typename": "AdvertisingLocation"
+            }
+          ],
+          "allDescriptions": {
+            "html": "<div class=\"jd-appended-job-description\">\n  <div class=\"jd-section-employer\">\n    <div class=\"jd-description-text\">\n      <p><b>General Practitioner</b><br/><b>4 to 6 Sessions per Week</b><br/><b>Fixed-Term 6-Month Contract with View to Extend</b><br/><b>Harley Street Medical Centre</b></p><p>Harley Street Medical Centre is looking to
+
+  Operation: jobPostStatusesMessagingTags
+  Variables: {
+    "input": {
+        "jobDataSourcePreferences": {
+            "jobData": [
+                {
+                    "title": "General Practitioner",
+                    "company": "Harley Street Medical Centre",
+                    "country": "GB",
+                    "language": "en",
+                    "description": "*General Practitioner*\n*4 to 6 Sessions per Week*\n*Fixed-Term 6-Month Contract with View to Extend*\n*Harley Street Medical Centre*\n\nHarley Street Medical Centre is lookin
+  Query: query jobPostStatusesMessagingTags($input: JobPostStatusesInput!) {
+  jobPostStatuses(input: $input) {
+    results {
+      jobPostStatus {
+        globalStatus {
+          visibilityLevel
+          __typename
+        }
+        surfaceStatuses {
+          statusCommunication {
+            messagingTa...
+  Response keys: ['jobPostStatuses']
+  Response preview:
+{
+  "data": {
+    "jobPostStatuses": {
+      "results": [
+        {
+          "jobPostStatus": {
+            "globalStatus": {
+              "visibilityLevel": "UNRESTRICTED",
+              "__typename": "JobPostGlobalStatus"
+            },
+            "surfaceStatuses": [
+              {
+                "statusCommunication": {
+                  "messagingTagMatches": [],
+                  "__typename": "JobPostStatusCommunication"
+                },
+                "__typename": "JobPostSurfaceStatus"
+              }
+            ],
+            "__typename": "JobPostStatus"
+          },
+          "__typename": "JobPostStatusResult"
+        }
+      ],
+      "__typename": "JobPostStatusesPayload"
+    }
+  }
+}
+
+  Operation: getSimilarJobPosts
+  Variables: {
+    "ids": [
+        "699dcb42bbac624530669a72"
+    ]
+}
+  Query: query getSimilarJobPosts($ids: [ID!]!) {
+  hostedJobPosts(ids: $ids) {
+    results {
+      hostedJobPost {
+        attributes(keys: ["isRefreshSO"]) {
+          key
+          value
+          __typename
+        }
+        similarJobPosts {
+          matchingJobCount
+          copiedJobId
+          cop...
+  Response keys: ['hostedJobPosts']
+  Response preview:
+{
+  "data": {
+    "hostedJobPosts": {
+      "results": [
+        {
+          "hostedJobPost": {
+            "attributes": [],
+            "similarJobPosts": {
+              "matchingJobCount": 0,
+              "copiedJobId": null,
+              "copiedJobCopyType": null,
+              "__typename": "SimilarJobPostsPayload"
+            },
+            "__typename": "HostedJobPost"
+          },
+          "__typename": "HostedJobPostsResult"
+        }
+      ],
+      "__typename": "HostedJobPostsPayload"
+    }
+  }
+}
+
+  Operation: GetHostedEmployerJob
+  Variables: {
+    "title": "General Practitioner",
+    "location": "Stoke-on-Trent ST1 3RX",
+    "status": [
+        "ACTIVE"
+    ],
+    "countryCode": "GB"
+}
+  Query: query GetHostedEmployerJob($location: String!, $countryCode: String, $title: String!, $status: [HostedJobStatus!]) {
+  findEmployerJobs(
+    input: {filter: {location: {countryCode: $countryCode, match: $location}, anyOf: [{claimed: true}, {createdOnIndeed: true}], title: {match: $title}, hostedJobS...
+  Response keys: ['findEmployerJobs']
+  Response preview:
+{
+  "data": {
+    "findEmployerJobs": {
+      "results": [],
+      "__typename": "FindEmployerJobsPayload"
+    }
+  }
+}
+
+  Operation: SalaryFormatForLocaleQuery
+  Variables: {
+    "input": {
+        "locale": {
+            "country": "GB",
+            "language": "en"
+        }
+    }
+}
+  Query: query SalaryFormatForLocaleQuery($input: SalaryFormatForLocaleInput!) {
+  salaryFormatForLocale(input: $input) {
+    result {
+      currencySignAfterNumber
+      currency
+      currencySymbol
+      defaultSalaryPeriod
+      majorToMinorMultiplier
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['salaryFormatForLocale']
+  Response preview:
+{
+  "data": {
+    "salaryFormatForLocale": {
+      "result": {
+        "currencySignAfterNumber": false,
+        "currency": "GBP",
+        "currencySymbol": "\u00a3",
+        "defaultSalaryPeriod": "YEAR",
+        "majorToMinorMultiplier": 100,
+        "__typename": "SalaryFormatForLocaleResult"
+      },
+      "__typename": "SalaryFormatForLocalePayload"
+    }
+  }
+}
+
+  Operation: applicableMinimumWageQuery
+  Variables: {
+    "input": {
+        "location": {
+            "countryCode": "GB",
+            "admin1Code": null,
+            "city": null
+        },
+        "effectiveDate": "2026-03-30"
+    }
+}
+  Query: query applicableMinimumWageQuery($input: ApplicableMinimumWageInput!) {
+  applicableMinimumWage(input: $input) {
+    minimumWage {
+      amount {
+        amountLocal
+        currency
+        __typename
+      }
+      unit
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['applicableMinimumWage']
+  Response preview:
+{
+  "data": {
+    "applicableMinimumWage": {
+      "minimumWage": {
+        "amount": {
+          "amountLocal": "1221",
+          "currency": "GBP",
+          "__typename": "MonetaryValue"
+        },
+        "unit": "HOURLY",
+        "__typename": "LegalMinimumWage"
+      },
+      "__typename": "ApplicableMinimumWagePayload"
+    }
+  }
+}
+
+  Operation: GetEmployerPermissions
+  Variables: {}
+  Query: query GetEmployerPermissions {
+  currentEmployerUser {
+    id
+    permissions {
+      hostedCandidate {
+        read
+        update
+        access_as_granted
+        __typename
+      }
+      admin {
+        update
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "permissions": {
+        "hostedCandidate": {
+          "read": true,
+          "update": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "admin": {
+          "update": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "__typename": "EmployerUserPermissions"
+      },
+      "__typename": "EmployerUser"
+    }
+  }
+}
+
+  Operation: AutomationHub_EmployerJobApplyMethod_Hook
+  Variables: {
+    "iri": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+}
+  Query: query AutomationHub_EmployerJobApplyMethod_Hook($iri: ID!) {
+  node(id: $iri) {
+    ... on EmployerJob {
+      id
+      __typename
+      jobData {
+        id
+        __typename
+        ... on HostedJobPost {
+          applyMethodType
+          __typename
+        }
+      }
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['node']
+  Response preview:
+{
+  "data": {
+    "node": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "__typename": "EmployerJob",
+      "jobData": {
+        "id": "699dcb42bbac624530669a72",
+        "__typename": "HostedJobPost",
+        "applyMethodType": "EMAIL"
+      }
+    }
+  }
+}
+
+  Operation: ClassifyOccupations
+  Variables: {
+    "jobTitle": "General Practitioner",
+    "countryCode": "GB",
+    "languageCode": "en"
+}
+  Query: query ClassifyOccupations($jobTitle: String!, $countryCode: CountryCode!, $languageCode: LanguageCode!) {
+  classifyOccupationsForJobDetails(
+    input: {jobTitle: $jobTitle, countryCode: $countryCode, languageCode: $languageCode}
+  ) {
+    occupations {
+      uuid
+      label
+      pathToRoot {
+   ...
+  Response keys: ['classifyOccupationsForJobDetails']
+  Response preview:
+{
+  "data": {
+    "classifyOccupationsForJobDetails": {
+      "occupations": [
+        {
+          "uuid": "8d4439da-1fd9-46d6-b7b5-67740aa49242",
+          "label": "Physicians",
+          "pathToRoot": [
+            {
+              "uuid": "8d4439da-1fd9-46d6-b7b5-67740aa49242",
+              "label": "Physicians",
+              "__typename": "TaxonomyConcept"
+            },
+            {
+              "uuid": "73e02895-9f2b-4708-9300-d4518e37018d",
+              "label": "Physicians & Physician Associates",
+              "__typename": "TaxonomyConcept"
+            },
+            {
+              "uuid": "d36f02e1-a66c-412b-8601-8555fc5d82e5",
+              "label": "Healthcare",
+              "__typename": "TaxonomyConcept"
+            }
+          ],
+          "__typename": "TaxonomyConc
+
+  Operation: GeocodeQuery
+  Variables: {
+    "input": {
+        "text": "Harley Street, Stoke-on-Trent, ST1 3RX",
+        "country": "GB"
+    }
+}
+  Query: query GeocodeQuery($input: GeocodeInput!) {
+  geocode(input: $input) {
+    location {
+      longitude
+      latitude
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['geocode']
+  Response preview:
+{
+  "data": {
+    "geocode": {
+      "location": {
+        "longitude": -2.17073,
+        "latitude": 53.02243,
+        "__typename": "NamedLocation"
+      },
+      "__typename": "GeocodeResult"
+    }
+  }
+}
+
+  Operation: GatheredFeedback
+  Variables: {
+    "ids": [
+        "699dcb42bbac624530669a72"
+    ]
+}
+  Query: query GatheredFeedback($ids: [ID!]!) {
+  draftJobPosts(ids: $ids) {
+    results {
+      draftJobPost {
+        id
+        qualifications {
+          category
+          employerFacingQuestion
+          isCrowTaxoSpecificTag
+          label
+          strength
+          suid
+          uuid
+          sp...
+  Response keys: ['draftJobPosts']
+  Response preview:
+{
+  "data": {
+    "draftJobPosts": {
+      "results": [
+        {
+          "draftJobPost": {
+            "id": "699dcb42bbac624530669a72",
+            "qualifications": [],
+            "__typename": "DraftJobPost"
+          },
+          "__typename": "DraftJobPostsResult"
+        }
+      ],
+      "__typename": "DraftJobPostsPayload"
+    }
+  }
+}
+
+  Operation: QualificationQuestionSetByEntity
+  Variables: {
+    "input": {
+        "entityId": "699dcb42bbac624530669a72",
+        "entityType": "JOB"
+    },
+    "shouldQueryUserDefinedQuestion": false
+}
+  Query: query QualificationQuestionSetByEntity($input: QualificationQuestionEntityInput, $shouldQueryUserDefinedQuestion: Boolean!) {
+  qualificationQuestionSetByEntity(input: $input) {
+    questionSet {
+      entityType
+      id
+      context {
+        key
+        value
+        __typename
+      }
+      que...
+  Response keys: ['qualificationQuestionSetByEntity']
+  Response preview:
+{
+  "data": {
+    "qualificationQuestionSetByEntity": {
+      "questionSet": null,
+      "__typename": "QualificationQuestionSetPayload"
+    }
+  }
+}
+
+  Operation: AutomationHub_WorkflowCounts_IsJobSponsored
+  Variables: {
+    "input": {
+        "employerJobId": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+    }
+}
+  Query: query AutomationHub_WorkflowCounts_IsJobSponsored($input: AutomationSponsorshipInput!) {
+  automationSponsorship(input: $input) {
+    employerJobId
+    isSponsored
+    __typename
+  }
+}
+...
+  Response keys: ['automationSponsorship']
+  Response preview:
+{
+  "data": {
+    "automationSponsorship": {
+      "employerJobId": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "isSponsored": false,
+      "__typename": "AutomationSponsorshipPayload"
+    }
+  }
+}
+
+  Operation: AutomationHub_ActiveEmployerAutomationsQueryInput_IsJobSponsored
+  Variables: {
+    "input": {
+        "employerJobId": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+    }
+}
+  Query: query AutomationHub_ActiveEmployerAutomationsQueryInput_IsJobSponsored($input: AutomationSponsorshipInput!) {
+  automationSponsorship(input: $input) {
+    employerJobId
+    isSponsored
+    __typename
+  }
+}
+...
+  Response keys: ['automationSponsorship']
+  Response preview:
+{
+  "data": {
+    "automationSponsorship": {
+      "employerJobId": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "isSponsored": false,
+      "__typename": "AutomationSponsorshipPayload"
+    }
+  }
+}
+
+  Operation: UseWorkflowCountsV2_EmployerAutomation
+  Variables: {
+    "input": {
+        "triggerLevelV2": {
+            "job": {
+                "employerJobIds": [
+                    "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+                ]
+            },
+            "includeAdvertiserLevel": true
+        }
+    }
+}
+  Query: query UseWorkflowCountsV2_EmployerAutomation($input: FindEmployerAutomationsV2Input!) {
+  findEmployerAutomationsV2(input: $input) {
+    automations {
+      actions {
+        typename
+        ... on SendMessageToCandidateAction {
+          message
+          senderAccountKey
+          typename
+      ...
+  Response keys: ['findEmployerAutomationsV2']
+  Response preview:
+{
+  "data": {
+    "findEmployerAutomationsV2": {
+      "automations": [],
+      "__typename": "FindEmployerAutomationsV2Connection"
+    }
+  }
+}
+
+  Operation: SuggestedQualifications
+  Variables: {
+    "input": {
+        "jobCountry": "GB",
+        "jobLanguage": "en",
+        "jobTitle": "General Practitioner",
+        "jobDescription": "*General Practitioner*\n*4 to 6 Sessions per Week*\n*Fixed-Term 6-Month Contract with View to Extend*\n*Harley Street Medical Centre*\n\nHarley Street Medical Centre is looking to recruit a motivated and patient-focused *General Practitioner* to join our friendly and supportive team on a *fixed-term six-month contract, with the possibility of extension*
+  Query: query SuggestedQualifications($ids: [ID!]!, $input: DraftJobSuggestedQualificationsInput) {
+  draftJobPosts(ids: $ids) {
+    results {
+      draftJobPost {
+        id
+        suggestedQualifications(input: $input) {
+          jobQualifications {
+            category
+            employerFacingQuestio...
+  Response keys: ['draftJobPosts']
+  Response preview:
+{
+  "data": {
+    "draftJobPosts": {
+      "results": [
+        {
+          "draftJobPost": {
+            "id": "699dcb42bbac624530669a72",
+            "suggestedQualifications": {
+              "jobQualifications": [
+                {
+                  "category": "LICENSE",
+                  "employerFacingQuestion": "",
+                  "isCrowTaxoSpecificTag": false,
+                  "isOQVTTag": false,
+                  "label": "GMC",
+                  "strength": "REQUIRED",
+                  "suid": "5RVUQ",
+                  "uuid": "ae67451d-039d-4437-b5c1-8c395efaf100",
+                  "specificQuals": [],
+                  "__typename": "UnifiedQualification"
+                },
+                {
+                  "category": "SKILL",
+                  "employerFacingQuestio
+
+  Operation: UseWorkflowCountsV2_EmployerAutomation
+  Variables: {
+    "input": {
+        "triggerLevelV2": {
+            "job": {
+                "employerJobIds": [
+                    "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+                ]
+            },
+            "includeAdvertiserLevel": true,
+            "includeJobLevel": false
+        },
+        "sponsorshipRequired": false
+    }
+}
+  Query: query UseWorkflowCountsV2_EmployerAutomation($input: FindEmployerAutomationsV2Input!) {
+  findEmployerAutomationsV2(input: $input) {
+    automations {
+      actions {
+        typename
+        ... on SendMessageToCandidateAction {
+          message
+          senderAccountKey
+          typename
+      ...
+  Response keys: ['findEmployerAutomationsV2']
+  Response preview:
+{
+  "data": {
+    "findEmployerAutomationsV2": {
+      "automations": [],
+      "__typename": "FindEmployerAutomationsV2Connection"
+    }
+  }
+}
+
+  Operation: AutomationHub_AutomationSetupModalContainer_EmployerJob
+  Variables: {
+    "iri": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+}
+  Query: query AutomationHub_AutomationSetupModalContainer_EmployerJob($iri: ID!) {
+  node(id: $iri) {
+    ... on EmployerJob {
+      __typename
+      id
+      ...AutomationHub_JobToastDetails_UseAutomationSetupModal_EmployerJob
+      ...AutomationHub_RemoveAutomationModal_EmployerJobDescription_EmployerJob
+...
+  Response keys: ['node']
+  Response preview:
+{
+  "data": {
+    "node": {
+      "__typename": "EmployerJob",
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "jobData": {
+        "id": "699dcb42bbac624530669a72",
+        "__typename": "HostedJobPost",
+        "title": "General Practitioner",
+        "location": {
+          "formatted": {
+            "short": "Stoke-on-Trent ST1 3RX",
+            "__typename": "FormattedJobLocation"
+          },
+          "__typename": "JobLocation"
+        }
+      }
+    }
+  }
+}
+
+  Operation: AutomationHub_EmployerEntityAutomationAttributes
+  Variables: {}
+  Query: query AutomationHub_EmployerEntityAutomationAttributes {
+  currentEmployerEntity {
+    result {
+      id
+      __typename
+      employerAutomationAttributes {
+        autoReplySendExistCandNms
+        autoContactSendExistCandNms
+        maybeAutoSendExistCandNms
+        schedRejectSendExistCandNms
+ ...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "__typename": "EmployerEntity",
+        "employerAutomationAttributes": {
+          "autoReplySendExistCandNms": null,
+          "autoContactSendExistCandNms": null,
+          "maybeAutoSendExistCandNms": null,
+          "schedRejectSendExistCandNms": null,
+          "__typename": "EmployerEntityAutomationAttributes"
+        }
+      },
+      "__typename": "CurrentEmployerEntityPayload"
+    }
+  }
+}
+
+  Operation: AutomationHub_ActiveEmployerAutomationsQueryInput_IsJobSponsored
+  Variables: {
+    "input": {
+        "employerJobId": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+    }
+}
+  Query: query AutomationHub_ActiveEmployerAutomationsQueryInput_IsJobSponsored($input: AutomationSponsorshipInput!) {
+  automationSponsorship(input: $input) {
+    employerJobId
+    isSponsored
+    __typename
+  }
+}
+...
+  Response keys: ['automationSponsorship']
+  Response preview:
+{
+  "data": {
+    "automationSponsorship": {
+      "employerJobId": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+      "isSponsored": false,
+      "__typename": "AutomationSponsorshipPayload"
+    }
+  }
+}
+
+  Operation: AutomationEditV2_EmployerAutomation
+  Variables: {
+    "input": {
+        "triggerLevelV2": {
+            "job": {
+                "employerJobIds": [
+                    "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+                ]
+            }
+        }
+    }
+}
+  Query: query AutomationEditV2_EmployerAutomation($input: FindEmployerAutomationsV2Input!, $first: Int) {
+  findEmployerAutomationsV2(input: $input, first: $first) {
+    automations {
+      id
+      product {
+        name
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['findEmployerAutomationsV2']
+  Response preview:
+{
+  "data": {
+    "findEmployerAutomationsV2": {
+      "automations": [],
+      "__typename": "FindEmployerAutomationsV2Connection"
+    }
+  }
+}
+
+  Operation: AutomationEditV2_EmployerAutomation
+  Variables: {
+    "input": {
+        "triggerLevelV2": {
+            "job": {
+                "employerJobIds": [
+                    "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw=="
+                ]
+            },
+            "includeAdvertiserLevel": true,
+            "includeJobLevel": false
+        },
+        "sponsorshipRequired": false
+    }
+}
+  Query: query AutomationEditV2_EmployerAutomation($input: FindEmployerAutomationsV2Input!, $first: Int) {
+  findEmployerAutomationsV2(input: $input, first: $first) {
+    automations {
+      id
+      product {
+        name
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['findEmployerAutomationsV2']
+  Response preview:
+{
+  "data": {
+    "findEmployerAutomationsV2": {
+      "automations": [],
+      "__typename": "FindEmployerAutomationsV2Connection"
+    }
+  }
+}
+
+  Operation: CurrentEmployerUserId
+  Variables: {}
+  Query: query CurrentEmployerUserId {
+  currentEmployerUser {
+    id
+    __typename
+  }
+}
+...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "__typename": "EmployerUser"
+    }
+  }
+}
+
+  Operation: Sponsor_EmployerAlertsModule_EmployerUser
+  Variables: {}
+  Query: query Sponsor_EmployerAlertsModule_EmployerUser {
+  currentEmployerUser {
+    id
+    permissions {
+      bill {
+        create
+        update
+        read
+        __typename
+      }
+      __typename
+    }
+    ...Sponmods_MonthlyBudgetLimitBanner_CurrentEmployerUser
+    __typename
+  }
+}
+
+fragment Spo...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "permissions": {
+        "bill": {
+          "create": false,
+          "update": false,
+          "read": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "__typename": "EmployerUserPermissions",
+        "employerEntity": {
+          "update": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        }
+      },
+      "__typename": "EmployerUser"
+    }
+  }
+}
+
+  Operation: Sponsor_EmployerAlertsModule_EmployerEntity
+  Variables: {
+    "hasBillingReadPermission": false
+}
+  Query: query Sponsor_EmployerAlertsModule_EmployerEntity($hasBillingReadPermission: Boolean!) {
+  currentEmployerEntity {
+    result {
+      id
+      activeBillingAccount @include(if: $hasBillingReadPermission) {
+        id
+        billingTaxInfo {
+          billingTaxDetailList {
+            taxId
+       ...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "legacyMoneyInfo": {
+          "billingState": "BILLING_APPROVED",
+          "__typename": "EmployerLegacyMoneyInfo"
+        },
+        "isPrimaryEmployer": false,
+        "primaryUser": {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9iZGY1NDAxNjc1MTI1MzYzNGExNzMxYjFkM2IyMWRjODpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+          "account": {
+            "id": "bdf54016751253634a1731b1d3b21dc8",
+            "accountProfile": {
+              "email": {
+                "emailAddress": "yvonne.bell@stokeccg.nhs.uk",
+                "__typename": "Email"
+              },
+              "__typen
+
+  Operation: GetEstimatedJobResultCount
+  Variables: {
+    "input": {
+        "filter": {
+            "allOf": [
+                {
+                    "anyOf": [
+                        {
+                            "not": {
+                                "hostedJobStatus": [
+                                    "CLOSED",
+                                    "PAUSED"
+                                ]
+                            }
+                        },
+                        {
+                            "hostedJobStatus": [
+                  
+  Query: query GetEstimatedJobResultCount($input: FindEmployerJobsInput!) {
+  findEmployerJobs(input: $input) {
+    estimatedTotalResultsCount
+    __typename
+  }
+}
+...
+  Response keys: ['findEmployerJobs']
+  Response preview:
+{
+  "data": {
+    "findEmployerJobs": {
+      "estimatedTotalResultsCount": 8,
+      "__typename": "FindEmployerJobsPayload"
+    }
+  }
+}
+
+  Operation: GetEstimatedJobResultCount
+  Variables: {
+    "input": {
+        "filter": {
+            "claimed": false,
+            "createdOnIndeed": true,
+            "allOf": [
+                {
+                    "anyOf": [
+                        {
+                            "not": {
+                                "hostedJobStatus": [
+                                    "CLOSED",
+                                    "PAUSED"
+                                ]
+                            }
+                        },
+                        {
+
+  Query: query GetEstimatedJobResultCount($input: FindEmployerJobsInput!) {
+  findEmployerJobs(input: $input) {
+    estimatedTotalResultsCount
+    __typename
+  }
+}
+...
+  Response keys: ['findEmployerJobs']
+  Response preview:
+{
+  "data": {
+    "findEmployerJobs": {
+      "estimatedTotalResultsCount": 8,
+      "__typename": "FindEmployerJobsPayload"
+    }
+  }
+}
+
+  Operation: EntJobTableMfe_EmployerJobSearch
+  Variables: {
+    "input": {
+        "filter": {
+            "allOf": [
+                {
+                    "anyOf": [
+                        {
+                            "not": {
+                                "hostedJobStatus": [
+                                    "CLOSED",
+                                    "PAUSED"
+                                ]
+                            }
+                        },
+                        {
+                            "hostedJobStatus": [
+                  
+  Query: query EntJobTableMfe_EmployerJobSearch($input: FindEmployerJobsInput!, $messagingTagJobPostStatusInput: EmployerJobJobPostStatusInput!, $sponsor_campaign_connection_migration_metrics1: Boolean!, $sponsor_reopen_modal_2025_revamp1: Boolean!, $P_visapi_migration_visibility_level1_active: Boolean! = fa...
+  Response keys: ['findEmployerJobs']
+  Response preview:
+{
+  "data": {
+    "findEmployerJobs": {
+      "pageInfo": {
+        "endCursor": null,
+        "startCursor": null,
+        "__typename": "BidirectionalCursorInfo",
+        "hasNextPage": false,
+        "hasPreviousPage": false
+      },
+      "metadata": {
+        "searchRequestTk": "81d45733-11d0-4ef7-886a-88658d8e3199",
+        "__typename": "FindEmployerJobsMetadata"
+      },
+      "__typename": "FindEmployerJobsPayload",
+      "results": [
+        {
+          "employerJob": {
+            "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVySm9iLzYyYzBmYjU2LWVmODMtNDQ0Ni04ODllLWNkNDBmNDFjYWUyMw==",
+            "__typename": "EmployerJob",
+            "jobData": {
+              "id": "699dcb42bbac624530669a72",
+              "legacyId": "1011f9eafc0d",
+              "__typename": "HostedJobPos
+
+  Operation: EntJobTableMfe_FindDraftJobPosts
+  Variables: {}
+  Query: query EntJobTableMfe_FindDraftJobPosts {
+  findDraftJobPosts(input: {}) {
+    results {
+      draftJobPost {
+        id
+        title
+        advertisingLocations {
+          active
+          __typename
+        }
+        ...Jmfm_BulkActions_DraftJobPost
+        ...Jmfm_RowLevelSelector_DraftJobPost
+...
+  Response keys: ['findDraftJobPosts']
+  Response preview:
+{
+  "data": {
+    "findDraftJobPosts": {
+      "results": [],
+      "__typename": "FindDraftJobPostsPayload"
+    }
+  }
+}
+
+  Operation: GetEmployerNotifications
+  Variables: {
+    "first": 15,
+    "input": {}
+}
+  Query: query GetEmployerNotifications($input: EmployerNotificationsInput, $first: Int, $after: String, $last: Int, $before: String) {
+  employerNotifications(
+    input: $input
+    first: $first
+    after: $after
+    last: $last
+    before: $before
+  ) {
+    isMasquerading
+    pageInfo {
+      hasPreviousP...
+  Response keys: ['employerNotifications']
+  Response preview:
+{
+  "data": {
+    "employerNotifications": {
+      "isMasquerading": false,
+      "pageInfo": {
+        "hasPreviousPage": false,
+        "hasNextPage": false,
+        "startCursor": null,
+        "endCursor": null,
+        "__typename": "PageInfo"
+      },
+      "edges": [],
+      "__typename": "EmployerNotificationsConnection"
+    }
+  }
+}
+
+  Operation: Jmfe_FindEmployerJobTags
+  Variables: {}
+  Query: query Jmfe_FindEmployerJobTags {
+  currentEmployerEntity {
+    result {
+      id
+      employerJobTagsConnection {
+        tags {
+          id
+          name
+          description
+          createdDate
+          dateModified
+          employerJobMembersConnection {
+            totalCount
+           ...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "employerJobTagsConnection": {
+          "tags": [],
+          "__typename": "EmployerEntityEmployerJobTagsConnection"
+        },
+        "__typename": "EmployerEntity"
+      },
+      "__typename": "CurrentEmployerEntityPayload"
+    }
+  }
+}
+
+  Operation: GetEmployerNotifications
+  Variables: {
+    "first": 15,
+    "input": {}
+}
+  Query: query GetEmployerNotifications($input: EmployerNotificationsInput, $first: Int, $after: String, $last: Int, $before: String) {
+  employerNotifications(
+    input: $input
+    first: $first
+    after: $after
+    last: $last
+    before: $before
+  ) {
+    isMasquerading
+    pageInfo {
+      hasPreviousP...
+  Response keys: ['employerNotifications']
+  Response preview:
+{
+  "data": {
+    "employerNotifications": {
+      "isMasquerading": false,
+      "pageInfo": {
+        "hasPreviousPage": false,
+        "hasNextPage": false,
+        "startCursor": null,
+        "endCursor": null,
+        "__typename": "PageInfo"
+      },
+      "edges": [],
+      "__typename": "EmployerNotificationsConnection"
+    }
+  }
+}
+
+  Operation: CurrentEmployerUserPermissions
+  Variables: {}
+  Query: query CurrentEmployerUserPermissions {
+  currentEmployerUser {
+    permissions {
+      hostedJob {
+        read
+        access_as_granted
+        __typename
+      }
+      hostedCandidate {
+        read
+        access_as_granted
+        __typename
+      }
+      screeningCriteria {
+        read
+      ...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "permissions": {
+        "hostedJob": {
+          "read": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "hostedCandidate": {
+          "read": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "screeningCriteria": {
+          "read": true,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "candidateProfile": {
+          "read": true,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "analytics": {
+          "read": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "bill": {
+          "read": false,
+          "__typename": "Employer
+
+  Operation: CurrentAccountDetails
+  Variables: {}
+  Query: query CurrentAccountDetails {
+  currentEmployerUser {
+    id
+    employer {
+      id
+      name
+      primaryUser {
+        id
+        account {
+          id
+          accountProfile {
+            email {
+              emailAddress
+              __typename
+            }
+            __typename
+      ...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "employer": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "name": "Harley Street Medical Centre",
+        "primaryUser": {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9iZGY1NDAxNjc1MTI1MzYzNGExNzMxYjFkM2IyMWRjODpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+          "account": {
+            "id": "bdf54016751253634a1731b1d3b21dc8",
+            "accountProfile": {
+              "email": {
+                "emailAddress": "yvonne.bell@stokeccg.nhs.uk",
+                "__typename": "Email"
+           
+
+  Operation: CurrentEmployerUserPermissionsWithId
+  Variables: {}
+  Query: query CurrentEmployerUserPermissionsWithId {
+  currentEmployerUser {
+    id
+    permissions {
+      ...DefaultPermissions
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment DefaultPermissionVerbs on EmployerUserPermissionVerbs {
+  create
+  delete
+  list
+  read
+  update
+  accessAsGranted: access_a...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "permissions": {
+        "accountLogin": {
+          "create": false,
+          "delete": false,
+          "list": false,
+          "read": true,
+          "update": false,
+          "accessAsGranted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "adCampaign": {
+          "create": false,
+          "delete": false,
+          "list": false,
+          "read": false,
+          "update": false,
+          "accessAsGranted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "adCampaignDetailedReport": {
+          "create": false,
+    
+
+  Operation: FindGroupedCandidateSubmissionFilterOptions
+  Variables: {
+    "filterDataInput": {
+        "filter": {
+            "submissionType": "LEGACY",
+            "created": {
+                "createdAfter": 1711756800000
+            },
+            "jobs": {
+                "hostedJobPostStatuses": [
+                    "ACTIVE",
+                    "PAUSED"
+                ]
+            },
+            "hiringMilestones": {
+                "milestoneIds": [
+                    "NEW",
+                    "PENDING",
+                    "PHONE_SCREENED",
+      
+  Query: query FindGroupedCandidateSubmissionFilterOptions($filterDataInput: FindCandidateSubmissionsInput!, $statusDataInput: FindCandidateSubmissionsInput!, $shortlistCountInput: FindCandidateSubmissionsInput!, $undecidedCountInput: FindCandidateSubmissionsInput!) {
+  filterData: findCandidateSubmissions(i...
+  Response keys: ['filterData', 'milestoneData', 'shortlistCountData', 'undecidedCountData']
+  Response preview:
+{
+  "data": {
+    "filterData": {
+      "filterOptions": {
+        "locations": {
+          "locations": [
+            {
+              "value": "Stoke-on-Trent",
+              "count": 143,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "",
+              "count": 22,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "Newcastle-under-Lyme",
+              "count": 17,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "Kidsgrove",
+              "count": 6,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+            
+
+  Operation: getDradisVerifiedSource
+  Variables: {}
+  Query: query getDradisVerifiedSource {
+  currentEmployerEntity {
+    result {
+      traits {
+        hasDradisVerifiedSource
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "traits": {
+          "hasDradisVerifiedSource": false,
+          "__typename": "EmployerTraits"
+        },
+        "__typename": "EmployerEntity"
+      },
+      "__typename": "CurrentEmployerEntityPayload"
+    }
+  }
+}
+
+  Operation: FindRCPMatches
+  Variables: {
+    "showGuidedNudgeV2": true,
+    "showPremiumFeatures": false,
+    "pushProctorIsActive": false,
+    "input": {
+        "clientSurfaceName": "candidate-list-page",
+        "defaultStrategyId": "U20GF",
+        "limit": 20,
+        "context": {
+            "surfaceContext": [
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS",
+                    "contextPayload": "ACTIVE"
+                },
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS"
+  Query: query FindRCPMatches($input: OrchestrationMatchesInput!, $showGuidedNudgeV2: Boolean! = false, $showPremiumFeatures: Boolean = false, $pushProctorIsActive: Boolean = false) {
+  findRCPMatches(input: $input) {
+    rcpRequestId
+    searchSessionId
+    overallMatchCount
+    overallMatchCountWithoutLimi...
+  Response keys: ['findRCPMatches']
+  Response preview:
+{
+  "data": {
+    "findRCPMatches": {
+      "rcpRequestId": "95c4ca7c-7153-4912-85a3-33953502a525",
+      "searchSessionId": "GDoIvl69pSIr3YoYbS4IN+TTx9ChL5WMgo7Dci+eJYo=",
+      "overallMatchCount": 244,
+      "overallMatchCountWithoutLimit": "244",
+      "matchConnection": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "hasPreviousPage": false,
+          "__typename": "PageInfo"
+        },
+        "matches": [
+          {
+            "matchId": {
+              "id": "a20b8c51-136f-4029-92c9-5138ccf6b2c0",
+              "type": "CANDIDATE_SUBMISSION",
+              "__typename": "MatchId"
+            },
+            "candidateSubmission": {
+              "__typename": "CandidateSubmission",
+              "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vYTIwY
+
+  Operation: LogRcpCandidateSeen
+  Variables: {
+    "input": {
+        "feedbackContexts": [
+            {
+                "encryptedJobseekerAccountId": "",
+                "rcpRequestId": "6d4df225-0545-4c02-9a46-444dca8e46b5",
+                "matchType": "CANDIDATE_SUBMISSION",
+                "typedMatchId": "27bd62c3-70e2-44b2-864f-5ccd642f338d"
+            }
+        ],
+        "surfaceContext": {
+            "timestampAtSurface": 1774847032956,
+            "grps": [],
+            "surface": "candidate-list-page"
+        }
+    }
+}
+  Query: mutation LogRcpCandidateSeen($input: LogRcpCandidateSeenInput!) {
+  logRcpCandidateSeen(input: $input) {
+    candidateResults {
+      encryptedJobseekerAccountId
+      eventKey
+      matchId
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['logRcpCandidateSeen']
+  Response preview:
+{
+  "data": {
+    "logRcpCandidateSeen": {
+      "candidateResults": [
+        {
+          "encryptedJobseekerAccountId": "27bd62c3-70e2-44b2-864f-5ccd642f338d",
+          "eventKey": "336eb89f-13e8-49df-a232-adf014740dfe",
+          "matchId": "27bd62c3-70e2-44b2-864f-5ccd642f338d",
+          "__typename": "RcpCandidateResult"
+        }
+      ],
+      "__typename": "LogRcpCandidateSeenPayload"
+    }
+  }
+}
+
+  Operation: LogRcpCandidateSeen
+  Variables: {
+    "input": {
+        "feedbackContexts": [
+            {
+                "encryptedJobseekerAccountId": "",
+                "rcpRequestId": "6d4df225-0545-4c02-9a46-444dca8e46b5",
+                "matchType": "CANDIDATE_SUBMISSION",
+                "typedMatchId": "b56729d3-27bd-435e-a4f7-41772036e966"
+            }
+        ],
+        "surfaceContext": {
+            "timestampAtSurface": 1774847032958,
+            "grps": [],
+            "surface": "candidate-list-page"
+        }
+    }
+}
+  Query: mutation LogRcpCandidateSeen($input: LogRcpCandidateSeenInput!) {
+  logRcpCandidateSeen(input: $input) {
+    candidateResults {
+      encryptedJobseekerAccountId
+      eventKey
+      matchId
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['logRcpCandidateSeen']
+  Response preview:
+{
+  "data": {
+    "logRcpCandidateSeen": {
+      "candidateResults": [
+        {
+          "encryptedJobseekerAccountId": "b56729d3-27bd-435e-a4f7-41772036e966",
+          "eventKey": "89c19dc0-ae59-48de-9e0e-3832a938b09a",
+          "matchId": "b56729d3-27bd-435e-a4f7-41772036e966",
+          "__typename": "RcpCandidateResult"
+        }
+      ],
+      "__typename": "LogRcpCandidateSeenPayload"
+    }
+  }
+}
+
+  Operation: CurrentEmployerUserPermissions
+  Variables: {}
+  Query: query CurrentEmployerUserPermissions {
+  currentEmployerUser {
+    permissions {
+      hostedJob {
+        read
+        access_as_granted
+        __typename
+      }
+      hostedCandidate {
+        read
+        access_as_granted
+        __typename
+      }
+      screeningCriteria {
+        read
+      ...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "permissions": {
+        "hostedJob": {
+          "read": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "hostedCandidate": {
+          "read": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "screeningCriteria": {
+          "read": true,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "candidateProfile": {
+          "read": true,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "analytics": {
+          "read": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "bill": {
+          "read": false,
+          "__typename": "Employer
+
+  Operation: CurrentAccountDetails
+  Variables: {}
+  Query: query CurrentAccountDetails {
+  currentEmployerUser {
+    id
+    employer {
+      id
+      name
+      primaryUser {
+        id
+        account {
+          id
+          accountProfile {
+            email {
+              emailAddress
+              __typename
+            }
+            __typename
+      ...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "employer": {
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "name": "Harley Street Medical Centre",
+        "primaryUser": {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9iZGY1NDAxNjc1MTI1MzYzNGExNzMxYjFkM2IyMWRjODpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+          "account": {
+            "id": "bdf54016751253634a1731b1d3b21dc8",
+            "accountProfile": {
+              "email": {
+                "emailAddress": "yvonne.bell@stokeccg.nhs.uk",
+                "__typename": "Email"
+           
+
+  Operation: CurrentEmployerUserPermissionsWithId
+  Variables: {}
+  Query: query CurrentEmployerUserPermissionsWithId {
+  currentEmployerUser {
+    id
+    permissions {
+      ...DefaultPermissions
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment DefaultPermissionVerbs on EmployerUserPermissionVerbs {
+  create
+  delete
+  list
+  read
+  update
+  accessAsGranted: access_a...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "permissions": {
+        "accountLogin": {
+          "create": false,
+          "delete": false,
+          "list": false,
+          "read": true,
+          "update": false,
+          "accessAsGranted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "adCampaign": {
+          "create": false,
+          "delete": false,
+          "list": false,
+          "read": false,
+          "update": false,
+          "accessAsGranted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "adCampaignDetailedReport": {
+          "create": false,
+    
+
+  Operation: CurrentEmployerUserPermissions
+  Variables: {}
+  Query: query CurrentEmployerUserPermissions {
+  currentEmployerUser {
+    permissions {
+      hostedJob {
+        read
+        access_as_granted
+        __typename
+      }
+      hostedCandidate {
+        read
+        access_as_granted
+        __typename
+      }
+      screeningCriteria {
+        read
+      ...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "permissions": {
+        "hostedJob": {
+          "read": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "hostedCandidate": {
+          "read": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "screeningCriteria": {
+          "read": true,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "candidateProfile": {
+          "read": true,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "analytics": {
+          "read": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "bill": {
+          "read": false,
+          "__typename": "Employer
+
+  Operation: LogRcpCandidateSeen
+  Variables: {
+    "input": {
+        "feedbackContexts": [
+            {
+                "encryptedJobseekerAccountId": "",
+                "rcpRequestId": "95c4ca7c-7153-4912-85a3-33953502a525",
+                "matchType": "CANDIDATE_SUBMISSION",
+                "typedMatchId": "8be1cd7c-3519-4b55-b839-9bc06a631d7d"
+            }
+        ],
+        "surfaceContext": {
+            "timestampAtSurface": 1774847034252,
+            "grps": [],
+            "surface": "candidate-list-page"
+        }
+    }
+}
+  Query: mutation LogRcpCandidateSeen($input: LogRcpCandidateSeenInput!) {
+  logRcpCandidateSeen(input: $input) {
+    candidateResults {
+      encryptedJobseekerAccountId
+      eventKey
+      matchId
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['logRcpCandidateSeen']
+  Response preview:
+{
+  "data": {
+    "logRcpCandidateSeen": {
+      "candidateResults": [
+        {
+          "encryptedJobseekerAccountId": "8be1cd7c-3519-4b55-b839-9bc06a631d7d",
+          "eventKey": "9ad1cc2a-12e0-4705-8e10-3cf2773274ab",
+          "matchId": "8be1cd7c-3519-4b55-b839-9bc06a631d7d",
+          "__typename": "RcpCandidateResult"
+        }
+      ],
+      "__typename": "LogRcpCandidateSeenPayload"
+    }
+  }
+}
+
+  Operation: FindGroupedCandidateSubmissionFilterOptions
+  Variables: {
+    "filterDataInput": {
+        "filter": {
+            "submissionType": "LEGACY",
+            "created": {
+                "createdAfter": 1711756800000
+            },
+            "jobs": {
+                "hostedJobPostStatuses": [
+                    "ACTIVE",
+                    "PAUSED"
+                ]
+            },
+            "hiringMilestones": {
+                "milestoneIds": [
+                    "NEW",
+                    "PENDING"
+                ]
+            }
+        }
+   
+  Query: query FindGroupedCandidateSubmissionFilterOptions($filterDataInput: FindCandidateSubmissionsInput!, $statusDataInput: FindCandidateSubmissionsInput!, $shortlistCountInput: FindCandidateSubmissionsInput!, $undecidedCountInput: FindCandidateSubmissionsInput!) {
+  filterData: findCandidateSubmissions(i...
+  Response keys: ['filterData', 'milestoneData', 'shortlistCountData', 'undecidedCountData']
+  Response preview:
+{
+  "data": {
+    "filterData": {
+      "filterOptions": {
+        "locations": {
+          "locations": [
+            {
+              "value": "Stoke-on-Trent",
+              "count": 76,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "",
+              "count": 12,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "Newcastle-under-Lyme",
+              "count": 10,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "United Kingdom",
+              "count": 4,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+        
+
+  Operation: FindRCPMatches
+  Variables: {
+    "showGuidedNudgeV2": true,
+    "showPremiumFeatures": false,
+    "pushProctorIsActive": false,
+    "input": {
+        "clientSurfaceName": "candidate-list-page",
+        "defaultStrategyId": "U20GF",
+        "limit": 20,
+        "context": {
+            "surfaceContext": [
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS",
+                    "contextPayload": "ACTIVE"
+                },
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS"
+  Query: query FindRCPMatches($input: OrchestrationMatchesInput!, $showGuidedNudgeV2: Boolean! = false, $showPremiumFeatures: Boolean = false, $pushProctorIsActive: Boolean = false) {
+  findRCPMatches(input: $input) {
+    rcpRequestId
+    searchSessionId
+    overallMatchCount
+    overallMatchCountWithoutLimi...
+  Response keys: ['findRCPMatches']
+  Response preview:
+{
+  "data": {
+    "findRCPMatches": {
+      "rcpRequestId": "e8cca215-b06c-448d-b929-6a7582306c2b",
+      "searchSessionId": "RrCcavvtfrhFTH0HTayZbyRWMoLnNTMkg0+cLse3/aE=",
+      "overallMatchCount": 137,
+      "overallMatchCountWithoutLimit": "137",
+      "matchConnection": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "hasPreviousPage": false,
+          "__typename": "PageInfo"
+        },
+        "matches": [
+          {
+            "matchId": {
+              "id": "a20b8c51-136f-4029-92c9-5138ccf6b2c0",
+              "type": "CANDIDATE_SUBMISSION",
+              "__typename": "MatchId"
+            },
+            "candidateSubmission": {
+              "__typename": "CandidateSubmission",
+              "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vYTIwY
+
+  Operation: LogRcpCandidateSeen
+  Variables: {
+    "input": {
+        "feedbackContexts": [
+            {
+                "encryptedJobseekerAccountId": "",
+                "rcpRequestId": "e8cca215-b06c-448d-b929-6a7582306c2b",
+                "matchType": "CANDIDATE_SUBMISSION",
+                "typedMatchId": "27bd62c3-70e2-44b2-864f-5ccd642f338d"
+            }
+        ],
+        "surfaceContext": {
+            "timestampAtSurface": 1774847037380,
+            "grps": [],
+            "surface": "candidate-list-page"
+        }
+    }
+}
+  Query: mutation LogRcpCandidateSeen($input: LogRcpCandidateSeenInput!) {
+  logRcpCandidateSeen(input: $input) {
+    candidateResults {
+      encryptedJobseekerAccountId
+      eventKey
+      matchId
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['logRcpCandidateSeen']
+  Response preview:
+{
+  "data": {
+    "logRcpCandidateSeen": {
+      "candidateResults": [
+        {
+          "encryptedJobseekerAccountId": "27bd62c3-70e2-44b2-864f-5ccd642f338d",
+          "eventKey": "ace8e840-01e9-4beb-886f-91dd1d276074",
+          "matchId": "27bd62c3-70e2-44b2-864f-5ccd642f338d",
+          "__typename": "RcpCandidateResult"
+        }
+      ],
+      "__typename": "LogRcpCandidateSeenPayload"
+    }
+  }
+}
+
+  Operation: LogRcpCandidateSeen
+  Variables: {
+    "input": {
+        "feedbackContexts": [
+            {
+                "encryptedJobseekerAccountId": "",
+                "rcpRequestId": "e8cca215-b06c-448d-b929-6a7582306c2b",
+                "matchType": "CANDIDATE_SUBMISSION",
+                "typedMatchId": "b56729d3-27bd-435e-a4f7-41772036e966"
+            }
+        ],
+        "surfaceContext": {
+            "timestampAtSurface": 1774847037383,
+            "grps": [],
+            "surface": "candidate-list-page"
+        }
+    }
+}
+  Query: mutation LogRcpCandidateSeen($input: LogRcpCandidateSeenInput!) {
+  logRcpCandidateSeen(input: $input) {
+    candidateResults {
+      encryptedJobseekerAccountId
+      eventKey
+      matchId
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['logRcpCandidateSeen']
+  Response preview:
+{
+  "data": {
+    "logRcpCandidateSeen": {
+      "candidateResults": [
+        {
+          "encryptedJobseekerAccountId": "b56729d3-27bd-435e-a4f7-41772036e966",
+          "eventKey": "ef0fb950-88b5-41d4-9edc-66890e7a62b0",
+          "matchId": "b56729d3-27bd-435e-a4f7-41772036e966",
+          "__typename": "RcpCandidateResult"
+        }
+      ],
+      "__typename": "LogRcpCandidateSeenPayload"
+    }
+  }
+}
+
+  Operation: LogRcpCandidateSeen
+  Variables: {
+    "input": {
+        "feedbackContexts": [
+            {
+                "encryptedJobseekerAccountId": "",
+                "rcpRequestId": "e8cca215-b06c-448d-b929-6a7582306c2b",
+                "matchType": "CANDIDATE_SUBMISSION",
+                "typedMatchId": "8be1cd7c-3519-4b55-b839-9bc06a631d7d"
+            }
+        ],
+        "surfaceContext": {
+            "timestampAtSurface": 1774847037385,
+            "grps": [],
+            "surface": "candidate-list-page"
+        }
+    }
+}
+  Query: mutation LogRcpCandidateSeen($input: LogRcpCandidateSeenInput!) {
+  logRcpCandidateSeen(input: $input) {
+    candidateResults {
+      encryptedJobseekerAccountId
+      eventKey
+      matchId
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['logRcpCandidateSeen']
+  Response preview:
+{
+  "data": {
+    "logRcpCandidateSeen": {
+      "candidateResults": [
+        {
+          "encryptedJobseekerAccountId": "8be1cd7c-3519-4b55-b839-9bc06a631d7d",
+          "eventKey": "fd4a87bd-9eae-4af3-83e4-f6a4fb9912d6",
+          "matchId": "8be1cd7c-3519-4b55-b839-9bc06a631d7d",
+          "__typename": "RcpCandidateResult"
+        }
+      ],
+      "__typename": "LogRcpCandidateSeenPayload"
+    }
+  }
+}
+
+  Operation: FindGroupedCandidateSubmissionFilterOptions
+  Variables: {
+    "filterDataInput": {
+        "filter": {
+            "submissionType": "LEGACY",
+            "created": {
+                "createdAfter": 1711756800000
+            },
+            "jobs": {
+                "hostedJobPostStatuses": [
+                    "ACTIVE",
+                    "PAUSED"
+                ]
+            },
+            "hiringMilestones": {
+                "milestoneIds": [
+                    "NEW",
+                    "PENDING",
+                    "PHONE_SCREENED",
+      
+  Query: query FindGroupedCandidateSubmissionFilterOptions($filterDataInput: FindCandidateSubmissionsInput!, $statusDataInput: FindCandidateSubmissionsInput!, $shortlistCountInput: FindCandidateSubmissionsInput!, $undecidedCountInput: FindCandidateSubmissionsInput!) {
+  filterData: findCandidateSubmissions(i...
+  Response keys: ['filterData', 'milestoneData', 'shortlistCountData', 'undecidedCountData']
+  Response preview:
+{
+  "data": {
+    "filterData": {
+      "filterOptions": {
+        "locations": {
+          "locations": [
+            {
+              "value": "Stoke-on-Trent",
+              "count": 143,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "",
+              "count": 22,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "Newcastle-under-Lyme",
+              "count": 17,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+              "value": "Kidsgrove",
+              "count": 6,
+              "__typename": "FindCandidateSubmissionsStringFilterOption"
+            },
+            {
+            
+
+  Operation: FindRCPMatches
+  Variables: {
+    "showGuidedNudgeV2": true,
+    "showPremiumFeatures": false,
+    "pushProctorIsActive": false,
+    "input": {
+        "clientSurfaceName": "candidate-list-page",
+        "defaultStrategyId": "U20GF",
+        "limit": 20,
+        "context": {
+            "surfaceContext": [
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS",
+                    "contextPayload": "ACTIVE"
+                },
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS"
+  Query: query FindRCPMatches($input: OrchestrationMatchesInput!, $showGuidedNudgeV2: Boolean! = false, $showPremiumFeatures: Boolean = false, $pushProctorIsActive: Boolean = false) {
+  findRCPMatches(input: $input) {
+    rcpRequestId
+    searchSessionId
+    overallMatchCount
+    overallMatchCountWithoutLimi...
+  Response keys: ['findRCPMatches']
+  Response preview:
+{
+  "data": {
+    "findRCPMatches": {
+      "rcpRequestId": "41fa0444-f279-42cb-b2ec-51e6be7800a1",
+      "searchSessionId": "GDoIvl69pSIr3YoYbS4IN+TTx9ChL5WMgo7Dci+eJYo=",
+      "overallMatchCount": 244,
+      "overallMatchCountWithoutLimit": "244",
+      "matchConnection": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "hasPreviousPage": false,
+          "__typename": "PageInfo"
+        },
+        "matches": [
+          {
+            "matchId": {
+              "id": "a20b8c51-136f-4029-92c9-5138ccf6b2c0",
+              "type": "CANDIDATE_SUBMISSION",
+              "__typename": "MatchId"
+            },
+            "candidateSubmission": {
+              "__typename": "CandidateSubmission",
+              "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vYTIwY
+
+  Operation: FindConversationsByCandidateKey
+  Variables: {
+    "enableAdjacentContextSearch": true,
+    "advertiserKey": "faf8f2e6919ee4c1ed56f4c929ed5789",
+    "candidateKey": "4857997319a7"
+}
+  Query: query FindConversationsByCandidateKey($advertiserKey: String!, $candidateKey: String!, $enableAdjacentContextSearch: Boolean = false) {
+  findConversations(
+    input: {filter: {contexts: [APPLICATION, HQM], scope: [{key: ADVERTISER_KEY, value: $advertiserKey}, {key: CANDIDATE_KEY, value: $candidate...
+  Response keys: ['findConversations']
+  Response preview:
+{
+  "data": {
+    "findConversations": {
+      "conversations": [],
+      "__typename": "FindConversationsConnection"
+    }
+  }
+}
+
+  Operation: GetConversations
+  Variables: {
+    "last": 50,
+    "includeRequireResponse": false,
+    "contexts": [
+        "APPLICATION",
+        "HQM"
+    ]
+}
+  Query: query GetConversations($last: Int = 10, $before: String, $first: Int, $after: String, $includedLabels: [String!], $excludedLabels: [String!], $contexts: [ConversationContext!], $scope: [ConversationScopeInput!], $includeRequireResponse: Boolean = false) {
+  findConversations(
+    input: {filter: {in...
+  Response keys: ['findConversations']
+  Response preview:
+{
+  "data": {
+    "findConversations": {
+      "edges": [
+        {
+          "node": {
+            "id": "AAAAATRd7lX095_bztQJmyFDtzpOyq2eeM7XW5Y6cuUQSc7WqIoxyE7GAGhNXCUw79lP",
+            "__typename": "Conversation",
+            "creationDateTime": "2023-12-12T18:15:19Z",
+            "context": "APPLICATION",
+            "scope": [
+              {
+                "key": "JOB_SEEKER_KEY",
+                "value": "cfb8cb9b61e8ce347f3cc5fb788e7c70",
+                "__typename": "ConversationScope"
+              },
+              {
+                "key": "ADVERTISER_KEY",
+                "value": "faf8f2e6919ee4c1ed56f4c929ed5789",
+                "__typename": "ConversationScope"
+              },
+              {
+                "key": "CANDIDATE_KEY",
+                "value": "46d4613f9da
+
+  Operation: GetCandidateSubmission
+  Variables: {
+    "input": {
+        "legacyIds": [
+            "4857997319a7"
+        ]
+    }
+}
+  Query: query GetCandidateSubmission($input: CandidateSubmissionsInput!) {
+  candidateSubmissions(input: $input) {
+    results {
+      ...CandidateSubmissionFields
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment CandidateSubmissionFields on CandidateSubmission {
+  id
+  data {
+    created
+    profile {...
+  Response keys: ['candidateSubmissions']
+  Response preview:
+{
+  "data": {
+    "candidateSubmissions": {
+      "results": [
+        {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vVjFfX0NBTExZX180ODU3OTk3MzE5YTc=",
+          "data": {
+            "created": 1773214797000,
+            "profile": {
+              "name": {
+                "displayName": "Maryam Mushtaq",
+                "__typename": "CandidateSubmissionName"
+              },
+              "contact": {
+                "phoneNumber": "+971 56 541 2514",
+                "__typename": "CandidateSubmissionContact"
+              },
+              "__typename": "CandidateSubmissionProfile"
+            },
+            "milestone": {
+              "milestone": {
+                "category": "CANDIDATE_APPLIED",
+                "__typename": "CandidateSubmissionMilestone
+
+  Operation: FindApplicationRejectedTriggerAutomations
+  Variables: {}
+  Query: query FindApplicationRejectedTriggerAutomations {
+  findEmployerAutomationsV2(
+    input: {triggerLevelV2: {includeAdvertiserLevel: true}, triggerType: "OnApplicationRejectedTrigger"}
+  ) {
+    automations {
+      ... on EmployerAutomation {
+        id
+        actions {
+          typename
+          ...
+  Response keys: ['findEmployerAutomationsV2']
+  Response preview:
+{
+  "data": {
+    "findEmployerAutomationsV2": {
+      "automations": [],
+      "__typename": "FindEmployerAutomationsV2Connection"
+    }
+  }
+}
+
+  Operation: GetEmployerScheduledRejectionNumberOfModalShown
+  Variables: {}
+  Query: query GetEmployerScheduledRejectionNumberOfModalShown {
+  currentEmployerEntity {
+    result {
+      employerAutomationAttributes {
+        scheduledRejectionNms
+        __typename
+      }
+      id
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['currentEmployerEntity']
+  Response preview:
+{
+  "data": {
+    "currentEmployerEntity": {
+      "result": {
+        "employerAutomationAttributes": {
+          "scheduledRejectionNms": 1,
+          "__typename": "EmployerEntityAutomationAttributes"
+        },
+        "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyRW50aXR5L2ZhZjhmMmU2OTE5ZWU0YzFlZDU2ZjRjOTI5ZWQ1Nzg5",
+        "__typename": "EmployerEntity"
+      },
+      "__typename": "CurrentEmployerEntityPayload"
+    }
+  }
+}
+
+  Operation: GetEmployerPermissions
+  Variables: {}
+  Query: query GetEmployerPermissions {
+  currentEmployerUser {
+    id
+    permissions {
+      hostedCandidate {
+        read
+        update
+        access_as_granted
+        __typename
+      }
+      admin {
+        update
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+...
+  Response keys: ['currentEmployerUser']
+  Response preview:
+{
+  "data": {
+    "currentEmployerUser": {
+      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0VtcGxveWVyVXNlci9jYWZmMDliOGY1NmVmZjhhOTcwZDRhOGUyNzA2NWU4YTpmYWY4ZjJlNjkxOWVlNGMxZWQ1NmY0YzkyOWVkNTc4OQ==",
+      "permissions": {
+        "hostedCandidate": {
+          "read": true,
+          "update": true,
+          "access_as_granted": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "admin": {
+          "update": false,
+          "__typename": "EmployerUserPermissionVerbs"
+        },
+        "__typename": "EmployerUserPermissions"
+      },
+      "__typename": "EmployerUser"
+    }
+  }
+}
+
+  Operation: FindRCPMatches
+  Variables: {
+    "includeQualificationsMet": false,
+    "inGuidedNudgeV2Toggle": true,
+    "pushProctorIsActive": false,
+    "showPremiumFeatures": false,
+    "input": {
+        "clientSurfaceName": "candidate-review-page",
+        "defaultStrategyId": "U20GF",
+        "limit": 20,
+        "context": {
+            "surfaceContext": [
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS",
+                    "contextPayload": "ACTIVE"
+                },
+                {
+             
+  Query: query FindRCPMatches($input: OrchestrationMatchesInput!, $includeQualificationsMet: Boolean = false, $inGuidedNudgeV2Toggle: Boolean! = false, $pushProctorIsActive: Boolean = false, $showPremiumFeatures: Boolean = false) {
+  findRCPMatches(input: $input) {
+    rcpRequestId
+    searchSessionId
+    ov...
+  Response keys: ['findRCPMatches']
+  Response preview:
+{
+  "data": {
+    "findRCPMatches": {
+      "rcpRequestId": "ad7aa612-c52d-495b-af00-132d440c8aa0",
+      "searchSessionId": "1q411oV1QbQliGOU601iwCoDR8U3uLugTRDkRt29+Ck=",
+      "overallMatchCount": 244,
+      "overallMatchCountWithoutLimit": "244",
+      "matchConnection": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "hasPreviousPage": false,
+          "__typename": "PageInfo"
+        },
+        "matches": [
+          {
+            "matchId": {
+              "id": "a20b8c51-136f-4029-92c9-5138ccf6b2c0",
+              "type": "CANDIDATE_SUBMISSION",
+              "__typename": "MatchId"
+            },
+            "candidateSubmission": {
+              "__typename": "CandidateSubmission",
+              "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vYTIwY
+
+  Operation: CRP_CandidateSubmissions
+  Variables: {
+    "includeConversationAlias": false,
+    "includeQualificationsMet": false,
+    "pushProctorIsActive": false,
+    "inAiInterview": false,
+    "inNexusPremiumPlus": true,
+    "inPackagingConfigurationMigration": false,
+    "input": {
+        "legacyIds": [
+            "4857997319a7"
+        ]
+    },
+    "P_sponsor_packaging_configuration_migration_active": false
+}
+  Query: query CRP_CandidateSubmissions($input: CandidateSubmissionsInput!, $includeConversationAlias: Boolean! = false, $includeQualificationsMet: Boolean = false, $pushProctorIsActive: Boolean = false, $inAiInterview: Boolean = false, $inNexusPremiumPlus: Boolean = false, $inPackagingConfigurationMigration...
+  Response keys: ['candidateSubmissions']
+  Response preview:
+{
+  "data": {
+    "candidateSubmissions": {
+      "results": [
+        {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vVjFfX0NBTExZX180ODU3OTk3MzE5YTc=",
+          "data": {
+            "activity": [],
+            "candidateIdentity": {
+              "candidateId": "27bd62c3-70e2-44b2-864f-5ccd642f338d",
+              "jobseekerAccountKey": "f5c2bb6dd4a5645841a97a8e80238798",
+              "candidate": {
+                "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZS8yN2JkNjJjMy03MGUyLTQ0YjItODY0Zi01Y2NkNjQyZjMzOGQ=",
+                "submissionsConnection": {
+                  "submissions": [
+                    {
+                      "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vVjFfX0NBTExZX180ODU3OTk3MzE5YTc=",
+                      "data
+
+  Operation: CRP_SignatureFeature
+  Variables: {
+    "includeConversationAlias": false,
+    "inTrmUiImprovements": true,
+    "input": {
+        "legacyIds": [
+            "4857997319a7"
+        ]
+    }
+}
+  Query: query CRP_SignatureFeature($input: CandidateSubmissionsInput!, $includeConversationAlias: Boolean! = false, $inTrmUiImprovements: Boolean = false) {
+  candidateSubmissions(input: $input) {
+    results {
+      id
+      ... on CandidateSubmission {
+        id
+        data {
+          profile {
+       ...
+  Response keys: ['candidateSubmissions']
+  Response preview:
+{
+  "data": {
+    "candidateSubmissions": {
+      "results": [
+        {
+          "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL0NhbmRpZGF0ZVN1Ym1pc3Npb24vVjFfX0NBTExZX180ODU3OTk3MzE5YTc=",
+          "data": {
+            "profile": {
+              "name": {
+                "displayName": "Maryam Mushtaq",
+                "__typename": "CandidateSubmissionName"
+              },
+              "__typename": "CandidateSubmissionProfile",
+              "location": null,
+              "contact": {
+                "aliasedEmail": "maryammushtaqyonus_c58@indeedemail.com",
+                "__typename": "CandidateSubmissionContact"
+              }
+            },
+            "submissionUuid": "a20b8c51-136f-4029-92c9-5138ccf6b2c0",
+            "__typename": "IndeedApplyCandidateSubmission",
+            "crea
+
+  Operation: Nex_Applicants
+  Variables: {
+    "input": {
+        "clientSurfaceName": "candidate-review-page",
+        "defaultStrategyId": "U20GF",
+        "limit": 20,
+        "context": {
+            "surfaceContext": [
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS",
+                    "contextPayload": "ACTIVE"
+                },
+                {
+                    "contextKey": "HOSTED_JOB_POST_STATUS",
+                    "contextPayload": "PAUSED"
+                },
+                {
+           
+  Query: query Nex_Applicants($input: OrchestrationMatchesInput!) {
+  findRCPMatches(input: $input) {
+    overallMatchCount
+    matchConnection {
+      pageInfo {
+        hasNextPage
+        __typename
+      }
+      matches {
+        matchId {
+          id
+          __typename
+        }
+        scoutApplicat...
+  Response keys: ['findRCPMatches']
+  Response preview:
+{
+  "data": {
+    "findRCPMatches": {
+      "overallMatchCount": 244,
+      "matchConnection": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "__typename": "PageInfo"
+        },
+        "matches": [
+          {
+            "matchId": {
+              "id": "a20b8c51-136f-4029-92c9-5138ccf6b2c0",
+              "__typename": "MatchId"
+            },
+            "scoutApplication": {
+              "id": "aXJpOi8vYXBpcy5pbmRlZWQuY29tL1Njb3V0QXBwbGljYXRpb24vYTIwYjhjNTEtMTM2Zi00MDI5LTkyYzktNTEzOGNjZjZiMmMw",
+              "nexusDetails": {
+                "isRescoring": false,
+                "__typename": "NexusDetails",
+                "atsSyncStatus": "SENT",
+                "nexusGeneratedSummary": null
+              },
+              "job": {
+                "employerJobId":
+
+  Operation: registerOnlineStatusListeners
+  Variables: {
+    "input": {
+        "accounts": [
+            {
+                "accountKey": "f5c2bb6dd4a5645841a97a8e80238798",
+                "accountType": "JOBSEEKER"
+            }
+        ],
+        "listenerAccountType": "JOBSEEKER"
+    }
+}
+  Query: mutation registerOnlineStatusListeners($input: RegisterListenersOnlineStatusInput!) {
+  onlineStatus {
+    registerListeners(input: $input) {
+      accounts {
+        ... on EmployerUser {
+          onlineStatus {
+            offlineSeconds
+            status
+            __t

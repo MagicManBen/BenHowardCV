@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indeed Job Puller</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0f1117;
+            color: #e1e4e8;
+            min-height: 100vh;
+        }
+        header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 2rem;
+        }
+        header h1 { font-size: 1.3rem; color: #58a6ff; }
+        .controls {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .controls label { font-size: 0.8rem; color: #8b949e; display: block; margin-bottom: 0.25rem; }
+        .controls input, .controls select {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e1e4e8;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+        }
+        .controls input { width: 170px; }
+        .controls input:focus, .controls select:focus { outline: none; border-color: #58a6ff; }
+        #pullBtn {
+            background: #238636;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        #pullBtn:hover { background: #2ea043; }
+        #pullBtn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+        .progress-bar {
+            height: 3px;
+            background: #21262d;
+            position: relative;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: #58a6ff;
+            transition: width 0.3s;
+            width: 0%;
+        }
+        .status-bar {
+            padding: 0.5rem 2rem;
+            font-size: 0.85rem;
+            color: #8b949e;
+            display: flex;
+            justify-content: space-between;
+        }
+        .status-bar .count { color: #58a6ff; font-weight: 600; }
+        .status-bar .error { color: #f85149; }
+        #jobList {
+            padding: 0.5rem 2rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .job-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 0.85rem 1.1rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.3rem;
+            transition: border-color 0.15s;
+        }
+        .job-card:hover { border-color: #58a6ff; }
+        .job-card .title { font-size: 0.95rem; font-weight: 600; color: #58a6ff; }
+        .job-card .title a { color: inherit; text-decoration: none; }
+        .job-card .title a:hover { text-decoration: underline; }
+        .job-card .meta {
+            font-size: 0.82rem;
+            color: #8b949e;
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.15rem;
+            flex-wrap: wrap;
+        }
+        .job-card .salary {
+            color: #3fb950;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: right;
+            white-space: nowrap;
+        }
+        .job-card .snippet {
+            font-size: 0.78rem;
+            color: #6e7681;
+            margin-top: 0.2rem;
+            grid-column: 1 / -1;
+        }
+        .badge {
+            display: inline-block;
+            background: #1f2937;
+            color: #f0ad4e;
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            margin-left: 0.4rem;
+            font-weight: 600;
+        }
+        .empty {
+            text-align: center;
+            color: #484f58;
+            padding: 4rem 2rem;
+            font-size: 1.1rem;
+        }
+        .spinner {
+            display: inline-block;
+            width: 14px; height: 14px;
+            border: 2px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.4rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Debug panel */
+        #debugSection {
+            border-top: 1px solid #30363d;
+            margin-top: 1rem;
+        }
+        #debugToggle {
+            background: #161b22;
+            border: none;
+            color: #8b949e;
+            padding: 0.6rem 2rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #debugToggle:hover { color: #e1e4e8; }
+        #debugPanel {
+            display: none;
+            background: #0d1117;
+            border-top: 1px solid #30363d;
+            padding: 0.75rem 2rem;
+            max-height: 50vh;
+            overflow: auto;
+        }
+        #debugPanel.open { display: block; }
+        #debugLog {
+            font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+            font-size: 0.72rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #8b949e;
+        }
+        #debugLog .log-page { color: #58a6ff; font-weight: 600; }
+        #debugLog .log-ok { color: #3fb950; }
+        #debugLog .log-warn { color: #f0ad4e; }
+        #debugLog .log-err { color: #f85149; }
+        #debugLog .log-dim { color: #484f58; }
+        .debug-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .debug-bar button {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #e1e4e8;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .debug-bar button:hover { border-color: #58a6ff; }
+
+        /* Cookie banner */
+        #cookieBanner {
+            padding: 0.6rem 2rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid #30363d;
+        }
+        #cookieBanner.ok { background: #0d2818; color: #3fb950; }
+        #cookieBanner.warn { background: #2a1a00; color: #f0ad4e; }
+        #cookieBanner button {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #e1e4e8;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        #cookieBanner button:hover { border-color: #58a6ff; }
+        #cookieUploadArea {
+            display: none;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 0.75rem 2rem;
+        }
+        #cookieUploadArea.open { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+        #cookieUploadArea input[type="file"] { font-size: 0.8rem; color: #8b949e; }
+        #cookieUploadArea textarea {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e1e4e8;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.75rem;
+            font-family: monospace;
+            width: 100%;
+            height: 60px;
+            resize: vertical;
+        }
+        #cookieUploadArea .or { color: #484f58; font-size: 0.8rem; }
+        #uploadCookieBtn {
+            background: #238636;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.35rem 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        #uploadCookieBtn:hover { background: #2ea043; }
+    </style>
+</head>
+<body>
+    <header><h1>Indeed Job Puller</h1></header>
+
+    <div id="cookieBanner" class="warn">
+        <span id="cookieStatus">⚠ No cookies loaded — page 2+ will be blocked by Indeed login wall</span>
+        <button onclick="toggleCookieUpload()">Upload Cookies</button>
+    </div>
+    <div id="cookieUploadArea">
+        <div style="flex:1;">
+            <label style="font-size:0.8rem;color:#8b949e;display:block;margin-bottom:0.3rem;">
+                Upload cookies.json (exported from Chrome via EditThisCookie or DevTools):
+            </label>
+            <div style="display:flex;gap:0.75rem;align-items:center;">
+                <input type="file" id="cookieFile" accept=".json">
+                <span class="or">— or paste JSON below —</span>
+            </div>
+            <textarea id="cookiePaste" placeholder='[{"name":"JSESSIONID","value":"...","domain":".indeed.com",...}]'></textarea>
+        </div>
+        <button id="uploadCookieBtn" onclick="uploadCookies()">Save Cookies</button>
+    </div>
+
+    <div class="controls">
+        <div>
+            <label>Search</label>
+            <input type="text" id="query" placeholder="e.g. warehouse, admin">
+        </div>
+        <div>
+            <label>Location</label>
+            <input type="text" id="location" value="Staffordshire">
+        </div>
+        <div>
+            <label>Radius</label>
+            <select id="radius">
+                <option value="5">5 mi</option>
+                <option value="10">10 mi</option>
+                <option value="15">15 mi</option>
+                <option value="25" selected>25 mi</option>
+                <option value="50">50 mi</option>
+            </select>
+        </div>
+        <div>
+            <label>Sort</label>
+            <select id="sort">
+                <option value="date" selected>Date</option>
+                <option value="relevance">Relevance</option>
+            </select>
+        </div>
+        <div>
+            <label>Max Pages</label>
+            <select id="pages">
+                <option value="5">5 (~50 jobs)</option>
+                <option value="10">10 (~100 jobs)</option>
+                <option value="20" selected>20 (~200 jobs)</option>
+                <option value="30">30 (~300 jobs)</option>
+                <option value="50">50 (~500 jobs)</option>
+            </select>
+        </div>
+        <button id="pullBtn" onclick="pullJobs()">Pull Jobs</button>
+    </div>
+    <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+    <div class="status-bar">
+        <span id="statusText">Click "Pull Jobs" to fetch listings</span>
+        <span id="countText"></span>
+    </div>
+    <div id="jobList">
+        <div class="empty">No jobs loaded yet. Hit the button above.</div>
+    </div>
+
+    <div id="debugSection">
+        <button id="debugToggle" onclick="toggleDebug()">
+            <span>🔧 Debug Log</span>
+            <span id="debugCount"></span>
+        </button>
+        <div id="debugPanel">
+            <div class="debug-bar">
+                <button onclick="saveDebugLog()">💾 Save Full Debug Log</button>
+                <button onclick="document.getElementById('debugLog').textContent = ''; debugData = [];">🗑 Clear</button>
+            </div>
+            <div id="debugLog"></div>
+        </div>
+    </div>
+
+    <script>
+        let abortController = null;
+        let debugData = [];
+        let pullMeta = {};
+
+        // --- Cookie management ---
+        function toggleCookieUpload() {
+            document.getElementById("cookieUploadArea").classList.toggle("open");
+        }
+
+        async function checkCookieStatus() {
+            try {
+                const resp = await fetch("/api/cookies");
+                const data = await resp.json();
+                const banner = document.getElementById("cookieBanner");
+                const status = document.getElementById("cookieStatus");
+                if (data.loaded) {
+                    banner.className = "ok";
+                    status.textContent = `✓ ${data.count} cookies loaded from ${data.source}`;
+                } else {
+                    banner.className = "warn";
+                    status.textContent = "⚠ No cookies loaded — page 2+ will be blocked by Indeed login wall";
+                }
+            } catch {}
+        }
+
+        async function uploadCookies() {
+            const fileInput = document.getElementById("cookieFile");
+            const pasteArea = document.getElementById("cookiePaste");
+            let cookieJson = null;
+
+            if (fileInput.files.length > 0) {
+                cookieJson = await fileInput.files[0].text();
+            } else if (pasteArea.value.trim()) {
+                cookieJson = pasteArea.value.trim();
+            } else {
+                alert("Select a file or paste JSON first.");
+                return;
+            }
+
+            // Validate it's valid JSON
+            try { JSON.parse(cookieJson); } catch {
+                alert("Invalid JSON. Make sure you exported cookies as JSON array.");
+                return;
+            }
+
+            try {
+                const resp = await fetch("/api/cookies", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: cookieJson,
+                });
+                const data = await resp.json();
+                if (data.ok) {
+                    alert(`Saved ${data.count} cookies. Session will reload them on next pull.`);
+                    toggleCookieUpload();
+                    checkCookieStatus();
+                } else {
+                    alert("Error: " + (data.error || "unknown"));
+                }
+            } catch (err) {
+                alert("Upload failed: " + err.message);
+            }
+        }
+
+        // Check cookie status on page load
+        checkCookieStatus();
+
+        function toggleDebug() {
+            document.getElementById("debugPanel").classList.toggle("open");
+        }
+
+        function appendDebugLine(cls, text) {
+            const log = document.getElementById("debugLog");
+            const span = document.createElement("span");
+            span.className = cls;
+            span.textContent = text + "\n";
+            log.appendChild(span);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function saveDebugLog() {
+            const blob = {
+                meta: pullMeta,
+                timestamp: new Date().toISOString(),
+                pages: debugData,
+            };
+            const json = JSON.stringify(blob, null, 2);
+            const file = new Blob([json], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(file);
+            a.download = `indeed-debug-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        async function pullJobs() {
+            const q = document.getElementById("query").value;
+            const l = document.getElementById("location").value;
+            const r = document.getElementById("radius").value;
+            const pages = document.getElementById("pages").value;
+            const btn = document.getElementById("pullBtn");
+            const status = document.getElementById("statusText");
+            const countText = document.getElementById("countText");
+            const jobList = document.getElementById("jobList");
+            const progress = document.getElementById("progressFill");
+
+            if (abortController) abortController.abort();
+            abortController = new AbortController();
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Pulling...';
+            status.textContent = "Connecting...";
+            countText.textContent = "";
+            jobList.innerHTML = "";
+            progress.style.width = "0%";
+
+            // Reset debug
+            debugData = [];
+            pullMeta = { query: q, location: l, radius: r, pages, startTime: new Date().toISOString() };
+            document.getElementById("debugLog").textContent = "";
+            document.getElementById("debugCount").textContent = "";
+            appendDebugLine("log-dim", `=== Pull started: q="${q}" l="${l}" radius=${r} pages=${pages} ===`);
+
+            try {
+                const sort = document.getElementById("sort").value;
+                const url = `/api/pull?q=${encodeURIComponent(q)}&l=${encodeURIComponent(l)}&radius=${r}&pages=${pages}&sort=${sort}`;
+                const resp = await fetch(url, { signal: abortController.signal });
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let maxPages = parseInt(pages);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n\n");
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (!line.startsWith("data: ")) continue;
+                        const msg = JSON.parse(line.slice(6));
+
+                        if (msg.type === "start") {
+                            maxPages = msg.max_pages;
+                            status.innerHTML = '<span class="spinner"></span>Starting pull...';
+                            appendDebugLine("log-ok", `Server confirmed: max_pages=${msg.max_pages}`);
+
+                        } else if (msg.type === "debug") {
+                            debugData.push(msg);
+                            document.getElementById("debugCount").textContent = `${debugData.length} pages captured`;
+
+                            const blocked = msg.blocked ? " ⚠ BLOCKED" : "";
+                            appendDebugLine("log-page", `\n── Page ${msg.page} ──`);
+                            appendDebugLine("", `URL: ${msg.url}`);
+                            appendDebugLine(msg.status === 200 ? "log-ok" : "log-err", `Status: ${msg.status}${blocked} | Size: ${(msg.response_size / 1024).toFixed(1)}KB | Attempt: ${msg.attempt}`);
+                            appendDebugLine("", `Parsed: ${msg.jobs_parsed} jobs | New: ${msg.jobs_new}`);
+
+                            // Show key response headers
+                            const interestingHeaders = ["content-type", "cf-ray", "cf-cache-status", "server", "set-cookie"];
+                            for (const [k, v] of Object.entries(msg.response_headers || {})) {
+                                if (interestingHeaders.includes(k.toLowerCase())) {
+                                    appendDebugLine("log-dim", `  resp ${k}: ${v}`);
+                                }
+                            }
+                            // Show cookies
+                            const cookieCount = Object.keys(msg.cookies || {}).length;
+                            if (cookieCount > 0) {
+                                appendDebugLine("log-dim", `  Cookies (${cookieCount}): ${Object.keys(msg.cookies).join(", ")}`);
+                            }
+
+                        } else if (msg.type === "page") {
+                            const pct = Math.round((msg.page / maxPages) * 100);
+                            progress.style.width = pct + "%";
+                            status.innerHTML = `<span class="spinner"></span>Page ${msg.page}/${maxPages} — ${msg.new} new jobs`;
+                            countText.innerHTML = `<span class="count">${msg.total}</span> total`;
+
+                        } else if (msg.type === "error") {
+                            status.innerHTML = `<span class="error">Error on page ${msg.page}: ${escHtml(msg.error)}</span>`;
+                            appendDebugLine("log-err", `ERROR on page ${msg.page}: ${msg.error}`);
+
+                        } else if (msg.type === "done") {
+                            progress.style.width = "100%";
+                            status.textContent = `Done — ${msg.count} unique jobs — pulled at ${new Date().toLocaleTimeString()}`;
+                            countText.innerHTML = `<span class="count">${msg.count}</span> jobs`;
+                            pullMeta.endTime = new Date().toISOString();
+                            pullMeta.totalJobs = msg.count;
+                            appendDebugLine("log-ok", `\n=== Done: ${msg.count} jobs across ${debugData.length} pages ===`);
+                            renderJobs(msg.jobs);
+                        }
+                    }
+                }
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    status.innerHTML = `<span class="error">Error: ${err.message}</span>`;
+                    jobList.innerHTML = '<div class="empty" style="color:#f85149;">Something went wrong. Is the server running?</div>';
+                    appendDebugLine("log-err", `FETCH ERROR: ${err.message}`);
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Pull Jobs";
+            }
+        }
+
+        function renderJobs(jobs) {
+            const jobList = document.getElementById("jobList");
+            if (jobs.length === 0) {
+                jobList.innerHTML = '<div class="empty">No jobs found for this search.</div>';
+                return;
+            }
+            jobList.innerHTML = jobs.map((job, i) => `
+                <div class="job-card">
+                    <div>
+                        <div class="title">
+                            <span style="color:#484f58;font-size:0.75rem;margin-right:0.4rem;">${i + 1}.</span>
+                            <a href="${escHtml(job.link)}" target="_blank">${escHtml(job.title)}</a>
+                            ${job.sponsored ? '<span class="badge">Sponsored</span>' : ''}
+                        </div>
+                        <div class="meta">
+                            <span>🏢 ${escHtml(job.company)}</span>
+                            <span>📍 ${escHtml(job.location)}</span>
+                            ${job.date ? `<span>🕐 ${escHtml(job.date)}</span>` : ''}
+                        </div>
+                        ${job.snippet ? `<div class="snippet">${escHtml(job.snippet)}</div>` : ''}
+                    </div>
+                    <div class="salary">${escHtml(job.salary) || '—'}</div>
+                </div>
+            `).join("");
+        }
+
+        function escHtml(str) {
+            if (!str) return "";
+            const d = document.createElement("div");
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        document.querySelectorAll(".controls input").forEach(el => {
+            el.addEventListener("keydown", e => { if (e.key === "Enter") pullJobs(); });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+services:
+  local-server:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: ["python3", "local_server.py", "8000"]

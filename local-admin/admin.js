@@ -106,7 +106,7 @@ async function initLocalAdminPage() {
 
     dom.confirmButton.disabled = true;
     dom.confirmButton.textContent = "Publishing\u2026";
-    dom.confirmStatus.textContent = "Pushing to GitHub\u2026";
+    dom.confirmStatus.textContent = "Saving application\u2026";
 
     try {
       const publishApplicationData = sanitizeApplicationForPublish(pendingApplication);
@@ -137,11 +137,11 @@ async function initLocalAdminPage() {
       await renderPublishedResult(dom, application, publicUrl, localPreviewUrl);
       dom.resultPanel.hidden = false;
       dom.confirmStatus.textContent = "Published.";
-      showToast(dom, response.publishedToGitHub ? "CV published." : "Saved locally.");
+      showToast(dom, response.publishedToSupabase || response.publishedToGitHub ? "CV saved." : "Saved locally.");
       dom.resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      if (!response.publishedToGitHub) {
-        showError(dom.confirmError, "Saved locally, but GitHub publish did not complete.");
+      if (!response.publishedToSupabase && !response.publishedToGitHub) {
+        showError(dom.confirmError, "Saved locally, but no remote backend completed.");
       }
     } catch (error) {
       showError(dom.confirmError, error instanceof Error ? error.message : "Publish failed.");
@@ -186,7 +186,7 @@ async function initLocalAdminPage() {
     dom.downloadCvButton.textContent = "Uploading\u2026";
     try {
       var publicUrl = await downloadCvWithQr(qrUrl, roleTitle, companyName);
-      showToast(dom, publicUrl ? "CV saved to GitHub and downloaded." : "CV downloaded.");
+      showToast(dom, publicUrl ? "CV uploaded and downloaded." : "CV downloaded.");
     } catch (err) {
       showToast(dom, "Download failed: " + (err.message || err));
     } finally {
@@ -369,8 +369,16 @@ async function loadLocalStatus(dom) {
     publicCvBaseUrl = payload.publicCvBaseUrl || DEFAULT_PUBLIC_CV_BASE_URL;
     publicJobBaseUrl = new URL("j/", publicCvBaseUrl).href;
     publicRedirectBaseUrl = new URL("r/", publicCvBaseUrl).href;
+    if (payload.supabaseAccessOk) {
+      dom.keysStatus.textContent = "Server ready. Supabase access confirmed.";
+      return;
+    }
+    if (payload.hasSupabase) {
+      dom.keysStatus.textContent = "Supabase configured, but access check failed: " + (payload.supabaseMessage || "Unknown error.");
+      return;
+    }
     if (!payload.hasGithubToken) {
-      dom.keysStatus.textContent = "Local server running, but no GitHub token configured.";
+      dom.keysStatus.textContent = "Local server running, but no GitHub token or Supabase key configured.";
       return;
     }
     dom.keysStatus.textContent = payload.githubAccessOk
@@ -682,7 +690,7 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
   /* 5. Build a safe filename */
   var safeName = "Ben Howard CV" + (companyName ? " - " + companyName : "");
 
-  /* 6. Upload HTML to GitHub via local server */
+  /* 6. Upload HTML via the local server */
   var uploadRes = await fetch(LOCAL_API_BASE + "/upload-cv", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

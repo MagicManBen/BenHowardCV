@@ -1,8 +1,7 @@
+.git
 .DS_Store
-.env.local
 debug/
 local-cache/
 local-admin/secrets.local.json
 local-admin/secrets.local.js
 *.log
-__pycache__/

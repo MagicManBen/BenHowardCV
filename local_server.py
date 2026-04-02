@@ -109,6 +109,8 @@ GITHUB_REPO = "BenHowardCV"
 GITHUB_BRANCH = "main"
 APPLICATIONS_INDEX_PATH = "data/applications.json"
 DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
+SUPABASE_DEFAULT_BUCKET = "cv-files"
+SUPABASE_APPLICATIONS_TABLE = "applications"
 
 
 def load_local_config():
@@ -118,6 +120,10 @@ def load_local_config():
       "publicCvBaseUrl": DEFAULT_PUBLIC_CV_BASE_URL,
       "ollamaBaseUrl": os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
       "ollamaModel": os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
+      "supabaseUrl": os.environ.get("SUPABASE_URL", "").strip(),
+      "supabaseAnonKey": os.environ.get("SUPABASE_ANON_KEY", "").strip(),
+      "supabaseServiceRoleKey": os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip(),
+      "supabaseBucket": os.environ.get("SUPABASE_BUCKET", SUPABASE_DEFAULT_BUCKET).strip() or SUPABASE_DEFAULT_BUCKET,
     }
 
   try:
@@ -130,7 +136,169 @@ def load_local_config():
     "publicCvBaseUrl": str(payload.get("cvBaseUrl", "")).strip() or DEFAULT_PUBLIC_CV_BASE_URL,
     "ollamaBaseUrl": str(payload.get("ollamaBaseUrl", "")).strip() or os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
     "ollamaModel": str(payload.get("ollamaModel", "")).strip() or os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
+    "supabaseUrl": str(payload.get("supabaseUrl", "")).strip() or os.environ.get("SUPABASE_URL", "").strip(),
+    "supabaseAnonKey": str(payload.get("supabaseAnonKey", "")).strip() or os.environ.get("SUPABASE_ANON_KEY", "").strip(),
+    "supabaseServiceRoleKey": str(payload.get("supabaseServiceRoleKey", "")).strip() or os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip(),
+    "supabaseBucket": str(payload.get("supabaseBucket", "")).strip() or os.environ.get("SUPABASE_BUCKET", SUPABASE_DEFAULT_BUCKET).strip() or SUPABASE_DEFAULT_BUCKET,
   }
+
+
+def decode_jwt_payload(token):
+  parts = str(token or "").split(".")
+  if len(parts) < 2:
+    return {}
+
+  payload = parts[1]
+  padding = "=" * ((4 - len(payload) % 4) % 4)
+  try:
+    raw = base64.urlsafe_b64decode((payload + padding).encode("utf-8")).decode("utf-8")
+    data = json.loads(raw)
+    return data if isinstance(data, dict) else {}
+  except Exception:
+    return {}
+
+
+def derive_supabase_url(config):
+  configured = str(config.get("supabaseUrl", "")).strip()
+  if configured:
+    return configured.rstrip("/")
+
+  for candidate in (config.get("supabaseServiceRoleKey", ""), config.get("supabaseAnonKey", "")):
+    payload = decode_jwt_payload(candidate)
+    ref = str(payload.get("ref", "")).strip()
+    if ref:
+      return f"https://{ref}.supabase.co"
+
+  return ""
+
+
+def supabase_settings(config):
+  return {
+    "url": derive_supabase_url(config),
+    "anonKey": str(config.get("supabaseAnonKey", "")).strip(),
+    "serviceRoleKey": str(config.get("supabaseServiceRoleKey", "")).strip(),
+    "bucket": str(config.get("supabaseBucket", SUPABASE_DEFAULT_BUCKET)).strip() or SUPABASE_DEFAULT_BUCKET,
+  }
+
+
+def has_supabase_access(config):
+  settings = supabase_settings(config)
+  return bool(settings["url"] and settings["serviceRoleKey"])
+
+
+def supabase_headers(key, extra=None):
+  headers = {
+    "apikey": key,
+    "Authorization": f"Bearer {key}",
+    "Accept": "application/json",
+  }
+  if extra:
+    headers.update(extra)
+  return headers
+
+
+def http_request_json(url, method="GET", headers=None, payload=None, timeout=20):
+  request_headers = dict(headers or {})
+  body = None
+  if payload is not None:
+    request_headers["Content-Type"] = "application/json"
+    body = json.dumps(payload).encode("utf-8")
+
+  request = Request(url, data=body, headers=request_headers, method=method)
+
+  try:
+    with urlopen(request, timeout=timeout) as response:
+      raw = response.read().decode("utf-8")
+      return response.getcode(), json.loads(raw) if raw else {}
+  except HTTPError as exc:
+    raw = exc.read().decode("utf-8")
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      payload = {"message": raw.strip()}
+    return exc.code, payload
+  except URLError as exc:
+    raise RuntimeError(f"Could not reach {urlparse(url).netloc}: {exc.reason}") from exc
+
+
+def supabase_request_json(config, path, method="GET", payload=None, extra_headers=None):
+  settings = supabase_settings(config)
+  if not settings["url"] or not settings["serviceRoleKey"]:
+    raise RuntimeError("No Supabase service role key configured.")
+
+  url = settings["url"].rstrip("/") + path
+  headers = supabase_headers(settings["serviceRoleKey"], extra_headers)
+  return http_request_json(url, method=method, headers=headers, payload=payload)
+
+
+def supabase_request_raw(config, path, method="POST", body=b"", extra_headers=None):
+  settings = supabase_settings(config)
+  if not settings["url"] or not settings["serviceRoleKey"]:
+    raise RuntimeError("No Supabase service role key configured.")
+
+  url = settings["url"].rstrip("/") + path
+  headers = supabase_headers(settings["serviceRoleKey"], extra_headers)
+  request = Request(url, data=body, headers=headers, method=method)
+
+  try:
+    with urlopen(request, timeout=30) as response:
+      raw = response.read().decode("utf-8")
+      return response.getcode(), json.loads(raw) if raw else {}
+  except HTTPError as exc:
+    raw = exc.read().decode("utf-8")
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      payload = {"message": raw.strip()}
+    return exc.code, payload
+  except URLError as exc:
+    raise RuntimeError(f"Could not reach {urlparse(url).netloc}: {exc.reason}") from exc
+
+
+def supabase_public_url(config, object_path):
+  settings = supabase_settings(config)
+  if not settings["url"]:
+    return ""
+  return f"{settings['url'].rstrip('/')}/storage/v1/object/public/{quote(settings['bucket'], safe='')}/{quote(object_path, safe='/')}"
+
+
+def supabase_summary_from_row(row):
+  if not isinstance(row, dict):
+    return None
+
+  application = row.get("application") if isinstance(row.get("application"), dict) else {}
+  summary = {
+    "ref": str(row.get("ref") or application.get("ref", "")).strip(),
+    "companyName": str(row.get("company_name") or application.get("companyName", "")).strip(),
+    "roleTitle": str(row.get("role_title") or application.get("roleTitle", "")).strip(),
+    "location": str(row.get("location") or application.get("location", "")).strip(),
+    "createdAt": str(row.get("created_at") or application.get("createdAt", "")).strip(),
+    "updatedAt": str(row.get("updated_at") or application.get("updatedAt", "")).strip(),
+  }
+  if row.get("short_code") and not application.get("shortCode"):
+    summary["shortCode"] = str(row.get("short_code", "")).strip()
+  elif application.get("shortCode"):
+    summary["shortCode"] = str(application.get("shortCode", "")).strip()
+  return summary if summary["ref"] else None
+
+
+def supabase_application_from_row(row):
+  if not isinstance(row, dict):
+    return None
+
+  application = row.get("application") if isinstance(row.get("application"), dict) else {}
+  payload = dict(application)
+  payload.setdefault("ref", str(row.get("ref", "")).strip())
+  payload.setdefault("companyName", str(row.get("company_name", "")).strip())
+  payload.setdefault("roleTitle", str(row.get("role_title", "")).strip())
+  payload.setdefault("location", str(row.get("location", "")).strip())
+  payload.setdefault("createdAt", str(row.get("created_at", "")).strip())
+  payload.setdefault("updatedAt", str(row.get("updated_at", "")).strip())
+  if row.get("short_code") and not payload.get("shortCode"):
+    payload["shortCode"] = str(row.get("short_code", "")).strip()
+  if payload.get("ref") and not payload.get("slug"):
+    payload["slug"] = payload["ref"]
+  return payload if payload.get("ref") else None
 
 
 def read_json(path, default):
@@ -225,11 +393,182 @@ def read_local_index():
   return payload if isinstance(payload, list) else []
 
 
-def read_merged_index():
-  return merge_application_lists(read_public_index(), read_local_index())
+def read_supabase_index(config):
+  if not has_supabase_access(config):
+    return []
+
+  path = f"/rest/v1/{SUPABASE_APPLICATIONS_TABLE}?select=ref,company_name,role_title,location,created_at,updated_at,short_code,application&order=updated_at.desc&limit=1000"
+  status, payload = supabase_request_json(config, path)
+  if status < 200 or status >= 300:
+    return []
+
+  rows = payload if isinstance(payload, list) else []
+  return [item for item in (supabase_summary_from_row(row) for row in rows) if item]
 
 
-def read_application_by_ref(ref):
+def read_supabase_application_by_ref(ref, config):
+  if not has_supabase_access(config):
+    return None
+
+  encoded_ref = quote(ref, safe="")
+  path = f"/rest/v1/{SUPABASE_APPLICATIONS_TABLE}?ref=eq.{encoded_ref}&select=ref,company_name,role_title,location,created_at,updated_at,short_code,application&limit=1"
+  status, payload = supabase_request_json(config, path)
+  if status < 200 or status >= 300:
+    return None
+
+  rows = payload if isinstance(payload, list) else []
+  if not rows:
+    return None
+
+  application = supabase_application_from_row(rows[0])
+  if application:
+    upsert_local_application(application)
+  return application
+
+
+def upsert_supabase_application(application, config):
+  if not has_supabase_access(config):
+    return {
+      "publishedToSupabase": False,
+      "error": "No Supabase service role key configured.",
+    }
+
+  row = {
+    "ref": application["ref"],
+    "company_name": application.get("companyName", ""),
+    "role_title": application.get("roleTitle", ""),
+    "location": application.get("location", ""),
+    "short_code": application.get("shortCode", ""),
+    "created_at": application.get("createdAt", now_iso()),
+    "updated_at": application.get("updatedAt", now_iso()),
+    "application": application,
+  }
+
+  path = f"/rest/v1/{SUPABASE_APPLICATIONS_TABLE}?on_conflict=ref"
+  status, payload = supabase_request_json(
+    config,
+    path,
+    method="POST",
+    payload=[row],
+    extra_headers={"Prefer": "resolution=merge-duplicates,return=representation"},
+  )
+
+  ok = 200 <= status < 300
+  result = {
+    "publishedToSupabase": ok,
+    "status": status,
+    "response": payload,
+  }
+  if not ok:
+    result["error"] = payload.get("message") or f"Supabase API returned {status}"
+  return result
+
+
+def ensure_supabase_bucket(config):
+  settings = supabase_settings(config)
+  if not settings["url"] or not settings["serviceRoleKey"]:
+    return {
+      "ok": False,
+      "error": "No Supabase service role key configured.",
+    }
+
+  bucket = settings["bucket"]
+  path = f"/storage/v1/bucket/{quote(bucket, safe='')}"
+  status, payload = supabase_request_json(config, path)
+  if status == 200:
+    return {
+      "ok": True,
+      "bucket": bucket,
+      "status": status,
+      "response": payload,
+    }
+
+  if status != 404:
+    return {
+      "ok": False,
+      "bucket": bucket,
+      "status": status,
+      "response": payload,
+      "error": payload.get("message") or f"Supabase API returned {status}",
+    }
+
+  status, payload = supabase_request_json(
+    config,
+    "/storage/v1/bucket",
+    method="POST",
+    payload={
+      "id": bucket,
+      "name": bucket,
+      "public": True,
+    },
+  )
+  ok = 200 <= status < 300
+  result = {
+    "ok": ok,
+    "bucket": bucket,
+    "status": status,
+    "response": payload,
+  }
+  if not ok:
+    result["error"] = payload.get("message") or f"Supabase API returned {status}"
+  return result
+
+
+def upload_cv_to_supabase(filename, html_content, config):
+  bucket_result = ensure_supabase_bucket(config)
+  if not bucket_result.get("ok"):
+    return {
+      "ok": False,
+      "error": bucket_result.get("error") or "Could not prepare Supabase bucket.",
+      "bucketResult": bucket_result,
+    }
+
+  safe = re.sub(r'[^\w\s().,-]', '', filename).strip()
+  if not safe:
+    safe = "Ben Howard CV"
+  object_path = "downloads/" + safe + ".html"
+  request_path = f"/storage/v1/object/{quote(bucket_result['bucket'], safe='')}/{quote(object_path, safe='/')}"
+  status, payload = supabase_request_raw(
+    config,
+    request_path,
+    method="POST",
+    body=html_content.encode("utf-8"),
+    extra_headers={
+      "Content-Type": "text/html; charset=utf-8",
+      "x-upsert": "true",
+      "Cache-Control": "no-cache",
+    },
+  )
+
+  ok = 200 <= status < 300
+  result = {
+    "ok": ok,
+    "bucket": bucket_result["bucket"],
+    "path": object_path,
+    "status": status,
+    "response": payload,
+    "publicUrl": supabase_public_url(config, object_path),
+  }
+  if not ok:
+    result["error"] = payload.get("message") or f"Supabase API returned {status}"
+  return result
+
+
+def read_merged_index(config=None):
+  config = config or load_local_config()
+  return merge_application_lists(
+    read_public_index(),
+    read_local_index(),
+    read_supabase_index(config),
+  )
+
+
+def read_application_by_ref(ref, config=None):
+  config = config or load_local_config()
+  application = read_supabase_application_by_ref(ref, config)
+  if application:
+    return application
+
   local_path = LOCAL_CACHE_DATA_DIR / f"{ref}.json"
   if local_path.exists():
     payload = read_json(local_path, {})
@@ -534,6 +873,19 @@ def validate_github_token(token):
   return False, message
 
 
+def validate_supabase_access(config):
+  settings = supabase_settings(config)
+  if not settings["url"] or not settings["serviceRoleKey"]:
+    return False, "No Supabase service role key configured."
+
+  path = f"/rest/v1/{SUPABASE_APPLICATIONS_TABLE}?select=ref&limit=1"
+  status, payload = supabase_request_json(config, path)
+  if 200 <= status < 300:
+    return True, "Supabase access confirmed."
+
+  return False, payload.get("message") or f"Supabase API returned {status}"
+
+
 class AppHandler(SimpleHTTPRequestHandler):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -560,12 +912,17 @@ class AppHandler(SimpleHTTPRequestHandler):
       try:
         config = load_local_config()
         github_ok, github_message = validate_github_token(config["githubToken"])
+        supabase_ok, supabase_message = validate_supabase_access(config)
         self.send_json(
           200,
           {
             "hasGithubToken": bool(config["githubToken"]),
             "githubAccessOk": github_ok,
             "githubMessage": github_message,
+            "hasSupabase": has_supabase_access(config),
+            "supabaseAccessOk": supabase_ok,
+            "supabaseMessage": supabase_message,
+            "supabaseBucket": supabase_settings(config)["bucket"],
             "publicCvBaseUrl": config["publicCvBaseUrl"],
           },
         )
@@ -574,7 +931,11 @@ class AppHandler(SimpleHTTPRequestHandler):
       return
 
     if parsed.path == "/api/applications":
-      self.send_json(200, read_merged_index())
+      try:
+        config = load_local_config()
+        self.send_json(200, read_merged_index(config))
+      except RuntimeError as exc:
+        self.send_json(500, {"error": str(exc)})
       return
 
     if parsed.path == "/api/application":
@@ -583,7 +944,13 @@ class AppHandler(SimpleHTTPRequestHandler):
         self.send_json(400, {"error": "Missing ref"})
         return
 
-      application = read_application_by_ref(ref)
+      try:
+        config = load_local_config()
+      except RuntimeError as exc:
+        self.send_json(500, {"error": str(exc)})
+        return
+
+      application = read_application_by_ref(ref, config)
       if not application:
         self.send_json(404, {"error": "Application not found"})
         return
@@ -656,26 +1023,33 @@ class AppHandler(SimpleHTTPRequestHandler):
     }
 
     try:
+      if not application.get("shortCode"):
+        application["shortCode"] = generate_short_code()
+
       upsert_local_application(application)
       config = load_local_config()
       public_url = f"{config['publicCvBaseUrl']}?ref={application['ref']}"
       debug_entry["publicUrl"] = public_url
       debug_entry["publicCvBaseUrl"] = config["publicCvBaseUrl"]
       debug_entry["githubTokenConfigured"] = bool(config["githubToken"])
+      debug_entry["supabaseConfigured"] = has_supabase_access(config)
 
-      if not config["githubToken"]:
-        debug_entry["status"] = "saved-locally-no-token"
+      if not config["githubToken"] and not has_supabase_access(config):
+        debug_entry["status"] = "saved-locally-no-backend"
         debug_entry["result"] = {
           "savedLocally": True,
           "publishedToGitHub": False,
-          "error": f"Missing GitHub token in {LOCAL_CONFIG_PATH.name}",
+          "publishedToSupabase": False,
+          "error": "No GitHub token or Supabase service role key configured.",
         }
         debug_path = write_publish_debug_log(debug_entry)
         self.send_json(
           500,
           {
-            "error": f"Missing GitHub token in {LOCAL_CONFIG_PATH.name}",
+            "error": "No GitHub token or Supabase service role key configured.",
             "savedLocally": True,
+            "publishedToGitHub": False,
+            "publishedToSupabase": False,
             "application": application,
             "publicUrl": public_url,
             "debugLogPath": debug_path,
@@ -683,26 +1057,40 @@ class AppHandler(SimpleHTTPRequestHandler):
         )
         return
 
-      github_result = push_application_to_github(application, config["githubToken"])
-      debug_entry["githubResult"] = github_result
-      debug_entry["status"] = "published" if github_result.get("publishedToGitHub") else "failed"
+      github_result = None
+      supabase_result = None
+
+      if has_supabase_access(config):
+        supabase_result = upsert_supabase_application(application, config)
+        debug_entry["supabaseResult"] = supabase_result
+
+      if config["githubToken"]:
+        github_result = push_application_to_github(application, config["githubToken"])
+        debug_entry["githubResult"] = github_result
+
+      github_ok = bool(github_result and github_result.get("publishedToGitHub"))
+      supabase_ok = bool(supabase_result and supabase_result.get("publishedToSupabase"))
+      debug_entry["status"] = "published" if (github_ok or supabase_ok) else "failed"
       debug_entry["result"] = {
         "savedLocally": True,
-        "publishedToGitHub": github_result.get("publishedToGitHub", False),
-        "error": github_result.get("error"),
+        "publishedToGitHub": github_ok,
+        "publishedToSupabase": supabase_ok,
+        "error": (github_result or {}).get("error") or (supabase_result or {}).get("error"),
       }
       debug_path = write_publish_debug_log(debug_entry)
 
-      if github_result.get("publishedToGitHub"):
+      if github_ok or supabase_ok:
         self.send_json(
           200,
           {
             "application": application,
             "publicUrl": public_url,
             "savedLocally": True,
-            "publishedToGitHub": True,
+            "publishedToGitHub": github_ok,
+            "publishedToSupabase": supabase_ok,
             "debugLogPath": debug_path,
             "githubResult": github_result,
+            "supabaseResult": supabase_result,
           },
         )
         return
@@ -710,12 +1098,13 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(
         502,
         {
-          "error": github_result.get("error") or "GitHub publish did not complete.",
+          "error": (github_result or {}).get("error") or (supabase_result or {}).get("error") or "Publish did not complete.",
           "savedLocally": True,
           "application": application,
           "publicUrl": public_url,
           "debugLogPath": debug_path,
           "githubResult": github_result,
+          "supabaseResult": supabase_result,
         },
       )
     except Exception as exc:
@@ -734,7 +1123,7 @@ class AppHandler(SimpleHTTPRequestHandler):
         },
       )
   def _handle_upload_cv(self):
-    """Upload a generated CV HTML to the downloads/ folder on GitHub."""
+    """Upload a generated CV HTML file to Supabase Storage, with GitHub fallback."""
     length = int(self.headers.get("Content-Length", "0") or 0)
     raw = self.rfile.read(length).decode("utf-8") if length else ""
 
@@ -756,23 +1145,65 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(500, {"error": str(exc)})
       return
 
-    if not config["githubToken"]:
-      self.send_json(500, {"error": "No GitHub token configured."})
+    supabase_result = None
+    github_result = None
+
+    if has_supabase_access(config):
+      try:
+        supabase_result = upload_cv_to_supabase(filename, html_content, config)
+      except Exception as exc:
+        supabase_result = {
+          "ok": False,
+          "error": f"Upload error: {exc}",
+        }
+
+    if not (supabase_result and supabase_result.get("ok")) and config["githubToken"]:
+      try:
+        github_result = upload_cv_to_github(filename, html_content, config["githubToken"])
+      except Exception as exc:
+        github_result = {
+          "ok": False,
+          "error": f"Upload error: {exc}",
+        }
+
+    if supabase_result and supabase_result.get("ok"):
+      self.send_json(
+        200,
+        {
+          "ok": True,
+          "backend": "supabase",
+          "path": supabase_result["path"],
+          "publicUrl": supabase_result.get("publicUrl", ""),
+          "supabaseResult": supabase_result,
+          "githubResult": github_result,
+        },
+      )
       return
 
-    try:
-      result = upload_cv_to_github(filename, html_content, config["githubToken"])
-    except Exception as exc:
-      self.send_json(500, {"error": f"Upload error: {exc}"})
+    if github_result and github_result.get("ok"):
+      safe = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
+      public_url = config["publicCvBaseUrl"].rstrip("/").replace("/cv.html", "") + "/downloads/" + quote(safe + ".html")
+      self.send_json(
+        200,
+        {
+          "ok": True,
+          "backend": "github",
+          "path": github_result["path"],
+          "publicUrl": public_url,
+          "supabaseResult": supabase_result,
+          "githubResult": github_result,
+        },
+      )
       return
 
-    if not result.get("ok"):
-      self.send_json(502, {"error": result.get("error", "Upload failed.")})
-      return
-
-    safe = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
-    public_url = config["publicCvBaseUrl"].rstrip("/").replace("/cv.html", "") + "/downloads/" + quote(safe + ".html")
-    self.send_json(200, {"ok": True, "path": result["path"], "publicUrl": public_url})
+    self.send_json(
+      502,
+      {
+        "error": (supabase_result or {}).get("error") or (github_result or {}).get("error") or "Upload failed.",
+        "supabaseResult": supabase_result,
+        "githubResult": github_result,
+      },
+    )
 
   def _handle_pdf(self):
     """Convert posted HTML to PDF using Chrome headless and return as a download."""
@@ -850,7 +1281,9 @@ def main():
   if len(sys.argv) > 1:
     port = int(sys.argv[1])
 
-  server = ThreadingHTTPServer(("127.0.0.1", port), AppHandler)
+  # Bind to 0.0.0.0 inside Docker so port-forwarding works; 127.0.0.1 otherwise.
+  bind_host = "0.0.0.0" if os.environ.get("DOCKER_CONTAINER") else "127.0.0.1"
+  server = ThreadingHTTPServer((bind_host, port), AppHandler)
   print(f"Serving BenHowardCV locally at http://localhost:{port}/")
   try:
     server.serve_forever()

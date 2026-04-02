@@ -3,9 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Indeed (RapidAPI)</title>
+  <title>Dashboard — Indeed</title>
   <link rel="stylesheet" href="dashboard.css">
   <style>
+    .tab-bar { display:flex; gap:0; margin:1rem 0 0.5rem; border-bottom:2px solid #e0e0e0; }
+    .tab-bar button { padding:0.5rem 1.2rem; border:none; background:none; cursor:pointer; font-size:0.9rem; font-weight:600; color:#888; border-bottom:2px solid transparent; margin-bottom:-2px; }
+    .tab-bar button.active { color:#1a73e8; border-bottom-color:#1a73e8; }
+    .tab-panel { display:none; } .tab-panel.active { display:block; }
+    .scraped-meta { font-size:0.82rem; color:#888; margin:0.5rem 0; }
+    .scraped-meta strong { color:#333; }
     .usage-gauge { display:inline-flex; align-items:center; gap:0.5rem; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:6px; padding:0.4rem 0.8rem; margin:0.5rem 0; font-size:0.82rem; }
     .gauge-bar { width:120px; height:10px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
     .gauge-fill { height:100%; border-radius:5px; transition:width 0.5s; }
@@ -14,6 +20,10 @@
     .gauge-fill--danger { background:#e74c3c; }
     .gauge-text { font-weight:600; }
     .rate-info { font-size:0.78rem; color:#888; }
+    .refresh-btn { background:#1a73e8; color:#fff; border:none; padding:0.4rem 1rem; border-radius:4px; cursor:pointer; font-size:0.82rem; }
+    .refresh-btn:hover { background:#1557b0; }
+    .local-instructions { background:#fffbea; border:1px solid #f5d020; border-radius:6px; padding:0.8rem 1rem; margin:0.8rem 0; font-size:0.85rem; line-height:1.5; }
+    .local-instructions code { background:#f0f0f0; padding:0.15rem 0.4rem; border-radius:3px; font-size:0.82rem; }
   </style>
 </head>
 <body>
@@ -29,51 +39,72 @@
 
   <div class="page-shell">
     <h1 class="page-title">Indeed Search</h1>
-    <p class="page-subtitle">Via RapidAPI Indeed Scraper. <strong style="color:#e74c3c;">Limit: 1 request/day</strong> on free plan — use wisely!</p>
+    <p class="page-subtitle">Hybrid: local scraper → Supabase → dashboard</p>
 
     <!-- Status lights -->
     <div class="status-bar">
       <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">checking…</span></div>
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-edge"></span> Edge Function: <span id="lbl-edge">checking…</span></div>
+      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-cookies"></span> Cookies: <span id="lbl-cookies">checking…</span></div>
+      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-jobs"></span> Saved jobs: <span id="lbl-jobs">checking…</span></div>
     </div>
 
-    <!-- Usage gauge -->
-    <div id="usage-box" style="display:none;">
-      <div class="usage-gauge">
-        <span>Daily quota:</span>
-        <div class="gauge-bar"><div class="gauge-fill gauge-fill--ok" id="gauge-fill" style="width:100%"></div></div>
-        <span class="gauge-text" id="gauge-text">—</span>
-      </div>
-      <div class="rate-info" id="rate-info"></div>
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="active" onclick="switchTab('saved')">Saved Results</button>
+      <button onclick="switchTab('rapid')">RapidAPI Search</button>
     </div>
 
-    <!-- Search form -->
-    <div class="search-form">
-      <div class="field"><label for="q">Keywords</label><input id="q" value="Practice Manager OR operations manager OR continuous improvement"></div>
-      <div class="field"><label for="loc">Location</label><input id="loc" value="Staffordshire"></div>
-      <div class="field field--small"><label for="rad">Radius</label>
-        <select id="rad"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="25">25</option><option value="50" selected>50</option><option value="100">100</option></select>
+    <!-- Tab 1: Saved results from local scraper -->
+    <div class="tab-panel active" id="tab-saved">
+      <div class="local-instructions">
+        <strong>How it works:</strong> Run the local scraper from your terminal to fetch Indeed jobs → results are stored in Supabase → displayed here.<br>
+        <code>cd local-admin && python3 scrape-indeed-local.py</code><br>
+        Add <code>--query "your keywords"</code> <code>--location "City"</code> <code>--pages 5</code> to customise.
       </div>
-      <div class="field field--small"><label for="days">Days</label>
-        <select id="days"><option value="1">1</option><option value="3">3</option><option value="7" selected>7</option><option value="14">14</option></select>
-      </div>
-      <div class="field field--small"><label for="rows">Max</label><input id="rows" type="number" value="15" min="1" max="50"></div>
-      <div class="field field--small"><label for="sort">Sort</label>
-        <select id="sort"><option value="relevance">Relevance</option><option value="date">Date</option></select>
-      </div>
-      <button id="search-btn" onclick="doSearch()">Search Indeed</button>
+
+      <div class="scraped-meta" id="scraped-meta"></div>
+      <button class="refresh-btn" onclick="loadSavedJobs()">↻ Refresh from Supabase</button>
+      <div id="saved-results"><p class="empty-msg">Loading…</p></div>
     </div>
 
-    <!-- Results -->
-    <div id="results"></div>
+    <!-- Tab 2: RapidAPI (backup, 1/day) -->
+    <div class="tab-panel" id="tab-rapid">
+      <p style="font-size:0.85rem; color:#e74c3c; margin:0.5rem 0;"><strong>Limit: 1 request/day</strong> on free plan — use the local scraper instead when possible.</p>
+
+      <div id="usage-box" style="display:none;">
+        <div class="usage-gauge">
+          <span>Daily quota:</span>
+          <div class="gauge-bar"><div class="gauge-fill gauge-fill--ok" id="gauge-fill" style="width:100%"></div></div>
+          <span class="gauge-text" id="gauge-text">—</span>
+        </div>
+        <div class="rate-info" id="rate-info"></div>
+      </div>
+
+      <div class="search-form">
+        <div class="field"><label for="q">Keywords</label><input id="q" value="Practice Manager OR operations manager OR continuous improvement"></div>
+        <div class="field"><label for="loc">Location</label><input id="loc" value="Staffordshire"></div>
+        <div class="field field--small"><label for="rad">Radius</label>
+          <select id="rad"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="25">25</option><option value="50" selected>50</option><option value="100">100</option></select>
+        </div>
+        <div class="field field--small"><label for="days">Days</label>
+          <select id="days"><option value="1">1</option><option value="3">3</option><option value="7" selected>7</option><option value="14">14</option></select>
+        </div>
+        <div class="field field--small"><label for="rows">Max</label><input id="rows" type="number" value="15" min="1" max="50"></div>
+        <div class="field field--small"><label for="sort">Sort</label>
+          <select id="sort"><option value="relevance">Relevance</option><option value="date">Date</option></select>
+        </div>
+        <button id="search-btn" onclick="doRapidSearch()">Search Indeed (RapidAPI)</button>
+      </div>
+      <div id="rapid-results"></div>
+    </div>
 
     <!-- Debug box -->
     <div class="debug-box">
       <div class="debug-header">
-        <span>Debug — Raw API Response</span>
+        <span>Debug</span>
         <button onclick="copyDebug()">Copy All</button>
       </div>
-      <pre class="debug-pre" id="debug-output">Click Search to begin. Remember: 1 request/day limit!</pre>
+      <pre class="debug-pre" id="debug-output">Ready.</pre>
     </div>
   </div>
 
@@ -86,9 +117,11 @@
 
     async function init() {
       await checkSupabase();
-      setStatus("dot-edge", "lbl-edge", "green", "Ready (search-indeed-rapid)");
+      await checkCookies();
+      await loadSavedJobs();
     }
 
+    // ─── status checks ──────────────────────────────────────────────
     async function checkSupabase() {
       try {
         var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
@@ -101,30 +134,63 @@
       }
     }
 
-    function updateGauge(rl) {
-      if (!rl || !rl.limit) return;
-      document.getElementById("usage-box").style.display = "block";
-      var limit = parseInt(rl.limit) || 1;
-      var remaining = parseInt(rl.remaining);
-      if (isNaN(remaining)) remaining = limit;
-      var used = limit - remaining;
-      var pct = Math.round((remaining / limit) * 100);
-      var fill = document.getElementById("gauge-fill");
-      fill.style.width = pct + "%";
-      fill.className = "gauge-fill " + (pct > 50 ? "gauge-fill--ok" : pct > 10 ? "gauge-fill--warn" : "gauge-fill--danger");
-      document.getElementById("gauge-text").textContent = remaining + " / " + limit + " remaining";
-      var info = "Used today: " + used + " of " + limit;
-      if (rl.reset) {
-        var rd = new Date(parseInt(rl.reset) * 1000);
-        info += " · Resets: " + rd.toLocaleString("en-GB");
+    async function checkCookies() {
+      try {
+        var res = await fetch(SUPABASE_URL + "/rest/v1/cookies?source=eq.indeed&select=updated_at", {
+          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
+        });
+        var rows = await res.json();
+        if (rows.length > 0) {
+          var age = timeSince(rows[0].updated_at);
+          setStatus("dot-cookies", "lbl-cookies", "green", "Captured " + age);
+        } else {
+          setStatus("dot-cookies", "lbl-cookies", "amber", "Not found — open Indeed with Tampermonkey");
+        }
+      } catch (e) {
+        setStatus("dot-cookies", "lbl-cookies", "red", e.message);
       }
-      document.getElementById("rate-info").textContent = info;
     }
 
-    async function doSearch() {
+    // ─── saved results (from local scraper) ─────────────────────────
+    async function loadSavedJobs() {
+      try {
+        var res = await fetch(SUPABASE_URL + "/rest/v1/indeed_jobs?select=*&order=scraped_at.desc&limit=200", {
+          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        var jobs = await res.json();
+        debugLog({ saved_jobs_count: jobs.length, source: "supabase/indeed_jobs" });
+
+        if (jobs.length === 0) {
+          setStatus("dot-jobs", "lbl-jobs", "amber", "0 jobs — run the local scraper");
+          document.getElementById("saved-results").innerHTML = '<p class="empty-msg">No saved results yet. Run the local scraper to populate.</p>';
+          document.getElementById("scraped-meta").innerHTML = "";
+          return;
+        }
+
+        setStatus("dot-jobs", "lbl-jobs", "green", jobs.length + " jobs saved");
+
+        // Compute metadata
+        var latest = jobs[0].scraped_at;
+        var queries = [];
+        var seen = {};
+        jobs.forEach(function(j) { if (j.search_query && !seen[j.search_query]) { seen[j.search_query] = 1; queries.push(j.search_query); } });
+        document.getElementById("scraped-meta").innerHTML =
+          "<strong>" + jobs.length + "</strong> jobs saved · Last scraped: <strong>" + timeSince(latest) + "</strong>" +
+          (queries.length ? " · Queries: " + queries.map(esc).join(", ") : "");
+
+        renderJobCards(jobs, "saved-results");
+      } catch (e) {
+        setStatus("dot-jobs", "lbl-jobs", "red", e.message);
+        document.getElementById("saved-results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
+      }
+    }
+
+    // ─── RapidAPI search (backup) ───────────────────────────────────
+    async function doRapidSearch() {
       var btn = document.getElementById("search-btn");
       btn.disabled = true; btn.textContent = "Searching… (10-30s)";
-      document.getElementById("results").innerHTML = '<p class="empty-msg">Scraping Indeed via RapidAPI… this may take 10-30 seconds.</p>';
+      document.getElementById("rapid-results").innerHTML = '<p class="empty-msg">Scraping Indeed via RapidAPI…</p>';
 
       try {
         var body = {
@@ -137,7 +203,6 @@
           jobType: "fulltime",
           country: "uk"
         };
-
         var res = await fetch(EDGE_FN, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -145,51 +210,46 @@
         });
         var data = await res.json();
         debugLog({ request: body, response: data });
-
         if (data.rateLimits) updateGauge(data.rateLimits);
-
         if (data.error) {
-          document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
+          document.getElementById("rapid-results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
           return;
         }
-        if (!data.ok) {
-          document.getElementById("results").innerHTML = '<p class="error-msg">API returned status ' + data.status + '</p>';
-          return;
-        }
-
         var jobs = extractJobs(data.data);
-        renderJobs(jobs);
+        renderJobCards(jobs.map(function(j) {
+          return {
+            title: j.title || j.jobTitle || j.name || "Untitled",
+            company: j.company || j.companyName || "",
+            location: j.location || j.locationName || "",
+            salary: j.salary || j.formattedSalary || "",
+            url: j.url || j.link || j.jobUrl || "#",
+            date_posted: j.date || j.postDate || j.datePosted || "",
+            description: j.description || j.snippet || ""
+          };
+        }), "rapid-results");
       } catch (e) {
-        document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
+        document.getElementById("rapid-results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
         debugLog({ error: e.message });
       } finally {
-        btn.disabled = false; btn.textContent = "Search Indeed";
+        btn.disabled = false; btn.textContent = "Search Indeed (RapidAPI)";
       }
     }
 
-    function extractJobs(d) {
-      if (!d) return [];
-      if (Array.isArray(d)) return d;
-      if (d.jobs && Array.isArray(d.jobs)) return d.jobs;
-      if (d.results && Array.isArray(d.results)) return d.results;
-      if (d.data && Array.isArray(d.data)) return d.data;
-      return [];
-    }
-
-    function renderJobs(jobs) {
+    // ─── shared rendering ───────────────────────────────────────────
+    function renderJobCards(jobs, containerId) {
       if (!jobs.length) {
-        document.getElementById("results").innerHTML = '<p class="empty-msg">No results returned. Check debug output for details.</p>';
+        document.getElementById(containerId).innerHTML = '<p class="empty-msg">No results.</p>';
         return;
       }
-      var html = '<p class="result-count">' + jobs.length + ' jobs found</p>';
+      var html = '<p class="result-count">' + jobs.length + ' jobs</p>';
       jobs.forEach(function(j) {
-        var title = j.title || j.jobTitle || j.name || "Untitled";
-        var company = j.company || j.companyName || j.employer || "";
-        var loc = j.location || j.locationName || "";
-        var salary = j.salary || j.formattedSalary || "";
-        var url = j.url || j.link || j.jobUrl || "#";
-        var date = j.date || j.postDate || j.datePosted || "";
-        var desc = j.description || j.snippet || "";
+        var title = j.title || "Untitled";
+        var company = j.company || "";
+        var loc = j.location || "";
+        var salary = j.salary || "";
+        var url = j.url || "#";
+        var date = j.date_posted || "";
+        var desc = j.description || "";
         var badges = "";
         if (date && isRecent(date, 3)) badges += ' <span class="badge badge--new">New</span>';
 
@@ -200,7 +260,49 @@
           + (desc ? '<div class="snippet">' + esc(desc.substring(0, 200)) + '</div>' : '')
           + '</div>';
       });
-      document.getElementById("results").innerHTML = html;
+      document.getElementById(containerId).innerHTML = html;
+    }
+
+    // ─── tabs ───────────────────────────────────────────────────────
+    function switchTab(name) {
+      document.querySelectorAll(".tab-bar button").forEach(function(b) { b.classList.remove("active"); });
+      document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
+      if (name === "saved") {
+        document.querySelector(".tab-bar button:nth-child(1)").classList.add("active");
+        document.getElementById("tab-saved").classList.add("active");
+      } else {
+        document.querySelector(".tab-bar button:nth-child(2)").classList.add("active");
+        document.getElementById("tab-rapid").classList.add("active");
+      }
+    }
+
+    // ─── utilities ──────────────────────────────────────────────────
+    function updateGauge(rl) {
+      if (!rl || !rl.limit) return;
+      document.getElementById("usage-box").style.display = "block";
+      var limit = parseInt(rl.limit) || 1;
+      var remaining = parseInt(rl.remaining);
+      if (isNaN(remaining)) remaining = limit;
+      var pct = Math.round((remaining / limit) * 100);
+      var fill = document.getElementById("gauge-fill");
+      fill.style.width = pct + "%";
+      fill.className = "gauge-fill " + (pct > 50 ? "gauge-fill--ok" : pct > 10 ? "gauge-fill--warn" : "gauge-fill--danger");
+      document.getElementById("gauge-text").textContent = remaining + " / " + limit + " remaining";
+      var info = "Used today: " + (limit - remaining) + " of " + limit;
+      if (rl.reset) {
+        var rd = new Date(parseInt(rl.reset) * 1000);
+        info += " · Resets: " + rd.toLocaleString("en-GB");
+      }
+      document.getElementById("rate-info").textContent = info;
+    }
+
+    function extractJobs(d) {
+      if (!d) return [];
+      if (Array.isArray(d)) return d;
+      if (d.jobs && Array.isArray(d.jobs)) return d.jobs;
+      if (d.results && Array.isArray(d.results)) return d.results;
+      if (d.data && Array.isArray(d.data)) return d.data;
+      return [];
     }
 
     function setStatus(dotId, lblId, color, text) {
@@ -216,6 +318,13 @@
     }
     function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
     function isRecent(s, days) { try { return (Date.now() - new Date(s).getTime()) < days * 86400000; } catch(e) { return false; } }
+    function timeSince(iso) {
+      var ms = Date.now() - new Date(iso).getTime();
+      if (ms < 60000) return "just now";
+      if (ms < 3600000) return Math.floor(ms/60000) + "m ago";
+      if (ms < 86400000) return Math.floor(ms/3600000) + "h ago";
+      return Math.floor(ms/86400000) + "d ago";
+    }
   </script>
 </body>
 </html>

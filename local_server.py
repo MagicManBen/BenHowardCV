@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import parse_qs, quote, urlparse
+from urllib.parse import parse_qs, quote, urlencode, urlparse
 from urllib.request import Request, urlopen
 
 CHROME_CANDIDATES = [
@@ -104,6 +104,10 @@ LOCAL_CONFIG_PATH = LOCAL_ADMIN_DIR / "secrets.local.json"
 DEBUG_DIR = ROOT / "debug"
 PUBLISH_DEBUG_DIR = DEBUG_DIR / "publish"
 PUBLISH_DEBUG_INDEX = DEBUG_DIR / "publish.log"
+KEYCHAIN_SERVICE_GITHUB_TOKEN = "benhowardcv-github-token"
+KEYCHAIN_SERVICE_ADZUNA_APP_ID = "benhowardcv-adzuna-app-id"
+KEYCHAIN_SERVICE_ADZUNA_API_KEY = "benhowardcv-adzuna-api-key"
+KEYCHAIN_SERVICE_REED_API_KEY = "benhowardcv-reed-api-key"
 
 GITHUB_OWNER = "MagicManBen"
 GITHUB_REPO = "BenHowardCV"
@@ -222,10 +226,32 @@ INDEED_COUNTRIES = {
 }
 
 
+def read_keychain_secret(service_name):
+  if not service_name:
+    return ""
+  try:
+    result = subprocess.run(
+      ["security", "find-generic-password", "-s", service_name, "-w"],
+      check=False,
+      capture_output=True,
+      text=True,
+    )
+  except FileNotFoundError:
+    return ""
+  if result.returncode != 0:
+    return ""
+  return result.stdout.strip()
+
+
 def load_local_config():
+  keychain_github_token = read_keychain_secret(KEYCHAIN_SERVICE_GITHUB_TOKEN)
+  keychain_adzuna_app_id = read_keychain_secret(KEYCHAIN_SERVICE_ADZUNA_APP_ID)
+  keychain_adzuna_api_key = read_keychain_secret(KEYCHAIN_SERVICE_ADZUNA_API_KEY)
+  keychain_reed_api_key = read_keychain_secret(KEYCHAIN_SERVICE_REED_API_KEY)
+
   if not LOCAL_CONFIG_PATH.exists():
     return {
-      "githubToken": "",
+      "githubToken": os.environ.get("GITHUB_TOKEN", "").strip() or keychain_github_token,
       "publicCvBaseUrl": DEFAULT_PUBLIC_CV_BASE_URL,
       "ollamaBaseUrl": os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
       "ollamaModel": os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
@@ -233,6 +259,9 @@ def load_local_config():
       "supabaseAnonKey": os.environ.get("SUPABASE_ANON_KEY", "").strip(),
       "supabaseServiceRoleKey": os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip(),
       "supabaseBucket": os.environ.get("SUPABASE_BUCKET", SUPABASE_DEFAULT_BUCKET).strip() or SUPABASE_DEFAULT_BUCKET,
+      "adzunaAppId": os.environ.get("ADZUNA_APP_ID", "").strip() or keychain_adzuna_app_id,
+      "adzunaApiKey": os.environ.get("ADZUNA_API_KEY", "").strip() or keychain_adzuna_api_key,
+      "reedApiKey": os.environ.get("REED_API_KEY", "").strip() or keychain_reed_api_key,
     }
 
   try:
@@ -241,7 +270,7 @@ def load_local_config():
     raise RuntimeError(f"Invalid local config JSON in {LOCAL_CONFIG_PATH.name}: {exc}") from exc
 
   return {
-    "githubToken": str(payload.get("githubToken", "")).strip(),
+    "githubToken": str(payload.get("githubToken", "")).strip() or os.environ.get("GITHUB_TOKEN", "").strip() or keychain_github_token,
     "publicCvBaseUrl": str(payload.get("cvBaseUrl", "")).strip() or DEFAULT_PUBLIC_CV_BASE_URL,
     "ollamaBaseUrl": str(payload.get("ollamaBaseUrl", "")).strip() or os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
     "ollamaModel": str(payload.get("ollamaModel", "")).strip() or os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
@@ -249,6 +278,9 @@ def load_local_config():
     "supabaseAnonKey": str(payload.get("supabaseAnonKey", "")).strip() or os.environ.get("SUPABASE_ANON_KEY", "").strip(),
     "supabaseServiceRoleKey": str(payload.get("supabaseServiceRoleKey", "")).strip() or os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip(),
     "supabaseBucket": str(payload.get("supabaseBucket", "")).strip() or os.environ.get("SUPABASE_BUCKET", SUPABASE_DEFAULT_BUCKET).strip() or SUPABASE_DEFAULT_BUCKET,
+    "adzunaAppId": str(payload.get("adzunaAppId", "")).strip() or os.environ.get("ADZUNA_APP_ID", "").strip() or keychain_adzuna_app_id,
+    "adzunaApiKey": str(payload.get("adzunaApiKey", "")).strip() or os.environ.get("ADZUNA_API_KEY", "").strip() or keychain_adzuna_api_key,
+    "reedApiKey": str(payload.get("reedApiKey", "")).strip() or os.environ.get("REED_API_KEY", "").strip() or keychain_reed_api_key,
   }
 
 
@@ -444,6 +476,162 @@ def html_to_text(value):
   text = re.sub(r"[ \t]+", " ", text)
   text = re.sub(r"\n{3,}", "\n\n", text)
   return text.strip()
+
+
+def compact_currency(currency_code):
+  code = str(currency_code or "").strip().upper()
+  return {
+    "GBP": "GBP ",
+    "USD": "$",
+    "CAD": "CAD ",
+    "AUD": "AUD ",
+    "EUR": "EUR ",
+  }.get(code, (code + " ") if code else "")
+
+
+def salary_range_summary(min_amount=None, max_amount=None, currency_code="", interval=""):
+  if min_amount in ("", None) and max_amount in ("", None):
+    return ""
+  prefix = compact_currency(currency_code)
+  interval_text = f" / {interval}" if interval else ""
+  if min_amount not in ("", None) and max_amount not in ("", None):
+    return f"{prefix}{int(float(min_amount)):,} - {prefix}{int(float(max_amount)):,}{interval_text}".strip()
+  amount = min_amount if min_amount not in ("", None) else max_amount
+  return f"{prefix}{int(float(amount)):,}{interval_text}".strip()
+
+
+def basic_auth_header(username, password=""):
+  token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+  return f"Basic {token}"
+
+
+def build_reed_search_url(keywords="", location="", distance=25):
+  params = {}
+  if keywords:
+    params["keywords"] = keywords
+  if location:
+    params["location"] = location
+  if distance:
+    params["distancefromlocation"] = int(distance)
+  query = urlencode(params)
+  return f"https://www.reed.co.uk/jobs?{query}" if query else "https://www.reed.co.uk/jobs"
+
+
+def fetch_reed_jobs(api_key, keywords="", location="", distance=25, results_to_take=50, results_to_skip=0):
+  fallback_url = build_reed_search_url(keywords=keywords, location=location, distance=distance)
+  if not api_key:
+    return {
+      "jobs": [],
+      "count": 0,
+      "totalResults": 0,
+      "source": "Reed website fallback",
+      "fallbackUrl": fallback_url,
+      "requiresApiKey": True,
+      "unavailableReason": "No Reed API key configured locally.",
+      "docs": "https://www.reed.co.uk/developers/jobseeker",
+    }
+
+  params = {
+    "keywords": keywords,
+    "locationName": location,
+    "distanceFromLocation": max(1, int(distance or 25)),
+    "resultsToTake": max(1, min(int(results_to_take or 50), 100)),
+    "resultsToSkip": max(0, int(results_to_skip or 0)),
+  }
+  query = urlencode({key: value for key, value in params.items() if value not in ("", None)})
+  status, payload = http_request_json(
+    f"https://www.reed.co.uk/api/1.0/search?{query}",
+    headers={
+      "Authorization": basic_auth_header(api_key),
+      "Accept": "application/json",
+      "User-Agent": "BenHowardCV-LocalServer",
+    },
+    timeout=20,
+  )
+  if status < 200 or status >= 300:
+    raise RuntimeError((payload.get("message") or payload.get("error") or f"Reed API returned {status}"))
+
+  jobs = []
+  for job in payload.get("results") or []:
+    jobs.append({
+      "jobId": job.get("jobId"),
+      "title": job.get("jobTitle") or "",
+      "employer": job.get("employerName") or "",
+      "location": job.get("locationName") or "",
+      "salary": salary_range_summary(
+        job.get("minimumSalary"),
+        job.get("maximumSalary"),
+        job.get("currency") or "GBP",
+        job.get("salaryType") or "",
+      ),
+      "description": html_to_text(job.get("jobDescription") or ""),
+      "url": job.get("jobUrl") or "",
+      "externalUrl": job.get("externalUrl") or "",
+      "postDate": job.get("date") or "",
+      "expirationDate": job.get("expirationDate") or "",
+      "applications": job.get("applications"),
+    })
+
+  return {
+    "jobs": jobs,
+    "count": len(jobs),
+    "totalResults": payload.get("totalResults", len(jobs)),
+    "source": "Reed Jobseeker API",
+    "docs": "https://www.reed.co.uk/developers/jobseeker",
+    "fallbackUrl": fallback_url,
+    "requiresApiKey": False,
+  }
+
+
+def fetch_adzuna_jobs(app_id, api_key, what="", where="", distance=50, max_days_old=14, sort_by="date", page=1, results_per_page=50, country="gb"):
+  if not app_id or not api_key:
+    raise RuntimeError("Adzuna credentials are not configured locally.")
+
+  page_number = max(1, int(page or 1))
+  params = {
+    "app_id": app_id,
+    "app_key": api_key,
+    "what": what,
+    "where": where,
+    "distance": max(1, int(distance or 50)),
+    "max_days_old": max(1, int(max_days_old or 14)),
+    "sort_by": sort_by or "date",
+    "results_per_page": max(1, min(int(results_per_page or 50), 50)),
+    "content-type": "application/json",
+  }
+  query = urlencode({key: value for key, value in params.items() if value not in ("", None)})
+  url = f"https://api.adzuna.com/v1/api/jobs/{str(country or 'gb').lower()}/search/{page_number}?{query}"
+  status, payload = http_request_json(url, timeout=20)
+  if status < 200 or status >= 300:
+    raise RuntimeError(payload.get("message") or payload.get("error") or f"Adzuna API returned {status}")
+
+  jobs = []
+  for job in payload.get("results") or []:
+    location = (job.get("location") or {})
+    category = (job.get("category") or {})
+    company = (job.get("company") or {})
+    jobs.append({
+      "id": job.get("id"),
+      "title": job.get("title") or "",
+      "company": company.get("display_name") or "",
+      "location": location.get("display_name") or "",
+      "salary": salary_range_summary(job.get("salary_min"), job.get("salary_max"), "GBP"),
+      "description": job.get("description") or "",
+      "url": job.get("redirect_url") or "",
+      "created": job.get("created") or "",
+      "category": category.get("label") or "",
+      "contractType": job.get("contract_type") or "",
+      "contractTime": job.get("contract_time") or "",
+    })
+
+  return {
+    "jobs": jobs,
+    "count": len(jobs),
+    "totalResults": payload.get("count", len(jobs)),
+    "source": "Adzuna API",
+    "docs": "https://developer.adzuna.com/docs/search",
+    "country": str(country or "gb").upper(),
+  }
 
 
 def indeed_country_meta(country_name):
@@ -1239,6 +1427,8 @@ class AppHandler(SimpleHTTPRequestHandler):
             "supabaseMessage": supabase_message,
             "supabaseBucket": supabase_settings(config)["bucket"],
             "publicCvBaseUrl": config["publicCvBaseUrl"],
+            "hasAdzunaCredentials": bool(config.get("adzunaAppId") and config.get("adzunaApiKey")),
+            "hasReedApiKey": bool(config.get("reedApiKey")),
           },
         )
       except RuntimeError as exc:
@@ -1300,6 +1490,60 @@ class AppHandler(SimpleHTTPRequestHandler):
           is_remote=is_remote,
           job_type=job_type,
         )
+      except Exception as exc:
+        self.send_json(502, {"error": str(exc)})
+        return
+
+      self.send_json(200, payload)
+      return
+
+    if parsed.path == "/api/reed-search":
+      params = parse_qs(parsed.query)
+      try:
+        config = load_local_config()
+        payload = fetch_reed_jobs(
+          config.get("reedApiKey", ""),
+          keywords=(params.get("q", [""])[0] or "").strip(),
+          location=(params.get("l", [""])[0] or "").strip(),
+          distance=int((params.get("distance", ["25"])[0] or "25").strip()),
+          results_to_take=int((params.get("limit", ["50"])[0] or "50").strip()),
+          results_to_skip=int((params.get("skip", ["0"])[0] or "0").strip()),
+        )
+      except ValueError as exc:
+        self.send_json(400, {"error": f"Invalid search parameters: {exc}"})
+        return
+      except RuntimeError as exc:
+        self.send_json(500, {"error": str(exc)})
+        return
+      except Exception as exc:
+        self.send_json(502, {"error": str(exc)})
+        return
+
+      self.send_json(200, payload)
+      return
+
+    if parsed.path == "/api/adzuna-search":
+      params = parse_qs(parsed.query)
+      try:
+        config = load_local_config()
+        payload = fetch_adzuna_jobs(
+          config.get("adzunaAppId", ""),
+          config.get("adzunaApiKey", ""),
+          what=(params.get("q", [""])[0] or "").strip(),
+          where=(params.get("l", [""])[0] or "").strip(),
+          distance=int((params.get("distance", ["50"])[0] or "50").strip()),
+          max_days_old=int((params.get("days", ["14"])[0] or "14").strip()),
+          sort_by=(params.get("sort", ["date"])[0] or "date").strip(),
+          page=int((params.get("page", ["1"])[0] or "1").strip()),
+          results_per_page=int((params.get("limit", ["50"])[0] or "50").strip()),
+          country=(params.get("country", ["gb"])[0] or "gb").strip(),
+        )
+      except ValueError as exc:
+        self.send_json(400, {"error": f"Invalid search parameters: {exc}"})
+        return
+      except RuntimeError as exc:
+        self.send_json(500, {"error": str(exc)})
+        return
       except Exception as exc:
         self.send_json(502, {"error": str(exc)})
         return

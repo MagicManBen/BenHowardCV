@@ -61,26 +61,18 @@
 
   <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
-    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
-    var EDGE_FN = SUPABASE_URL + "/functions/v1/search-reed";
-
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
-      await checkSupabase();
-      JobBoardUI.setStatus("dot-edge", "lbl-edge", "green", "Ready");
-    }
-
-    async function checkSupabase() {
       try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        if (!res.ok) throw new Error(res.status);
-        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
+        var res = await fetch("/api/status");
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || ("Status failed (" + res.status + ")"));
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", data.supabaseAccessOk ? "green" : "amber", data.supabaseAccessOk ? "Connected" : "Optional");
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", data.hasReedApiKey ? "green" : "amber", data.hasReedApiKey ? "API ready" : "Website fallback");
       } catch (e) {
         JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "red", e.message);
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", "amber", "Website fallback");
       }
     }
 
@@ -96,19 +88,22 @@
         var keywords = document.getElementById("q").value;
         var location = document.getElementById("loc").value;
         var distance = parseInt(document.getElementById("dist").value, 10) || 45;
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            keywords: keywords,
-            location: location,
-            distanceFromLocation: distance,
-            resultsToTake: 50,
-            resultsToSkip: 0
-          })
-        });
+        var url = new URL("/api/reed-search", window.location.origin);
+        url.searchParams.set("q", keywords);
+        url.searchParams.set("l", location);
+        url.searchParams.set("distance", String(distance));
+        url.searchParams.set("limit", "50");
+        var res = await fetch(url.toString());
         var data = await res.json();
         if (!res.ok || data.error) throw new Error(data.error || ("Search failed (" + res.status + ")"));
+
+        if (data.requiresApiKey) {
+          document.getElementById("results").innerHTML =
+            '<div class="note-card"><strong>Reed website search</strong><p>Reed API credentials are not configured locally, so this search opens the live Reed website instead of failing.</p><p><a class="button--ghost" href="' + JobBoardUI.esc(data.fallbackUrl || "https://www.reed.co.uk/jobs") + '" target="_blank" rel="noopener noreferrer">Open Reed results</a></p></div>';
+          summary.textContent = "Opened Reed website fallback.";
+          JobBoardUI.setStatus("dot-edge", "lbl-edge", "amber", "Website fallback");
+          return;
+        }
 
         var jobs = (data.jobs || []).map(function(job) {
           var badges = [];
@@ -133,9 +128,11 @@
           summary: (data.totalResults || jobs.length) + " Reed adverts"
         });
         summary.textContent = "Loaded " + jobs.length + " adverts.";
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", "green", "API ready");
       } catch (e) {
         document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(e.message) + "</p>";
         summary.textContent = "Search failed.";
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", "red", "Load failed");
       } finally {
         btn.disabled = false;
         btn.textContent = "Search Reed";

@@ -65,23 +65,19 @@
 
   <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
-    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
-    var EDGE_FN = SUPABASE_URL + "/functions/v1/search-adzuna";
-
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
       try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        if (!res.ok) throw new Error(res.status);
-        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
+        var res = await fetch("/api/status");
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || ("Status failed (" + res.status + ")"));
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", data.supabaseAccessOk ? "green" : "amber", data.supabaseAccessOk ? "Connected" : "Optional");
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", data.hasAdzunaCredentials ? "green" : "red", data.hasAdzunaCredentials ? "API ready" : "Credentials missing");
       } catch (e) {
         JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "red", e.message);
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", "red", "Status failed");
       }
-      JobBoardUI.setStatus("dot-edge", "lbl-edge", "green", "Ready");
     }
 
     async function doSearch() {
@@ -93,19 +89,15 @@
       document.getElementById("results").innerHTML = '<p class="empty-msg">Searching Adzuna...</p>';
 
       try {
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            what: document.getElementById("q").value,
-            where: document.getElementById("loc").value,
-            distance: parseInt(document.getElementById("dist").value, 10) || 50,
-            maxDaysOld: parseInt(document.getElementById("days").value, 10) || 14,
-            sortBy: "date",
-            page: 1,
-            resultsPerPage: 50
-          })
-        });
+        var url = new URL("/api/adzuna-search", window.location.origin);
+        url.searchParams.set("q", document.getElementById("q").value);
+        url.searchParams.set("l", document.getElementById("loc").value);
+        url.searchParams.set("distance", String(parseInt(document.getElementById("dist").value, 10) || 50));
+        url.searchParams.set("days", String(parseInt(document.getElementById("days").value, 10) || 14));
+        url.searchParams.set("sort", "date");
+        url.searchParams.set("page", "1");
+        url.searchParams.set("limit", "50");
+        var res = await fetch(url.toString());
         var data = await res.json();
         if (!res.ok || data.error) throw new Error(data.error || ("Search failed (" + res.status + ")"));
 
@@ -132,9 +124,11 @@
           summary: (data.totalResults || jobs.length) + " Adzuna adverts"
         });
         summary.textContent = "Loaded " + jobs.length + " adverts.";
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", "green", "API ready");
       } catch (e) {
         document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(e.message) + "</p>";
         summary.textContent = "Search failed.";
+        JobBoardUI.setStatus("dot-edge", "lbl-edge", "red", "Load failed");
       } finally {
         btn.disabled = false;
         btn.textContent = "Search Adzuna";

@@ -190,14 +190,14 @@
       <!-- GitHub Copilot -->
       <div class="usage-card">
         <h2>GitHub Copilot <span class="tag tag--paid">Pro plan</span></h2>
-        <div id="copilot-status">Checking…</div>
+        <div id="copilot-status">Manage on GitHub</div>
         <table class="usage-table">
           <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Plan</td><td id="copilot-plan">—</td></tr>
-          <tr><td>Seat</td><td id="copilot-seat">—</td></tr>
-          <tr><td>Premium requests</td><td id="copilot-premium">—</td></tr>
-          <tr><td>Billing cycle</td><td id="copilot-billing">—</td></tr>
-          <tr><td>Cost</td><td id="copilot-cost">—</td></tr>
+          <tr><td>Plan</td><td id="copilot-plan">GitHub Copilot Pro</td></tr>
+          <tr><td>Seat</td><td id="copilot-seat">Personal account</td></tr>
+          <tr><td>Premium requests</td><td id="copilot-premium"><a href="https://github.com/settings/copilot" target="_blank">View on GitHub</a></td></tr>
+          <tr><td>Billing cycle</td><td id="copilot-billing"><a href="https://github.com/settings/billing/summary" target="_blank">View billing</a></td></tr>
+          <tr><td>Cost</td><td id="copilot-cost">Managed on GitHub</td></tr>
         </table>
         <div class="advice">
           View full usage at <a href="https://github.com/settings/copilot" target="_blank">github.com/settings/copilot</a>
@@ -208,23 +208,17 @@
       <!-- OpenAI -->
       <div class="usage-card">
         <h2>OpenAI <span class="tag tag--paid">API credits</span></h2>
-        <div id="openai-status">Checking…</div>
+        <div id="openai-status">Managed on the OpenAI website</div>
         <div id="openai-gauges"></div>
         <table class="usage-table">
           <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Organisation</td><td id="openai-org">—</td></tr>
-          <tr><td>Credit balance</td><td id="openai-balance">—</td></tr>
-          <tr><td>Usage (this month)</td><td id="openai-usage">—</td></tr>
-          <tr><td>Rate limit tier</td><td id="openai-tier">—</td></tr>
+          <tr><td>Organisation</td><td id="openai-org"><a href="https://platform.openai.com/settings/organization/general" target="_blank">Open settings</a></td></tr>
+          <tr><td>Credit balance</td><td id="openai-balance"><a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank">View billing</a></td></tr>
+          <tr><td>Usage (this month)</td><td id="openai-usage"><a href="https://platform.openai.com/usage" target="_blank">View usage</a></td></tr>
+          <tr><td>Rate limit tier</td><td id="openai-tier"><a href="https://platform.openai.com/settings/organization/limits" target="_blank">View limits</a></td></tr>
         </table>
-        <div style="margin-top:0.5rem;">
-          <label style="font-size:0.8rem; color:#555;">OpenAI API Key (stored in browser only):</label><br>
-          <input type="password" id="openai-key-input" placeholder="sk-..." style="width:300px; font-size:0.8rem; padding:4px 8px; margin-top:4px; border:1px solid #ccc; border-radius:4px;">
-          <button onclick="saveOpenAIKey()" style="font-size:0.8rem; padding:4px 10px; margin-left:4px; cursor:pointer;">Save &amp; Check</button>
-        </div>
         <div class="advice">
-          View full usage at <a href="https://platform.openai.com/usage" target="_blank">platform.openai.com/usage</a>.
-          API key is stored in localStorage only — never sent to Supabase.
+          OpenAI usage and billing are managed directly on the OpenAI website. This dashboard does not ask for or store an OpenAI API key.
         </div>
       </div>
 
@@ -250,7 +244,7 @@
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
-      await Promise.all([checkSupabase(), checkCopilot(), checkOpenAI()]);
+      await Promise.all([checkSupabase(), checkServiceStatus()]);
       debugLog(debugData);
     }
 
@@ -296,119 +290,28 @@
     function debugLog(obj) { return obj; }
     function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
 
-    async function checkCopilot() {
+    async function checkServiceStatus() {
       try {
-        // Load GitHub token from secrets
-        var secRes = await fetch("secrets.local.json");
-        if (!secRes.ok) throw new Error("No secrets.local.json");
-        var secrets = await secRes.json();
-        var token = secrets.githubToken;
-        if (!token) throw new Error("No githubToken in secrets");
+        var res = await fetch("/api/status");
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || ("Status failed (" + res.status + ")"));
 
-        // Get user info
-        var userRes = await fetch("https://api.github.com/user", {
-          headers: { Authorization: "token " + token, Accept: "application/vnd.github+json" }
-        });
-        if (!userRes.ok) throw new Error("GitHub API " + userRes.status);
-        var user = await userRes.json();
-
-        // Get Copilot billing info
-        var copilotRes = await fetch("https://api.github.com/user/copilot", {
-          headers: { Authorization: "token " + token, Accept: "application/vnd.github+json" }
-        });
-
-        var statusEl = document.getElementById("copilot-status");
-        if (copilotRes.ok) {
-          var copilot = await copilotRes.json();
-          statusEl.innerHTML = '<span style="color:#2ecc40; font-weight:600;">✓ Active</span> — ' + esc(user.login);
-          document.getElementById("copilot-plan").textContent = copilot.plan_type || copilot.seat_management_setting || "Active";
-          document.getElementById("copilot-seat").textContent = copilot.seat_breakdown ?
-            ("Active: " + copilot.seat_breakdown.active_this_cycle) : "Assigned";
-
-          if (copilot.copilot_chat) {
-            document.getElementById("copilot-premium").textContent = copilot.copilot_chat === "enabled" ? "Chat enabled" : copilot.copilot_chat;
-          }
-
-          debugData.copilot = { user: user.login, plan: copilot };
-        } else if (copilotRes.status === 404) {
-          // Individual user — try just showing user info
-          statusEl.innerHTML = '<span style="color:#2ecc40; font-weight:600;">✓ Connected</span> — ' + esc(user.login);
-          document.getElementById("copilot-plan").textContent = user.plan ? user.plan.name : "Individual";
-          document.getElementById("copilot-seat").textContent = "Personal account";
-          document.getElementById("copilot-cost").textContent = "$10/mo (Pro) or $39/mo (Pro+)";
-          debugData.copilot = { user: user.login, note: "Individual plan — /user/copilot not available" };
-        } else {
-          throw new Error("Copilot API " + copilotRes.status);
-        }
+        document.getElementById("copilot-status").innerHTML = data.githubAccessOk
+          ? '<span style="color:#2ecc40; font-weight:600;">OK</span> GitHub token linked locally'
+          : '<span style="color:#888;">Website only</span> Open GitHub to manage Copilot';
+        debugData.copilot = {
+          githubTokenConfigured: data.hasGithubToken,
+          githubAccessOk: data.githubAccessOk,
+          githubMessage: data.githubMessage
+        };
+        document.getElementById("openai-status").innerHTML = '<span style="color:#888;">Website only</span> Open OpenAI directly for usage and billing';
+        debugData.openai = { managedViaWebsite: true };
       } catch (e) {
-        document.getElementById("copilot-status").innerHTML = '<span style="color:#e74c3c;">✗ ' + esc(e.message) + '</span>';
+        document.getElementById("copilot-status").innerHTML = '<span style="color:#888;">Website only</span> Open GitHub directly';
+        document.getElementById("openai-status").innerHTML = '<span style="color:#888;">Website only</span> Open OpenAI directly';
         debugData.copilot = { error: e.message };
+        debugData.openai = { managedViaWebsite: true, statusError: e.message };
       }
-    }
-
-    async function checkOpenAI() {
-      var key = localStorage.getItem("bh_openai_api_key");
-      var input = document.getElementById("openai-key-input");
-      if (key) input.value = key;
-      if (!key) {
-        document.getElementById("openai-status").innerHTML = '<span style="color:#888;">Enter API key to check balance</span>';
-        debugData.openai = { status: "no key" };
-        return;
-      }
-      await fetchOpenAIUsage(key);
-    }
-
-    async function fetchOpenAIUsage(key) {
-      var statusEl = document.getElementById("openai-status");
-      try {
-        // Check organisation / models access
-        var modelsRes = await fetch("https://api.openai.com/v1/models", {
-          headers: { Authorization: "Bearer " + key }
-        });
-        if (modelsRes.status === 401) throw new Error("Invalid API key");
-        if (!modelsRes.ok) throw new Error("OpenAI API " + modelsRes.status);
-
-        statusEl.innerHTML = '<span style="color:#2ecc40; font-weight:600;">✓ Key valid</span>';
-
-        // Try billing/usage endpoint (may not be available on all tiers)
-        try {
-          // Get subscription info
-          var now = new Date();
-          var startDate = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-01";
-          var endDate = now.toISOString().split("T")[0];
-
-          var usageRes = await fetch("https://api.openai.com/v1/usage?date=" + endDate, {
-            headers: { Authorization: "Bearer " + key }
-          });
-          if (usageRes.ok) {
-            var usage = await usageRes.json();
-            debugData.openai = { status: "valid", usage: usage };
-          } else {
-            debugData.openai = { status: "valid", usage: "endpoint not available (" + usageRes.status + ")" };
-          }
-        } catch (ue) {
-          debugData.openai = { status: "valid", usageError: ue.message };
-        }
-
-        document.getElementById("openai-org").textContent = "Key verified — see platform for details";
-        document.getElementById("openai-balance").innerHTML = '<a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank">View on platform →</a>';
-        document.getElementById("openai-usage").innerHTML = '<a href="https://platform.openai.com/usage" target="_blank">View on platform →</a>';
-        document.getElementById("openai-tier").innerHTML = '<a href="https://platform.openai.com/settings/organization/limits" target="_blank">View on platform →</a>';
-      } catch (e) {
-        statusEl.innerHTML = '<span style="color:#e74c3c;">✗ ' + esc(e.message) + '</span>';
-        debugData.openai = { error: e.message };
-      }
-    }
-
-    function saveOpenAIKey() {
-      var key = document.getElementById("openai-key-input").value.trim();
-      if (!key) {
-        localStorage.removeItem("bh_openai_api_key");
-        document.getElementById("openai-status").innerHTML = '<span style="color:#888;">Key removed</span>';
-        return;
-      }
-      localStorage.setItem("bh_openai_api_key", key);
-      fetchOpenAIUsage(key).then(function() { debugLog(debugData); });
     }
   </script>
 </body>

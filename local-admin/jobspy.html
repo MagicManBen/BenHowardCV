@@ -110,20 +110,25 @@
       indeedUrl.searchParams.set("country", country);
       if (days) indeedUrl.searchParams.set("days", days);
 
+      var reedUrl = new URL("/api/reed-search", window.location.origin);
+      reedUrl.searchParams.set("q", q);
+      reedUrl.searchParams.set("l", loc);
+      reedUrl.searchParams.set("distance", String(distance));
+      reedUrl.searchParams.set("limit", String(limit));
+
+      var adzunaUrl = new URL("/api/adzuna-search", window.location.origin);
+      adzunaUrl.searchParams.set("q", q);
+      adzunaUrl.searchParams.set("l", loc);
+      adzunaUrl.searchParams.set("distance", String(distance));
+      adzunaUrl.searchParams.set("days", String(days ? parseInt(days, 10) : 14));
+      adzunaUrl.searchParams.set("sort", "date");
+      adzunaUrl.searchParams.set("page", "1");
+      adzunaUrl.searchParams.set("limit", String(limit));
+
       try {
         var results = await Promise.allSettled([
           fetch(indeedUrl.toString()).then(readJson),
-          fetch(SUPABASE_URL + "/functions/v1/search-reed", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              keywords: q,
-              location: loc,
-              distanceFromLocation: distance,
-              resultsToTake: limit,
-              resultsToSkip: 0
-            })
-          }).then(readJson),
+          fetch(reedUrl.toString()).then(readJson),
           fetch(SUPABASE_URL + "/functions/v1/search-nhs-jobs", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -136,23 +141,12 @@
               sort: "publicationDateDesc"
             })
           }).then(readJson),
-          fetch(SUPABASE_URL + "/functions/v1/search-adzuna", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              what: q,
-              where: loc,
-              distance: distance,
-              maxDaysOld: days ? parseInt(days, 10) : 14,
-              sortBy: "date",
-              page: 1,
-              resultsPerPage: limit
-            })
-          }).then(readJson)
+          fetch(adzunaUrl.toString()).then(readJson)
         ]);
 
         var counts = [];
         var jobs = [];
+        var notes = [];
 
         if (results[0].status === "fulfilled" && !results[0].value.error) {
           var indeedJobs = (results[0].value.jobs || []).map(function(job) {
@@ -177,25 +171,30 @@
         }
 
         if (results[1].status === "fulfilled" && !results[1].value.error) {
-          var reedJobs = (results[1].value.jobs || []).map(function(job) {
-            var badges = [];
-            if (job.expirationDate && JobBoardUI.isClosingSoon(job.expirationDate)) badges.push({ label: "Closing Soon", tone: "accent" });
-            if (job.applications !== undefined) badges.push({ label: job.applications + " apps", tone: "neutral" });
-            return {
-              source: "Reed",
-              title: job.title,
-              company: job.employer,
-              location: job.location,
-              salary: job.salary,
-              url: job.url,
-              dateText: job.postDate ? "Posted " + JobBoardUI.fmtDate(job.postDate) : "",
-              dateSort: job.postDate || "",
-              description: job.description ? job.description.substring(0, 700) : "",
-              badges: badges
-            };
-          });
-          counts.push({ label: "Reed", count: reedJobs.length });
-          jobs = jobs.concat(reedJobs);
+          if (results[1].value.requiresApiKey) {
+            counts.push({ label: "Reed", count: "site" });
+            notes.push('<div class="note-card"><strong>Reed website fallback</strong><p>Local Reed API credentials are not configured, so Reed results open on the website.</p><p><a class="button--ghost" href="' + JobBoardUI.esc(results[1].value.fallbackUrl || "https://www.reed.co.uk/jobs") + '" target="_blank" rel="noopener noreferrer">Open Reed results</a></p></div>');
+          } else {
+            var reedJobs = (results[1].value.jobs || []).map(function(job) {
+              var badges = [];
+              if (job.expirationDate && JobBoardUI.isClosingSoon(job.expirationDate)) badges.push({ label: "Closing Soon", tone: "accent" });
+              if (job.applications !== undefined) badges.push({ label: job.applications + " apps", tone: "neutral" });
+              return {
+                source: "Reed",
+                title: job.title,
+                company: job.employer,
+                location: job.location,
+                salary: job.salary,
+                url: job.url,
+                dateText: job.postDate ? "Posted " + JobBoardUI.fmtDate(job.postDate) : "",
+                dateSort: job.postDate || "",
+                description: job.description ? job.description.substring(0, 700) : "",
+                badges: badges
+              };
+            });
+            counts.push({ label: "Reed", count: reedJobs.length });
+            jobs = jobs.concat(reedJobs);
+          }
         }
 
         if (results[2].status === "fulfilled" && !results[2].value.error) {
@@ -246,9 +245,9 @@
         });
 
         document.getElementById("source-counts").innerHTML = counts.length
-          ? '<div class="result-chip-row">' + counts.map(function(item) {
+          ? (notes.join("") + '<div class="result-chip-row">' + counts.map(function(item) {
               return '<span class="result-chip">' + JobBoardUI.esc(item.label) + ': ' + JobBoardUI.esc(item.count) + "</span>";
-            }).join("") + "</div>"
+            }).join("") + "</div>")
           : "";
 
         JobBoardUI.renderJobs("results", jobs, {

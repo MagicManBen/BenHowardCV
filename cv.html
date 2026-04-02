@@ -1918,16 +1918,28 @@
         };
       }
 
-      async function fetchApplicationByRef(ref) {
-        const target = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-          ? `/api/application?ref=${encodeURIComponent(ref)}&t=${Date.now()}`
-          : `data/${encodeURIComponent(ref)}.json?t=${Date.now()}`;
+      const SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
 
-        const response = await fetch(target, { cache: "no-store" });
-        if (!response.ok) {
-          throw new Error(`Could not load application record for ${ref}`);
+      async function fetchApplicationByRef(ref) {
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+        if (isLocal) {
+          const response = await fetch(`/api/application?ref=${encodeURIComponent(ref)}&t=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`Could not load application record for ${ref}`);
+          return response.json();
         }
-        return response.json();
+
+        // Fetch from Supabase (public read via anon key + RLS)
+        const url = `${SUPABASE_URL}/rest/v1/applications?ref=eq.${encodeURIComponent(ref)}&select=application&limit=1`;
+        const response = await fetch(url, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Accept": "application/json" },
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error(`Could not load application record for ${ref}`);
+        const rows = await response.json();
+        if (!rows.length || !rows[0].application) throw new Error(`No application found for ${ref}`);
+        return rows[0].application;
       }
 
       function compactValue(value) {

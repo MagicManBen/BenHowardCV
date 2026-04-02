@@ -555,20 +555,20 @@ async function renderPublishedResult(dom, application, publicUrl, localPreviewUr
 }
 
 function buildPublicPreviewUrl(app) {
-  return publicCvBaseUrl + "#app=" + encodePayload(buildEmbeddedPayload(app));
+  return publicCvBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
 }
 function buildShortJobUrl(app) {
-  return publicJobBaseUrl + "?r=" + encodeURIComponent(app.ref || "");
+  return publicCvBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
 }
 function buildShortQrUrl(app) {
   if (!app.shortCode) return "";
   return publicRedirectBaseUrl + encodeURIComponent(app.shortCode);
 }
 function buildLocalPreviewUrl(app) {
-  return new URL("../cv.html#app=" + encodePayload(buildEmbeddedPayload(app)), window.location.href).href;
+  return new URL("../cv.html?ref=" + encodeURIComponent(app.ref || ""), window.location.href).href;
 }
 function buildLocalPrintUrl(app) {
-  return new URL("../cv.html?print=1#app=" + encodePayload(buildEmbeddedPayload(app)), window.location.href).href;
+  return new URL("../cv.html?ref=" + encodeURIComponent(app.ref || "") + "&print=1", window.location.href).href;
 }
 
 function buildEmbeddedPayload(a) {

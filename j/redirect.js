@@ -15,15 +15,9 @@ async function initRedirectPage() {
     return;
   }
 
-  try {
-    const application = await fetchApplicationByRef(ref);
-    const payload = buildEmbeddedPreviewPayload(application);
-    const printSuffix = params.get("print") === "1" ? "?print=1" : "";
-    const target = `${PUBLIC_CV_BASE_URL}${printSuffix}#app=${encodeApplicationPayload(payload)}`;
-    window.location.replace(target);
-  } catch {
-    setMessage(titleEl, messageEl, "Could not open the CV", "The job link could not be resolved.");
-  }
+  const printSuffix = params.get("print") === "1" ? "&print=1" : "";
+  const target = `${PUBLIC_CV_BASE_URL}?ref=${encodeURIComponent(ref)}${printSuffix}`;
+  window.location.replace(target);
 }
 
 async function fetchApplicationByRef(ref) {

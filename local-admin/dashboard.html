@@ -25,18 +25,36 @@
     .tracker-table a:hover { text-decoration:underline; }
     .tracker-empty { text-align:center; padding:2rem; color:#888; }
 
+    /* Source filter pills */
+    .source-filters { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.8rem; }
+    .source-pill { padding:0.3rem 0.8rem; border-radius:999px; font-size:0.78rem; font-weight:600; cursor:pointer; border:2px solid #ddd; background:#fff; color:#666; transition:all 0.15s; }
+    .source-pill:hover { border-color:#999; }
+    .source-pill--active { border-color:#1a73e8; background:#e8f0fe; color:#1a73e8; }
+    .source-pill--indeed.source-pill--active { border-color:#2164f3; background:#e8f0fe; color:#2164f3; }
+    .source-pill--nhs.source-pill--active { border-color:#005eb8; background:#e0f0ff; color:#005eb8; }
+    .source-pill--google.source-pill--active { border-color:#ea4335; background:#fce8e6; color:#ea4335; }
+    .source-pill__count { font-weight:400; opacity:0.7; margin-left:0.2rem; }
+
+    /* Source badge on job cards */
+    .source-badge { display:inline-block; font-size:0.65rem; font-weight:700; padding:0.12rem 0.45rem; border-radius:3px; text-transform:uppercase; letter-spacing:0.03em; vertical-align:middle; margin-left:0.4rem; }
+    .source-badge--indeed { background:#2164f3; color:#fff; }
+    .source-badge--nhs { background:#005eb8; color:#fff; }
+    .source-badge--google { background:#ea4335; color:#fff; }
+
     /* Search form */
     .search-row { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:end; }
     .search-row .field-group { flex:1; min-width:140px; }
     .search-row .field-group--small { flex:0 0 100px; min-width:80px; }
     .search-actions { display:flex; gap:0.5rem; align-items:end; padding-bottom:0.15rem; }
 
-    /* Cookie field */
-    .cookie-field textarea { width:100%; height:3.5rem; font-family:monospace; font-size:0.75rem; resize:vertical; }
-    .cookie-toggle { font-size:0.8rem; color:#1a73e8; cursor:pointer; background:none; border:none; padding:0; text-decoration:underline; }
+    /* Cookie status */
+    .cookie-status { font-size:0.8rem; padding:0.5rem 0.75rem; border-radius:0.4rem; display:flex; align-items:center; gap:0.5rem; }
+    .cookie-status--ok { background:#d4edda; color:#155724; }
+    .cookie-status--warn { background:#fff3cd; color:#856404; }
+    .cookie-status--error { background:#f8d7da; color:#721c24; }
 
     /* Job cards */
-    .job-cards { display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem; }
+    .job-cards { display:flex; flex-direction:column; gap:0.6rem; margin-top:0.8rem; }
     .job-card { background:#fff; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.8rem 1rem; transition:border-color 0.15s; }
     .job-card:hover { border-color:#1a73e8; }
     .job-card__title { font-weight:700; font-size:0.95rem; margin:0; }
@@ -48,6 +66,7 @@
     .job-card__badge { display:inline-block; font-size:0.7rem; font-weight:600; padding:0.15rem 0.5rem; border-radius:999px; }
     .job-card__badge--new { background:#d4edda; color:#155724; }
     .job-card__badge--sponsored { background:#fef3cd; color:#856404; }
+    .job-card__badge--closing { background:#f8d7da; color:#721c24; }
 
     /* Pagination */
     .pagination { display:flex; gap:0.5rem; align-items:center; justify-content:center; margin-top:1rem; }
@@ -56,6 +75,18 @@
     /* Status bar */
     .search-status { font-size:0.82rem; color:#666; margin-top:0.6rem; min-height:1.2em; }
     .search-status--error { color:#c0392b; }
+
+    /* Loading spinner */
+    .loading-spinner { display:inline-block; width:14px; height:14px; border:2px solid #ddd; border-top-color:#1a73e8; border-radius:50%; animation:spin 0.6s linear infinite; vertical-align:middle; margin-right:0.4rem; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* Settings panel */
+    .settings-panel { background:#f9f9f9; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.8rem 1rem; margin-bottom:1rem; }
+    .settings-panel summary { cursor:pointer; font-weight:600; font-size:0.85rem; color:#666; }
+    .settings-panel summary:hover { color:#333; }
+    .settings-inner { padding-top:0.6rem; }
+    .settings-row { display:flex; gap:1rem; align-items:center; margin-bottom:0.4rem; font-size:0.82rem; }
+    .settings-row label { min-width:100px; font-weight:600; color:#555; }
   </style>
 </head>
 <body data-page="dashboard">
@@ -86,35 +117,47 @@
       <button class="tab" data-tab="search">Job Search</button>
     </div>
 
-    <!-- Tab: My Applications -->
+    <!-- ═══ Tab: My Applications ═══ -->
     <section class="tab-panel tab-panel--active" id="panel-tracker">
       <div id="tracker-content">
         <p class="tracker-empty">Loading applications&hellip;</p>
       </div>
     </section>
 
-    <!-- Tab: Job Search -->
+    <!-- ═══ Tab: Job Search ═══ -->
     <section class="tab-panel" id="panel-search">
-      <!-- Cookie config (collapsed by default) -->
-      <section class="card cookie-field" id="cookie-section">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <label style="font-weight:600; font-size:0.85rem;">Indeed Cookies</label>
-          <button class="cookie-toggle" id="cookie-toggle">Show</button>
+
+      <!-- Settings (collapsed) -->
+      <details class="settings-panel" id="settings-panel">
+        <summary>⚙ Settings &amp; Connections</summary>
+        <div class="settings-inner">
+          <div class="settings-row">
+            <label>Indeed:</label>
+            <span id="indeed-status">Checking…</span>
+            <a href="https://uk.indeed.com" target="_blank" rel="noopener" id="indeed-login-link" style="display:none; font-size:0.8rem;">Log in to Indeed →</a>
+          </div>
+          <div class="settings-row">
+            <label>NHS Jobs:</label>
+            <span style="color:#155724;">✓ Public API — always available</span>
+          </div>
+          <div class="settings-row">
+            <label>Google Jobs:</label>
+            <span id="google-status">Checking…</span>
+            <button class="button button--ghost" id="google-connect-btn" style="display:none; font-size:0.78rem; padding:0.2rem 0.6rem;">Connect Google</button>
+          </div>
         </div>
-        <textarea id="cookie-input" placeholder="Paste your Indeed cookie string from DevTools (Application → Cookies → uk.indeed.com)" hidden></textarea>
-        <p style="font-size:0.75rem; color:#888; margin:0.3rem 0 0;">Required for searching. Cookies are stored in your browser only.</p>
-      </section>
+      </details>
 
       <!-- Search form -->
       <section class="card">
         <div class="search-row">
           <div class="field-group">
             <label for="search-keywords">Keywords</label>
-            <input id="search-keywords" type="text" placeholder="e.g. operations manager">
+            <input id="search-keywords" type="text" placeholder="e.g. operations manager" value="practice manager OR operations manager OR continuous improvement">
           </div>
           <div class="field-group">
             <label for="search-location">Location</label>
-            <input id="search-location" type="text" placeholder="e.g. ST13 5QR" value="ST13 5QR">
+            <input id="search-location" type="text" placeholder="e.g. Leek, Staffordshire" value="Leek, Staffordshire">
           </div>
           <div class="field-group field-group--small">
             <label for="search-radius">Radius</label>
@@ -122,19 +165,31 @@
               <option value="5">5 mi</option>
               <option value="10">10 mi</option>
               <option value="15">15 mi</option>
-              <option value="25" selected>25 mi</option>
+              <option value="25">25 mi</option>
+              <option value="30">30 mi</option>
+              <option value="45" selected>45 mi</option>
               <option value="50">50 mi</option>
             </select>
           </div>
           <div class="search-actions">
-            <button class="button" id="search-button" type="button">Search</button>
+            <button class="button" id="search-button" type="button">Search All Sources</button>
           </div>
         </div>
         <p class="search-status" id="search-status"></p>
       </section>
 
+      <!-- Source filter pills (shown after results arrive) -->
+      <div class="source-filters" id="source-filters" style="display:none;">
+        <button class="source-pill source-pill--active" data-source="all">All <span class="source-pill__count" id="count-all"></span></button>
+        <button class="source-pill source-pill--indeed" data-source="indeed">Indeed <span class="source-pill__count" id="count-indeed"></span></button>
+        <button class="source-pill source-pill--nhs" data-source="nhs">NHS Jobs <span class="source-pill__count" id="count-nhs"></span></button>
+        <button class="source-pill source-pill--google" data-source="google">Google <span class="source-pill__count" id="count-google"></span></button>
+      </div>
+
       <!-- Search results -->
       <div id="search-results" class="job-cards"></div>
+
+      <!-- Pagination -->
       <div class="pagination" id="pagination" hidden>
         <button class="button button--ghost" id="prev-page" type="button">&larr; Previous</button>
         <span id="page-info"></span>
@@ -144,6 +199,6 @@
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="dashboard.js?v=1" defer></script>
+  <script src="dashboard.js?v=2" defer></script>
 </body>
 </html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Indeed</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <nav class="dash-nav">
+    <a href="dashboard.html">Applied Jobs</a>
+    <a href="indeed.html" class="active">Indeed</a>
+    <a href="nhs.html">NHS Jobs</a>
+    <a href="google.html">Google Jobs</a>
+    <a href="index.html" style="margin-left:auto; color:#999;">← New Application</a>
+  </nav>
+
+  <div class="page-shell">
+    <h1 class="page-title">Indeed Search</h1>
+    <p class="page-subtitle">Scrape Indeed UK via Supabase Edge Function. Requires cookie capture via Tampermonkey.</p>
+
+    <!-- Status lights -->
+    <div class="status-bar">
+      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">checking…</span></div>
+      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-cookies"></span> Indeed Cookies: <span id="lbl-cookies">checking…</span></div>
+      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-edge"></span> Edge Function: <span id="lbl-edge">checking…</span></div>
+    </div>
+
+    <!-- Search form -->
+    <div class="search-form">
+      <div class="field"><label for="q">Keywords</label><input id="q" value="practice manager OR operations manager OR continuous improvement"></div>
+      <div class="field"><label for="loc">Location</label><input id="loc" value="Leek, Staffordshire"></div>
+      <div class="field field--small"><label for="rad">Radius</label>
+        <select id="rad"><option value="5">5 mi</option><option value="10">10 mi</option><option value="15">15 mi</option><option value="25">25 mi</option><option value="30">30 mi</option><option value="45" selected>45 mi</option><option value="50">50 mi</option></select>
+      </div>
+      <div class="field field--small"><label for="pg">Page</label><input id="pg" type="number" value="0" min="0"></div>
+      <button id="search-btn" onclick="doSearch()">Search Indeed</button>
+    </div>
+
+    <!-- Results -->
+    <div id="results"></div>
+
+    <!-- Debug box -->
+    <div class="debug-box">
+      <div class="debug-header">
+        <span>Debug — Raw API Response</span>
+        <button onclick="copyDebug()">Copy All</button>
+      </div>
+      <pre class="debug-pre" id="debug-output">Waiting for search…</pre>
+    </div>
+
+    <p style="margin-top:1rem; font-size:0.8rem; color:#888;">
+      <strong>Tampermonkey script:</strong> Install <a href="indeed-cookie-capture.user.js">indeed-cookie-capture.user.js</a>
+      then log in to <a href="https://uk.indeed.com" target="_blank">uk.indeed.com</a>. Cookies auto-save to Supabase.
+    </p>
+  </div>
+
+  <script>
+    var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
+    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
+    var EDGE_FN = SUPABASE_URL + "/functions/v1/scrape-indeed";
+
+    document.addEventListener("DOMContentLoaded", init);
+
+    async function init() {
+      await checkSupabase();
+      await checkCookies();
+    }
+
+    async function checkSupabase() {
+      try {
+        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
+          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
+        });
+        if (!res.ok) throw new Error(res.status);
+        setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
+      } catch (e) {
+        setStatus("dot-supabase", "lbl-supabase", "red", e.message);
+      }
+    }
+
+    async function checkCookies() {
+      try {
+        setStatus("dot-edge", "lbl-edge", "yellow", "testing…");
+        var res = await fetch(EDGE_FN, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: "", location: "", radius: "1", page: 0 })
+        });
+        var data = await res.json();
+        setStatus("dot-edge", "lbl-edge", "green", "Reachable");
+
+        if (data.needsCookies) {
+          setStatus("dot-cookies", "lbl-cookies", "red", "No cookies — log in to Indeed + install Tampermonkey script");
+        } else if (data.blocked) {
+          setStatus("dot-cookies", "lbl-cookies", "red", "Blocked/expired — re-login to Indeed");
+        } else {
+          var msg = "Available";
+          if (data.cookieSource) msg += " (source: " + data.cookieSource + ")";
+          if (data.cookieAge) msg += " — " + data.cookieAge + " old";
+          setStatus("dot-cookies", "lbl-cookies", "green", msg);
+        }
+        debugLog({ statusCheck: data });
+      } catch (e) {
+        setStatus("dot-edge", "lbl-edge", "red", e.message);
+        setStatus("dot-cookies", "lbl-cookies", "grey", "Cannot check");
+      }
+    }
+
+    async function doSearch() {
+      var btn = document.getElementById("search-btn");
+      btn.disabled = true; btn.textContent = "Searching…";
+      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching Indeed…</p>';
+
+      try {
+        var body = {
+          query: document.getElementById("q").value,
+          location: document.getElementById("loc").value,
+          radius: document.getElementById("rad").value,
+          page: parseInt(document.getElementById("pg").value, 10) || 0
+        };
+        debugLog({ request: body, endpoint: EDGE_FN });
+
+        var res = await fetch(EDGE_FN, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        var data = await res.json();
+        debugLog({ request: body, response: data });
+
+        if (data.needsCookies || data.blocked) {
+          document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error || "Cookies needed") + '</p>';
+          setStatus("dot-cookies", "lbl-cookies", "red", data.error || "Cookies needed");
+          return;
+        }
+
+        if (data.error && !data.jobs) {
+          document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
+          return;
+        }
+
+        renderJobs(data.jobs || [], data.totalResults || 0);
+      } catch (e) {
+        document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
+        debugLog({ error: e.message });
+      } finally {
+        btn.disabled = false; btn.textContent = "Search Indeed";
+      }
+    }
+
+    function renderJobs(jobs, total) {
+      if (!jobs.length) {
+        document.getElementById("results").innerHTML = '<p class="empty-msg">No results.</p>';
+        return;
+      }
+      var html = '<p class="result-count">' + total + ' total results, showing ' + jobs.length + '</p>';
+      jobs.forEach(function(j) {
+        var badges = "";
+        if (j.isNew) badges += ' <span class="badge badge--new">New</span>';
+        if (j.isSponsored) badges += ' <span class="badge" style="background:#fef3cd;color:#856404;">Sponsored</span>';
+        var meta = [j.location, j.salary, j.jobTypes ? j.jobTypes.join(", ") : ""].filter(Boolean).join(" · ");
+        html += '<div class="job-card">'
+          + '<h3><a href="' + esc(j.url) + '" target="_blank">' + esc(j.title) + '</a>' + badges + '</h3>'
+          + '<div class="meta">' + esc(j.company) + (j.companyRating ? ' ★' + Number(j.companyRating).toFixed(1) : '') + ' · ' + esc(meta) + '</div>'
+          + (j.snippet ? '<div class="snippet">' + esc(j.snippet) + '</div>' : '')
+          + '</div>';
+      });
+      document.getElementById("results").innerHTML = html;
+    }
+
+    function setStatus(dotId, lblId, color, text) {
+      document.getElementById(dotId).className = "status-dot status-dot--" + color;
+      document.getElementById(lblId).textContent = text;
+    }
+    function debugLog(obj) { document.getElementById("debug-output").textContent = JSON.stringify(obj, null, 2); }
+    function copyDebug() {
+      navigator.clipboard.writeText(document.getElementById("debug-output").textContent).then(function() {
+        var btn = document.querySelector(".debug-header button");
+        btn.textContent = "Copied!"; setTimeout(function() { btn.textContent = "Copy All"; }, 1500);
+      });
+    }
+    function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Indeed Cookie Capture → Supabase
 // @namespace    https://checkloops.co.uk
-// @version      1.0
+// @version      1.1
 // @description  Auto-captures Indeed cookies on login and saves to Supabase for job search dashboard
 // @author       Ben Howard
 // @match        https://uk.indeed.com/*
@@ -23,16 +23,15 @@
   }
 
   function isLoggedIn() {
-    // Indeed sets these cookies when logged in
-    var c = document.cookie;
-    return c.includes("CTK=") || c.includes("INDEED_CSRF_TOKEN=");
+    // Indeed sets cookies on any visit; just check we have some
+    return document.cookie.length > 20;
   }
 
   function shouldSave() {
     var last = localStorage.getItem(LAST_SAVE_KEY);
     if (!last) return true;
-    // Re-save if last save was more than 1 hour ago
-    return Date.now() - parseInt(last, 10) > 3600000;
+    // Re-save every 10 minutes (was 1 hour)
+    return Date.now() - parseInt(last, 10) > 600000;
   }
 
   function saveCookies() {
@@ -57,6 +56,7 @@
       },
       onerror: function (err) {
         console.error("[BH Cookie Capture] Failed to save cookies:", err);
+        showNotification("✗ Cookie save failed — check console");
       },
     });
   }

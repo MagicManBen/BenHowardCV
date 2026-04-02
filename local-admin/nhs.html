@@ -3,209 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — NHS Jobs</title>
+  <title>NHS Jobs Search</title>
   <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
     <a href="indeed.html">Indeed</a>
+    <a href="jobspy.html">Multi-Site</a>
     <a href="reed.html">Reed</a>
     <a href="nhs.html" class="active">NHS Jobs</a>
     <a href="adzuna.html">Adzuna</a>
     <a href="usage.html">Usage</a>
-    <a href="index.html" style="margin-left:auto; color:#999;">← New Application</a>
+    <a href="index.html" class="nav-link--muted">New Application</a>
   </nav>
 
-  <div class="page-shell">
-    <h1 class="page-title">NHS Jobs Search</h1>
-    <p class="page-subtitle">Public NHS Jobs XML API — no authentication required.</p>
+  <main class="page-shell">
+    <section class="page-hero">
+      <p class="eyebrow">Job Search</p>
+      <h1 class="page-title">NHS Jobs</h1>
+      <p class="page-subtitle">Public NHS Jobs feed with the same finished layout and same result-card structure as the other source pages.</p>
+    </section>
 
-    <!-- Status lights -->
-    <div class="status-bar">
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">checking…</span></div>
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-edge"></span> Edge Function: <span id="lbl-edge">checking…</span></div>
-      <div class="status-item"><span class="status-dot status-dot--green" id="dot-nhs"></span> NHS API: <span id="lbl-nhs">Public (always available)</span></div>
+    <div class="page-grid">
+      <section class="status-bar">
+        <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">Checking...</span></div>
+        <div class="status-item"><span class="status-dot status-dot--green"></span> NHS API: <span>Public</span></div>
+      </section>
+
+      <section class="surface-card search-panel">
+        <div class="search-grid">
+          <div class="field field--span-6">
+            <label for="q">Keywords</label>
+            <input id="q" value="practice manager OR operations manager OR continuous improvement">
+          </div>
+          <div class="field field--span-4">
+            <label for="loc">Location</label>
+            <input id="loc" value="Leek, Staffordshire">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="dist">Distance (mi)</label>
+            <input id="dist" type="number" value="45" min="1" max="100">
+          </div>
+        </div>
+
+        <div class="search-actions">
+          <button id="search-btn" onclick="doSearch()">Search NHS</button>
+          <span class="search-summary" id="search-summary">Ready.</span>
+        </div>
+      </section>
+
+      <section class="results-shell">
+        <div id="results"><p class="empty-msg">Run a search to load adverts.</p></div>
+      </section>
     </div>
+  </main>
 
-    <!-- Search form -->
-    <div class="search-form">
-      <div class="field"><label for="q">Keywords</label><input id="q" value="practice manager OR operations manager OR continuous improvement"></div>
-      <div class="field"><label for="loc">Location</label><input id="loc" value="Leek, Staffordshire"></div>
-      <div class="field field--small"><label for="dist">Distance (mi)</label><input id="dist" type="number" value="45" min="1" max="100"></div>
-      <button id="search-btn" onclick="doSearch()">Search NHS</button>
-    </div>
-
-    <!-- Progress bar for multi-page fetch -->
-    <div id="fetch-progress" style="display:none; margin-bottom:0.6rem;">
-      <div style="background:#e0e0e0; border-radius:4px; overflow:hidden; height:6px;">
-        <div id="progress-bar" style="background:#1a73e8; height:100%; width:0%; transition:width 0.3s;"></div>
-      </div>
-      <span id="progress-text" style="font-size:0.78rem; color:#666;"></span>
-    </div>
-
-    <!-- Results -->
-    <div id="results"></div>
-
-    <!-- Debug box -->
-    <div class="debug-box">
-      <div class="debug-header">
-        <span>Debug — Raw API Response</span>
-        <button onclick="copyDebug()">Copy All</button>
-      </div>
-      <pre class="debug-pre" id="debug-output">Waiting for search…</pre>
-    </div>
-  </div>
-
+  <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
+    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
     var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
     var EDGE_FN = SUPABASE_URL + "/functions/v1/search-nhs-jobs";
 
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
-      await checkSupabase();
-      await checkEdge();
-    }
-
-    async function checkSupabase() {
       try {
         var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
           headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
         });
         if (!res.ok) throw new Error(res.status);
-        setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
       } catch (e) {
-        setStatus("dot-supabase", "lbl-supabase", "red", e.message);
-      }
-    }
-
-    async function checkEdge() {
-      try {
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ keyword: "test", location: "London", distance: "5", limit: 1, page: 1 })
-        });
-        var data = await res.json();
-        if (data.error) throw new Error(data.error);
-        setStatus("dot-edge", "lbl-edge", "green", "Reachable (test returned " + (data.totalResults || 0) + " results)");
-        debugLog({ edgeCheck: data });
-      } catch (e) {
-        setStatus("dot-edge", "lbl-edge", "red", e.message);
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "red", e.message);
       }
     }
 
     async function doSearch() {
       var btn = document.getElementById("search-btn");
-      btn.disabled = true; btn.textContent = "Searching…";
-      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching NHS Jobs…</p>';
-
-      var progressEl = document.getElementById("fetch-progress");
-      var progressBar = document.getElementById("progress-bar");
-      var progressText = document.getElementById("progress-text");
+      var summary = document.getElementById("search-summary");
+      btn.disabled = true;
+      btn.textContent = "Searching...";
+      summary.textContent = "Searching NHS Jobs...";
+      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching NHS Jobs...</p>';
 
       try {
-        var keyword = document.getElementById("q").value;
-        var location = document.getElementById("loc").value;
-        var distance = document.getElementById("dist").value;
-
-        // Fetch first page to get totalPages
-        var allJobs = [];
-        var page = 1;
-        var totalPages = 1;
-        var totalResults = 0;
-        var lastResponse = null;
-
-        progressEl.style.display = "block";
-        progressBar.style.width = "0%";
-        progressText.textContent = "Fetching page 1…";
-
-        while (page <= totalPages) {
-          var body = {
-            keyword: keyword,
-            location: location,
-            distance: distance,
-            page: page,
-            limit: 100,
+        var res = await fetch(EDGE_FN, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            keyword: document.getElementById("q").value,
+            location: document.getElementById("loc").value,
+            distance: document.getElementById("dist").value,
+            page: 1,
+            limit: 50,
             sort: "publicationDateDesc"
+          })
+        });
+        var data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || ("Search failed (" + res.status + ")"));
+
+        var jobs = (data.jobs || []).map(function(job) {
+          var badges = [];
+          if (job.postDate && JobBoardUI.isRecent(job.postDate, 3)) badges.push({ label: "New", tone: "brand" });
+          if (job.closeDate && JobBoardUI.isClosingSoon(job.closeDate)) badges.push({ label: "Closing Soon", tone: "accent" });
+          return {
+            source: "NHS Jobs",
+            title: job.title,
+            company: job.employer,
+            location: job.location,
+            salary: job.salary,
+            url: job.url,
+            dateText: job.postDate ? "Posted " + JobBoardUI.fmtDate(job.postDate) : "",
+            metaText: job.type || "",
+            description: job.description ? job.description.substring(0, 800) : "",
+            badges: badges
           };
+        });
 
-          var res = await fetch(EDGE_FN, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-          });
-          var data = await res.json();
-          lastResponse = data;
-
-          if (data.error) {
-            document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
-            debugLog({ request: body, response: data });
-            return;
-          }
-
-          totalPages = data.totalPages || 1;
-          totalResults = data.totalResults || 0;
-          allJobs = allJobs.concat(data.jobs || []);
-
-          var pct = Math.round((page / totalPages) * 100);
-          progressBar.style.width = pct + "%";
-          progressText.textContent = "Fetched page " + page + " of " + totalPages + " (" + allJobs.length + " jobs so far)";
-
-          page++;
-        }
-
-        debugLog({ totalPages: totalPages, totalResults: totalResults, jobsFetched: allJobs.length, lastPageResponse: lastResponse });
-        progressText.textContent = "Done — " + allJobs.length + " jobs loaded from " + totalPages + " page(s)";
-
-        renderJobs(allJobs, totalResults);
+        JobBoardUI.renderJobs("results", jobs, {
+          summary: (data.totalResults || jobs.length) + " NHS adverts"
+        });
+        summary.textContent = "Loaded " + jobs.length + " adverts.";
       } catch (e) {
-        document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
-        debugLog({ error: e.message });
+        document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(e.message) + "</p>";
+        summary.textContent = "Search failed.";
       } finally {
-        btn.disabled = false; btn.textContent = "Search NHS";
+        btn.disabled = false;
+        btn.textContent = "Search NHS";
       }
     }
-
-    function renderJobs(jobs, total) {
-      if (!jobs.length) {
-        document.getElementById("results").innerHTML = '<p class="empty-msg">No results.</p>';
-        return;
-      }
-      var html = '<p class="result-count">' + total + ' total results, showing ' + jobs.length + '</p>';
-      jobs.forEach(function(j) {
-        var badges = "";
-        if (isRecent(j.postDate, 3)) badges += ' <span class="badge badge--new">New</span>';
-        if (j.closeDate && isClosingSoon(j.closeDate)) badges += ' <span class="badge badge--closing">Closes ' + esc(fmtDate(j.closeDate)) + '</span>';
-
-        var meta = [j.location, j.salary, j.type].filter(Boolean).join(" · ");
-        html += '<div class="job-card">'
-          + '<h3><a href="' + esc(j.url) + '" target="_blank">' + esc(j.title) + '</a>' + badges + '</h3>'
-          + '<div class="meta">' + esc(j.employer) + ' · ' + esc(meta) + '</div>'
-          + (j.postDate ? '<div class="meta">Posted: ' + esc(fmtDate(j.postDate)) + '</div>' : '')
-          + (j.description ? '<div class="snippet">' + esc(j.description) + '</div>' : '')
-          + '</div>';
-      });
-      document.getElementById("results").innerHTML = html;
-    }
-
-    function setStatus(dotId, lblId, color, text) {
-      document.getElementById(dotId).className = "status-dot status-dot--" + color;
-      document.getElementById(lblId).textContent = text;
-    }
-    function debugLog(obj) { document.getElementById("debug-output").textContent = JSON.stringify(obj, null, 2); }
-    function copyDebug() {
-      navigator.clipboard.writeText(document.getElementById("debug-output").textContent).then(function() {
-        var btn = document.querySelector(".debug-header button");
-        btn.textContent = "Copied!"; setTimeout(function() { btn.textContent = "Copy All"; }, 1500);
-      });
-    }
-    function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
-    function fmtDate(s) { try { return new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); } catch(e) { return s; } }
-    function isRecent(s, days) { if (!s) return false; return (Date.now() - new Date(s).getTime()) < days * 86400000; }
-    function isClosingSoon(s) { if (!s) return false; var d = (new Date(s).getTime() - Date.now()) / 86400000; return d >= 0 && d <= 7; }
   </script>
 </body>
 </html>

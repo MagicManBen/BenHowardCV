@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import base64
+import html
 import json
 import os
 import re
@@ -111,6 +112,114 @@ APPLICATIONS_INDEX_PATH = "data/applications.json"
 DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
 SUPABASE_DEFAULT_BUCKET = "cv-files"
 SUPABASE_APPLICATIONS_TABLE = "applications"
+INDEED_SEARCH_QUERY_TEMPLATE = """
+query GetJobData {{
+  jobSearch(
+    {what}
+    {location}
+    limit: {limit}
+    sort: RELEVANCE
+    {cursor}
+    {filters}
+  ) {{
+    pageInfo {{
+      nextCursor
+    }}
+    results {{
+      trackingKey
+      job {{
+        key
+        title
+        datePublished
+        description {{
+          html
+        }}
+        location {{
+          countryName
+          countryCode
+          admin1Code
+          city
+          postalCode
+          streetAddress
+          formatted {{
+            short
+            long
+          }}
+        }}
+        compensation {{
+          estimated {{
+            currencyCode
+            baseSalary {{
+              unitOfWork
+              range {{
+                ... on Range {{
+                  min
+                  max
+                }}
+              }}
+            }}
+          }}
+          baseSalary {{
+            unitOfWork
+            range {{
+              ... on Range {{
+                min
+                max
+              }}
+            }}
+          }}
+          currencyCode
+        }}
+        attributes {{
+          key
+          label
+        }}
+        employer {{
+          relativeCompanyPageUrl
+          name
+          dossier {{
+            employerDetails {{
+              addresses
+              industry
+              employeesLocalizedLabel
+              revenueLocalizedLabel
+              briefDescription
+            }}
+            images {{
+              squareLogoUrl
+            }}
+            links {{
+              corporateWebsite
+            }}
+          }}
+        }}
+        recruit {{
+          viewJobUrl
+          detailedSalary
+          workSchedule
+        }}
+      }}
+    }}
+  }}
+}}
+""".strip()
+INDEED_API_HEADERS = {
+  "Host": "apis.indeed.com",
+  "content-type": "application/json",
+  "indeed-api-key": "161092c2017b5bbab13edb12461a62d5a833871e7cad6d9d475304573de67ac8",
+  "accept": "application/json",
+  "indeed-locale": "en-GB",
+  "accept-language": "en-GB,en;q=0.9",
+  "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Indeed App 193.1",
+  "indeed-app-info": "appv=193.1; appid=com.indeed.jobsearch; osv=16.6.1; os=ios; dtype=phone",
+}
+INDEED_COUNTRIES = {
+  "UK": ("uk", "GB", "en-GB"),
+  "USA": ("www", "US", "en-US"),
+  "CANADA": ("ca", "CA", "en-CA"),
+  "AUSTRALIA": ("au", "AU", "en-AU"),
+  "IRELAND": ("ie", "IE", "en-IE"),
+}
 
 
 def load_local_config():
@@ -324,6 +433,212 @@ def safe_filename(value):
   text = re.sub(r"[^a-z0-9]+", "-", text)
   text = text.strip("-")
   return text[:80] or "unknown"
+
+
+def html_to_text(value):
+  text = re.sub(r"<br\s*/?>", "\n", str(value or ""), flags=re.IGNORECASE)
+  text = re.sub(r"</p\s*>", "\n\n", text, flags=re.IGNORECASE)
+  text = re.sub(r"<[^>]+>", " ", text)
+  text = html.unescape(text)
+  text = re.sub(r"\r\n?", "\n", text)
+  text = re.sub(r"[ \t]+", " ", text)
+  text = re.sub(r"\n{3,}", "\n\n", text)
+  return text.strip()
+
+
+def indeed_country_meta(country_name):
+  key = str(country_name or "UK").strip().upper()
+  if key not in INDEED_COUNTRIES:
+    raise ValueError(f"Unsupported Indeed country: {country_name}")
+  subdomain, api_country, locale = INDEED_COUNTRIES[key]
+  return {
+    "label": key,
+    "subdomain": subdomain,
+    "apiCountry": api_country,
+    "locale": locale,
+  }
+
+
+def indeed_compensation_summary(compensation):
+  if not isinstance(compensation, dict):
+    return ""
+  source = compensation.get("baseSalary") or ((compensation.get("estimated") or {}).get("baseSalary"))
+  if not isinstance(source, dict):
+    return ""
+  unit = str(source.get("unitOfWork") or "").upper()
+  interval_map = {
+    "YEAR": "year",
+    "MONTH": "month",
+    "WEEK": "week",
+    "DAY": "day",
+    "HOUR": "hour",
+  }
+  interval = interval_map.get(unit, unit.lower())
+  salary_range = source.get("range") if isinstance(source.get("range"), dict) else {}
+  min_amount = salary_range.get("min")
+  max_amount = salary_range.get("max")
+  currency = compensation.get("currencyCode") or ((compensation.get("estimated") or {}).get("currencyCode")) or ""
+  currency_symbol = {"USD": "$", "GBP": "GBP ", "CAD": "CAD ", "AUD": "AUD ", "EUR": "EUR "}.get(currency, (currency + " ") if currency else "")
+  if min_amount is None and max_amount is None:
+    return ""
+  if min_amount is not None and max_amount is not None:
+    return f"{currency_symbol}{int(min_amount):,} - {currency_symbol}{int(max_amount):,} / {interval}".strip()
+  amount = min_amount if min_amount is not None else max_amount
+  return f"{currency_symbol}{int(amount):,} / {interval}".strip()
+
+
+def indeed_job_types(attributes):
+  labels = []
+  seen = set()
+  for attribute in attributes or []:
+    label = str((attribute or {}).get("label", "")).strip()
+    normalized = label.lower()
+    if not label or normalized in seen:
+      continue
+    seen.add(normalized)
+    if any(token in normalized for token in ("full-time", "full time", "part-time", "part time", "contract", "intern", "temporary")):
+      labels.append(label)
+  return labels
+
+
+def indeed_is_remote(job):
+  description = html_to_text(((job.get("description") or {}).get("html")) if isinstance(job, dict) else "")
+  location_long = ((((job.get("location") or {}).get("formatted")) or {}).get("long")) if isinstance(job, dict) else ""
+  haystacks = [description.lower(), str(location_long or "").lower()]
+  for attribute in (job.get("attributes") or []) if isinstance(job, dict) else []:
+    haystacks.append(str((attribute or {}).get("label", "")).lower())
+  return any("remote" in value or "work from home" in value or "wfh" in value for value in haystacks)
+
+
+def build_indeed_filters(hours_old=None, is_remote=False, job_type=""):
+  job_type = str(job_type or "").strip().lower()
+  if hours_old and (is_remote or job_type):
+    raise ValueError("Indeed supports either posted-within filtering or remote/job type filtering, not both together.")
+  if hours_old:
+    return f"""
+    filters: {{
+      date: {{
+        field: "dateOnIndeed",
+        start: "{int(hours_old)}h"
+      }}
+    }}
+    """.strip()
+  keys = []
+  job_type_map = {
+    "fulltime": "CF3CP",
+    "parttime": "75GKK",
+    "contract": "NJXCK",
+    "internship": "VDTG7",
+  }
+  if job_type:
+    if job_type not in job_type_map:
+      raise ValueError(f"Unsupported Indeed job type: {job_type}")
+    keys.append(job_type_map[job_type])
+  if is_remote:
+    keys.append("DSQF7")
+  if not keys:
+    return ""
+  joined = '", "'.join(keys)
+  return f"""
+  filters: {{
+    composite: {{
+      filters: [{{
+        keyword: {{
+          field: "attributes",
+          keys: ["{joined}"]
+        }}
+      }}]
+    }}
+  }}
+  """.strip()
+
+
+def build_indeed_search_query(search_term="", location="", distance=25, limit=20, cursor=None, hours_old=None, is_remote=False, job_type=""):
+  safe_term = str(search_term or "").replace("\\", "\\\\").replace('"', '\\"').strip()
+  safe_location = str(location or "").replace("\\", "\\\\").replace('"', '\\"').strip()
+  return INDEED_SEARCH_QUERY_TEMPLATE.format(
+    what=f'what: "{safe_term}"' if safe_term else "",
+    location=(f'location: {{where: "{safe_location}", radius: {int(distance)}, radiusUnit: MILES}}' if safe_location else ""),
+    limit=max(1, min(int(limit), 100)),
+    cursor=(f'cursor: "{cursor}"' if cursor else ""),
+    filters=build_indeed_filters(hours_old=hours_old, is_remote=is_remote, job_type=job_type),
+  )
+
+
+def fetch_indeed_jobs(search_term="", location="", distance=25, results_wanted=20, country="UK", hours_old=None, is_remote=False, job_type=""):
+  country_meta = indeed_country_meta(country)
+  headers = dict(INDEED_API_HEADERS)
+  headers["indeed-co"] = country_meta["apiCountry"]
+  headers["indeed-locale"] = country_meta["locale"]
+  headers["accept-language"] = f"{country_meta['locale']},en;q=0.9"
+  base_url = f"https://{country_meta['subdomain']}.indeed.com"
+
+  jobs = []
+  seen = set()
+  cursor = None
+  while len(jobs) < results_wanted:
+    query = build_indeed_search_query(
+      search_term=search_term,
+      location=location,
+      distance=distance,
+      limit=min(100, max(1, results_wanted)),
+      cursor=cursor,
+      hours_old=hours_old,
+      is_remote=is_remote,
+      job_type=job_type,
+    )
+    status, payload = http_request_json(
+      "https://apis.indeed.com/graphql",
+      method="POST",
+      headers=headers,
+      payload={"query": query},
+      timeout=20,
+    )
+    if status < 200 or status >= 300:
+      raise RuntimeError(f"Indeed API returned {status}")
+    page_info = (((payload.get("data") or {}).get("jobSearch")) or {}).get("pageInfo") or {}
+    results = (((payload.get("data") or {}).get("jobSearch")) or {}).get("results") or []
+    if not isinstance(results, list) or not results:
+      break
+    cursor = page_info.get("nextCursor")
+    for item in results:
+      job = (item or {}).get("job") or {}
+      job_key = str(job.get("key") or "").strip()
+      if not job_key:
+        continue
+      job_url = f"{base_url}/viewjob?jk={job_key}"
+      if job_url in seen:
+        continue
+      seen.add(job_url)
+      location_data = job.get("location") or {}
+      formatted = location_data.get("formatted") or {}
+      description_html = ((job.get("description") or {}).get("html")) or ""
+      jobs.append({
+        "id": f"in-{job_key}",
+        "title": job.get("title") or "",
+        "company": ((job.get("employer") or {}).get("name")) or "",
+        "location": formatted.get("long") or formatted.get("short") or ", ".join([part for part in [location_data.get("city"), location_data.get("admin1Code"), location_data.get("countryCode")] if part]),
+        "date_posted": datetime.fromtimestamp((job.get("datePublished") or 0) / 1000).strftime("%Y-%m-%d") if job.get("datePublished") else "",
+        "salary": indeed_compensation_summary(job.get("compensation") or {}),
+        "job_url": job_url,
+        "job_url_direct": ((job.get("recruit") or {}).get("viewJobUrl")) or "",
+        "description": html_to_text(description_html),
+        "description_html": description_html,
+        "remote": indeed_is_remote(job),
+        "job_type": indeed_job_types(job.get("attributes") or []),
+        "company_industry": ((((job.get("employer") or {}).get("dossier")) or {}).get("employerDetails") or {}).get("industry") or "",
+      })
+      if len(jobs) >= results_wanted:
+        break
+    if not cursor:
+      break
+  return {
+    "jobs": jobs,
+    "count": len(jobs),
+    "source": "JobSpy-inspired Indeed GraphQL integration",
+    "repo": "https://github.com/speedyapply/JobSpy",
+    "country": country_meta["label"],
+  }
 
 
 def now_iso():
@@ -956,6 +1271,40 @@ class AppHandler(SimpleHTTPRequestHandler):
         return
 
       self.send_json(200, application)
+      return
+
+    if parsed.path == "/api/indeed-search":
+      params = parse_qs(parsed.query)
+      try:
+        search_term = (params.get("q", [""])[0] or "").strip()
+        location = (params.get("l", [""])[0] or "").strip()
+        distance = int((params.get("distance", ["25"])[0] or "25").strip())
+        results_wanted = int((params.get("limit", ["20"])[0] or "20").strip())
+        country = (params.get("country", ["UK"])[0] or "UK").strip()
+        days = (params.get("days", [""])[0] or "").strip()
+        job_type = (params.get("job_type", [""])[0] or "").strip()
+        is_remote = (params.get("remote", ["false"])[0] or "").strip().lower() in {"1", "true", "yes", "on"}
+        hours_old = int(days) * 24 if days else None
+      except ValueError as exc:
+        self.send_json(400, {"error": f"Invalid search parameters: {exc}"})
+        return
+
+      try:
+        payload = fetch_indeed_jobs(
+          search_term=search_term,
+          location=location,
+          distance=distance,
+          results_wanted=results_wanted,
+          country=country,
+          hours_old=hours_old,
+          is_remote=is_remote,
+          job_type=job_type,
+        )
+      except Exception as exc:
+        self.send_json(502, {"error": str(exc)})
+        return
+
+      self.send_json(200, payload)
       return
 
     if self.is_blocked_path(parsed.path):

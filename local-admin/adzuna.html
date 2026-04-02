@@ -3,205 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Adzuna</title>
+  <title>Adzuna Search</title>
   <link rel="stylesheet" href="dashboard.css">
-  <style>
-    .usage-gauge { display:inline-flex; align-items:center; gap:0.5rem; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:6px; padding:0.4rem 0.8rem; margin:0.5rem 0; font-size:0.82rem; }
-    .gauge-bar { width:120px; height:10px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
-    .gauge-fill { height:100%; border-radius:5px; transition:width 0.5s; }
-    .gauge-fill--ok { background:#2ecc40; }
-  </style>
 </head>
 <body>
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
     <a href="indeed.html">Indeed</a>
+    <a href="jobspy.html">Multi-Site</a>
     <a href="reed.html">Reed</a>
     <a href="nhs.html">NHS Jobs</a>
     <a href="adzuna.html" class="active">Adzuna</a>
     <a href="usage.html">Usage</a>
-    <a href="index.html" style="margin-left:auto; color:#999;">← New Application</a>
+    <a href="index.html" class="nav-link--muted">New Application</a>
   </nav>
 
-  <div class="page-shell">
-    <h1 class="page-title">Adzuna Job Search</h1>
-    <p class="page-subtitle">Adzuna API — multi-country job aggregator, free developer tier.</p>
+  <main class="page-shell">
+    <section class="page-hero">
+      <p class="eyebrow">Job Search</p>
+      <h1 class="page-title">Adzuna</h1>
+      <p class="page-subtitle">Adzuna API results using the same layout, same navigation, and same result-card presentation as the other boards.</p>
+    </section>
 
-    <!-- Status lights -->
-    <div class="status-bar">
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">checking…</span></div>
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-edge"></span> Edge Function: <span id="lbl-edge">checking…</span></div>
+    <div class="page-grid">
+      <section class="status-bar">
+        <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">Checking...</span></div>
+        <div class="status-item"><span class="status-dot status-dot--grey" id="dot-edge"></span> Adzuna route: <span id="lbl-edge">Checking...</span></div>
+      </section>
+
+      <section class="surface-card search-panel">
+        <div class="search-grid">
+          <div class="field field--span-5">
+            <label for="q">Keywords</label>
+            <input id="q" value="practice manager OR operations manager OR continuous improvement">
+          </div>
+          <div class="field field--span-3">
+            <label for="loc">Location</label>
+            <input id="loc" value="Staffordshire">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="dist">Distance (km)</label>
+            <input id="dist" type="number" value="50" min="1" max="200">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="days">Max days old</label>
+            <input id="days" type="number" value="14" min="1" max="90">
+          </div>
+        </div>
+
+        <div class="search-actions">
+          <button id="search-btn" onclick="doSearch()">Search Adzuna</button>
+          <span class="search-summary" id="search-summary">Ready.</span>
+        </div>
+      </section>
+
+      <section class="results-shell">
+        <div id="results"><p class="empty-msg">Run a search to load adverts.</p></div>
+      </section>
     </div>
+  </main>
 
-    <!-- Search form -->
-    <div class="search-form">
-      <div class="field"><label for="q">Keywords</label><input id="q" value="practice manager OR operations manager OR continuous improvement"></div>
-      <div class="field"><label for="loc">Location</label><input id="loc" value="Staffordshire"></div>
-      <div class="field field--small"><label for="dist">Distance (km)</label><input id="dist" type="number" value="50" min="1" max="200"></div>
-      <div class="field field--small"><label for="days">Max days old</label><input id="days" type="number" value="14" min="1" max="90"></div>
-      <div class="field field--small"><label for="sort">Sort</label>
-        <select id="sort"><option value="relevance">Relevance</option><option value="date">Date</option><option value="salary">Salary</option></select>
-      </div>
-      <button id="search-btn" onclick="doSearch()">Search Adzuna</button>
-    </div>
-
-    <!-- Progress bar -->
-    <div id="fetch-progress" style="display:none; margin-bottom:0.6rem;">
-      <div style="background:#e0e0e0; border-radius:4px; overflow:hidden; height:6px;">
-        <div id="progress-bar" style="background:#1a73e8; height:100%; width:0%; transition:width 0.3s;"></div>
-      </div>
-      <span id="progress-text" style="font-size:0.78rem; color:#666;"></span>
-    </div>
-
-    <!-- Results -->
-    <div id="results"></div>
-
-    <!-- Debug box -->
-    <div class="debug-box">
-      <div class="debug-header">
-        <span>Debug — Raw API Response</span>
-        <button onclick="copyDebug()">Copy All</button>
-      </div>
-      <pre class="debug-pre" id="debug-output">Click Search to begin.</pre>
-    </div>
-  </div>
-
+  <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
+    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
     var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
     var EDGE_FN = SUPABASE_URL + "/functions/v1/search-adzuna";
 
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
-      await checkSupabase();
-      setStatus("dot-edge", "lbl-edge", "green", "Ready (search-adzuna)");
-    }
-
-    async function checkSupabase() {
       try {
         var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
           headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
         });
         if (!res.ok) throw new Error(res.status);
-        setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
       } catch (e) {
-        setStatus("dot-supabase", "lbl-supabase", "red", e.message);
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "red", e.message);
       }
+      JobBoardUI.setStatus("dot-edge", "lbl-edge", "green", "Ready");
     }
 
     async function doSearch() {
       var btn = document.getElementById("search-btn");
-      btn.disabled = true; btn.textContent = "Searching…";
-      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching Adzuna…</p>';
-
-      var progressEl = document.getElementById("fetch-progress");
-      var progressBar = document.getElementById("progress-bar");
-      var progressText = document.getElementById("progress-text");
+      var summary = document.getElementById("search-summary");
+      btn.disabled = true;
+      btn.textContent = "Searching...";
+      summary.textContent = "Searching Adzuna...";
+      document.getElementById("results").innerHTML = '<p class="empty-msg">Searching Adzuna...</p>';
 
       try {
-        var what = document.getElementById("q").value;
-        var where = document.getElementById("loc").value;
-        var distance = parseInt(document.getElementById("dist").value) || 50;
-        var maxDaysOld = parseInt(document.getElementById("days").value) || 14;
-        var sortBy = document.getElementById("sort").value;
-
-        // Fetch all pages (50 per page)
-        var allJobs = [];
-        var page = 1;
-        var totalResults = 0;
-        var lastData = null;
-
-        progressEl.style.display = "block";
-        progressBar.style.width = "0%";
-        progressText.textContent = "Fetching page 1…";
-
-        while (true) {
-          var body = {
-            what: what,
-            where: where,
-            distance: distance,
-            maxDaysOld: maxDaysOld,
-            sortBy: sortBy,
-            page: page,
+        var res = await fetch(EDGE_FN, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            what: document.getElementById("q").value,
+            where: document.getElementById("loc").value,
+            distance: parseInt(document.getElementById("dist").value, 10) || 50,
+            maxDaysOld: parseInt(document.getElementById("days").value, 10) || 14,
+            sortBy: "date",
+            page: 1,
             resultsPerPage: 50
+          })
+        });
+        var data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || ("Search failed (" + res.status + ")"));
+
+        var jobs = (data.jobs || []).map(function(job) {
+          var badges = [];
+          if (job.created && JobBoardUI.isRecent(job.created, 3)) badges.push({ label: "New", tone: "brand" });
+          if (job.contractType) badges.push({ label: job.contractType, tone: "neutral" });
+          if (job.contractTime) badges.push({ label: job.contractTime, tone: "brand" });
+          return {
+            source: "Adzuna",
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            salary: job.salary,
+            url: job.url,
+            dateText: job.created ? "Posted " + JobBoardUI.fmtDate(job.created) : "",
+            metaText: job.category || "",
+            description: job.description ? job.description.substring(0, 800) : "",
+            badges: badges
           };
+        });
 
-          var res = await fetch(EDGE_FN, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-          });
-          var data = await res.json();
-          lastData = data;
-
-          if (data.error) {
-            document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
-            debugLog({ request: body, response: data });
-            return;
-          }
-
-          totalResults = data.totalResults || 0;
-          var jobs = data.jobs || [];
-          allJobs = allJobs.concat(jobs);
-
-          var pct = totalResults > 0 ? Math.round((allJobs.length / totalResults) * 100) : 100;
-          progressBar.style.width = Math.min(pct, 100) + "%";
-          progressText.textContent = "Fetched " + allJobs.length + " of " + totalResults + " jobs (page " + page + ")";
-
-          if (jobs.length < 50 || allJobs.length >= totalResults) break;
-          page++;
-        }
-
-        debugLog({ totalResults: totalResults, jobsFetched: allJobs.length, pages: page, lastPage: lastData });
-        progressText.textContent = "Done — " + allJobs.length + " jobs loaded";
-        renderJobs(allJobs, totalResults);
+        JobBoardUI.renderJobs("results", jobs, {
+          summary: (data.totalResults || jobs.length) + " Adzuna adverts"
+        });
+        summary.textContent = "Loaded " + jobs.length + " adverts.";
       } catch (e) {
-        document.getElementById("results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
-        debugLog({ error: e.message });
+        document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(e.message) + "</p>";
+        summary.textContent = "Search failed.";
       } finally {
-        btn.disabled = false; btn.textContent = "Search Adzuna";
+        btn.disabled = false;
+        btn.textContent = "Search Adzuna";
       }
     }
-
-    function renderJobs(jobs, total) {
-      if (!jobs.length) {
-        document.getElementById("results").innerHTML = '<p class="empty-msg">No results.</p>';
-        return;
-      }
-      var html = '<p class="result-count">' + total + ' total results, showing ' + jobs.length + '</p>';
-      jobs.forEach(function(j) {
-        var badges = "";
-        if (j.created && isRecent(j.created, 3)) badges += ' <span class="badge badge--new">New</span>';
-        if (j.contractType) badges += ' <span class="badge" style="background:#e8eaf6;color:#283593;">' + esc(j.contractType) + '</span>';
-        if (j.contractTime) badges += ' <span class="badge" style="background:#fce4ec;color:#880e4f;">' + esc(j.contractTime) + '</span>';
-        if (j.category) badges += ' <span class="badge" style="background:#e0f2f1;color:#004d40;">' + esc(j.category) + '</span>';
-
-        var meta = [j.company, j.location, j.salary].filter(Boolean).join(" · ");
-        html += '<div class="job-card">'
-          + '<h3><a href="' + esc(j.url) + '" target="_blank">' + esc(j.title) + '</a>' + badges + '</h3>'
-          + '<div class="meta">' + esc(meta) + '</div>'
-          + (j.created ? '<div class="meta">Posted: ' + esc(fmtDate(j.created)) + '</div>' : '')
-          + (j.description ? '<div class="snippet">' + esc(j.description.substring(0, 200)) + '</div>' : '')
-          + '</div>';
-      });
-      document.getElementById("results").innerHTML = html;
-    }
-
-    function setStatus(dotId, lblId, color, text) {
-      document.getElementById(dotId).className = "status-dot status-dot--" + color;
-      document.getElementById(lblId).textContent = text;
-    }
-    function debugLog(obj) { document.getElementById("debug-output").textContent = JSON.stringify(obj, null, 2); }
-    function copyDebug() {
-      navigator.clipboard.writeText(document.getElementById("debug-output").textContent).then(function() {
-        var btn = document.querySelector(".debug-header button");
-        btn.textContent = "Copied!"; setTimeout(function() { btn.textContent = "Copy All"; }, 1500);
-      });
-    }
-    function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
-    function fmtDate(s) { try { return new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); } catch(e) { return s; } }
-    function isRecent(s, days) { try { return (Date.now() - new Date(s).getTime()) < days * 86400000; } catch(e) { return false; } }
   </script>
 </body>
 </html>

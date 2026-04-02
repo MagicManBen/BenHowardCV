@@ -3,455 +3,174 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Indeed</title>
+  <title>Indeed Search</title>
   <link rel="stylesheet" href="dashboard.css">
-  <style>
-    .tab-bar { display:flex; gap:0; margin:1rem 0 0.5rem; border-bottom:2px solid #e0e0e0; }
-    .tab-bar button { padding:0.5rem 1.2rem; border:none; background:none; cursor:pointer; font-size:0.9rem; font-weight:600; color:#888; border-bottom:2px solid transparent; margin-bottom:-2px; }
-    .tab-bar button.active { color:#1a73e8; border-bottom-color:#1a73e8; }
-    .tab-panel { display:none; } .tab-panel.active { display:block; }
-    .scraped-meta { font-size:0.82rem; color:#888; margin:0.5rem 0; }
-    .scraped-meta strong { color:#333; }
-    .usage-gauge { display:inline-flex; align-items:center; gap:0.5rem; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:6px; padding:0.4rem 0.8rem; margin:0.5rem 0; font-size:0.82rem; }
-    .gauge-bar { width:120px; height:10px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
-    .gauge-fill { height:100%; border-radius:5px; transition:width 0.5s; }
-    .gauge-fill--ok { background:#2ecc40; }
-    .gauge-fill--warn { background:#f1c40f; }
-    .gauge-fill--danger { background:#e74c3c; }
-    .gauge-text { font-weight:600; }
-    .rate-info { font-size:0.78rem; color:#888; }
-    .refresh-btn { background:#1a73e8; color:#fff; border:none; padding:0.4rem 1rem; border-radius:4px; cursor:pointer; font-size:0.82rem; }
-    .refresh-btn:hover { background:#1557b0; }
-    .config-panel { background:#f0f4ff; border:1px solid #c5d5f5; border-radius:8px; padding:1rem; margin:0.8rem 0; }
-    .config-panel h3 { margin:0 0 0.6rem; font-size:0.95rem; color:#1a73e8; }
-    .config-panel .field { margin-bottom:0.5rem; }
-    .config-panel .field label { display:block; font-size:0.8rem; font-weight:600; color:#555; margin-bottom:0.15rem; }
-    .config-panel .field input, .config-panel .field select { width:100%; padding:0.35rem 0.5rem; border:1px solid #ccc; border-radius:4px; font-size:0.85rem; box-sizing:border-box; }
-    .config-row { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0.5rem; }
-    .config-actions { display:flex; gap:0.5rem; margin-top:0.6rem; align-items:center; }
-    .config-actions .save-btn { background:#2ecc40; color:#fff; border:none; padding:0.4rem 1rem; border-radius:4px; cursor:pointer; font-size:0.82rem; font-weight:600; }
-    .config-actions .save-btn:hover { background:#27ae60; }
-    .config-status { font-size:0.8rem; color:#888; }
-    .local-instructions { background:#fffbea; border:1px solid #f5d020; border-radius:6px; padding:0.8rem 1rem; margin:0.8rem 0; font-size:0.85rem; line-height:1.5; }
-    .local-instructions code { background:#f0f0f0; padding:0.15rem 0.4rem; border-radius:3px; font-size:0.82rem; }
-  </style>
 </head>
 <body>
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
     <a href="indeed.html" class="active">Indeed</a>
+    <a href="jobspy.html">Multi-Site</a>
     <a href="reed.html">Reed</a>
     <a href="nhs.html">NHS Jobs</a>
     <a href="adzuna.html">Adzuna</a>
     <a href="usage.html">Usage</a>
-    <a href="index.html" style="margin-left:auto; color:#999;">&#8592; New Application</a>
+    <a href="index.html" class="nav-link--muted">New Application</a>
   </nav>
 
-  <div class="page-shell">
-    <h1 class="page-title">Indeed Search</h1>
-    <p class="page-subtitle">Chrome scraper &#8594; Supabase &#8594; dashboard</p>
-
-    <!-- Status lights -->
-    <div class="status-bar">
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-supabase"></span> Supabase: <span id="lbl-supabase">checking&#8230;</span></div>
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-cookies"></span> Cookies: <span id="lbl-cookies">checking&#8230;</span></div>
-      <div class="status-item"><span class="status-dot status-dot--grey" id="dot-jobs"></span> Saved jobs: <span id="lbl-jobs">checking&#8230;</span></div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tab-bar">
-      <button class="active" onclick="switchTab('saved')">Saved Results</button>
-      <button onclick="switchTab('config')">Search Config</button>
-      <button onclick="switchTab('rapid')">RapidAPI Search</button>
-    </div>
-
-    <!-- Tab 1: Saved results -->
-    <div class="tab-panel active" id="tab-saved">
-      <div class="local-instructions">
-        <strong>How it works:</strong> Double-click <code>Capture Indeed Cookies.command</code> in Finder.
-        It captures your cookies, reads the search config below, scrapes Indeed via Chrome, and uploads results to Supabase.
+  <main class="page-shell">
+    <section class="page-hero">
+      <p class="eyebrow">Job Search</p>
+      <h1 class="page-title">Indeed</h1>
+      <p class="page-subtitle">Live Indeed search through your local backend, with a cleaner operator-focused layout and consistent result cards.</p>
+      <div class="source-tabs">
+        <a href="indeed.html" class="active">Indeed</a>
+        <a href="jobspy.html">Multi-Site</a>
       </div>
+    </section>
 
-      <div class="scraped-meta" id="scraped-meta"></div>
-      <button class="refresh-btn" onclick="loadSavedJobs()">&#8635; Refresh from Supabase</button>
-      <div id="saved-results"><p class="empty-msg">Loading&#8230;</p></div>
-    </div>
+    <div class="page-grid">
+      <section class="note-card">
+        Based on the current <a href="https://github.com/speedyapply/JobSpy" target="_blank" rel="noopener noreferrer">speedyapply/JobSpy</a> approach for Indeed. This page runs through <code>local_server.py</code> so the site can call it directly.
+      </section>
 
-    <!-- Tab 2: Search Config -->
-    <div class="tab-panel" id="tab-config">
-      <div class="config-panel">
-        <h3>Search Configuration</h3>
-        <p style="font-size:0.82rem; color:#666; margin:0 0 0.8rem;">
-          Edit your search terms here and click Save. The <code>.command</code> scraper reads this config from Supabase.
-        </p>
-        <div class="field">
-          <label for="cfg-query">Keywords (use OR between terms)</label>
-          <input id="cfg-query" value="manager OR director OR operations OR continuous improvement">
-        </div>
-        <div class="field">
-          <label for="cfg-location">Location</label>
-          <input id="cfg-location" value="Leek, Staffordshire">
-        </div>
-        <div class="config-row">
-          <div class="field">
-            <label for="cfg-radius">Radius (miles)</label>
-            <select id="cfg-radius">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="25">25</option>
-              <option value="50" selected>50</option>
-              <option value="100">100</option>
+      <section class="surface-card search-panel">
+        <div class="search-grid">
+          <div class="field field--span-5">
+            <label for="q">Keywords</label>
+            <input id="q" value="operations manager OR continuous improvement OR factory manager">
+          </div>
+          <div class="field field--span-3">
+            <label for="loc">Location</label>
+            <input id="loc" value="Staffordshire">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="distance">Radius (miles)</label>
+            <input id="distance" type="number" min="1" max="100" value="25">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="limit">Max jobs</label>
+            <input id="limit" type="number" min="1" max="100" value="20">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="days">Posted within (days)</label>
+            <input id="days" type="number" min="1" max="30" placeholder="Any">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="country">Country</label>
+            <select id="country">
+              <option value="UK" selected>UK</option>
+              <option value="USA">USA</option>
+              <option value="CANADA">Canada</option>
+              <option value="AUSTRALIA">Australia</option>
+              <option value="IRELAND">Ireland</option>
             </select>
           </div>
-          <div class="field">
-            <label for="cfg-days">Posted within (days)</label>
-            <select id="cfg-days">
-              <option value="1">1</option>
-              <option value="3">3</option>
-              <option value="7" selected>7</option>
-              <option value="14">14</option>
-              <option value="30">30</option>
+          <div class="field field--span-2 field--compact">
+            <label for="job-type">Job type</label>
+            <select id="job-type">
+              <option value="">Any</option>
+              <option value="fulltime">Full time</option>
+              <option value="parttime">Part time</option>
+              <option value="contract">Contract</option>
+              <option value="internship">Internship</option>
             </select>
           </div>
-          <div class="field">
-            <label for="cfg-pages">Pages to scrape</label>
-            <select id="cfg-pages">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3" selected>3</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="cfg-sort">Sort by</label>
-            <select id="cfg-sort">
-              <option value="date">Date</option>
-              <option value="relevance">Relevance</option>
-            </select>
+          <div class="field-checkbox field--span-2 field--compact">
+            <span>Remote</span>
+            <label for="remote"><input id="remote" type="checkbox"> Remote only</label>
           </div>
         </div>
-        <div class="config-actions">
-          <button class="save-btn" onclick="saveSearchConfig()">Save Config to Supabase</button>
-          <span class="config-status" id="config-status"></span>
+
+        <div class="search-actions">
+          <button id="search-btn" onclick="doSearch()">Search Indeed</button>
+          <button class="button--ghost" onclick="loadSample()">Load sample</button>
+          <span class="search-summary" id="search-summary">Ready.</span>
         </div>
-      </div>
+      </section>
+
+      <section class="results-shell">
+        <div id="results"><p class="empty-msg">Run a search to load adverts.</p></div>
+      </section>
     </div>
+  </main>
 
-    <!-- Tab 3: RapidAPI (backup) -->
-    <div class="tab-panel" id="tab-rapid">
-      <p style="font-size:0.85rem; color:#e74c3c; margin:0.5rem 0;"><strong>Limit: 1 request/day</strong> on free plan &#8212; use the .command scraper instead.</p>
-
-      <div id="usage-box" style="display:none;">
-        <div class="usage-gauge">
-          <span>Daily quota:</span>
-          <div class="gauge-bar"><div class="gauge-fill gauge-fill--ok" id="gauge-fill" style="width:100%"></div></div>
-          <span class="gauge-text" id="gauge-text">&#8212;</span>
-        </div>
-        <div class="rate-info" id="rate-info"></div>
-      </div>
-
-      <div class="search-form">
-        <div class="field"><label for="q">Keywords</label><input id="q" value="Practice Manager OR operations manager OR continuous improvement"></div>
-        <div class="field"><label for="loc">Location</label><input id="loc" value="Staffordshire"></div>
-        <div class="field field--small"><label for="rad">Radius</label>
-          <select id="rad"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="25">25</option><option value="50" selected>50</option><option value="100">100</option></select>
-        </div>
-        <div class="field field--small"><label for="days">Days</label>
-          <select id="days"><option value="1">1</option><option value="3">3</option><option value="7" selected>7</option><option value="14">14</option></select>
-        </div>
-        <div class="field field--small"><label for="rows">Max</label><input id="rows" type="number" value="15" min="1" max="50"></div>
-        <div class="field field--small"><label for="sort">Sort</label>
-          <select id="sort"><option value="relevance">Relevance</option><option value="date">Date</option></select>
-        </div>
-        <button id="search-btn" onclick="doRapidSearch()">Search Indeed (RapidAPI)</button>
-      </div>
-      <div id="rapid-results"></div>
-    </div>
-
-    <!-- Debug box -->
-    <div class="debug-box">
-      <div class="debug-header">
-        <span>Debug</span>
-        <button onclick="copyDebug()">Copy All</button>
-      </div>
-      <pre class="debug-pre" id="debug-output">Ready.</pre>
-    </div>
-  </div>
-
+  <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
-    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
-    var EDGE_FN = SUPABASE_URL + "/functions/v1/search-indeed-rapid";
-
-    document.addEventListener("DOMContentLoaded", init);
-
-    async function init() {
-      await checkSupabase();
-      await checkCookies();
-      await loadSavedJobs();
-      await loadSearchConfig();
-    }
-
-    // ─── status checks ──────────────────────────────────────────
-    async function checkSupabase() {
-      try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        if (!res.ok) throw new Error(res.status);
-        setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
-      } catch (e) {
-        setStatus("dot-supabase", "lbl-supabase", "red", e.message);
-      }
-    }
-
-    async function checkCookies() {
-      try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/cookies?source=eq.indeed&select=updated_at", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        var rows = await res.json();
-        if (rows.length > 0) {
-          var age = timeSince(rows[0].updated_at);
-          setStatus("dot-cookies", "lbl-cookies", "green", "Captured " + age);
-        } else {
-          setStatus("dot-cookies", "lbl-cookies", "amber", "Not found");
-        }
-      } catch (e) {
-        setStatus("dot-cookies", "lbl-cookies", "red", e.message);
-      }
-    }
-
-    // ─── search config ──────────────────────────────────────────
-    async function loadSearchConfig() {
-      try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/cookies?source=eq.indeed_search_config&select=cookie_data", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        var rows = await res.json();
-        if (rows.length > 0 && rows[0].cookie_data) {
-          var cfg = JSON.parse(rows[0].cookie_data);
-          if (cfg.query) document.getElementById("cfg-query").value = cfg.query;
-          if (cfg.location) document.getElementById("cfg-location").value = cfg.location;
-          if (cfg.radius) document.getElementById("cfg-radius").value = String(cfg.radius);
-          if (cfg.days) document.getElementById("cfg-days").value = String(cfg.days);
-          if (cfg.pages) document.getElementById("cfg-pages").value = String(cfg.pages);
-          if (cfg.sort) document.getElementById("cfg-sort").value = cfg.sort;
-          document.getElementById("config-status").textContent = "Loaded from Supabase";
-          debugLog({ search_config: cfg });
-        }
-      } catch (e) {
-        document.getElementById("config-status").textContent = "Could not load config: " + e.message;
-      }
-    }
-
-    async function saveSearchConfig() {
-      var cfg = {
-        query: document.getElementById("cfg-query").value,
-        location: document.getElementById("cfg-location").value,
-        radius: parseInt(document.getElementById("cfg-radius").value),
-        days: parseInt(document.getElementById("cfg-days").value),
-        pages: parseInt(document.getElementById("cfg-pages").value),
-        sort: document.getElementById("cfg-sort").value
-      };
-
-      var statusEl = document.getElementById("config-status");
-      statusEl.textContent = "Saving...";
-
-      try {
-        var res = await fetch(SUPABASE_URL + "/functions/v1/save-cookies", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ source: "indeed_search_config", cookies: JSON.stringify(cfg) })
-        });
-        var data = await res.json();
-        if (data.ok) {
-          statusEl.textContent = "Saved! The .command script will use these settings.";
-          statusEl.style.color = "#2ecc40";
-          setTimeout(function() { statusEl.style.color = "#888"; }, 3000);
-        } else {
-          throw new Error(data.error || "Unknown error");
-        }
-      } catch (e) {
-        statusEl.textContent = "Save failed: " + e.message;
-        statusEl.style.color = "#e74c3c";
-      }
-      debugLog({ saved_config: cfg });
-    }
-
-    // ─── saved results ──────────────────────────────────────────
-    async function loadSavedJobs() {
-      try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/indeed_jobs?select=*&order=scraped_at.desc&limit=200", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        var jobs = await res.json();
-        debugLog({ saved_jobs_count: jobs.length, source: "supabase/indeed_jobs" });
-
-        if (jobs.length === 0) {
-          setStatus("dot-jobs", "lbl-jobs", "amber", "0 jobs");
-          document.getElementById("saved-results").innerHTML = '<p class="empty-msg">No saved results yet. Run the .command scraper to populate.</p>';
-          document.getElementById("scraped-meta").innerHTML = "";
-          return;
-        }
-
-        setStatus("dot-jobs", "lbl-jobs", "green", jobs.length + " jobs saved");
-
-        var latest = jobs[0].scraped_at;
-        var queries = [];
-        var seen = {};
-        jobs.forEach(function(j) {
-          if (j.search_query && !seen[j.search_query]) { seen[j.search_query] = 1; queries.push(j.search_query); }
-        });
-        document.getElementById("scraped-meta").innerHTML =
-          "<strong>" + jobs.length + "</strong> jobs saved &middot; Last scraped: <strong>" + timeSince(latest) + "</strong>" +
-          (queries.length ? " &middot; Queries: " + queries.map(esc).join(", ") : "");
-
-        renderJobCards(jobs, "saved-results");
-      } catch (e) {
-        setStatus("dot-jobs", "lbl-jobs", "red", e.message);
-        document.getElementById("saved-results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
-      }
-    }
-
-    // ─── RapidAPI search (backup) ───────────────────────────────
-    async function doRapidSearch() {
+    async function doSearch() {
       var btn = document.getElementById("search-btn");
-      btn.disabled = true; btn.textContent = "Searching... (10-30s)";
-      document.getElementById("rapid-results").innerHTML = '<p class="empty-msg">Scraping Indeed via RapidAPI...</p>';
+      var summary = document.getElementById("search-summary");
+      var days = document.getElementById("days").value.trim();
+      var remote = document.getElementById("remote").checked;
+      var jobType = document.getElementById("job-type").value;
 
-      try {
-        var body = {
-          query: document.getElementById("q").value,
-          location: document.getElementById("loc").value,
-          radius: document.getElementById("rad").value,
-          fromDays: document.getElementById("days").value,
-          maxRows: parseInt(document.getElementById("rows").value) || 15,
-          sort: document.getElementById("sort").value,
-          jobType: "fulltime",
-          country: "uk"
-        };
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
-        });
-        var data = await res.json();
-        debugLog({ request: body, response: data });
-        if (data.rateLimits) updateGauge(data.rateLimits);
-        if (data.error) {
-          document.getElementById("rapid-results").innerHTML = '<p class="error-msg">' + esc(data.error) + '</p>';
-          return;
-        }
-        var jobs = extractJobs(data.data);
-        renderJobCards(jobs.map(function(j) {
-          return {
-            title: j.title || j.jobTitle || j.name || "Untitled",
-            company: j.company || j.companyName || "",
-            location: j.location || j.locationName || "",
-            salary: j.salary || j.formattedSalary || "",
-            url: j.url || j.link || j.jobUrl || "#",
-            date_posted: j.date || j.postDate || j.datePosted || "",
-            description: j.description || j.snippet || ""
-          };
-        }), "rapid-results");
-      } catch (e) {
-        document.getElementById("rapid-results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
-        debugLog({ error: e.message });
-      } finally {
-        btn.disabled = false; btn.textContent = "Search Indeed (RapidAPI)";
-      }
-    }
-
-    // ─── shared rendering ───────────────────────────────────────
-    function renderJobCards(jobs, containerId) {
-      if (!jobs.length) {
-        document.getElementById(containerId).innerHTML = '<p class="empty-msg">No results.</p>';
+      if (days && (remote || jobType)) {
+        document.getElementById("results").innerHTML = '<p class="error-msg">Indeed only supports either posted-within filtering or remote/job-type filtering on this route. Clear one side and try again.</p>';
         return;
       }
-      var html = '<p class="result-count">' + jobs.length + ' jobs</p>';
-      jobs.forEach(function(j) {
-        var title = j.title || "Untitled";
-        var company = j.company || "";
-        var loc = j.location || "";
-        var salary = j.salary || "";
-        var url = j.url || "#";
-        var date = j.date_posted || "";
-        var desc = j.description || "";
-        var badges = "";
-        if (date && isRecent(date, 3)) badges += ' <span class="badge badge--new">New</span>';
 
-        html += '<div class="job-card">'
-          + '<h3><a href="' + esc(url) + '" target="_blank">' + esc(title) + '</a>' + badges + '</h3>'
-          + '<div class="meta">' + [company, loc, salary].filter(Boolean).map(esc).join(" &middot; ") + '</div>'
-          + (date ? '<div class="meta">Posted: ' + esc(date) + '</div>' : '')
-          + (desc ? '<div class="snippet">' + esc(desc.substring(0, 200)) + '</div>' : '')
-          + '</div>';
-      });
-      document.getElementById(containerId).innerHTML = html;
-    }
+      btn.disabled = true;
+      btn.textContent = "Searching...";
+      summary.textContent = "Searching Indeed...";
+      document.getElementById("results").innerHTML = '<p class="empty-msg">Fetching live Indeed results...</p>';
 
-    // ─── tabs ───────────────────────────────────────────────────
-    function switchTab(name) {
-      document.querySelectorAll(".tab-bar button").forEach(function(b) { b.classList.remove("active"); });
-      document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
-      var tabMap = { saved: 0, config: 1, rapid: 2 };
-      var idx = tabMap[name] || 0;
-      document.querySelectorAll(".tab-bar button")[idx].classList.add("active");
-      document.getElementById("tab-" + name).classList.add("active");
-    }
+      try {
+        var params = new URLSearchParams({
+          q: document.getElementById("q").value,
+          l: document.getElementById("loc").value,
+          distance: document.getElementById("distance").value,
+          limit: document.getElementById("limit").value,
+          country: document.getElementById("country").value
+        });
+        if (days) params.set("days", days);
+        if (jobType) params.set("job_type", jobType);
+        if (remote) params.set("remote", "true");
 
-    // ─── utilities ──────────────────────────────────────────────
-    function updateGauge(rl) {
-      if (!rl || !rl.limit) return;
-      document.getElementById("usage-box").style.display = "block";
-      var limit = parseInt(rl.limit) || 1;
-      var remaining = parseInt(rl.remaining);
-      if (isNaN(remaining)) remaining = limit;
-      var pct = Math.round((remaining / limit) * 100);
-      var fill = document.getElementById("gauge-fill");
-      fill.style.width = pct + "%";
-      fill.className = "gauge-fill " + (pct > 50 ? "gauge-fill--ok" : pct > 10 ? "gauge-fill--warn" : "gauge-fill--danger");
-      document.getElementById("gauge-text").textContent = remaining + " / " + limit + " remaining";
-      var info = "Used today: " + (limit - remaining) + " of " + limit;
-      if (rl.reset) {
-        var rd = new Date(parseInt(rl.reset) * 1000);
-        info += " &middot; Resets: " + rd.toLocaleString("en-GB");
+        var res = await fetch("/api/indeed-search?" + params.toString());
+        var data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || ("Search failed (" + res.status + ")"));
+
+        var jobs = (data.jobs || []).map(function(job) {
+          var badges = [];
+          if (job.remote) badges.push({ label: "Remote", tone: "brand" });
+          (job.job_type || []).forEach(function(type) { badges.push({ label: type, tone: "neutral" }); });
+          return {
+            source: "Indeed",
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            salary: job.salary,
+            url: job.job_url,
+            applyUrl: job.job_url_direct,
+            dateText: job.date_posted ? "Posted " + JobBoardUI.fmtDate(job.date_posted) : "",
+            description: job.description ? job.description.substring(0, 900) : "",
+            badges: badges
+          };
+        });
+
+        JobBoardUI.renderJobs("results", jobs, {
+          summary: (data.count || jobs.length) + " live Indeed adverts"
+        });
+        summary.textContent = "Loaded " + jobs.length + " adverts.";
+      } catch (e) {
+        document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(e.message) + "</p>";
+        summary.textContent = "Search failed.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Search Indeed";
       }
-      document.getElementById("rate-info").textContent = info;
     }
 
-    function extractJobs(d) {
-      if (!d) return [];
-      if (Array.isArray(d)) return d;
-      if (d.jobs && Array.isArray(d.jobs)) return d.jobs;
-      if (d.results && Array.isArray(d.results)) return d.results;
-      if (d.data && Array.isArray(d.data)) return d.data;
-      return [];
-    }
-
-    function setStatus(dotId, lblId, color, text) {
-      document.getElementById(dotId).className = "status-dot status-dot--" + color;
-      document.getElementById(lblId).textContent = text;
-    }
-    function debugLog(obj) { document.getElementById("debug-output").textContent = JSON.stringify(obj, null, 2); }
-    function copyDebug() {
-      navigator.clipboard.writeText(document.getElementById("debug-output").textContent).then(function() {
-        var btn = document.querySelector(".debug-header button");
-        btn.textContent = "Copied!"; setTimeout(function() { btn.textContent = "Copy All"; }, 1500);
-      });
-    }
-    function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
-    function isRecent(s, days) { try { return (Date.now() - new Date(s).getTime()) < days * 86400000; } catch(e) { return false; } }
-    function timeSince(iso) {
-      var ms = Date.now() - new Date(iso).getTime();
-      if (ms < 60000) return "just now";
-      if (ms < 3600000) return Math.floor(ms/60000) + "m ago";
-      if (ms < 86400000) return Math.floor(ms/3600000) + "h ago";
-      return Math.floor(ms/86400000) + "d ago";
+    function loadSample() {
+      document.getElementById("q").value = "operations manager OR continuous improvement OR factory manager";
+      document.getElementById("loc").value = "Staffordshire";
+      document.getElementById("distance").value = "25";
+      document.getElementById("limit").value = "20";
+      document.getElementById("days").value = "";
+      document.getElementById("country").value = "UK";
+      document.getElementById("job-type").value = "";
+      document.getElementById("remote").checked = false;
+      document.getElementById("search-summary").textContent = "Sample values loaded.";
     }
   </script>
 </body>

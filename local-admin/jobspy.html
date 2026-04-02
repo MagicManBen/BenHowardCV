@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Site Search</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <nav class="dash-nav">
+    <a href="dashboard.html">Applied Jobs</a>
+    <a href="indeed.html">Indeed</a>
+    <a href="jobspy.html" class="active">Multi-Site</a>
+    <a href="reed.html">Reed</a>
+    <a href="nhs.html">NHS Jobs</a>
+    <a href="adzuna.html">Adzuna</a>
+    <a href="usage.html">Usage</a>
+    <a href="index.html" class="nav-link--muted">New Application</a>
+  </nav>
+
+  <main class="page-shell">
+    <section class="page-hero">
+      <p class="eyebrow">Job Search</p>
+      <h1 class="page-title">Multi-Site</h1>
+      <p class="page-subtitle">One search across the boards already wired into your system, with the multi-board GitHub direction coming from JobSpy.</p>
+      <div class="source-tabs">
+        <a href="indeed.html">Indeed</a>
+        <a href="jobspy.html" class="active">Multi-Site</a>
+      </div>
+    </section>
+
+    <div class="page-grid">
+      <section class="note-card">
+        Multi-board repo found: <a href="https://github.com/speedyapply/JobSpy" target="_blank" rel="noopener noreferrer">speedyapply/JobSpy</a>. This tab uses that as the multi-source reference and combines your available sources: Indeed, Reed, NHS Jobs, and Adzuna.
+      </section>
+
+      <section class="surface-card search-panel">
+        <div class="search-grid">
+          <div class="field field--span-5">
+            <label for="q">Keywords</label>
+            <input id="q" value="operations manager OR continuous improvement OR factory manager">
+          </div>
+          <div class="field field--span-3">
+            <label for="loc">Location</label>
+            <input id="loc" value="Staffordshire">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="distance">Radius</label>
+            <input id="distance" type="number" min="1" max="100" value="25">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="limit">Per source</label>
+            <input id="limit" type="number" min="1" max="25" value="10">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="days">Posted within (days)</label>
+            <input id="days" type="number" min="1" max="30" placeholder="Any">
+          </div>
+          <div class="field field--span-2 field--compact">
+            <label for="country">Indeed country</label>
+            <select id="country">
+              <option value="UK" selected>UK</option>
+              <option value="USA">USA</option>
+              <option value="CANADA">Canada</option>
+              <option value="AUSTRALIA">Australia</option>
+              <option value="IRELAND">Ireland</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="search-actions">
+          <button id="search-btn" onclick="runSearch()">Search All Sources</button>
+          <button class="button--ghost" onclick="loadSample()">Load sample</button>
+          <span class="search-summary" id="search-summary">Ready.</span>
+        </div>
+      </section>
+
+      <section class="results-shell">
+        <div id="source-counts"></div>
+        <div id="results"><p class="empty-msg">Run a search to combine multiple sources.</p></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="job-board-ui.js"></script>
+  <script>
+    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
+
+    async function runSearch() {
+      var btn = document.getElementById("search-btn");
+      var summary = document.getElementById("search-summary");
+      var q = document.getElementById("q").value;
+      var loc = document.getElementById("loc").value;
+      var distance = parseInt(document.getElementById("distance").value, 10) || 25;
+      var limit = parseInt(document.getElementById("limit").value, 10) || 10;
+      var days = document.getElementById("days").value.trim();
+      var country = document.getElementById("country").value;
+
+      btn.disabled = true;
+      btn.textContent = "Searching...";
+      summary.textContent = "Searching all sources...";
+      document.getElementById("results").innerHTML = '<p class="empty-msg">Combining job boards...</p>';
+      document.getElementById("source-counts").innerHTML = "";
+
+      var indeedUrl = new URL("/api/indeed-search", window.location.origin);
+      indeedUrl.searchParams.set("q", q);
+      indeedUrl.searchParams.set("l", loc);
+      indeedUrl.searchParams.set("distance", String(distance));
+      indeedUrl.searchParams.set("limit", String(limit));
+      indeedUrl.searchParams.set("country", country);
+      if (days) indeedUrl.searchParams.set("days", days);
+
+      try {
+        var results = await Promise.allSettled([
+          fetch(indeedUrl.toString()).then(readJson),
+          fetch(SUPABASE_URL + "/functions/v1/search-reed", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              keywords: q,
+              location: loc,
+              distanceFromLocation: distance,
+              resultsToTake: limit,
+              resultsToSkip: 0
+            })
+          }).then(readJson),
+          fetch(SUPABASE_URL + "/functions/v1/search-nhs-jobs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              keyword: q,
+              location: loc,
+              distance: distance,
+              limit: limit,
+              page: 1,
+              sort: "publicationDateDesc"
+            })
+          }).then(readJson),
+          fetch(SUPABASE_URL + "/functions/v1/search-adzuna", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              what: q,
+              where: loc,
+              distance: distance,
+              maxDaysOld: days ? parseInt(days, 10) : 14,
+              sortBy: "date",
+              page: 1,
+              resultsPerPage: limit
+            })
+          }).then(readJson)
+        ]);
+
+        var counts = [];
+        var jobs = [];
+
+        if (results[0].status === "fulfilled" && !results[0].value.error) {
+          var indeedJobs = (results[0].value.jobs || []).map(function(job) {
+            var badges = [];
+            if (job.remote) badges.push({ label: "Remote", tone: "brand" });
+            return {
+              source: "Indeed",
+              title: job.title,
+              company: job.company,
+              location: job.location,
+              salary: job.salary,
+              url: job.job_url,
+              applyUrl: job.job_url_direct,
+              dateText: job.date_posted ? "Posted " + JobBoardUI.fmtDate(job.date_posted) : "",
+              dateSort: job.date_posted || "",
+              description: job.description ? job.description.substring(0, 700) : "",
+              badges: badges
+            };
+          });
+          counts.push({ label: "Indeed", count: indeedJobs.length });
+          jobs = jobs.concat(indeedJobs);
+        }
+
+        if (results[1].status === "fulfilled" && !results[1].value.error) {
+          var reedJobs = (results[1].value.jobs || []).map(function(job) {
+            var badges = [];
+            if (job.expirationDate && JobBoardUI.isClosingSoon(job.expirationDate)) badges.push({ label: "Closing Soon", tone: "accent" });
+            if (job.applications !== undefined) badges.push({ label: job.applications + " apps", tone: "neutral" });
+            return {
+              source: "Reed",
+              title: job.title,
+              company: job.employer,
+              location: job.location,
+              salary: job.salary,
+              url: job.url,
+              dateText: job.postDate ? "Posted " + JobBoardUI.fmtDate(job.postDate) : "",
+              dateSort: job.postDate || "",
+              description: job.description ? job.description.substring(0, 700) : "",
+              badges: badges
+            };
+          });
+          counts.push({ label: "Reed", count: reedJobs.length });
+          jobs = jobs.concat(reedJobs);
+        }
+
+        if (results[2].status === "fulfilled" && !results[2].value.error) {
+          var nhsJobs = (results[2].value.jobs || []).map(function(job) {
+            var badges = [];
+            if (job.closeDate && JobBoardUI.isClosingSoon(job.closeDate)) badges.push({ label: "Closing Soon", tone: "accent" });
+            return {
+              source: "NHS Jobs",
+              title: job.title,
+              company: job.employer,
+              location: job.location,
+              salary: job.salary,
+              url: job.url,
+              dateText: job.postDate ? "Posted " + JobBoardUI.fmtDate(job.postDate) : "",
+              dateSort: job.postDate || "",
+              description: job.description ? job.description.substring(0, 700) : "",
+              badges: badges
+            };
+          });
+          counts.push({ label: "NHS Jobs", count: nhsJobs.length });
+          jobs = jobs.concat(nhsJobs);
+        }
+
+        if (results[3].status === "fulfilled" && !results[3].value.error) {
+          var adzunaJobs = (results[3].value.jobs || []).map(function(job) {
+            var badges = [];
+            if (job.contractType) badges.push({ label: job.contractType, tone: "neutral" });
+            if (job.contractTime) badges.push({ label: job.contractTime, tone: "brand" });
+            return {
+              source: "Adzuna",
+              title: job.title,
+              company: job.company,
+              location: job.location,
+              salary: job.salary,
+              url: job.url,
+              dateText: job.created ? "Posted " + JobBoardUI.fmtDate(job.created) : "",
+              dateSort: job.created || "",
+              description: job.description ? job.description.substring(0, 700) : "",
+              badges: badges
+            };
+          });
+          counts.push({ label: "Adzuna", count: adzunaJobs.length });
+          jobs = jobs.concat(adzunaJobs);
+        }
+
+        jobs.sort(function(a, b) {
+          return new Date(b.dateSort || 0).getTime() - new Date(a.dateSort || 0).getTime();
+        });
+
+        document.getElementById("source-counts").innerHTML = counts.length
+          ? '<div class="result-chip-row">' + counts.map(function(item) {
+              return '<span class="result-chip">' + JobBoardUI.esc(item.label) + ': ' + JobBoardUI.esc(item.count) + "</span>";
+            }).join("") + "</div>"
+          : "";
+
+        JobBoardUI.renderJobs("results", jobs, {
+          summary: jobs.length + " combined adverts across " + counts.length + " sources",
+          emptyText: "No combined results returned."
+        });
+        summary.textContent = "Loaded " + jobs.length + " adverts from " + counts.length + " sources.";
+      } catch (error) {
+        document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(error.message) + "</p>";
+        summary.textContent = "Search failed.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Search All Sources";
+      }
+    }
+
+    async function readJson(res) {
+      var data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || ("Request failed (" + res.status + ")"));
+      }
+      return data;
+    }
+
+    function loadSample() {
+      document.getElementById("q").value = "operations manager OR continuous improvement OR factory manager";
+      document.getElementById("loc").value = "Staffordshire";
+      document.getElementById("distance").value = "25";
+      document.getElementById("limit").value = "10";
+      document.getElementById("days").value = "";
+      document.getElementById("country").value = "UK";
+      document.getElementById("search-summary").textContent = "Sample values loaded.";
+    }
+  </script>
+</body>
+</html>

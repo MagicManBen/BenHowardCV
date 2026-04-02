@@ -1,4 +1,6 @@
-const LOCAL_API_BASE = "/api";
+const EDGE_FN_BASE = "https://jntpyqguonknixyksqbp.supabase.co/functions/v1";
+const SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
 const DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html";
 
 const REVIEW_FIELDS = [
@@ -363,56 +365,32 @@ function renderContentGroup(dom, result) {
 
 async function loadLocalStatus(dom) {
   try {
-    var response = await fetch(LOCAL_API_BASE + "/status?t=" + Date.now(), { cache: "no-store" });
-    var payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "Could not read local server status.");
-    publicCvBaseUrl = payload.publicCvBaseUrl || DEFAULT_PUBLIC_CV_BASE_URL;
-    publicJobBaseUrl = new URL("j/", publicCvBaseUrl).href;
-    publicRedirectBaseUrl = new URL("r/", publicCvBaseUrl).href;
-    if (payload.supabaseAccessOk) {
-      dom.keysStatus.textContent = "Server ready. Supabase access confirmed.";
-      return;
-    }
-    if (payload.hasSupabase) {
-      dom.keysStatus.textContent = "Supabase configured, but access check failed: " + (payload.supabaseMessage || "Unknown error.");
-      return;
-    }
-    if (!payload.hasGithubToken) {
-      dom.keysStatus.textContent = "Local server running, but no GitHub token or Supabase key configured.";
-      return;
-    }
-    dom.keysStatus.textContent = payload.githubAccessOk
-      ? "Server ready. GitHub access confirmed."
-      : "GitHub token loaded, but rejected: " + (payload.githubMessage || "Unknown error.");
-  } catch (_) {
-    dom.keysStatus.textContent = "Could not reach the local server.";
+    var response = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
+      headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON },
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Supabase returned " + response.status);
+    dom.keysStatus.textContent = "Online mode. Supabase access confirmed.";
+  } catch (e) {
+    dom.keysStatus.textContent = "Could not reach Supabase: " + e.message;
   }
 }
 
 async function publishApplication(application) {
-  var response = await fetch(LOCAL_API_BASE + "/publish", {
+  var response = await fetch(EDGE_FN_BASE + "/publish", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ application: application, clientContext: buildClientContext() }),
   });
   var payload = await response.json().catch(function () { return {}; });
   if (!response.ok) {
-    var err = new Error(payload.error || "Server returned " + response.status);
-    err.debugLogPath = payload.debugLogPath || "";
-    throw err;
+    throw new Error(payload.error || "Publish failed with status " + response.status);
   }
   return payload;
 }
 
 async function generatePersonalisedContent(application) {
-  var response = await fetch(LOCAL_API_BASE + "/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ application: application }),
-  });
-  var payload = await response.json().catch(function () { return {}; });
-  if (!response.ok) throw new Error(payload.error || "Generate API returned " + response.status);
-  return payload;
+  throw new Error("Content generation is not available in online mode. Paste pre-generated JSON instead.");
 }
 
 /* ── Utility ───────────────────────────────────────── */
@@ -690,8 +668,8 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
   /* 5. Build a safe filename */
   var safeName = "Ben Howard CV" + (companyName ? " - " + companyName : "");
 
-  /* 6. Upload HTML via the local server */
-  var uploadRes = await fetch(LOCAL_API_BASE + "/upload-cv", {
+  /* 6. Upload HTML via Supabase Edge Function */
+  var uploadRes = await fetch(EDGE_FN_BASE + "/upload-cv", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ filename: safeName, content: html }),

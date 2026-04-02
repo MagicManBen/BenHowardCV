@@ -324,6 +324,115 @@
       if (ms < 3600000) return Math.floor(ms/60000) + "m ago";
       if (ms < 86400000) return Math.floor(ms/3600000) + "h ago";
       return Math.floor(ms/86400000) + "d ago";
+   
+        renderJobCards(jobs.map(function(j) {
+          return {
+            title: j.title || j.jobTitle || j.name || "Untitled",
+            company: j.company || j.companyName || "",
+            location: j.location || j.locationName || "",
+            salary: j.salary || j.formattedSalary || "",
+            url: j.url || j.link || j.jobUrl || "#",
+            date_posted: j.date || j.postDate || j.datePosted || "",
+            description: j.description || j.snippet || ""
+          };
+        }), "rapid-results");
+      } catch (e) {
+        document.getElementById("rapid-results").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
+        debugLog({ error: e.message });
+      } finally {
+        btn.disabled = false; btn.textContent = "Search Indeed (RapidAPI)";
+      }
+    }
+
+    // ─── shared rendering ───────────────────────────────────────────
+    function renderJobCards(jobs, containerId) {
+      if (!jobs.length) {
+        document.getElementById(containerId).innerHTML = '<p class="empty-msg">No results.</p>';
+        return;
+      }
+      var html = '<p class="result-count">' + jobs.length + ' jobs</p>';
+      jobs.forEach(function(j) {
+        var title = j.title || "Untitled";
+        var company = j.company || "";
+        var loc = j.location || "";
+        var salary = j.salary || "";
+        var url = j.url || "#";
+        var date = j.date_posted || "";
+        var desc = j.description || "";
+        var badges = "";
+        if (date && isRecent(date, 3)) badges += ' <span class="badge badge--new">New</span>';
+
+        html += '<div class="job-card">'
+          + '<h3><a href="' + esc(url) + '" target="_blank">' + esc(title) + '</a>' + badges + '</h3>'
+          + '<div class="meta">' + [company, loc, salary].filter(Boolean).map(esc).join(" · ") + '</div>'
+          + (date ? '<div class="meta">Posted: ' + esc(date) + '</div>' : '')
+          + (desc ? '<div class="snippet">' + esc(desc.substring(0, 200)) + '</div>' : '')
+          + '</div>';
+      });
+      document.getElementById(containerId).innerHTML = html;
+    }
+
+    // ─── tabs ───────────────────────────────────────────────────────
+    function switchTab(name) {
+      document.querySelectorAll(".tab-bar button").forEach(function(b) { b.classList.remove("active"); });
+      document.querySelectorAll(".tab-panel").forEach(function(p) { p.classList.remove("active"); });
+      if (name === "saved") {
+        document.querySelector(".tab-bar button:nth-child(1)").classList.add("active");
+        document.getElementById("tab-saved").classList.add("active");
+      } else {
+        document.querySelector(".tab-bar button:nth-child(2)").classList.add("active");
+        document.getElementById("tab-rapid").classList.add("active");
+      }
+    }
+
+    // ─── utilities ──────────────────────────────────────────────────
+    function updateGauge(rl) {
+      if (!rl || !rl.limit) return;
+      document.getElementById("usage-box").style.display = "block";
+      var limit = parseInt(rl.limit) || 1;
+      var remaining = parseInt(rl.remaining);
+      if (isNaN(remaining)) remaining = limit;
+      var pct = Math.round((remaining / limit) * 100);
+      var fill = document.getElementById("gauge-fill");
+      fill.style.width = pct + "%";
+      fill.className = "gauge-fill " + (pct > 50 ? "gauge-fill--ok" : pct > 10 ? "gauge-fill--warn" : "gauge-fill--danger");
+      document.getElementById("gauge-text").textContent = remaining + " / " + limit + " remaining";
+      var info = "Used today: " + (limit - remaining) + " of " + limit;
+      if (rl.reset) {
+        var rd = new Date(parseInt(rl.reset) * 1000);
+        info += " · Resets: " + rd.toLocaleString("en-GB");
+      }
+      document.getElementById("rate-info").textContent = info;
+    }
+
+    function extractJobs(d) {
+      if (!d) return [];
+      if (Array.isArray(d)) return d;
+      if (d.jobs && Array.isArray(d.jobs)) return d.jobs;
+      if (d.results && Array.isArray(d.results)) return d.results;
+      if (d.data && Array.isArray(d.data)) return d.data;
+      return [];
+    }
+
+    function setStatus(dotId, lblId, color, text) {
+      document.getElementById(dotId).className = "status-dot status-dot--" + color;
+      document.getElementById(lblId).textContent = text;
+    }
+    function debugLog(obj) { document.getElementById("debug-output").textContent = JSON.stringify(obj, null, 2); }
+    function copyDebug() {
+      navigator.clipboard.writeText(document.getElementById("debug-output").textContent).then(function() {
+        var btn = document.querySelector(".debug-header button");
+        btn.textContent = "Copied!"; setTimeout(function() { btn.textContent = "Copy All"; }, 1500);
+      });
+    }
+    function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
+    function isRecent(s, days) { try { return (Date.now() - new Date(s).getTime()) < days * 86400000; } catch(e) { return false; } }
+    function timeSince(iso) {
+      var ms = Date.now() - new Date(iso).getTime();
+      if (ms < 60000) return "just now";
+      if (ms < 3600000) return Math.floor(ms/60000) + "m ago";
+      if (ms < 86400000) return Math.floor(ms/3600000) + "h ago";
+      return Math.floor(ms/86400000) + "d ago";
     }
   </script>
 </body>

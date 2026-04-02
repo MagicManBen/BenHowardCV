@@ -1942,6 +1942,18 @@
         return rows[0].application;
       }
 
+      async function fetchApplicationByShortCode(sc) {
+        const url = `${SUPABASE_URL}/rest/v1/applications?short_code=eq.${encodeURIComponent(sc)}&select=application&limit=1`;
+        const response = await fetch(url, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Accept": "application/json" },
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error(`Could not load application for short code ${sc}`);
+        const rows = await response.json();
+        if (!rows.length || !rows[0].application) throw new Error(`No application found for short code ${sc}`);
+        return rows[0].application;
+      }
+
       function compactValue(value) {
         return value && value !== "Not specified" ? value : "";
       }
@@ -2539,6 +2551,14 @@
         if (embedded) return normaliseApplication(embedded);
 
         const params = new URLSearchParams(window.location.search);
+        const sc = cleanString(params.get("sc"));
+        if (sc) {
+          try {
+            return normaliseApplication(await fetchApplicationByShortCode(sc));
+          } catch (error) {
+            console.error(error);
+          }
+        }
         const ref = cleanString(params.get("ref"));
         if (ref) {
           try {

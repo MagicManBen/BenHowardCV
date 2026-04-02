@@ -540,7 +540,7 @@ function buildShortJobUrl(app) {
 }
 function buildShortQrUrl(app) {
   if (!app.shortCode) return "";
-  return publicRedirectBaseUrl + encodeURIComponent(app.shortCode);
+  return publicCvBaseUrl + "?sc=" + encodeURIComponent(app.shortCode);
 }
 function buildLocalPreviewUrl(app) {
   return new URL("../cv.html?ref=" + encodeURIComponent(app.ref || ""), window.location.href).href;

@@ -1,0 +1,411 @@
+BenHowardCV — Complete Project Breakdown
+=========================================
+Generated: 3 April 2026
+
+
+1. WHAT IT IS
+-------------
+This is a personalised CV and job-application platform for Ben Howard. It is a
+hybrid system that combines:
+
+  - A public-facing website hosted on GitHub Pages at checkloops.co.uk
+  - A local admin toolchain that runs on Ben's Mac
+  - AI-powered content generation using OpenAI
+  - Multi-source job search aggregation (Indeed, Reed, NHS Jobs, Adzuna)
+  - Supabase as a cloud database and file storage backend
+
+The core workflow is: find a job → paste the advert → AI generates a tailored
+CV page → review → publish to both GitHub Pages and Supabase → share a unique
+URL with each employer.
+
+
+2. RUNTIME SURFACES (THREE MODES)
+----------------------------------
+
+2a. Public Hosted Site (GitHub Pages)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Domain: checkloops.co.uk (set via CNAME file)
+
+  index.html              Public dashboard showing all published applications
+  cv.html                 The full employer-facing tailored CV page — renders
+                          differently for each application via ?ref= or ?sc=
+                          query params
+  cv-qr.html              A mobile-optimised version of the CV page, designed
+                          to be opened via QR code
+  script.js               Dashboard logic, application loading, QR generation,
+                          preview helpers
+  cv-runtime.js           Core rendering engine for cv.html — loads application
+                          data and populates every section of the page
+  cv-full.js              Bootstrapper that calls CVRuntime.initFullPage() on
+                          DOMContentLoaded
+  cv-qr.js                Rendering logic for the QR/mobile CV page
+  styles.css              Shared stylesheet for the dashboard and non-CV pages
+  j/index.html            Short-link resolver page
+  j/redirect.js           Takes ?r=<ref> and redirects to either cv.html or
+                          cv-qr.html
+  r/<shortcode>/index.html  Static redirect pages (one per application); each
+                          contains a meta-refresh to /j/?r=<ref>
+  data/applications.json  Public index of all published applications (ref,
+                          company, role, location, timestamps)
+  data/<ref>.json          Full application JSON for each published job
+  downloads/              Uploaded HTML CV files for download/print
+
+How cv.html works:
+  It is a single HTML page with embedded CSS. When loaded with ?ref=<slug>,
+  cv-runtime.js fetches the matching JSON from /data/<ref>.json (or from the
+  local API when running locally), then populates every section. It uses gen*
+  prefixed fields (AI-generated personalised content) with fallback builder
+  functions for each section. Fields like genHeroPositioning,
+  genPersonalisedOpening, genWhyThisCompany etc. are the AI outputs; the
+  runtime has handwritten fallback generators for when AI content is missing.
+
+Design of cv.html/cv-qr.html:
+  Premium editorial design using Cormorant Garamond + Manrope fonts,
+  gold/cream colour palette, with sections for: hero positioning, personalised
+  opening, why this company, why this role, focus areas, experience mappings,
+  evidence examples, 90-day plan, and closing summary.
+
+
+2b. Local Admin UI
+~~~~~~~~~~~~~~~~~~
+Accessed at http://localhost:8000/local-admin/ when the local server is running.
+
+  local-admin/index.html          New Application — paste raw advert text,
+                                  trigger AI generation, review results, publish
+  local-admin/admin.js            All admin pipeline logic: calls /api/generate,
+                                  renders review grid, calls /api/publish
+  local-admin/dashboard.html      Applied Jobs — view all published
+                                  applications, delete them
+  local-admin/jobspy.html         Job Search Workspace — unified multi-source
+                                  search with scoring/ranking
+  local-admin/reviews.html        Reviewed Jobs — jobs flagged for AI review
+                                  with strengths/gaps/dealbreakers analysis
+  local-admin/indeed.html         Indeed-specific search page
+  local-admin/reed.html           Reed-specific search page
+  local-admin/nhs.html            NHS Jobs search page
+  local-admin/adzuna.html         Adzuna search page
+  local-admin/usage.html          OpenCode quota status / tooling page
+  local-admin/job-board-ui.js     Shared rendering library (job cards,
+                                  application tables, status indicators, badges)
+  local-admin/dashboard.css       Styles for all local-admin pages
+  local-admin/job-search-preferences.json
+                                  Saved search criteria, priority rules, keyword
+                                  weights, excluded terms
+  local-admin/secrets.local.json  Local secrets (gitignored) — OpenAI key,
+                                  Supabase service role key, etc.
+
+
+2c. Local Python Server
+~~~~~~~~~~~~~~~~~~~~~~~
+local_server.py — a ThreadingHTTPServer that:
+  - Serves all static files from the repo root
+  - Provides a full REST API under /api/
+  - Blocks access to sensitive files (secrets.local.json, local-cache/)
+  - Redirects root / to /local-admin/jobspy.html
+  - Binds to 127.0.0.1 locally, 0.0.0.0 in Docker
+
+
+3. WHY IT USES A LOCAL SERVER
+------------------------------
+The local server exists because several operations cannot run in a browser:
+
+  1. Secret management
+     API keys for OpenAI, GitHub, Supabase, Reed, Adzuna, and Indeed are stored
+     in macOS Keychain or secrets.local.json. The server reads these securely
+     and never exposes them to the frontend.
+
+  2. OpenAI API calls
+     The advert parsing and personalised content generation require server-side
+     calls to OpenAI's API with the secret key.
+
+  3. GitHub API integration
+     Publishing applications requires authenticated GitHub Contents API calls
+     (PUT files, update index, create redirect pages). This uses a personal
+     access token.
+
+  4. Supabase service-role operations
+     Writing to Supabase requires the service-role key (not the anon key),
+     which must never be exposed client-side.
+
+  5. Multi-source job search
+     Fetching from Indeed (GraphQL API), Reed (REST API), Adzuna (REST API),
+     and NHS Jobs (via Supabase edge function) requires server-side API calls
+     with credentials.
+
+  6. PDF generation
+     Uses headless Chrome (--headless=new --print-to-pdf) to convert CV HTML
+     to PDF.
+
+  7. Evidence bank processing
+     The CSV evidence bank is loaded and scored server-side using token-matching
+     algorithms.
+
+  8. CV profile extraction
+     Parses BH CV.html to extract role titles, skills, and sectors for job
+     matching/scoring.
+
+
+4. HOW SUPABASE IS USED
+-------------------------
+Project URL: https://jntpyqguonknixyksqbp.supabase.co
+
+4a. Database Tables (from supabase/schema.sql)
+
+  applications
+    Stores full application data as JSONB with indexed columns for ref,
+    company, role, location.
+    RLS: Public read; write via service-role key only.
+    Primary key: ref (the slug).
+    The "application" JSONB column stores the entire application payload.
+    Has an auto-updating updated_at trigger.
+    The short_code column stores the 8-character shortcode for short URLs.
+
+  reviewed_jobs
+    AI-reviewed job adverts with strengths, weaknesses, dealbreakers.
+    RLS: Public read; write via service-role key only.
+    Primary key: id (UUID).
+    Unique constraint on fingerprint.
+
+  cv_contact_requests
+    Contact form submissions from cv.html (direction, sender info, message).
+    RLS: Anon insert allowed; no public read.
+
+4b. Storage
+
+  Bucket: cv-files (public)
+  Path pattern: downloads/<filename>.html
+  Used to host downloadable CV files (HTML format) that can be linked from
+  the CV page.
+
+4c. Edge Functions
+
+  search-nhs-jobs — called by the local server to proxy NHS Jobs search queries.
+
+4d. Auth/Keys
+
+  Anon key: Hardcoded in local-admin/admin.js for client-side reads and NHS
+    search edge function calls.
+  Service-role key: Stored in secrets.local.json (gitignored) for all write
+    operations.
+  All write operations happen server-side through the local Python server.
+
+4e. Data Flow with Supabase
+
+  When an application is published:
+    1. Local server upserts the full application JSON to the applications table.
+    2. The application JSONB column contains everything needed to render the
+       CV page.
+    3. The public cv.html can then load application data from either the static
+       data/<ref>.json file OR from Supabase (if accessed through the local
+       server).
+
+
+5. THE APPLICATION PIPELINE (END-TO-END)
+-----------------------------------------
+
+Step 1: Find a Job
+  Use jobspy.html to search across Indeed, Reed, NHS Jobs, and Adzuna
+  simultaneously. Jobs are:
+    - Normalised into a common format via normalise_search_job()
+    - Deduplicated via merge_duplicate_jobs() using title+company fingerprint
+    - Scored against Ben's CV profile via score_job() (0-100 scale with tiers:
+      Top Match 80+, Strong Match 60+, Worth Reviewing 40+, Low Match)
+    - Scored for location proximity, salary, keywords, employer type
+    - Optionally AI-reviewed via the "Review" button (calls OpenAI to compare
+      against CV)
+
+Step 2: Paste the Advert
+  In local-admin/index.html, paste the raw job advert text.
+
+Step 3: AI Generation (/api/generate)
+  The server runs a two-stage pipeline via content_generation.py:
+
+  Stage 1 — Advert Extraction:
+    Sends the raw text to OpenAI with the ADVERT_EXTRACTION_SYSTEM_PROMPT.
+    Returns structured JSON with fields like companyName, roleTitle, sector,
+    essentialRequirements, keyFocusAreas, etc.
+    Model: configurable, defaults to gpt-4.1-mini.
+
+  Stage 2 — Personalised Content Generation:
+    1. Loads the evidence bank from ben_evidence_bank_template.csv
+    2. Tokenises the application fields and scores each evidence row using
+       Jaccard-style overlap
+    3. Selects top 5 evidence examples with diversity bonuses (varies employer,
+       sector, proof tags)
+    4. Sends the parsed application + selected evidence to OpenAI with the
+       SYSTEM_PROMPT
+    5. Returns personalised content: hero positioning, opening statement, why
+       this company, why this role, experience mappings, focus areas, 90-day
+       plan, closing summary, etc.
+
+Step 4: Review
+  The admin UI displays all extracted and generated fields in a review grid.
+  The user can inspect everything before publishing.
+
+Step 5: Publish (/api/publish)
+  When confirmed, the server:
+    1. Generates an 8-character short code if needed
+    2. Saves to local-cache/data/<ref>.json (always)
+    3. Upserts to Supabase applications table (if configured)
+    4. Pushes to GitHub via Contents API:
+       - data/<ref>.json — the full application JSON
+       - data/applications.json — updated index
+       - r/<shortcode>/index.html — redirect page
+    5. Returns the live URLs (full page, QR page, short URL)
+
+Step 6: Share
+  The employer receives a URL like
+  https://checkloops.co.uk/cv.html?ref=<slug> or a short URL
+  https://checkloops.co.uk/r/<shortcode>/. Both resolve to a beautifully
+  designed, personalised CV page.
+
+
+6. THE EVIDENCE BANK
+----------------------
+ben_evidence_bank_template.csv contains 15 real career achievement examples
+structured as:
+  - Situation / Context → Problem / Challenge → What I Did → Result / Outcome
+  - Each tagged with: Proof Tags, Sector Tags, Role Tags
+  - Each has a Short Version, Headline Version, and metric/number
+  - Covers: NHS primary care, manufacturing (Copper Alloys), theme parks
+    (Merlin/Alton Towers), Experian, self-employed work, CheckLoops
+
+The matching algorithm in select_evidence_examples():
+  1. Builds token sets from application fields (sector, roleTitle,
+     keyFocusAreas, etc.)
+  2. Scores each evidence row on token overlap (Jaccard-style)
+  3. Adds bonuses for public-safe entries and entries with clear metrics
+  4. Uses greedy selection with diversity bonuses to avoid repeating the same
+     employer/sector/proof type
+
+
+7. JOB SEARCH SCORING SYSTEM
+------------------------------
+The score_job() function in local_server.py uses:
+
+  Priority rules (from job-search-preferences.json):
+    GP Practice Leadership:            weight 90
+    Operations / Transformation:       weight 60
+    Digital / Systems Improvement:     weight 42
+
+  CV keyword matching:    4 points per keyword match from the CV profile
+  Role title overlap:     6 points when 2+ significant words from CV role
+                          titles appear
+  Salary scoring:         +4 to +12 points above floor, -45 below floor
+  Location fit:           Priority terms scored by position in list,
+                          remote/hybrid bonuses
+  Exclusion rules:        -80 for clinical roles (nurse, physiotherapist, etc.)
+                          unless management is also present
+  Employer type bonuses:  GP Practice/Primary Care +20, NHS Trust +12
+
+
+8. SECRET MANAGEMENT
+----------------------
+Secrets are loaded via load_local_config() with a three-tier fallback:
+
+  1. macOS Keychain — via "security find-generic-password" (services like
+     benhowardcv-github-token, benhowardcv-openai-api-key, etc.)
+  2. secrets.local.json — local config file (gitignored)
+  3. Environment variables — GITHUB_TOKEN, OPENAI_API_KEY, SUPABASE_URL, etc.
+
+
+9. URL SYSTEM
+--------------
+  checkloops.co.uk/cv.html?ref=<slug>         Full employer-facing CV page
+  checkloops.co.uk/cv-qr.html?ref=<slug>      Mobile/QR-optimised CV page
+  checkloops.co.uk/r/<shortcode>/              Redirect → /j/?r=<ref> →
+                                               cv-qr.html
+  checkloops.co.uk/j/?r=<ref>                  Redirect page that resolves to
+                                               cv-qr.html
+  checkloops.co.uk/                            Public application dashboard
+
+The short URL chain:
+  r/<shortcode>/index.html
+    → meta-refresh to /j/?r=<ref>
+    → j/redirect.js resolves to cv-qr.html?ref=<ref>
+
+
+10. DOCKER SUPPORT
+-------------------
+  Dockerfile:          Python 3.12-slim, copies the repo, exposes port 8000,
+                       runs local_server.py
+  docker-compose.yml:  Mounts the repo as a volume for live editing, maps
+                       port 8000
+
+
+11. QR CODE SYSTEM
+-------------------
+Uses vendor/qrious.min.js (a QR code generation library). When an application
+is published, the admin UI generates a QR code pointing to the short URL. This
+QR code can be:
+  - Printed on a physical CV (via BH CV.html)
+  - Displayed in the admin result panel
+  - Used in the downloadable CV files
+
+
+12. THE BASE CV
+----------------
+BH CV.html is a traditional two-page print-format CV (A4 paper size,
+210mm x 297mm) with:
+  - Two-column layout (main content + sidebar)
+  - Employment history, skills, sector experience
+  - Used as the source for extract_cv_profile() which parses out role titles,
+    skills, and sectors for job matching
+  - QR codes on printed versions link back to the tailored online CV page
+
+
+13. FILE CATEGORIES
+--------------------
+  Public site:       index.html, cv.html, cv-qr.html, cv-runtime.js,
+                     cv-full.js, cv-qr.js, script.js, styles.css, j/, r/,
+                     data/
+  Local admin:       local-admin/ (all files)
+  Backend:           local_server.py, content_generation.py
+  Data/config:       ben_evidence_bank_template.csv, CNAME,
+                     job-search-preferences.json, secrets.local.json
+  Infrastructure:    Dockerfile, docker-compose.yml, supabase/, .github/
+  Base CV template:  BH CV.html
+  Vendor:            vendor/qrious.min.js
+  Backups/legacy:    cv copy.html, cv copy 2.html, cv copy 3.html,
+                     new-job.html, Indeed Scraper copy/
+  Gitignored:        local-cache/, debug/, __pycache__/, .env.local
+
+
+14. API ENDPOINTS SUMMARY
+---------------------------
+GET  /api/status                  Check GitHub token, Supabase access, API key
+                                  availability
+GET  /api/applications            Merged index from public + local-cache +
+                                  Supabase
+GET  /api/application?ref=        Full application data (Supabase → local-cache
+                                  → public fallback)
+GET  /api/job-search              Unified multi-source search with scoring
+GET  /api/indeed-search           Indeed GraphQL API search
+GET  /api/reed-search             Reed REST API search
+GET  /api/nhs-search              NHS Jobs search (via Supabase edge function)
+GET  /api/adzuna-search           Adzuna REST API search
+GET  /api/job-search-preferences  Load saved preferences + CV profile
+GET  /api/reviewed-jobs           All AI-reviewed jobs from Supabase
+GET  /api/opencode-quota-status   Plugin install status
+POST /api/generate                AI generation pipeline (advert parse +
+                                  personalised content)
+POST /api/publish                 Full publish pipeline (local + Supabase +
+                                  GitHub)
+POST /api/upload-cv               Upload CV HTML to Supabase Storage or GitHub
+POST /api/pdf                     Convert HTML to PDF via headless Chrome
+POST /api/delete-application      Delete from local + Supabase + GitHub
+POST /api/review-job              AI review of a job against Ben's CV
+
+
+15. LAUNCHER
+--------------
+"OPEN THIS - Ben Howard CV.command" is a macOS shell script that:
+  1. Finds a free port starting from 8000
+  2. Starts the local Python server in the background
+  3. Waits for the server to be ready (polls /api/status)
+  4. Opens the admin URL in the default browser
+  5. Cleans up the server process on exit
+
+This is a comprehensive, self-contained job application system combining static
+hosting, AI generation, multi-source job search, and cloud persistence into a
+workflow tailored to one person's job search.

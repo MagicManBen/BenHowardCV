@@ -29,6 +29,11 @@ APP_MATCH_FIELDS = [
     "matchCategories",
 ]
 
+CV_CONTEXT_FIELDS = [
+    "cvText", "cvSummary", "candidateCv", "candidateCvText",
+    "candidateCvSummary",
+]
+
 # Fields used for matching from each evidence row
 EVIDENCE_MATCH_FIELDS = [
     "Proof Tags", "Sector Tags", "Role Tags", "Example Title",
@@ -71,7 +76,44 @@ def _build_app_tokens(application):
     return tokens
 
 
-def _score_evidence_row(row, app_tokens):
+def _build_cv_tokens(application):
+    """Build a token set from CV context fields."""
+    tokens = set()
+    for field in CV_CONTEXT_FIELDS:
+        val = application.get(field, "")
+        if isinstance(val, list):
+            for item in val:
+                tokens |= _tokenise(item)
+        elif isinstance(val, str):
+            tokens |= _tokenise(val)
+    return tokens
+
+
+def _build_cv_context_section(application):
+    """Format any available CV context for the prompt."""
+    sections = []
+    for field in CV_CONTEXT_FIELDS:
+        value = application.get(field, "")
+        if isinstance(value, str) and value.strip():
+            if field == "cvText":
+                label = "CV text"
+            elif field == "cvSummary":
+                label = "CV summary"
+            elif field == "candidateCv":
+                label = "Candidate CV"
+            elif field == "candidateCvText":
+                label = "Candidate CV text"
+            elif field == "candidateCvSummary":
+                label = "Candidate CV summary"
+            else:
+                label = field
+            sections.append(f"{label}:")
+            sections.append(value.strip())
+            sections.append("")
+    return "\n".join(sections).strip()
+
+
+def _score_evidence_row(row, app_tokens, cv_tokens=None):
     """Score a single evidence row against the application tokens.
 
     Returns a float. Higher = more relevant.
@@ -86,6 +128,11 @@ def _score_evidence_row(row, app_tokens):
     overlap = row_tokens & app_tokens
     # Jaccard-style overlap, weighted toward application coverage
     score = len(overlap) / max(len(app_tokens), 1)
+
+    if cv_tokens:
+        cv_overlap = row_tokens & cv_tokens
+        cv_score = len(cv_overlap) / max(len(cv_tokens), 1)
+        score = (score * 0.8) + (cv_score * 0.2)
 
     # Bonus for public-safe entries
     if str(row.get("Safe for Public Use?", "")).strip().lower() in ("yes", "true"):
@@ -139,7 +186,8 @@ def select_evidence_examples(application, max_examples=5):
         return [], "Evidence bank is empty."
 
     app_tokens = _build_app_tokens(application)
-    if not app_tokens:
+    cv_tokens = _build_cv_tokens(application)
+    if not app_tokens and not cv_tokens:
         # If application has no matching tokens, return top rows by default
         for r in rows[:max_examples]:
             r["_matchScore"] = 0.01
@@ -147,7 +195,7 @@ def select_evidence_examples(application, max_examples=5):
 
     scored = []
     for row in rows:
-        s = _score_evidence_row(row, app_tokens)
+        s = _score_evidence_row(row, app_tokens, cv_tokens)
         row["_matchScore"] = s
         scored.append((s, row))
 
@@ -279,8 +327,9 @@ Return this exact JSON structure:
 SYSTEM_PROMPT = """You are writing personalised CV page content for Ben Howard, a UK-based senior operations and transformation leader. The content will appear on a tailored employer-facing web page that sits alongside his CV.
 
 You will receive:
-1. Parsed job advert data.
-2. A shortlist of Ben's evidence-bank examples drawn from his real career achievements.
+1. Parsed job advert data (company name, role title, sector, requirements, and other fields).
+2. Ben's CV or CV summary, which should be used to shape fit, tone, and evidence selection.
+3. A shortlist of Ben's evidence-bank examples (real achievements from his career).
 
 CORE OBJECTIVE:
 - Build a persuasive, selective first-person case for Ben.
@@ -300,9 +349,17 @@ VOICE AND TONE RULES (strict):
 SOURCE DISCIPLINE RULES (strict):
 - The advert is the source of truth for company, role, and requirement facts.
 - The evidence bank is the source of truth for Ben's achievements, environments, and examples.
+- Use the CV context to better match language, seniority, and the strongest supporting examples.
 - NEVER invent company facts, team structures, strategic initiatives, or role details not supported by the advert.
 - NEVER invent achievements, tools, responsibilities, sectors, or outcomes not supported by the evidence bank.
 - If either source is thin, write less.
+
+HANDLING SPARSE ADVERTS:
+- If key advert fields are missing (e.g. companySummary, sector, cultureSignals), do not pad with generic filler.
+- Focus on what IS known: the role title, responsibilities, requirements, and any direct signals.
+- Write shorter, more focused content rather than longer, vaguer content.
+- For companyHighlights: return fewer items (even zero) rather than unsupported claims.
+- For likelyContributionSummary: frame contribution around what the advert describes the role needing, not made-up promises. Use phrases like "Based on what the brief describes…" or "The role seems focused on…".
 
 EVIDENCE BANK RULES:
 - Only reference examples from the provided evidence bank.
@@ -311,6 +368,7 @@ EVIDENCE BANK RULES:
 - Prefer variety across employer/context/contribution type.
 - Use evidence to prove fit, not to decorate the page.
 - Make evidence choices selective and useful: each example should earn its place.
+- If CV context is present, use it to choose evidence examples that align with the candidate's background and the role's likely priorities.
 
 DISTINCT FIELD PURPOSES (strict):
 - heroPositioning: one short, high-value positioning line for the hero. This should frame the kind of contribution I make. It is NOT a repeat of the role title, sector, or opening paragraph.
@@ -428,6 +486,12 @@ def _build_user_prompt(application, evidence_rows):
     sections.append("- Build a persuasive first-person case for fit, proof, and likely contribution.")
     sections.append("- Prefer 3 evidence examples when possible; only return more if each adds something materially different.")
     sections.append("- Keep sections distinct and do not reuse the same idea across hero, fit, contribution, and closing.")
+
+    cv_context = _build_cv_context_section(application)
+    if cv_context:
+        sections.append("")
+        sections.append("=== BEN CV CONTEXT ===")
+        sections.append(cv_context)
 
     raw_advert = str(application.get("rawAdvertText", "")).strip()
     if raw_advert:

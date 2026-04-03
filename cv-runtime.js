@@ -1102,12 +1102,12 @@ window.CVRuntime = (() => {
         return items.length;
       }
 
-      function renderThemeCards(sectionId, containerId, cards) {
+      function renderThemeCards(sectionId, containerId, cards, skipDedup) {
         const section = document.getElementById(sectionId);
         const container = document.getElementById(containerId);
         if (!section || !container) return;
 
-        const usableCards = filterDistinctCards(cards);
+        const usableCards = skipDedup ? cards.filter((c) => c && cleanString(c.title) && cleanString(c.copy)) : filterDistinctCards(cards);
         container.innerHTML = "";
         if (!usableCards.length) {
           section.style.display = "none";
@@ -1534,7 +1534,8 @@ window.CVRuntime = (() => {
             title: pickFirst(item.phase, item.focus, "Next phase"),
             copy: pickFirst(item.detail, item.focus, "A practical phase of work."),
             tags: uniqueStrings([item.focus], 1)
-          }))
+          })),
+          true
         );
 
         setText("tailored-heading", "My closing case.");

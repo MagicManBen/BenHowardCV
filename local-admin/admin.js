@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", initLocalAdminPage);
 async function initLocalAdminPage() {
   const dom = {
     keysStatus:       document.getElementById("keys-status"),
-    jobJsonInput:     document.getElementById("job-json-input"),
+    jobAdvertInput:   document.getElementById("job-advert-input"),
     goButton:         document.getElementById("go-button"),
     clearButton:      document.getElementById("clear-button"),
     inputStatus:      document.getElementById("input-status"),
@@ -119,9 +119,9 @@ async function initLocalAdminPage() {
   dom.goButton.addEventListener("click", () => runPipeline(dom));
 
   dom.clearButton.addEventListener("click", () => {
-    dom.jobJsonInput.value = "";
+    dom.jobAdvertInput.value = "";
     pendingApplication = null;
-    dom.inputStatus.textContent = "Waiting for JSON.";
+    dom.inputStatus.textContent = "Waiting for advert text.";
     dom.inputError.hidden = true;
     dom.pipelinePanel.hidden = true;
     dom.resultsPanel.hidden = true;
@@ -242,9 +242,9 @@ async function initLocalAdminPage() {
     dom.pipelineError.hidden = true;
     dom.confirmError.hidden = true;
 
-    const rawText = dom.jobJsonInput.value.trim();
+    const rawText = dom.jobAdvertInput.value.trim();
     if (!rawText) {
-      showError(dom.inputError, "Paste the application JSON first.");
+      showError(dom.inputError, "Paste the job advert text first.");
       return;
     }
 
@@ -253,49 +253,57 @@ async function initLocalAdminPage() {
     dom.resultPanel.hidden = true;
     setPill(dom.pillParse, "running");
     setPill(dom.pillGenerate, "waiting");
-    dom.pipelineMessage.textContent = "Parsing JSON\u2026";
+    dom.pipelineMessage.textContent = "Preparing advert text\u2026";
     dom.pipelinePanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
-    /* STEP 1 \u2014 Parse */
-    try {
-      const parsed = JSON.parse(rawText);
-      pendingApplication = normaliseApplicationPayload(parsed);
-    } catch (error) {
-      setPill(dom.pillParse, "error");
-      dom.pipelineMessage.textContent = "Parse failed.";
-      showError(dom.pipelineError, error instanceof Error ? error.message : "Invalid JSON.");
-      dom.inputStatus.textContent = "Parse failed.";
-      return;
-    }
+    /* STEP 1 \u2014 Basic advert check */
+    pendingApplication = null;
 
     setPill(dom.pillParse, "done");
-    dom.inputStatus.textContent = "Parsed: " + pendingApplication.companyName + " / " + pendingApplication.roleTitle;
+    dom.pipelineMessage.textContent = "Generating tailored application locally with Ollama\u2026";
 
-    dom.resultsPanel.hidden = false;
-    dom.resultsTitle.textContent = pendingApplication.companyName + " \u2014 " + pendingApplication.roleTitle;
-    dom.advertResults.innerHTML = renderAdvertGroup(pendingApplication);
-    if (!pendingApplication.personalisedContent) {
+    /* STEP 2 \u2014 Generate */
+    setPill(dom.pillGenerate, "running");
+    try {
+      const result = await generateApplicationFromAdvert(rawText);
+      const meta = result && result.meta ? result.meta : {};
+      if (!result || !result.application) {
+        throw new Error("Generation returned no application object.");
+      }
+      if (meta.success === false) {
+        throw new Error(meta.error || "Generation failed.");
+      }
+      pendingApplication = normaliseApplicationPayload(result.application);
+      if (!pendingApplication.personalisedContent && result.generatedContent) {
+        pendingApplication.personalisedContent = normaliseProvidedPersonalisedContent({ personalisedContent: result.generatedContent });
+      }
+      pendingApplication.evidenceSelection = result.evidenceSelection || pendingApplication.evidenceSelection || { count: 0, error: null, examples: [] };
+      dom.debugJson.textContent = JSON.stringify(result, null, 2);
+    } catch (error) {
       setPill(dom.pillGenerate, "error");
-      dom.pipelineMessage.textContent = "Tailored content missing in pasted JSON.";
-      showError(dom.pipelineError, "This local-admin workflow is paste-only. Include a personalisedContent object in the pasted JSON.");
-      dom.contentResults.hidden = true;
-      dom.debugJson.textContent = JSON.stringify(pendingApplication, null, 2);
+      dom.pipelineMessage.textContent = "Generation failed.";
+      showError(dom.pipelineError, error instanceof Error ? error.message : "Generation failed.");
+      dom.inputStatus.textContent = "Generation failed.";
       dom.confirmButton.disabled = true;
-      dom.confirmStatus.textContent = "Add personalisedContent, then run Go again.";
+      dom.confirmStatus.textContent = "Fix the issue and try again.";
       return;
     }
 
     setPill(dom.pillGenerate, "done");
-    dom.pipelineMessage.textContent = "Using pasted tailored content (no generation).";
+    dom.pipelineMessage.textContent = "Tailored application generated and ready for review.";
+    dom.inputStatus.textContent = "Generated: " + pendingApplication.companyName + " / " + pendingApplication.roleTitle;
+
+    dom.resultsPanel.hidden = false;
+    dom.resultsTitle.textContent = pendingApplication.companyName + " \u2014 " + pendingApplication.roleTitle;
+    dom.advertResults.innerHTML = renderAdvertGroup(pendingApplication);
     renderContentGroup(dom, {
       generatedContent: pendingApplication.personalisedContent,
       evidenceSelection: pendingApplication.evidenceSelection || { count: 0, error: null, examples: [] },
-      meta: { success: true, source: "pasted-json" },
+      meta: { success: true, source: "local-ollama" },
     });
-    dom.debugJson.textContent = JSON.stringify(pendingApplication, null, 2);
     dom.confirmButton.disabled = false;
-    dom.confirmStatus.textContent = "Review the pasted JSON, then confirm.";
-    showToast(dom, "Pasted JSON loaded.");
+    dom.confirmStatus.textContent = "Review the generated output, then confirm.";
+    showToast(dom, "Generated locally.");
   }
 }
 
@@ -320,7 +328,7 @@ function renderAdvertGroup(app) {
 
 function renderContentGroup(dom, result) {
   var content = result.generatedContent || {};
-  var parts = ['<p class="results-group-heading">Pasted tailored content</p>'];
+  var parts = ['<p class="results-group-heading">Generated tailored content</p>'];
 
   var textFields = [
     ["Hero positioning", content.heroPositioning],
@@ -446,6 +454,22 @@ async function publishApplication(application) {
   return payload;
 }
 
+async function generateApplicationFromAdvert(advertText) {
+  var response = await fetch("/api/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ advertText: advertText, clientContext: buildClientContext() }),
+  });
+  var payload = await response.json().catch(function () { return {}; });
+  if (!response.ok) {
+    throw new Error(payload.error || "Local generation failed with status " + response.status);
+  }
+  if (payload.meta && payload.meta.success === false) {
+    throw new Error(payload.meta.error || "Local generation failed.");
+  }
+  return payload;
+}
+
 /* ── Utility ───────────────────────────────────────── */
 
 function buildClientContext() {
@@ -453,7 +477,7 @@ function buildClientContext() {
 }
 
 function normaliseApplicationPayload(input) {
-  if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("JSON must be a single object.");
+  if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Application payload must be a single object.");
   var companyName = str(input.companyName);
   var roleTitle = str(input.roleTitle);
   var location = str(input.location);
@@ -464,7 +488,7 @@ function normaliseApplicationPayload(input) {
   if (!ref) throw new Error("Could not build a usable ref.");
   var now = new Date().toISOString();
   var providedContent = normaliseProvidedPersonalisedContent(input);
-  if (!providedContent) throw new Error("personalisedContent is required for this paste-only workflow.");
+  if (!providedContent) throw new Error("Generated output is missing personalisedContent.");
 
   var preservedTopLevel = {};
   for (var inputKey in input) {

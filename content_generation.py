@@ -1,16 +1,10 @@
 """
-Personalised content generation for Stage 3.
+Local content generation utilities.
 
-Combines:
-  - Parsed application/job data
-  - Ben evidence-bank examples (selected deterministically)
-
-Then calls Ollama to produce structured personalised CV content.
-
-Future refinement:
-  - Tweak the system prompt for tone/style
-  - Adjust evidence-selection weights
-  - Add iterative regeneration support
+Provides:
+  - Advert extraction into structured application fields
+  - Personalised content generation using Ollama + evidence bank
+  - A combined end-to-end local pipeline for local-admin
 """
 
 import csv
@@ -230,6 +224,58 @@ DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
 DEFAULT_OLLAMA_MODEL = "llama3.2"
 OLLAMA_REQUEST_TIMEOUT_SECONDS = 180
 
+ADVERT_EXTRACTION_SYSTEM_PROMPT = """You are extracting structured application data from a raw job advert.
+
+Return ONLY valid JSON.
+No markdown. No code fences. No commentary.
+
+RULES:
+- Use only information present or strongly implied in the advert text.
+- Do not invent named people, org structure, strategic initiatives, benefits, tools, or requirements.
+- Be concise and practical.
+- Keep list items short and non-duplicative.
+- Keep salary and location wording clean.
+- If data is missing, use "" for string fields and [] for list fields.
+- Ensure companyName and roleTitle are populated when reasonably extractable.
+
+Return this exact JSON structure:
+{
+  "companyName": "",
+  "roleTitle": "",
+  "location": "",
+  "sector": "",
+  "salary": "",
+  "employmentType": "",
+  "hours": "",
+  "workplaceType": "",
+  "shortCompanyReason": "",
+  "shortRoleReason": "",
+  "companySummary": "",
+  "roleSummary": "",
+  "advertSummary": "",
+  "toneKeywords": [],
+  "probablePriorities": [],
+  "keyFocusAreas": [],
+  "companyPridePoints": [],
+  "headlineAttraction": "",
+  "rolePurpose": "",
+  "coreResponsibilities": [],
+  "essentialRequirements": [],
+  "preferredRequirements": [],
+  "skillsWanted": [],
+  "toolsMethodsMentioned": [],
+  "stakeholderGroups": [],
+  "teamTypesMentioned": [],
+  "senioritySignals": [],
+  "cultureSignals": [],
+  "likelyBusinessNeeds": [],
+  "impliedStrategicGoals": [],
+  "deliverablesLikely": [],
+  "travelRequired": "",
+  "possibleHeadlineFacts": [],
+  "matchCategories": []
+}"""
+
 SYSTEM_PROMPT = """You are writing personalised CV page content for Ben Howard, a UK-based senior operations and transformation leader. The content will appear on a tailored employer-facing web page that sits alongside his CV.
 
 You will receive:
@@ -383,6 +429,12 @@ def _build_user_prompt(application, evidence_rows):
     sections.append("- Prefer 3 evidence examples when possible; only return more if each adds something materially different.")
     sections.append("- Keep sections distinct and do not reuse the same idea across hero, fit, contribution, and closing.")
 
+    raw_advert = str(application.get("rawAdvertText", "")).strip()
+    if raw_advert:
+        sections.append("")
+        sections.append("=== RAW ADVERT TEXT (REFERENCE) ===")
+        sections.append(raw_advert[:12000])
+
     # Evidence bank
     sections.append("")
     sections.append("=== BEN'S EVIDENCE BANK (SHORTLISTED) ===")
@@ -419,8 +471,83 @@ def _extract_json_object(text):
     return text[start:end + 1]
 
 
-def call_ollama(base_url, model, application, evidence_rows):
-    """Call Ollama chat and return the parsed JSON response.
+def _str(value):
+    return str(value).strip() if isinstance(value, str) else ""
+
+
+def _str_list(value):
+    if not isinstance(value, list):
+        return []
+    clean = []
+    seen = set()
+    for item in value:
+        if not isinstance(item, str):
+            continue
+        text = item.strip()
+        if not text:
+            continue
+        key = text.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        clean.append(text)
+    return clean
+
+
+def _normalise_extracted_application(payload, advert_text):
+    if not isinstance(payload, dict):
+        payload = {}
+
+    return {
+        "companyName": _str(payload.get("companyName")),
+        "roleTitle": _str(payload.get("roleTitle")),
+        "location": _str(payload.get("location")),
+        "sector": _str(payload.get("sector")),
+        "salary": _str(payload.get("salary")),
+        "employmentType": _str(payload.get("employmentType")),
+        "hours": _str(payload.get("hours")),
+        "workplaceType": _str(payload.get("workplaceType")),
+        "shortCompanyReason": _str(payload.get("shortCompanyReason")),
+        "shortRoleReason": _str(payload.get("shortRoleReason")),
+        "companySummary": _str(payload.get("companySummary")),
+        "roleSummary": _str(payload.get("roleSummary")),
+        "advertSummary": _str(payload.get("advertSummary")),
+        "headlineAttraction": _str(payload.get("headlineAttraction")),
+        "rolePurpose": _str(payload.get("rolePurpose")),
+        "travelRequired": _str(payload.get("travelRequired")),
+        "toneKeywords": _str_list(payload.get("toneKeywords")),
+        "probablePriorities": _str_list(payload.get("probablePriorities")),
+        "keyFocusAreas": _str_list(payload.get("keyFocusAreas")),
+        "companyPridePoints": _str_list(payload.get("companyPridePoints")),
+        "coreResponsibilities": _str_list(payload.get("coreResponsibilities")),
+        "essentialRequirements": _str_list(payload.get("essentialRequirements")),
+        "preferredRequirements": _str_list(payload.get("preferredRequirements")),
+        "skillsWanted": _str_list(payload.get("skillsWanted")),
+        "toolsMethodsMentioned": _str_list(payload.get("toolsMethodsMentioned")),
+        "stakeholderGroups": _str_list(payload.get("stakeholderGroups")),
+        "teamTypesMentioned": _str_list(payload.get("teamTypesMentioned")),
+        "senioritySignals": _str_list(payload.get("senioritySignals")),
+        "cultureSignals": _str_list(payload.get("cultureSignals")),
+        "likelyBusinessNeeds": _str_list(payload.get("likelyBusinessNeeds")),
+        "impliedStrategicGoals": _str_list(payload.get("impliedStrategicGoals")),
+        "deliverablesLikely": _str_list(payload.get("deliverablesLikely")),
+        "possibleHeadlineFacts": _str_list(payload.get("possibleHeadlineFacts")),
+        "matchCategories": _str_list(payload.get("matchCategories")),
+        "rawAdvertText": advert_text.strip(),
+    }
+
+
+def _build_extraction_user_prompt(advert_text):
+    return (
+        "Extract the structured advert data from this job advert text.\n"
+        "Return JSON only.\n\n"
+        "=== JOB ADVERT TEXT ===\n"
+        f"{advert_text.strip()}\n"
+    )
+
+
+def call_ollama_json(base_url, model, system_prompt, user_prompt, temperature=0.4):
+    """Call Ollama chat and return a parsed JSON object.
 
     Returns (result_dict, error_message_or_none).
     """
@@ -429,18 +556,17 @@ def call_ollama(base_url, model, application, evidence_rows):
     if not model:
         return None, "Ollama model not configured."
 
-    user_prompt = _build_user_prompt(application, evidence_rows)
     chat_url = base_url.rstrip("/") + "/api/chat"
 
     request_body = {
         "model": model,
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
         "stream": False,
         "options": {
-            "temperature": 0.4,
+            "temperature": float(temperature),
         },
     }
 
@@ -485,9 +611,121 @@ def call_ollama(base_url, model, application, evidence_rows):
     return result, None
 
 
+def call_ollama(base_url, model, application, evidence_rows):
+    """Generate personalised-content JSON from advert + evidence context."""
+    user_prompt = _build_user_prompt(application, evidence_rows)
+    return call_ollama_json(
+        base_url=base_url,
+        model=model,
+        system_prompt=SYSTEM_PROMPT,
+        user_prompt=user_prompt,
+        temperature=0.4,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Orchestrator – full generation pipeline
 # ---------------------------------------------------------------------------
+
+def generate_application_from_advert(advert_text, config):
+    """Generate a full application object from raw advert text.
+
+    Pipeline:
+    1. Extract structured advert fields via Ollama
+    2. Generate personalised content via Ollama + evidence bank
+    3. Return merged application ready for preview/publish
+    """
+    advert_text = str(advert_text or "").strip()
+    if not advert_text:
+        return {
+            "application": None,
+            "generatedContent": None,
+            "evidenceSelection": {"count": 0, "error": "No advert text supplied.", "examples": []},
+            "meta": {"success": False, "stage": "extract", "error": "No advert text supplied."},
+        }
+
+    ollama_base_url = (config.get("ollamaBaseUrl") or "").strip() or DEFAULT_OLLAMA_BASE_URL
+    ollama_model = (config.get("ollamaModel") or "").strip() or DEFAULT_OLLAMA_MODEL
+
+    extracted_raw, extraction_error = call_ollama_json(
+        base_url=ollama_base_url,
+        model=ollama_model,
+        system_prompt=ADVERT_EXTRACTION_SYSTEM_PROMPT,
+        user_prompt=_build_extraction_user_prompt(advert_text),
+        temperature=0.2,
+    )
+    if extraction_error:
+        return {
+            "application": None,
+            "generatedContent": None,
+            "evidenceSelection": {"count": 0, "error": "Generation skipped: advert extraction failed.", "examples": []},
+            "meta": {
+                "success": False,
+                "stage": "extract",
+                "error": extraction_error,
+                "model": ollama_model,
+                "baseUrl": ollama_base_url,
+            },
+        }
+
+    application = _normalise_extracted_application(extracted_raw, advert_text)
+    if not application.get("companyName") or not application.get("roleTitle"):
+        return {
+            "application": application,
+            "generatedContent": None,
+            "evidenceSelection": {"count": 0, "error": "Generation skipped: missing companyName or roleTitle after extraction.", "examples": []},
+            "meta": {
+                "success": False,
+                "stage": "extract",
+                "error": "Advert extraction did not return companyName and roleTitle.",
+                "model": ollama_model,
+                "baseUrl": ollama_base_url,
+            },
+        }
+
+    personalised = generate_personalised_content(application, config)
+    generated_content = personalised.get("generatedContent")
+    evidence_selection = personalised.get("evidenceSelection") or {"count": 0, "error": None, "examples": []}
+
+    if not generated_content:
+        return {
+            "application": application,
+            "generatedContent": None,
+            "evidenceSelection": evidence_selection,
+            "meta": {
+                "success": False,
+                "stage": "personalise",
+                "error": (personalised.get("meta") or {}).get("error") or "Personalised generation failed.",
+                "model": ollama_model,
+                "baseUrl": ollama_base_url,
+                "companyName": application.get("companyName", ""),
+                "roleTitle": application.get("roleTitle", ""),
+            },
+        }
+
+    application["personalisedContent"] = generated_content
+    application["generatedContent"] = generated_content
+    application["evidenceSelection"] = evidence_selection
+    application["personalisedIntro"] = generated_content.get("personalisedOpening", "")
+    application["whyThisRole"] = generated_content.get("whyThisRole", "")
+    application["shortCompanyReason"] = application.get("shortCompanyReason") or generated_content.get("whyThisCompany", "")
+    application["closingSummary"] = generated_content.get("closingSummary", "")
+
+    return {
+        "application": application,
+        "generatedContent": generated_content,
+        "evidenceSelection": evidence_selection,
+        "meta": {
+            "success": True,
+            "stage": "complete",
+            "error": None,
+            "model": ollama_model,
+            "baseUrl": ollama_base_url,
+            "companyName": application.get("companyName", ""),
+            "roleTitle": application.get("roleTitle", ""),
+        },
+    }
+
 
 def generate_personalised_content(application, config):
     """Run the full Stage 3 generation pipeline.

@@ -93,7 +93,7 @@ def generate_pdf_from_html(html_content):
       return None, f"Chrome exited with code {retcode} but produced no PDF."
     return Path(pdf_path).read_bytes(), None
 
-from content_generation import generate_personalised_content
+from content_generation import generate_application_from_advert, generate_personalised_content
 
 
 ROOT = Path(__file__).resolve().parent
@@ -2959,9 +2959,15 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(400, {"error": "Invalid JSON"})
       return
 
-    application = payload.get("application") if isinstance(payload, dict) and isinstance(payload.get("application"), dict) else {}
-    if not isinstance(application, dict) or not application.get("companyName"):
-      self.send_json(400, {"error": "Application payload is missing companyName"})
+    if not isinstance(payload, dict):
+      self.send_json(400, {"error": "Request payload must be a JSON object."})
+      return
+
+    advert_text = str(payload.get("advertText", "")).strip()
+    application = payload.get("application") if isinstance(payload.get("application"), dict) else {}
+
+    if not advert_text and (not isinstance(application, dict) or not application.get("companyName")):
+      self.send_json(400, {"error": "Provide advertText or an application object with companyName."})
       return
 
     try:
@@ -2979,7 +2985,10 @@ class AppHandler(SimpleHTTPRequestHandler):
       return
 
     try:
-      result = generate_personalised_content(application, config)
+      if advert_text:
+        result = generate_application_from_advert(advert_text, config)
+      else:
+        result = generate_personalised_content(application, config)
       self.send_json(200, result)
     except Exception as exc:
       self.send_json(500, {

@@ -39,7 +39,7 @@
       <div class="header-row">
         <div>
           <h1>New application</h1>
-          <p class="subtitle">Paste ready-to-publish JSON with tailored content already included, review, then confirm.</p>
+          <p class="subtitle">Paste the raw job advert, generate tailored content locally with Ollama, review, then publish.</p>
         </div>
         <div class="header-actions">
           <a class="button button--ghost" href="dashboard.html">Dashboard</a>
@@ -57,25 +57,25 @@
 
     <!-- Input -->
     <section class="card">
-      <h2>Paste ready-to-publish application JSON</h2>
-      <textarea id="job-json-input" rows="12" placeholder='{"companyName":"Acme Ltd","roleTitle":"Operations Manager", ...}'></textarea>
-      <p class="inline-feedback" style="margin-top:0.6rem;">This workflow does not generate or rewrite content. Your pasted JSON is treated as final.</p>
+      <h2>Paste raw job advert text</h2>
+      <textarea id="job-advert-input" rows="14" placeholder="Paste the full job advert text here..."></textarea>
+      <p class="inline-feedback" style="margin-top:0.6rem;">This workflow generates locally with Ollama + your evidence bank. No browser-side AI calls or OpenAI calls are used.</p>
       <div class="action-row action-row--spread" style="margin-top:0.75rem;">
         <div class="action-row">
-          <button class="button" id="go-button" type="button">Go</button>
+          <button class="button" id="go-button" type="button">Generate &amp; Review</button>
           <button class="button button--ghost" id="clear-button" type="button">Clear</button>
         </div>
-        <p class="inline-feedback" id="input-status" aria-live="polite">Waiting for JSON.</p>
+        <p class="inline-feedback" id="input-status" aria-live="polite">Waiting for advert text.</p>
       </div>
       <p class="error-message" id="input-error" role="alert" hidden></p>
     </section>
 
     <!-- Pipeline progress -->
     <section class="card" id="pipeline-panel" hidden>
-      <h2>Validation</h2>
+      <h2>Generation pipeline</h2>
       <div class="pipeline-pills">
-        <span class="pill pill--waiting" id="pill-parse">Parse</span>
-        <span class="pill pill--waiting" id="pill-generate">Tailored content</span>
+        <span class="pill pill--waiting" id="pill-parse">Advert parse</span>
+        <span class="pill pill--waiting" id="pill-generate">Tailored application</span>
       </div>
       <p class="inline-feedback" id="pipeline-message" aria-live="polite"></p>
       <p class="error-message" id="pipeline-error" role="alert" hidden></p>
@@ -135,6 +135,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=15" defer></script>
+  <script src="admin.js?v=16" defer></script>
 </body>
 </html>

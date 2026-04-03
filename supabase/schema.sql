@@ -66,3 +66,24 @@ create policy "Public read reviewed_jobs"
 on public.reviewed_jobs
 for select
 using (true);
+
+-- CV contact requests (from the contact form on cv.html)
+create table if not exists public.cv_contact_requests (
+  id uuid primary key default gen_random_uuid(),
+  direction text not null,
+  cv_ref text not null default 'direct',
+  sender_name text not null default '',
+  sender_email text,
+  sender_phone text,
+  message text,
+  page_url text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.cv_contact_requests enable row level security;
+
+drop policy if exists "Anon insert cv_contact_requests" on public.cv_contact_requests;
+create policy "Anon insert cv_contact_requests"
+on public.cv_contact_requests
+for insert
+with check (true);

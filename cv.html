@@ -1138,84 +1138,137 @@
 
     .contact-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.72fr);
-      gap: 1.5rem 1.8rem;
-      align-items: stretch;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 2rem;
+      align-items: start;
     }
 
-    .contact-card {
-      display: grid;
-      gap: 0.85rem;
-      border-top: 1px solid var(--line-strong);
-      padding-top: 0.9rem;
-    }
-
-    .contact-card h2 {
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(2.35rem, 5vw, 4.4rem);
-      line-height: 0.92;
-      max-width: 10.5ch;
-    }
-
-    .contact-copy {
-      max-width: 38ch;
-    }
-
-    .contact-lines {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.55rem 1rem;
-      margin-top: 0.1rem;
-    }
-
-    .contact-line {
+    .contact-panel {
+      border-top: 2px solid var(--line-strong);
+      padding-top: 1.2rem;
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem 0.65rem;
-      align-items: baseline;
-      padding-bottom: 0.45rem;
-      border-bottom: 1px solid rgba(18, 18, 18, 0.08);
+      flex-direction: column;
+      gap: 1rem;
     }
 
-    .contact-line:last-child {
-      grid-column: 1 / -1;
+    .contact-panel-title {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      line-height: 1;
+      color: var(--ink);
+      margin: 0;
     }
 
-    .contact-line strong {
-      min-width: 4.5rem;
+    .contact-panel-sub {
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .contact-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .contact-field label {
       text-transform: uppercase;
       letter-spacing: 0.16em;
       font-size: 0.7rem;
       color: var(--muted);
+      font-weight: 600;
     }
 
-    .contact-figure {
-      display: grid;
-      align-content: space-between;
-      padding: 1rem 0;
-      border-top: 1px solid var(--line-strong);
-      border-bottom: 1px solid var(--line-strong);
+    .contact-field input,
+    .contact-field textarea {
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper-2);
+      color: var(--ink);
+      transition: border-color 0.2s;
+      outline: none;
     }
 
-    .contact-figure .mark {
+    .contact-field input:focus,
+    .contact-field textarea:focus {
+      border-color: var(--gold);
+    }
+
+    .contact-field textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .contact-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.25rem;
+    }
+
+    .contact-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1.3rem;
+      border: 1px solid var(--ink);
+      border-radius: 6px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .contact-btn:hover {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .contact-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .contact-btn--outline {
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .contact-btn--outline:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .contact-toast {
+      font-size: 0.82rem;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      display: none;
+      margin-top: 0.25rem;
+    }
+
+    .contact-toast--ok {
+      background: rgba(46, 125, 50, 0.1);
+      color: #2e7d32;
       display: block;
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(4rem, 11vw, 5.8rem);
-      color: rgba(18, 18, 18, 0.08);
-      letter-spacing: -0.08em;
-      line-height: 1;
-      text-align: right;
     }
 
-    .contact-caption {
-      margin-top: 0.7rem;
-      padding-top: 0.55rem;
-      border-top: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 0.8rem;
-      line-height: 1.5;
-      max-width: 24ch;
-      margin-left: auto;
+    .contact-toast--err {
+      background: rgba(198, 40, 40, 0.1);
+      color: #c62828;
+      display: block;
+    }
+
+    .contact-divider {
+      display: none;
     }
 
     .footer {
@@ -1370,6 +1423,13 @@
       .contact-grid {
         grid-template-columns: 1fr;
       }
+
+      .contact-divider {
+        display: block;
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 0;
+      }
     }
 
     @media (max-width: 720px) {
@@ -1409,13 +1469,8 @@
         border-bottom: 0;
       }
 
-      .tailored-list,
-      .contact-lines {
+      .tailored-list {
         grid-template-columns: 1fr;
-      }
-
-      .contact-line:last-child {
-        grid-column: auto;
       }
 
       .chapter-row {
@@ -1762,29 +1817,59 @@
         </div>
 
         <div class="contact-grid">
-          <article class="contact-card" data-reveal>
-            <h2 class="serif" id="contact-heading">Open to discussing the opportunity.</h2>
-            <p id="contact-copy">Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support the role.</p>
-            <div class="contact-lines">
-              <div class="contact-line">
-                <strong>Phone</strong>
-                <span><a href="tel:07507789672">07507 789672</a></span>
-              </div>
-              <div class="contact-line">
-                <strong>Email</strong>
-                <span><a href="mailto:benthoward@outlook.com">benthoward@outlook.com</a></span>
-              </div>
-              <div class="contact-line">
-                <strong>LinkedIn</strong>
-                <span><a href="https://linkedin.com/in/benthoward" target="_blank" rel="noreferrer">linkedin.com/in/benthoward</a></span>
-              </div>
-            </div>
-          </article>
+          <!-- LEFT: Contact Me -->
+          <div class="contact-panel" data-reveal>
+            <h3 class="contact-panel-title">Contact Me</h3>
+            <p class="contact-panel-sub">Send me a message or give me a call directly.</p>
 
-          <div class="contact-figure draw-line" data-reveal>
-            <div class="mark">BH</div>
-            <div class="contact-caption">Ben T. Howard — operations leadership across healthcare, manufacturing, leisure and regulated services.</div>
+            <form id="contactMeForm" autocomplete="off">
+              <div class="contact-field">
+                <label for="cm-name">Your Name</label>
+                <input type="text" id="cm-name" name="name" required placeholder="e.g. Jane Smith">
+              </div>
+              <div class="contact-field" style="margin-top:0.6rem">
+                <label for="cm-message">Message</label>
+                <textarea id="cm-message" name="message" required placeholder="I'd like to discuss…"></textarea>
+              </div>
+              <div class="contact-actions">
+                <button type="submit" class="contact-btn" id="cm-send">Send Message</button>
+                <a href="tel:07507789672" class="contact-btn contact-btn--outline" id="cm-call">Call Me</a>
+              </div>
+            </form>
+            <div class="contact-toast" id="cm-toast"></div>
           </div>
+
+          <hr class="contact-divider">
+
+          <!-- RIGHT: Contact You -->
+          <div class="contact-panel" data-reveal>
+            <h3 class="contact-panel-title">Contact You</h3>
+            <p class="contact-panel-sub">Leave your details and I'll reach out.</p>
+
+            <form id="contactYouForm" autocomplete="off">
+              <div class="contact-field">
+                <label for="cy-name">Your Name</label>
+                <input type="text" id="cy-name" name="name" required placeholder="e.g. Jane Smith">
+              </div>
+              <div class="contact-field" style="margin-top:0.6rem">
+                <label for="cy-email">Email Address</label>
+                <input type="email" id="cy-email" name="email" placeholder="you@company.com">
+              </div>
+              <div class="contact-field" style="margin-top:0.6rem">
+                <label for="cy-phone">Phone Number</label>
+                <input type="tel" id="cy-phone" name="phone" placeholder="07xxx xxxxxx">
+              </div>
+              <div class="contact-actions">
+                <button type="submit" class="contact-btn" id="cy-email-btn" data-mode="email">Email Me Back</button>
+                <button type="button" class="contact-btn contact-btn--outline" id="cy-call-btn">Call Me Back</button>
+              </div>
+            </form>
+            <div class="contact-toast" id="cy-toast"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.2rem; text-align:center;">
+          <p style="color:var(--muted); font-size:0.82rem;">Or reach me directly — <a href="mailto:benthoward@outlook.com">benthoward@outlook.com</a> · <a href="https://linkedin.com/in/benthoward" target="_blank" rel="noreferrer">LinkedIn</a></p>
         </div>
       </div>
     </section>
@@ -3131,6 +3216,109 @@
 
         return defaults;
       }
+
+      /* ── Contact form logic ── */
+      function showToast(el, msg, ok) {
+        el.textContent = msg;
+        el.className = 'contact-toast ' + (ok ? 'contact-toast--ok' : 'contact-toast--err');
+      }
+
+      async function supabaseInsert(table, row) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify(row)
+        });
+        if (!res.ok) throw new Error(`Insert failed (${res.status})`);
+      }
+
+      function getRef() {
+        const p = new URLSearchParams(window.location.search);
+        return p.get('ref') || p.get('sc') || 'direct';
+      }
+
+      // Contact Me form
+      document.getElementById('contactMeForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('cm-send');
+        const toast = document.getElementById('cm-toast');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        try {
+          await supabaseInsert('cv_contact_requests', {
+            direction: 'contact_me',
+            cv_ref: getRef(),
+            sender_name: document.getElementById('cm-name').value.trim(),
+            message: document.getElementById('cm-message').value.trim(),
+            page_url: window.location.href
+          });
+          showToast(toast, 'Message sent — thank you!', true);
+          this.reset();
+        } catch (err) {
+          showToast(toast, 'Could not send. Please try email or phone instead.', false);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+        }
+      });
+
+      // Contact You — Email Me Back
+      document.getElementById('contactYouForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const email = document.getElementById('cy-email').value.trim();
+        if (!email) { showToast(document.getElementById('cy-toast'), 'Please enter your email address.', false); return; }
+        const btn = document.getElementById('cy-email-btn');
+        const toast = document.getElementById('cy-toast');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        try {
+          await supabaseInsert('cv_contact_requests', {
+            direction: 'contact_you_email',
+            cv_ref: getRef(),
+            sender_name: document.getElementById('cy-name').value.trim(),
+            sender_email: email,
+            page_url: window.location.href
+          });
+          showToast(toast, 'Got it — I\'ll email you shortly.', true);
+          this.reset();
+        } catch (err) {
+          showToast(toast, 'Could not send. Please email me directly.', false);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Email Me Back';
+        }
+      });
+
+      // Contact You — Call Me Back
+      document.getElementById('cy-call-btn').addEventListener('click', async function () {
+        const phone = document.getElementById('cy-phone').value.trim();
+        if (!phone) { showToast(document.getElementById('cy-toast'), 'Please enter your phone number.', false); return; }
+        const btn = this;
+        const toast = document.getElementById('cy-toast');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        try {
+          await supabaseInsert('cv_contact_requests', {
+            direction: 'contact_you_call',
+            cv_ref: getRef(),
+            sender_name: document.getElementById('cy-name').value.trim(),
+            sender_phone: phone,
+            page_url: window.location.href
+          });
+          showToast(toast, 'Got it — I\'ll call you back soon.', true);
+          document.getElementById('contactYouForm').reset();
+        } catch (err) {
+          showToast(toast, 'Could not send. Please call me directly on 07507 789672.', false);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Call Me Back';
+        }
+      });
 
       loadState()
         .then((state) => {

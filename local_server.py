@@ -53,6 +53,8 @@ def generate_pdf_from_html(html_content):
       "--no-sandbox",
       "--disable-gpu",
       "--disable-dev-shm-usage",
+      "--disable-extensions",
+      "--disable-background-networking",
       "--no-first-run",
       "--no-default-browser-check",
       "--run-all-compositor-stages-before-draw",
@@ -66,7 +68,7 @@ def generate_pdf_from_html(html_content):
       proc = subprocess.Popen(
         cmd,
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
         stdin=subprocess.DEVNULL,
         close_fds=True,
         start_new_session=True,
@@ -75,22 +77,47 @@ def generate_pdf_from_html(html_content):
     except OSError as exc:
       return None, str(exc)
 
-    # Poll for completion up to 90 seconds
-    deadline = 90
+    # Chrome on macOS often writes the PDF but never exits when the
+    # main browser is already running.  Poll for the PDF file first,
+    # then fall back to waiting for the process to finish.
+    deadline = 60
     interval = 0.5
     elapsed = 0.0
+    pdf_ready = False
+    prev_size = -1
+    stable_ticks = 0
     while elapsed < deadline:
       retcode = proc.poll()
       if retcode is not None:
         break
+      if os.path.exists(pdf_path):
+        cur_size = os.path.getsize(pdf_path)
+        if cur_size > 0 and cur_size == prev_size:
+          stable_ticks += 1
+          if stable_ticks >= 3:
+            pdf_ready = True
+            break
+        else:
+          stable_ticks = 0
+        prev_size = cur_size
       time.sleep(interval)
       elapsed += interval
-    else:
-      proc.kill()
-      return None, "Chrome timed out after 90 seconds."
 
-    if not os.path.exists(pdf_path):
-      return None, f"Chrome exited with code {retcode} but produced no PDF."
+    # If Chrome is still running, kill it — we have the PDF (or timed out)
+    if proc.poll() is None:
+      try:
+        proc.kill()
+        proc.wait(timeout=5)
+      except Exception:
+        pass
+
+    if not os.path.exists(pdf_path) or os.path.getsize(pdf_path) == 0:
+      stderr_out = ""
+      try:
+        stderr_out = proc.stderr.read().decode("utf-8", errors="replace")[:500]
+      except Exception:
+        pass
+      return None, f"Chrome did not produce a PDF. {stderr_out}".strip()
     return Path(pdf_path).read_bytes(), None
 
 from content_generation import generate_application_from_advert, generate_personalised_content

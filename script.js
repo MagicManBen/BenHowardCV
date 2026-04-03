@@ -642,8 +642,12 @@ function buildEmbeddedPreviewPayload(application) {
     glc: application.genLikelyContribution || "",
     gcf: application.genCultureFit || "",
     gcs: application.genClosingSummary || "",
+    grn: application.genRoleNeedsSummary || "",
     gch: Array.isArray(application.genCompanyHighlights) ? application.genCompanyHighlights : [],
-    gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : []
+    gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : [],
+    gem: Array.isArray(application.genExperienceMappings) ? application.genExperienceMappings : [],
+    gfb: Array.isArray(application.genFocusAreasToBring) ? application.genFocusAreasToBring : [],
+    g90: Array.isArray(application.genFirst90DaysPlan) ? application.genFirst90DaysPlan : []
   };
 }
 
@@ -719,8 +723,12 @@ function normaliseEmbeddedApplication(input) {
     genLikelyContribution: toCleanString(input.genLikelyContribution) || toCleanString(input.glc),
     genCultureFit: toCleanString(input.genCultureFit) || toCleanString(input.gcf),
     genClosingSummary: toCleanString(input.genClosingSummary) || toCleanString(input.gcs),
+    genRoleNeedsSummary: toCleanString(input.genRoleNeedsSummary) || toCleanString(input.grn),
     genCompanyHighlights: normaliseStringArray(input.genCompanyHighlights || input.gch),
-    genEvidenceExamples: Array.isArray(input.genEvidenceExamples || input.gee) ? (input.genEvidenceExamples || input.gee) : []
+    genEvidenceExamples: Array.isArray(input.genEvidenceExamples || input.gee) ? (input.genEvidenceExamples || input.gee) : [],
+    genExperienceMappings: normaliseExperienceMappings(input.genExperienceMappings || input.gem),
+    genFocusAreasToBring: normaliseFocusAreasToBring(input.genFocusAreasToBring || input.gfb),
+    genFirst90DaysPlan: normaliseFirst90DaysPlan(input.genFirst90DaysPlan || input.g90)
   };
 
   if (!application.companyName || !application.roleTitle) {
@@ -957,6 +965,41 @@ function slugify(text) {
 function normaliseStringArray(value) {
   if (!Array.isArray(value)) return [];
   return value.map((item) => (typeof item === "string" ? item.trim() : "")).filter(Boolean);
+}
+
+function normaliseExperienceMappings(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      roleNeed: toCleanString(item.roleNeed),
+      myEvidence: toCleanString(item.myEvidence),
+      relevance: toCleanString(item.relevance)
+    };
+  }).filter((item) => item && (item.roleNeed || item.myEvidence || item.relevance));
+}
+
+function normaliseFocusAreasToBring(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      title: toCleanString(item.title),
+      summary: toCleanString(item.summary)
+    };
+  }).filter((item) => item && (item.title || item.summary));
+}
+
+function normaliseFirst90DaysPlan(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      phase: toCleanString(item.phase),
+      focus: toCleanString(item.focus),
+      detail: toCleanString(item.detail)
+    };
+  }).filter((item) => item && (item.phase || item.focus || item.detail));
 }
 
 function showError(el, message) {

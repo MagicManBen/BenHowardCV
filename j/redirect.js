@@ -76,8 +76,12 @@ function buildEmbeddedPreviewPayload(application) {
     glc: application.genLikelyContribution || "",
     gcf: application.genCultureFit || "",
     gcs: application.genClosingSummary || "",
+    grn: application.genRoleNeedsSummary || "",
     gch: Array.isArray(application.genCompanyHighlights) ? application.genCompanyHighlights : [],
-    gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : []
+    gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : [],
+    gem: Array.isArray(application.genExperienceMappings) ? application.genExperienceMappings : [],
+    gfb: Array.isArray(application.genFocusAreasToBring) ? application.genFocusAreasToBring : [],
+    g90: Array.isArray(application.genFirst90DaysPlan) ? application.genFirst90DaysPlan : []
   };
 }
 

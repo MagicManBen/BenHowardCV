@@ -126,8 +126,12 @@ async function initLocalAdminPage() {
       pendingApplication.genLikelyContribution = gen.likelyContributionSummary || "";
       pendingApplication.genCultureFit = gen.cultureFitSummary || "";
       pendingApplication.genClosingSummary = gen.closingSummary || "";
+      pendingApplication.genRoleNeedsSummary = gen.roleNeedsSummary || "";
       pendingApplication.genCompanyHighlights = Array.isArray(gen.companyHighlights) ? gen.companyHighlights : [];
       pendingApplication.genEvidenceExamples = Array.isArray(gen.selectedEvidenceExamples) ? gen.selectedEvidenceExamples : [];
+      pendingApplication.genExperienceMappings = Array.isArray(gen.experienceMappings) ? gen.experienceMappings : [];
+      pendingApplication.genFocusAreasToBring = Array.isArray(gen.focusAreasToBring) ? gen.focusAreasToBring : [];
+      pendingApplication.genFirst90DaysPlan = Array.isArray(gen.first90DaysPlan) ? gen.first90DaysPlan : [];
 
       const response = await publishApplication(publishApplicationData);
       const application = response.application || pendingApplication;
@@ -323,6 +327,7 @@ function renderContentGroup(dom, result) {
     ["Personalised opening", content.personalisedOpening],
     ["Why this company", content.whyThisCompany],
     ["Why this role", content.whyThisRole],
+    ["Role needs summary", content.roleNeedsSummary],
     ["Fit summary", content.fitSummary],
     ["Likely contribution", content.likelyContributionSummary],
     ["Culture fit", content.cultureFitSummary],
@@ -344,6 +349,34 @@ function renderContentGroup(dom, result) {
     parts.push('<p style="margin-top:0.6rem"><strong>Company highlights:</strong> ' + esc(highlights.join(" \u00b7 ")) + '</p>');
   }
 
+  var mappings = content.experienceMappings || [];
+  if (mappings.length) {
+    parts.push('<p style="margin-top:0.6rem"><strong>Experience mappings (' + mappings.length + '):</strong></p>');
+    for (var k = 0; k < mappings.length; k++) {
+      var mapping = mappings[k];
+      parts.push(
+        '<div class="review-value" style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">' +
+        '<strong>' + esc(mapping.roleNeed || "?") + '</strong><br>' +
+        esc(mapping.myEvidence || "") +
+        (mapping.relevance ? '<br><em>' + esc(mapping.relevance) + '</em>' : "") +
+        '</div>'
+      );
+    }
+  }
+
+  var focusAreas = content.focusAreasToBring || [];
+  if (focusAreas.length) {
+    parts.push('<p style="margin-top:0.6rem"><strong>Focus areas to bring (' + focusAreas.length + '):</strong></p>');
+    for (var m = 0; m < focusAreas.length; m++) {
+      var focusArea = focusAreas[m];
+      parts.push(
+        '<div class="review-value" style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">' +
+        '<strong>' + esc(focusArea.title || "?") + '</strong> \u2014 ' +
+        esc(focusArea.summary || "") + '</div>'
+      );
+    }
+  }
+
   var examples = content.selectedEvidenceExamples || [];
   if (examples.length) {
     parts.push('<p style="margin-top:0.6rem"><strong>Evidence examples (' + examples.length + '):</strong></p>');
@@ -353,6 +386,21 @@ function renderContentGroup(dom, result) {
         '<div class="review-value" style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">' +
         '<strong>' + esc(ex.exampleTitle || "?") + '</strong> \u2014 ' +
         esc(ex.shortLine || ex.whyChosen || "") + '</div>'
+      );
+    }
+  }
+
+  var first90DaysPlan = content.first90DaysPlan || [];
+  if (first90DaysPlan.length) {
+    parts.push('<p style="margin-top:0.6rem"><strong>First 90 days (' + first90DaysPlan.length + '):</strong></p>');
+    for (var n = 0; n < first90DaysPlan.length; n++) {
+      var phase = first90DaysPlan[n];
+      parts.push(
+        '<div class="review-value" style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">' +
+        '<strong>' + esc(phase.phase || "?") + '</strong> \u2014 ' +
+        esc(phase.focus || "") +
+        (phase.detail ? '<br>' + esc(phase.detail) : "") +
+        '</div>'
       );
     }
   }
@@ -463,8 +511,9 @@ function normaliseProvidedPersonalisedContent(input) {
     source = input.generatedContent;
   } else if (
     input.personalisedOpening || input.whyThisCompany || input.whyThisRole ||
+    input.roleNeedsSummary || input.experienceMappings || input.focusAreasToBring ||
     input.fitSummary || input.likelyContributionSummary || input.companyHighlights ||
-    input.cultureFitSummary || input.closingSummary || input.selectedEvidenceExamples ||
+    input.cultureFitSummary || input.first90DaysPlan || input.closingSummary || input.selectedEvidenceExamples ||
     input.contentNotes
   ) {
     source = input;
@@ -477,10 +526,14 @@ function normaliseProvidedPersonalisedContent(input) {
     whyThisCompany: str(source.whyThisCompany),
     whyThisRole: str(source.whyThisRole),
     selectedEvidenceExamples: normaliseEvidenceExamples(source.selectedEvidenceExamples),
+    roleNeedsSummary: str(source.roleNeedsSummary),
+    experienceMappings: normaliseExperienceMappings(source.experienceMappings),
+    focusAreasToBring: normaliseFocusAreasToBring(source.focusAreasToBring),
     fitSummary: str(source.fitSummary),
     likelyContributionSummary: str(source.likelyContributionSummary),
     companyHighlights: arr(source.companyHighlights),
     cultureFitSummary: str(source.cultureFitSummary),
+    first90DaysPlan: normaliseFirst90DaysPlan(source.first90DaysPlan),
     closingSummary: str(source.closingSummary),
     contentNotes: arr(source.contentNotes),
   };
@@ -498,6 +551,47 @@ function normaliseEvidenceExamples(value) {
       shortLine: str(item.shortLine),
     };
   }).filter(Boolean);
+}
+
+function normaliseExperienceMappings(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(function (item) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      roleNeed: str(item.roleNeed),
+      myEvidence: str(item.myEvidence),
+      relevance: str(item.relevance),
+    };
+  }).filter(function (item) {
+    return item && (item.roleNeed || item.myEvidence || item.relevance);
+  });
+}
+
+function normaliseFocusAreasToBring(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(function (item) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      title: str(item.title),
+      summary: str(item.summary),
+    };
+  }).filter(function (item) {
+    return item && (item.title || item.summary);
+  });
+}
+
+function normaliseFirst90DaysPlan(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(function (item) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      phase: str(item.phase),
+      focus: str(item.focus),
+      detail: str(item.detail),
+    };
+  }).filter(function (item) {
+    return item && (item.phase || item.focus || item.detail);
+  });
 }
 
 function buildEvidenceSelectionFromContent(content) {
@@ -576,8 +670,10 @@ function buildEmbeddedPayload(a) {
     gpo: a.genPersonalisedOpening || "", gwc: a.genWhyThisCompany || "",
     gwr: a.genWhyThisRole || "", gfs: a.genFitSummary || "",
     glc: a.genLikelyContribution || "", gcf: a.genCultureFit || "",
-    gcs: a.genClosingSummary || "",
+    gcs: a.genClosingSummary || "", grn: a.genRoleNeedsSummary || "",
     gch: a.genCompanyHighlights || [], gee: a.genEvidenceExamples || [],
+    gem: a.genExperienceMappings || [], gfb: a.genFocusAreasToBring || [],
+    g90: a.genFirst90DaysPlan || [],
   };
 }
 

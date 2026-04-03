@@ -204,6 +204,8 @@ HANDLING SPARSE ADVERTS:
 - Write shorter, more focused content rather than longer, vaguer content.
 - For companyHighlights: return fewer items (even zero) rather than unsupported claims.
 - For likelyContributionSummary: frame contribution around what the advert describes the role needing, not made-up promises. Use phrases like "Based on what the brief describes…" or "The role seems focused on…".
+- Avoid repeating the company name, role title, location, contract type, or other advert facts unless they add useful context.
+- Treat the page as a supporting site that sits beside the CV. Use the personalised sections to explain fit, evidence, and likely contribution rather than restating the advert.
 
 EVIDENCE BANK RULES:
 - Only reference achievements from the provided evidence bank — never invent examples.
@@ -225,10 +227,31 @@ Return ONLY valid JSON with this exact structure:
       "shortLine": "a punchy first-person one-liner tailored to this application"
     }
   ],
+  "roleNeedsSummary": "A concise first-person summary of what I understand this role really needs beyond the literal advert bullets (2-3 sentences).",
+  "experienceMappings": [
+    {
+      "roleNeed": "one clear capability or requirement the role needs",
+      "myEvidence": "the most relevant part of my experience for that need, in first person",
+      "relevance": "a short line on why that evidence matters for this role"
+    }
+  ],
+  "focusAreasToBring": [
+    {
+      "title": "a short focus area heading",
+      "summary": "how I would approach or add value in that area, in first person"
+    }
+  ],
   "fitSummary": "A 2-3 sentence first-person summary of why I'm a strong fit for this role overall.",
   "likelyContributionSummary": "What I'd expect to focus on in the first 6-12 months based on what the brief describes (2-3 sentences). Grounded in the advert, not invented promises.",
   "companyHighlights": ["Only include company facts clearly supported by the advert. Return fewer items or an empty array if reliable facts are limited."],
   "cultureFitSummary": "How my working style connects to the culture signals in the advert (1-2 sentences, first person).",
+  "first90DaysPlan": [
+    {
+      "phase": "First 30 days / Days 30-60 / Days 60-90",
+      "focus": "a short focus label for that phase",
+      "detail": "what I would concentrate on in that phase based on the brief"
+    }
+  ],
   "closingSummary": "A confident first-person closing line for the page (1 sentence).",
   "contentNotes": ["Any notes about content choices, gaps, thin data, or caveats for review."]
 }"""

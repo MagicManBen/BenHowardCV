@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", initRedirectPage);
 
 const IS_LOCAL_RUNTIME = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const LOCAL_API_BASE = "/api";
-const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : new URL("../cv.html", window.location.href).href;
+const PUBLIC_FULL_CV_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : new URL("../cv.html", window.location.href).href;
+const PUBLIC_QR_CV_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv-qr.html" : new URL("../cv-qr.html", window.location.href).href;
 
 async function initRedirectPage() {
   const titleEl = document.getElementById("redirect-title");
@@ -15,8 +16,10 @@ async function initRedirectPage() {
     return;
   }
 
-  const printSuffix = params.get("print") === "1" ? "&print=1" : "";
-  const target = `${PUBLIC_CV_BASE_URL}?ref=${encodeURIComponent(ref)}${printSuffix}`;
+  const wantsPrint = params.get("print") === "1";
+  const base = wantsPrint ? PUBLIC_FULL_CV_URL : PUBLIC_QR_CV_URL;
+  const printSuffix = wantsPrint ? "&print=1" : "";
+  const target = `${base}?ref=${encodeURIComponent(ref)}${printSuffix}`;
   window.location.replace(target);
 }
 

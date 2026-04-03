@@ -4,12 +4,15 @@
 // CV preview: render the personalised page and printable PDF view.
 
 const CV_BASE_URL = new URL("cv.html", window.location.href).href;
+const CV_QR_BASE_URL = new URL("cv-qr.html", window.location.href).href;
 const NEW_JOB_URL = new URL("new-job.html", window.location.href).href;
 const LOCAL_ADMIN_URL = new URL("local-admin/", window.location.href).href;
 const IS_LOCAL_RUNTIME = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const LOCAL_API_BASE = "/api";
 const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : CV_BASE_URL;
+const PUBLIC_QR_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv-qr.html" : CV_QR_BASE_URL;
 const PUBLIC_JOB_BASE_URL = new URL("j/", PUBLIC_CV_BASE_URL).href;
+const PUBLIC_REDIRECT_BASE_URL = new URL("r/", PUBLIC_CV_BASE_URL).href;
 const APPLICATIONS_STORE_KEY = "cv_applications_local";
 const APPLICATIONS_INDEX_PATH = "data/applications.json";
 
@@ -122,13 +125,25 @@ function initDashboardPage() {
     }
 
     const previewUrl = buildPreviewUrl(application);
+    const qrPreviewUrl = buildLocalQrPageUrl(application);
     const printUrl = buildPrintUrl(application);
 
     if (action === "copy-url") {
-      const publicUrl = buildShortJobUrl(application);
+      const publicUrl = buildPublicFullEmployerUrl(application);
       try {
         await navigator.clipboard.writeText(publicUrl);
-        showToast(dom, "URL copied.");
+        showToast(dom, "Full URL copied.");
+      } catch {
+        showToast(dom, "Could not copy automatically.");
+      }
+      return;
+    }
+
+    if (action === "copy-qr") {
+      const qrUrl = buildShortJobUrl(application);
+      try {
+        await navigator.clipboard.writeText(qrUrl);
+        showToast(dom, "QR URL copied.");
       } catch {
         showToast(dom, "Could not copy automatically.");
       }
@@ -137,6 +152,11 @@ function initDashboardPage() {
 
     if (action === "open-preview") {
       window.open(previewUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (action === "open-qr") {
+      window.open(qrPreviewUrl, "_blank", "noopener,noreferrer");
       return;
     }
 
@@ -424,18 +444,19 @@ function renderReviewPreview(application) {
 }
 
 async function renderPublishedResult(dom, application) {
-  const url = buildShortJobUrl(application);
+  const fullUrl = buildPublicFullEmployerUrl(application);
+  const qrUrl = buildShortJobUrl(application);
 
   dom.resultCompany.value = application.companyName || "";
   dom.resultRole.value = application.roleTitle || "";
   dom.resultLocation.value = application.location || "";
   dom.resultRef.value = application.ref || "";
-  dom.resultUrl.value = url;
-  dom.openPreviewLink.href = url;
+  dom.resultUrl.value = fullUrl;
+  dom.openPreviewLink.href = fullUrl;
   dom.resultPanel.hidden = false;
 
   try {
-    await renderQrImage(dom.resultQrImage, url);
+    await renderQrImage(dom.resultQrImage, qrUrl);
   } catch {
     dom.resultQrImage.hidden = true;
   }
@@ -538,10 +559,12 @@ function renderSavedApplicationCard(application) {
       </div>
       <div class="saved-application-actions">
         <button class="saved-action" type="button" data-action="open-preview" data-ref="${escapeHtml(application.ref)}">Open CV</button>
+        <button class="saved-action" type="button" data-action="open-qr" data-ref="${escapeHtml(application.ref)}">Open QR</button>
         <button class="saved-action" type="button" data-action="open-pdf" data-ref="${escapeHtml(application.ref)}">PDF view</button>
         <button class="saved-action" type="button" data-action="copy-url" data-ref="${escapeHtml(application.ref)}">Copy URL</button>
+        <button class="saved-action" type="button" data-action="copy-qr" data-ref="${escapeHtml(application.ref)}">Copy QR</button>
       </div>
-      <p class="saved-application-meta">Open or copy the tailored link for this application.</p>
+      <p class="saved-application-meta">Open the full employer page, or use the separate QR/mobile route for print and QR sharing.</p>
     </article>
   `;
 }
@@ -559,24 +582,33 @@ async function resolveApplicationForPreview(ref) {
   return application;
 }
 
-function buildPublicPreviewUrl(application) {
-  const payload = buildEmbeddedPreviewPayload(application);
-  return `${PUBLIC_CV_BASE_URL}#app=${encodeApplicationPayload(payload)}`;
+function buildPublicFullEmployerUrl(application) {
+  const ref = application && application.ref ? application.ref : "";
+  return `${PUBLIC_CV_BASE_URL}?ref=${encodeURIComponent(ref)}`;
 }
 
 function buildShortJobUrl(application) {
+  const shortCode = application && application.shortCode ? application.shortCode : "";
   const ref = application && application.ref ? application.ref : "";
+  if (shortCode) {
+    return new URL(`${encodeURIComponent(shortCode)}/`, PUBLIC_REDIRECT_BASE_URL).href;
+  }
   return `${PUBLIC_JOB_BASE_URL}?r=${encodeURIComponent(ref)}`;
 }
 
 function buildPreviewUrl(refOrApplication) {
-  const payload = buildEmbeddedPreviewPayload(refOrApplication);
-  return `${CV_BASE_URL}#app=${encodeApplicationPayload(payload)}`;
+  const ref = refOrApplication && refOrApplication.ref ? refOrApplication.ref : "";
+  return `${CV_BASE_URL}?ref=${encodeURIComponent(ref)}`;
+}
+
+function buildLocalQrPageUrl(refOrApplication) {
+  const ref = refOrApplication && refOrApplication.ref ? refOrApplication.ref : "";
+  return `${CV_QR_BASE_URL}?ref=${encodeURIComponent(ref)}`;
 }
 
 function buildPrintUrl(refOrApplication) {
-  const payload = buildEmbeddedPreviewPayload(refOrApplication);
-  return `${CV_BASE_URL}?print=1#app=${encodeApplicationPayload(payload)}`;
+  const ref = refOrApplication && refOrApplication.ref ? refOrApplication.ref : "";
+  return `${CV_BASE_URL}?ref=${encodeURIComponent(ref)}&print=1`;
 }
 
 function buildPrintUrlFromUrl(url) {

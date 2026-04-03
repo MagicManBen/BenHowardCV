@@ -2,6 +2,7 @@ const EDGE_FN_BASE = "https://jntpyqguonknixyksqbp.supabase.co/functions/v1";
 const SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
 const DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html";
+const DEFAULT_PUBLIC_QR_BASE_URL = new URL("cv-qr.html", DEFAULT_PUBLIC_CV_BASE_URL).href;
 
 const REVIEW_FIELDS = [
   ["companyName", "Company"],
@@ -69,6 +70,7 @@ const KNOWN_PERSONALISED_KEYS = new Set([
 
 let toastTimer = null;
 let publicCvBaseUrl = DEFAULT_PUBLIC_CV_BASE_URL;
+let publicQrBaseUrl = DEFAULT_PUBLIC_QR_BASE_URL;
 let publicJobBaseUrl = new URL("j/", DEFAULT_PUBLIC_CV_BASE_URL).href;
 let publicRedirectBaseUrl = new URL("r/", DEFAULT_PUBLIC_CV_BASE_URL).href;
 
@@ -107,6 +109,7 @@ async function initLocalAdminPage() {
     resultUrl:        document.getElementById("result-url"),
     copyUrlButton:    document.getElementById("copy-url-button"),
     openPreviewLink:  document.getElementById("open-preview-link"),
+    openQrLink:       document.getElementById("open-qr-link"),
     downloadCvButton: document.getElementById("download-cv-button"),
     resultQrImage:    document.getElementById("result-qr-image"),
     resultQrUrl:      document.getElementById("result-qr-url"),
@@ -115,8 +118,6 @@ async function initLocalAdminPage() {
   };
 
   let pendingApplication = null;
-  let localPreviewUrl = "";
-  let localPrintUrl = "";
 
   await loadLocalStatus(dom);
 
@@ -179,12 +180,10 @@ async function initLocalAdminPage() {
 
       const response = await publishApplication(publishApplicationData);
       const application = response.application || pendingApplication;
-      const publicUrl = buildShortQrUrl(application) || buildPublicPreviewUrl(application);
+      const fullUrl = response.fullUrl || buildFullEmployerPageUrl(application);
+      const qrUrl = response.qrUrl || buildQrDestinationUrl(application);
 
-      localPreviewUrl = buildLocalPreviewUrl(application);
-      localPrintUrl = buildLocalPrintUrl(application);
-
-      await renderPublishedResult(dom, application, publicUrl, localPreviewUrl);
+      await renderPublishedResult(dom, application, fullUrl, qrUrl);
       dom.resultPanel.hidden = false;
       dom.confirmStatus.textContent = "Published.";
       showToast(dom, response.publishedToSupabase || response.publishedToGitHub ? "CV saved." : "Saved locally.");
@@ -208,7 +207,7 @@ async function initLocalAdminPage() {
       if (!url) return;
       try {
         await navigator.clipboard.writeText(url);
-        showToast(dom, "URL copied.");
+        showToast(dom, "Full URL copied.");
       } catch {
         dom.resultUrl.focus();
         dom.resultUrl.select();
@@ -763,33 +762,33 @@ function buildEvidenceSelectionFromContent(content) {
   };
 }
 
-async function renderPublishedResult(dom, application, publicUrl, localPreviewUrl) {
+async function renderPublishedResult(dom, application, fullUrl, qrUrl) {
   dom.resultCompany.value = application.companyName || "";
   dom.resultRole.value = application.roleTitle || "";
   dom.resultLocation.value = application.location || "";
   dom.resultRef.value = application.ref || "";
-  dom.resultUrl.value = publicUrl;
+  dom.resultUrl.value = fullUrl;
 
-  if (dom.resultQrUrl) dom.resultQrUrl.value = publicUrl;
-  dom.openPreviewLink.href = publicUrl;
-  try { await renderQrImage(dom.resultQrImage, publicUrl); } catch (_) { dom.resultQrImage.hidden = true; }
+  if (dom.resultQrUrl) dom.resultQrUrl.value = qrUrl;
+  if (dom.openPreviewLink) dom.openPreviewLink.href = fullUrl;
+  if (dom.openQrLink) dom.openQrLink.href = qrUrl;
+  try { await renderQrImage(dom.resultQrImage, qrUrl); } catch (_) { dom.resultQrImage.hidden = true; }
 }
 
-function buildPublicPreviewUrl(app) {
+function buildFullEmployerPageUrl(app) {
   return publicCvBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
 }
-function buildShortJobUrl(app) {
-  return publicCvBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
+function buildDirectQrPageUrl(app) {
+  return publicQrBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
 }
 function buildShortQrUrl(app) {
-  if (!app.shortCode) return "";
-  return publicCvBaseUrl + "?sc=" + encodeURIComponent(app.shortCode);
+  if (app.shortCode) {
+    return new URL(encodeURIComponent(app.shortCode) + "/", publicRedirectBaseUrl).href;
+  }
+  return publicJobBaseUrl + "?r=" + encodeURIComponent(app.ref || "");
 }
-function buildLocalPreviewUrl(app) {
-  return new URL("../cv.html?ref=" + encodeURIComponent(app.ref || ""), window.location.href).href;
-}
-function buildLocalPrintUrl(app) {
-  return new URL("../cv.html?ref=" + encodeURIComponent(app.ref || "") + "&print=1", window.location.href).href;
+function buildQrDestinationUrl(app) {
+  return buildShortQrUrl(app) || buildDirectQrPageUrl(app);
 }
 
 function buildEmbeddedPayload(a) {

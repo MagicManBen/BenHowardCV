@@ -121,10 +121,13 @@
         <div class="field-group"><label>Ref</label><input id="result-ref" type="text" readonly></div>
       </div>
       <div class="field-group" style="margin-top:1rem">
-        <label for="result-qr-url">URL</label>
+        <label for="result-url">Full employer page</label>
+        <input id="result-url" type="text" readonly>
+      </div>
+      <div class="field-group" style="margin-top:1rem">
+        <label for="result-qr-url">QR / mobile page</label>
         <input id="result-qr-url" type="text" readonly>
       </div>
-      <input id="result-url" type="hidden">
       <div class="result-qr-layout">
         <section class="result-qr-card">
           <p class="section-kicker">QR Code</p>
@@ -134,8 +137,12 @@
         </section>
         <div class="result-actions">
           <div class="action-row">
-            <button class="button" id="copy-qr-url-button" type="button">Copy URL</button>
-            <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open URL</a>
+            <button class="button" id="copy-url-button" type="button">Copy full URL</button>
+            <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open full page</a>
+          </div>
+          <div class="action-row">
+            <button class="button" id="copy-qr-url-button" type="button">Copy QR URL</button>
+            <a class="button button--ghost" id="open-qr-link" href="#" target="_blank" rel="noopener noreferrer">Open QR page</a>
             <button class="button button--ghost" id="download-cv-button" type="button">Save CV as PDF</button>
           </div>
         </div>
@@ -145,6 +152,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=18" defer></script>
+  <script src="admin.js?v=19" defer></script>
 </body>
 </html>

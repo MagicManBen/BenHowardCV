@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import parse_qs, quote, urlencode, urlparse
+from urllib.parse import parse_qs, quote, urlencode, urljoin, urlparse
 from urllib.request import Request, urlopen
 
 CHROME_CANDIDATES = [
@@ -1677,6 +1677,26 @@ def read_supabase_application_by_ref(ref, config):
   return application
 
 
+def read_supabase_application_by_short_code(short_code, config):
+  if not has_supabase_access(config):
+    return None
+
+  encoded_short_code = quote(short_code, safe="")
+  path = f"/rest/v1/{SUPABASE_APPLICATIONS_TABLE}?short_code=eq.{encoded_short_code}&select=ref,company_name,role_title,location,created_at,updated_at,short_code,application&limit=1"
+  status, payload = supabase_request_json(config, path)
+  if status < 200 or status >= 300:
+    return None
+
+  rows = payload if isinstance(payload, list) else []
+  if not rows:
+    return None
+
+  application = supabase_application_from_row(rows[0])
+  if application:
+    upsert_local_application(application)
+  return application
+
+
 def upsert_supabase_application(application, config):
   if not has_supabase_access(config):
     return {
@@ -1835,6 +1855,44 @@ def read_application_by_ref(ref, config=None):
   return None
 
 
+def read_application_by_short_code(short_code, config=None):
+  config = config or load_local_config()
+  application = read_supabase_application_by_short_code(short_code, config)
+  if application:
+    return application
+
+  merged_index = read_merged_index(config)
+  match = next(
+    (
+      item for item in merged_index
+      if str(item.get("shortCode", "")).strip().lower() == str(short_code or "").strip().lower()
+    ),
+    None,
+  )
+  if match and match.get("ref"):
+    return read_application_by_ref(str(match["ref"]).strip().lower(), config)
+
+  return None
+
+
+def build_application_urls(application, config=None):
+  config = config or load_local_config()
+  full_url = f"{config['publicCvBaseUrl']}?ref={quote(str(application.get('ref', '')).strip())}"
+  direct_qr_url = urljoin(config["publicCvBaseUrl"], f"cv-qr.html?ref={quote(str(application.get('ref', '')).strip())}")
+
+  short_code = str(application.get("shortCode", "")).strip()
+  if short_code:
+    qr_url = urljoin(config["publicCvBaseUrl"], f"r/{quote(short_code)}/")
+  else:
+    qr_url = urljoin(config["publicCvBaseUrl"], f"j/?r={quote(str(application.get('ref', '')).strip())}")
+
+  return {
+    "fullUrl": full_url,
+    "directQrUrl": direct_qr_url,
+    "qrUrl": qr_url,
+  }
+
+
 def upsert_local_application(application):
   local_index = read_local_index()
   summary = {
@@ -1842,6 +1900,7 @@ def upsert_local_application(application):
     "companyName": application.get("companyName", ""),
     "roleTitle": application.get("roleTitle", ""),
     "location": application.get("location", ""),
+    "shortCode": application.get("shortCode", ""),
     "updatedAt": application.get("updatedAt", ""),
     "createdAt": application.get("createdAt", ""),
   }
@@ -2193,6 +2252,7 @@ def push_application_to_github(application, token):
     "companyName": application.get("companyName", ""),
     "roleTitle": application.get("roleTitle", ""),
     "location": application.get("location", ""),
+    "shortCode": application.get("shortCode", ""),
     "updatedAt": application.get("updatedAt", ""),
     "createdAt": application.get("createdAt", ""),
   }
@@ -2332,9 +2392,11 @@ class AppHandler(SimpleHTTPRequestHandler):
       return
 
     if parsed.path == "/api/application":
-      ref = (parse_qs(parsed.query).get("ref", [""])[0] or "").strip().lower()
-      if not ref:
-        self.send_json(400, {"error": "Missing ref"})
+      params = parse_qs(parsed.query)
+      ref = (params.get("ref", [""])[0] or "").strip().lower()
+      short_code = (params.get("sc", [""])[0] or "").strip().lower()
+      if not ref and not short_code:
+        self.send_json(400, {"error": "Missing ref or sc"})
         return
 
       try:
@@ -2343,7 +2405,7 @@ class AppHandler(SimpleHTTPRequestHandler):
         self.send_json(500, {"error": str(exc)})
         return
 
-      application = read_application_by_ref(ref, config)
+      application = read_application_by_ref(ref, config) if ref else read_application_by_short_code(short_code, config)
       if not application:
         self.send_json(404, {"error": "Application not found"})
         return
@@ -2587,8 +2649,12 @@ class AppHandler(SimpleHTTPRequestHandler):
 
       upsert_local_application(application)
       config = load_local_config()
-      public_url = f"{config['publicCvBaseUrl']}?ref={application['ref']}"
+      urls = build_application_urls(application, config)
+      public_url = urls["fullUrl"]
       debug_entry["publicUrl"] = public_url
+      debug_entry["fullUrl"] = urls["fullUrl"]
+      debug_entry["directQrUrl"] = urls["directQrUrl"]
+      debug_entry["qrUrl"] = urls["qrUrl"]
       debug_entry["publicCvBaseUrl"] = config["publicCvBaseUrl"]
       debug_entry["githubTokenConfigured"] = bool(config["githubToken"])
       debug_entry["supabaseConfigured"] = has_supabase_access(config)
@@ -2611,6 +2677,9 @@ class AppHandler(SimpleHTTPRequestHandler):
             "publishedToSupabase": False,
             "application": application,
             "publicUrl": public_url,
+            "fullUrl": urls["fullUrl"],
+            "directQrUrl": urls["directQrUrl"],
+            "qrUrl": urls["qrUrl"],
             "debugLogPath": debug_path,
           },
         )
@@ -2644,6 +2713,9 @@ class AppHandler(SimpleHTTPRequestHandler):
           {
             "application": application,
             "publicUrl": public_url,
+            "fullUrl": urls["fullUrl"],
+            "directQrUrl": urls["directQrUrl"],
+            "qrUrl": urls["qrUrl"],
             "savedLocally": True,
             "publishedToGitHub": github_ok,
             "publishedToSupabase": supabase_ok,
@@ -2661,6 +2733,9 @@ class AppHandler(SimpleHTTPRequestHandler):
           "savedLocally": True,
           "application": application,
           "publicUrl": public_url,
+          "fullUrl": urls["fullUrl"],
+          "directQrUrl": urls["directQrUrl"],
+          "qrUrl": urls["qrUrl"],
           "debugLogPath": debug_path,
           "githubResult": github_result,
           "supabaseResult": supabase_result,
@@ -2671,13 +2746,17 @@ class AppHandler(SimpleHTTPRequestHandler):
       debug_entry["error"] = str(exc)
       debug_entry["traceback"] = traceback.format_exc()
       debug_path = write_publish_debug_log(debug_entry)
+      error_urls = build_application_urls(application, load_local_config())
       self.send_json(
         500,
         {
           "error": str(exc),
           "savedLocally": True,
           "application": application,
-          "publicUrl": f"{load_local_config()['publicCvBaseUrl']}?ref={application['ref']}",
+          "publicUrl": error_urls["fullUrl"],
+          "fullUrl": error_urls["fullUrl"],
+          "directQrUrl": error_urls["directQrUrl"],
+          "qrUrl": error_urls["qrUrl"],
           "debugLogPath": debug_path,
         },
       )

@@ -347,6 +347,7 @@ function normaliseApplicationPayload(input) {
 
   const nowIso = new Date().toISOString();
   const createdAt = toCleanString(input.createdAt) || nowIso;
+  const providedContent = normaliseProvidedPersonalisedContent(input);
 
   return {
     ref,
@@ -387,6 +388,22 @@ function normaliseApplicationPayload(input) {
     deliverablesLikely: normaliseStringArray(input.deliverablesLikely),
     possibleHeadlineFacts: normaliseStringArray(input.possibleHeadlineFacts),
     matchCategories: normaliseStringArray(input.matchCategories),
+    personalisedContent: providedContent,
+    genHeroPositioning: providedContent ? providedContent.heroPositioning : "",
+    genPersonalisedOpening: providedContent ? providedContent.personalisedOpening : "",
+    genWhyThisCompany: providedContent ? providedContent.whyThisCompany : "",
+    genWhyThisRole: providedContent ? providedContent.whyThisRole : "",
+    genRoleNeedsSummary: providedContent ? providedContent.roleNeedsSummary : "",
+    genExperienceMappings: providedContent ? providedContent.experienceMappings : [],
+    genFocusAreasToBring: providedContent ? providedContent.focusAreasToBring : [],
+    genFitSummary: providedContent ? providedContent.fitSummary : "",
+    genLikelyContribution: providedContent ? providedContent.likelyContributionSummary : "",
+    genCompanyHighlights: providedContent ? providedContent.companyHighlights : [],
+    genCultureFit: providedContent ? providedContent.cultureFitSummary : "",
+    genFirst90DaysPlan: providedContent ? providedContent.first90DaysPlan : [],
+    genClosingSummary: providedContent ? providedContent.closingSummary : "",
+    genClosingProofPoints: providedContent ? providedContent.closingProofPoints : [],
+    genEvidenceExamples: providedContent ? providedContent.selectedEvidenceExamples : [],
     createdAt,
     updatedAt: nowIso
   };
@@ -635,6 +652,7 @@ function buildEmbeddedPreviewPayload(application) {
     phf: Array.isArray(application.possibleHeadlineFacts) ? application.possibleHeadlineFacts : [],
     mc: Array.isArray(application.matchCategories) ? application.matchCategories : [],
     // Generated content (Stage 4)
+    ghp: application.genHeroPositioning || "",
     gpo: application.genPersonalisedOpening || "",
     gwc: application.genWhyThisCompany || "",
     gwr: application.genWhyThisRole || "",
@@ -647,7 +665,8 @@ function buildEmbeddedPreviewPayload(application) {
     gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : [],
     gem: Array.isArray(application.genExperienceMappings) ? application.genExperienceMappings : [],
     gfb: Array.isArray(application.genFocusAreasToBring) ? application.genFocusAreasToBring : [],
-    g90: Array.isArray(application.genFirst90DaysPlan) ? application.genFirst90DaysPlan : []
+    g90: Array.isArray(application.genFirst90DaysPlan) ? application.genFirst90DaysPlan : [],
+    gcp: Array.isArray(application.genClosingProofPoints) ? application.genClosingProofPoints : []
   };
 }
 
@@ -716,6 +735,7 @@ function normaliseEmbeddedApplication(input) {
     possibleHeadlineFacts: normaliseStringArray(input.possibleHeadlineFacts || input.phf),
     matchCategories: normaliseStringArray(input.matchCategories || input.mc),
     // Generated content (Stage 4)
+    genHeroPositioning: toCleanString(input.genHeroPositioning) || toCleanString(input.ghp),
     genPersonalisedOpening: toCleanString(input.genPersonalisedOpening) || toCleanString(input.gpo),
     genWhyThisCompany: toCleanString(input.genWhyThisCompany) || toCleanString(input.gwc),
     genWhyThisRole: toCleanString(input.genWhyThisRole) || toCleanString(input.gwr),
@@ -728,7 +748,8 @@ function normaliseEmbeddedApplication(input) {
     genEvidenceExamples: Array.isArray(input.genEvidenceExamples || input.gee) ? (input.genEvidenceExamples || input.gee) : [],
     genExperienceMappings: normaliseExperienceMappings(input.genExperienceMappings || input.gem),
     genFocusAreasToBring: normaliseFocusAreasToBring(input.genFocusAreasToBring || input.gfb),
-    genFirst90DaysPlan: normaliseFirst90DaysPlan(input.genFirst90DaysPlan || input.g90)
+    genFirst90DaysPlan: normaliseFirst90DaysPlan(input.genFirst90DaysPlan || input.g90),
+    genClosingProofPoints: normaliseStringArray(input.genClosingProofPoints || input.gcp)
   };
 
   if (!application.companyName || !application.roleTitle) {
@@ -967,14 +988,70 @@ function normaliseStringArray(value) {
   return value.map((item) => (typeof item === "string" ? item.trim() : "")).filter(Boolean);
 }
 
+function normaliseEvidenceExamples(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+    return {
+      exampleId: toCleanString(item.exampleId),
+      exampleTitle: toCleanString(item.exampleTitle),
+      bestMatchedRoleNeed: toCleanString(item.bestMatchedRoleNeed),
+      proofAngle: toCleanString(item.proofAngle),
+      whyChosen: toCleanString(item.whyChosen),
+      suggestedUsage: toCleanString(item.suggestedUsage),
+      shortLine: toCleanString(item.shortLine)
+    };
+  }).filter((item) => item && (item.exampleTitle || item.whyChosen || item.shortLine));
+}
+
+function normaliseProvidedPersonalisedContent(input) {
+  let source = null;
+  if (input.personalisedContent && typeof input.personalisedContent === "object" && !Array.isArray(input.personalisedContent)) {
+    source = input.personalisedContent;
+  } else if (input.generatedContent && typeof input.generatedContent === "object" && !Array.isArray(input.generatedContent)) {
+    source = input.generatedContent;
+  } else if (
+    input.heroPositioning || input.personalisedOpening || input.whyThisCompany || input.whyThisRole ||
+    input.roleNeedsSummary || input.experienceMappings || input.focusAreasToBring ||
+    input.fitSummary || input.likelyContributionSummary || input.companyHighlights ||
+    input.cultureFitSummary || input.first90DaysPlan || input.closingSummary || input.closingProofPoints ||
+    input.selectedEvidenceExamples || input.contentNotes
+  ) {
+    source = input;
+  }
+
+  if (!source) return null;
+
+  return {
+    heroPositioning: toCleanString(source.heroPositioning),
+    personalisedOpening: toCleanString(source.personalisedOpening),
+    whyThisCompany: toCleanString(source.whyThisCompany),
+    whyThisRole: toCleanString(source.whyThisRole),
+    selectedEvidenceExamples: normaliseEvidenceExamples(source.selectedEvidenceExamples),
+    roleNeedsSummary: toCleanString(source.roleNeedsSummary),
+    experienceMappings: normaliseExperienceMappings(source.experienceMappings),
+    focusAreasToBring: normaliseFocusAreasToBring(source.focusAreasToBring),
+    fitSummary: toCleanString(source.fitSummary),
+    likelyContributionSummary: toCleanString(source.likelyContributionSummary),
+    companyHighlights: normaliseStringArray(source.companyHighlights),
+    cultureFitSummary: toCleanString(source.cultureFitSummary),
+    first90DaysPlan: normaliseFirst90DaysPlan(source.first90DaysPlan),
+    closingSummary: toCleanString(source.closingSummary),
+    closingProofPoints: normaliseStringArray(source.closingProofPoints),
+    contentNotes: normaliseStringArray(source.contentNotes)
+  };
+}
+
 function normaliseExperienceMappings(value) {
   if (!Array.isArray(value)) return [];
   return value.map((item) => {
     if (!item || typeof item !== "object" || Array.isArray(item)) return null;
     return {
       roleNeed: toCleanString(item.roleNeed),
+      evidenceExampleId: toCleanString(item.evidenceExampleId),
       myEvidence: toCleanString(item.myEvidence),
-      relevance: toCleanString(item.relevance)
+      relevance: toCleanString(item.relevance),
+      proofAngle: toCleanString(item.proofAngle)
     };
   }).filter((item) => item && (item.roleNeed || item.myEvidence || item.relevance));
 }

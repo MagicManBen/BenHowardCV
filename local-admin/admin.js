@@ -119,6 +119,7 @@ async function initLocalAdminPage() {
       if (gen.fitSummary) pendingApplication.advertSummary = gen.fitSummary;
       if (gen.closingSummary) pendingApplication.closingSummary = gen.closingSummary;
 
+      pendingApplication.genHeroPositioning = gen.heroPositioning || "";
       pendingApplication.genPersonalisedOpening = gen.personalisedOpening || "";
       pendingApplication.genWhyThisCompany = gen.whyThisCompany || "";
       pendingApplication.genWhyThisRole = gen.whyThisRole || "";
@@ -132,6 +133,7 @@ async function initLocalAdminPage() {
       pendingApplication.genExperienceMappings = Array.isArray(gen.experienceMappings) ? gen.experienceMappings : [];
       pendingApplication.genFocusAreasToBring = Array.isArray(gen.focusAreasToBring) ? gen.focusAreasToBring : [];
       pendingApplication.genFirst90DaysPlan = Array.isArray(gen.first90DaysPlan) ? gen.first90DaysPlan : [];
+      pendingApplication.genClosingProofPoints = Array.isArray(gen.closingProofPoints) ? gen.closingProofPoints : [];
 
       const response = await publishApplication(publishApplicationData);
       const application = response.application || pendingApplication;
@@ -324,6 +326,7 @@ function renderContentGroup(dom, result) {
   var parts = ['<p class="results-group-heading">Generated content</p>'];
 
   var textFields = [
+    ["Hero positioning", content.heroPositioning],
     ["Personalised opening", content.personalisedOpening],
     ["Why this company", content.whyThisCompany],
     ["Why this role", content.whyThisRole],
@@ -385,7 +388,11 @@ function renderContentGroup(dom, result) {
       parts.push(
         '<div class="review-value" style="padding:0.3rem 0;border-bottom:1px solid rgba(0,0,0,0.06)">' +
         '<strong>' + esc(ex.exampleTitle || "?") + '</strong> \u2014 ' +
-        esc(ex.shortLine || ex.whyChosen || "") + '</div>'
+        esc(ex.shortLine || ex.whyChosen || "") +
+        ((ex.bestMatchedRoleNeed || ex.proofAngle)
+          ? '<br><em>' + esc([ex.proofAngle, ex.bestMatchedRoleNeed].filter(Boolean).join(" · ")) + '</em>'
+          : '') +
+        '</div>'
       );
     }
   }
@@ -403,6 +410,11 @@ function renderContentGroup(dom, result) {
         '</div>'
       );
     }
+  }
+
+  var closingProofPoints = content.closingProofPoints || [];
+  if (closingProofPoints.length) {
+    parts.push('<p style="margin-top:0.6rem"><strong>Closing proof points:</strong> ' + esc(closingProofPoints.join(" \u00b7 ")) + '</p>');
   }
 
   dom.contentResults.innerHTML = parts.join("");
@@ -510,10 +522,10 @@ function normaliseProvidedPersonalisedContent(input) {
   } else if (input.generatedContent && typeof input.generatedContent === "object" && !Array.isArray(input.generatedContent)) {
     source = input.generatedContent;
   } else if (
-    input.personalisedOpening || input.whyThisCompany || input.whyThisRole ||
+    input.heroPositioning || input.personalisedOpening || input.whyThisCompany || input.whyThisRole ||
     input.roleNeedsSummary || input.experienceMappings || input.focusAreasToBring ||
     input.fitSummary || input.likelyContributionSummary || input.companyHighlights ||
-    input.cultureFitSummary || input.first90DaysPlan || input.closingSummary || input.selectedEvidenceExamples ||
+    input.cultureFitSummary || input.first90DaysPlan || input.closingSummary || input.closingProofPoints || input.selectedEvidenceExamples ||
     input.contentNotes
   ) {
     source = input;
@@ -522,6 +534,7 @@ function normaliseProvidedPersonalisedContent(input) {
   if (!source) return null;
 
   return {
+    heroPositioning: str(source.heroPositioning),
     personalisedOpening: str(source.personalisedOpening),
     whyThisCompany: str(source.whyThisCompany),
     whyThisRole: str(source.whyThisRole),
@@ -535,6 +548,7 @@ function normaliseProvidedPersonalisedContent(input) {
     cultureFitSummary: str(source.cultureFitSummary),
     first90DaysPlan: normaliseFirst90DaysPlan(source.first90DaysPlan),
     closingSummary: str(source.closingSummary),
+    closingProofPoints: arr(source.closingProofPoints),
     contentNotes: arr(source.contentNotes),
   };
 }
@@ -546,6 +560,8 @@ function normaliseEvidenceExamples(value) {
     return {
       exampleId: str(item.exampleId),
       exampleTitle: str(item.exampleTitle),
+      bestMatchedRoleNeed: str(item.bestMatchedRoleNeed),
+      proofAngle: str(item.proofAngle),
       whyChosen: str(item.whyChosen),
       suggestedUsage: str(item.suggestedUsage),
       shortLine: str(item.shortLine),
@@ -559,8 +575,10 @@ function normaliseExperienceMappings(value) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return null;
     return {
       roleNeed: str(item.roleNeed),
+      evidenceExampleId: str(item.evidenceExampleId),
       myEvidence: str(item.myEvidence),
       relevance: str(item.relevance),
+      proofAngle: str(item.proofAngle),
     };
   }).filter(function (item) {
     return item && (item.roleNeed || item.myEvidence || item.relevance);
@@ -667,13 +685,14 @@ function buildEmbeddedPayload(a) {
     deliverablesLikely: a.deliverablesLikely || [],
     phf: a.possibleHeadlineFacts || [],
     mc: a.matchCategories || [],
+    ghp: a.genHeroPositioning || "",
     gpo: a.genPersonalisedOpening || "", gwc: a.genWhyThisCompany || "",
     gwr: a.genWhyThisRole || "", gfs: a.genFitSummary || "",
     glc: a.genLikelyContribution || "", gcf: a.genCultureFit || "",
     gcs: a.genClosingSummary || "", grn: a.genRoleNeedsSummary || "",
     gch: a.genCompanyHighlights || [], gee: a.genEvidenceExamples || [],
     gem: a.genExperienceMappings || [], gfb: a.genFocusAreasToBring || [],
-    g90: a.genFirst90DaysPlan || [],
+    g90: a.genFirst90DaysPlan || [], gcp: a.genClosingProofPoints || [],
   };
 }
 

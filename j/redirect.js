@@ -69,6 +69,7 @@ function buildEmbeddedPreviewPayload(application) {
     deliverablesLikely: Array.isArray(application.deliverablesLikely) ? application.deliverablesLikely : [],
     phf: Array.isArray(application.possibleHeadlineFacts) ? application.possibleHeadlineFacts : [],
     mc: Array.isArray(application.matchCategories) ? application.matchCategories : [],
+    ghp: application.genHeroPositioning || "",
     gpo: application.genPersonalisedOpening || "",
     gwc: application.genWhyThisCompany || "",
     gwr: application.genWhyThisRole || "",
@@ -81,7 +82,8 @@ function buildEmbeddedPreviewPayload(application) {
     gee: Array.isArray(application.genEvidenceExamples) ? application.genEvidenceExamples : [],
     gem: Array.isArray(application.genExperienceMappings) ? application.genExperienceMappings : [],
     gfb: Array.isArray(application.genFocusAreasToBring) ? application.genFocusAreasToBring : [],
-    g90: Array.isArray(application.genFirst90DaysPlan) ? application.genFirst90DaysPlan : []
+    g90: Array.isArray(application.genFirst90DaysPlan) ? application.genFirst90DaysPlan : [],
+    gcp: Array.isArray(application.genClosingProofPoints) ? application.genClosingProofPoints : []
   };
 }
 

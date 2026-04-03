@@ -8,12 +8,9 @@
 </head>
 <body>
   <nav class="dash-nav">
-    <a href="dashboard.html">Applied Jobs</a>
     <a href="jobspy.html">Job Search</a>
+    <a href="dashboard.html">Applied Jobs</a>
     <a href="reviews.html">Reviews</a>
-    <a href="reed.html">Reed</a>
-    <a href="nhs.html">NHS Jobs</a>
-    <a href="adzuna.html">Adzuna</a>
     <a href="usage.html" class="active">Usage</a>
     <a href="index.html" class="nav-link--muted">New Application</a>
   </nav>
@@ -21,101 +18,136 @@
   <main class="page-shell">
     <section class="page-hero">
       <p class="eyebrow">Tooling</p>
-      <h1 class="page-title">OpenCode Quota</h1>
-      <p class="page-subtitle">The old manual quota notes have been replaced with the installed <code>opencode-quota</code> repo so this page now reflects the tool you actually want to use for Copilot, OpenAI and token tracking.</p>
+      <h1 class="page-title">Usage</h1>
+      <p class="page-subtitle">OpenAI token usage and estimated cost for CV generation calls.</p>
     </section>
 
     <div class="page-grid">
-      <section class="status-bar" id="quota-status">
-        <div class="status-item"><span class="status-dot status-dot--grey"></span> Loading plugin status…</div>
+      <section class="status-bar" id="usage-status">
+        <div class="status-item"><span class="status-dot status-dot--grey"></span> Loading usage data…</div>
       </section>
 
-      <section class="surface-card">
+      <section class="surface-card" id="usage-totals">
         <div class="workspace-head">
           <div>
-            <h2 class="section-title">Local Install</h2>
-            <p class="section-copy">This project now includes a local copy of the repo you asked for.</p>
+            <h2 class="section-title">Totals</h2>
+            <p class="section-copy" id="totals-summary">Calculating…</p>
           </div>
         </div>
-        <div class="result-chip-row" id="quota-install-summary">
-          <span class="result-chip">Checking install…</span>
-        </div>
-        <div class="note-card">
-          Installed path: <code>support/opencode-quota</code><br>
-          Source repo: <a href="https://github.com/slkiser/opencode-quota" target="_blank" rel="noopener noreferrer">slkiser/opencode-quota</a>
-        </div>
+        <div class="result-chip-row" id="totals-chips"></div>
       </section>
 
       <section class="surface-card">
         <div class="workspace-head">
           <div>
-            <h2 class="section-title">How To Use It</h2>
-            <p class="section-copy">This plugin is for OpenCode itself. It is not a browser widget inside this CV admin tool.</p>
+            <h2 class="section-title">Generation Log</h2>
+            <p class="section-copy">Most recent generations first.</p>
           </div>
         </div>
-        <div class="match-panel">
-          <strong>Config snippet</strong>
-          <pre><code>{
-  "plugin": ["@slkiser/opencode-quota"]
-}</code></pre>
-        </div>
-        <div class="match-panel">
-          <strong>Commands after setup</strong>
-          <ul>
-            <li><code>/quota_status</code> to confirm provider detection</li>
-            <li><code>/quota</code> for the grouped quota report</li>
-            <li><code>/tokens_today</code>, <code>/tokens_weekly</code>, <code>/tokens_monthly</code> for usage history</li>
-          </ul>
+        <div style="overflow-x:auto">
+          <table class="usage-table" id="usage-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Model</th>
+                <th>In</th>
+                <th>Out</th>
+                <th>Total</th>
+                <th>Est. Cost</th>
+              </tr>
+            </thead>
+            <tbody id="usage-tbody"></tbody>
+          </table>
         </div>
       </section>
 
       <section class="surface-card">
         <div class="workspace-head">
           <div>
-            <h2 class="section-title">Next Step</h2>
-            <p class="section-copy">The repo is installed locally. The only thing still missing on this machine is the OpenCode CLI itself.</p>
+            <h2 class="section-title">External Links</h2>
           </div>
         </div>
         <div class="advice">
-          Once OpenCode is available on your path, point it at the plugin above and use the commands from the repo. Until then, use these links directly:
-          <br><br>
-          <a href="https://github.com/settings/copilot" target="_blank" rel="noopener noreferrer">GitHub Copilot settings</a><br>
-          <a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">OpenAI usage</a><br>
-          <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener noreferrer">OpenAI billing</a>
+          <a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">OpenAI usage dashboard</a><br>
+          <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener noreferrer">OpenAI billing</a><br>
+          <a href="https://github.com/settings/copilot" target="_blank" rel="noopener noreferrer">GitHub Copilot settings</a>
         </div>
       </section>
     </div>
   </main>
 
+  <style>
+    .usage-table { width:100%; border-collapse:collapse; font-size:0.9em; }
+    .usage-table th, .usage-table td { padding:6px 10px; text-align:left; border-bottom:1px solid #e0e0e0; }
+    .usage-table th { font-weight:600; color:#555; font-size:0.85em; text-transform:uppercase; letter-spacing:0.03em; }
+    .usage-table td { font-variant-numeric:tabular-nums; }
+    .usage-table tbody tr:hover { background:#f8f8fc; }
+  </style>
+
   <script>
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
+      var statusEl = document.getElementById("usage-status");
       try {
-        var res = await fetch("/api/opencode-quota-status");
-        var data = await res.json();
-        if (!res.ok) throw new Error(data.error || ("Status failed (" + res.status + ")"));
-        renderStatus(data);
-      } catch (error) {
-        document.getElementById("quota-status").innerHTML =
-          '<div class="status-item"><span class="status-dot status-dot--red"></span> Plugin status: <span>' + escapeHtml(error.message) + "</span></div>";
+        var res = await fetch("/api/usage-log?limit=200");
+        if (!res.ok) throw new Error("Failed to load usage log (" + res.status + ")");
+        var entries = await res.json();
+        if (!entries.length) {
+          statusEl.innerHTML = '<div class="status-item"><span class="status-dot status-dot--amber"></span> No usage data yet. Generate an application to start tracking.</div>';
+          return;
+        }
+        statusEl.innerHTML = '<div class="status-item"><span class="status-dot status-dot--green"></span> ' + entries.length + ' generation' + (entries.length === 1 ? '' : 's') + ' logged</div>';
+        renderTotals(entries);
+        renderTable(entries);
+      } catch (err) {
+        statusEl.innerHTML = '<div class="status-item"><span class="status-dot status-dot--red"></span> ' + escapeHtml(err.message) + '</div>';
       }
     }
 
-    function renderStatus(data) {
-      var statusHtml = [];
-      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.installed ? 'green' : 'red') + '"></span> Repo: <span>' + (data.installed ? 'Installed' : 'Missing') + "</span></div>");
-      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.nodeVersion ? 'green' : 'red') + '"></span> Node: <span>' + escapeHtml(data.nodeVersion || 'Missing') + "</span></div>");
-      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.npmVersion ? 'green' : 'red') + '"></span> npm: <span>' + escapeHtml(data.npmVersion || 'Missing') + "</span></div>");
-      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.hasOpencodeCli ? 'green' : 'amber') + '"></span> OpenCode CLI: <span>' + (data.hasOpencodeCli ? 'Available' : 'Not installed yet') + "</span></div>");
-      document.getElementById("quota-status").innerHTML = statusHtml.join("");
-
-      var chips = [];
-      chips.push('<span class="result-chip">Package: ' + escapeHtml(data.name || '@slkiser/opencode-quota') + "</span>");
-      chips.push('<span class="result-chip">Version: ' + escapeHtml(data.version || 'unknown') + "</span>");
-      chips.push('<span class="result-chip">Path: ' + escapeHtml(data.path || 'support/opencode-quota') + "</span>");
-      document.getElementById("quota-install-summary").innerHTML = chips.join("");
+    function renderTotals(entries) {
+      var totalIn = 0, totalOut = 0, totalCost = 0;
+      entries.forEach(function(e) {
+        if (e.usage) { totalIn += e.usage.input_tokens || 0; totalOut += e.usage.output_tokens || 0; }
+        totalCost += e.estimated_cost_usd || 0;
+      });
+      document.getElementById("totals-summary").textContent =
+        entries.length + " generation" + (entries.length === 1 ? "" : "s") + " tracked";
+      var chips = document.getElementById("totals-chips");
+      chips.innerHTML =
+        '<span class="result-chip">Input: ' + fmt(totalIn) + '</span>' +
+        '<span class="result-chip">Output: ' + fmt(totalOut) + '</span>' +
+        '<span class="result-chip">Total: ' + fmt(totalIn + totalOut) + '</span>' +
+        '<span class="result-chip">Est. cost: $' + totalCost.toFixed(4) + '</span>';
     }
+
+    function renderTable(entries) {
+      var tbody = document.getElementById("usage-tbody");
+      var rows = [];
+      entries.forEach(function(e) {
+        var u = e.usage || {};
+        var inTok = u.input_tokens || 0;
+        var outTok = u.output_tokens || 0;
+        var ts = e.timestamp ? new Date(e.timestamp).toLocaleString() : "—";
+        rows.push(
+          "<tr>" +
+          "<td>" + escapeHtml(ts) + "</td>" +
+          "<td>" + escapeHtml(e.company || "—") + "</td>" +
+          "<td>" + escapeHtml(e.role || "—") + "</td>" +
+          "<td>" + escapeHtml(e.model || "—") + "</td>" +
+          "<td>" + fmt(inTok) + "</td>" +
+          "<td>" + fmt(outTok) + "</td>" +
+          "<td>" + fmt(inTok + outTok) + "</td>" +
+          "<td>$" + (e.estimated_cost_usd || 0).toFixed(6) + "</td>" +
+          "</tr>"
+        );
+      });
+      tbody.innerHTML = rows.join("");
+    }
+
+    function fmt(n) { return (n || 0).toLocaleString(); }
 
     function escapeHtml(value) {
       var node = document.createElement("div");

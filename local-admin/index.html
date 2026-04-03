@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ben Howard | Local Admin</title>
   <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="dashboard.css">
   <style>
     /* Pipeline pills */
     .pipeline-pills { display:flex; gap:0.5rem; margin:0.6rem 0; }
@@ -33,17 +34,20 @@
   </style>
 </head>
 <body data-page="local-admin">
+  <nav class="dash-nav">
+    <a href="jobspy.html">Job Search</a>
+    <a href="dashboard.html">Applied Jobs</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="usage.html">Usage</a>
+    <a href="index.html" class="nav-link--muted active">New Application</a>
+  </nav>
+
   <header class="app-header">
     <div class="shell shell--header">
-      <p class="eyebrow">Local admin</p>
       <div class="header-row">
         <div>
-          <h1>New application</h1>
+          <h1>New Application</h1>
           <p class="subtitle">Paste the raw job advert, generate tailored content server-side with OpenAI, review, then publish.</p>
-        </div>
-        <div class="header-actions">
-          <a class="button button--ghost" href="dashboard.html">Dashboard</a>
-          <a class="button button--ghost" href="jobspy.html">Job Search</a>
         </div>
       </div>
     </div>
@@ -98,6 +102,8 @@
       <div class="results-group results-group--advert" id="advert-results"></div>
       <div class="results-group results-group--content" id="content-results" hidden></div>
 
+      <div id="usage-summary" hidden style="margin-top:0.75rem; padding:0.65rem 0.85rem; border-radius:0.35rem; background:rgba(13,108,91,0.08); border-left:4px solid #0d6c5b; font-size:0.82rem; line-height:1.5;"></div>
+
       <details class="debug-panel" style="margin-top:0.75rem;">
         <summary>Full JSON</summary>
         <pre class="debug-output" id="debug-json"></pre>
@@ -125,7 +131,7 @@
         <input id="result-url" type="text" readonly>
       </div>
       <div class="field-group" style="margin-top:1rem">
-        <label for="result-qr-url">QR / mobile page</label>
+        <label for="result-qr-url">Short URL (QR target)</label>
         <input id="result-qr-url" type="text" readonly>
       </div>
       <div class="result-qr-layout">
@@ -141,8 +147,8 @@
             <a class="button button--ghost" id="open-preview-link" href="#" target="_blank" rel="noopener noreferrer">Open full page</a>
           </div>
           <div class="action-row">
-            <button class="button" id="copy-qr-url-button" type="button">Copy QR URL</button>
-            <a class="button button--ghost" id="open-qr-link" href="#" target="_blank" rel="noopener noreferrer">Open QR page</a>
+            <button class="button" id="copy-qr-url-button" type="button">Copy short URL</button>
+            <a class="button button--ghost" id="open-qr-link" href="#" target="blank" rel="noopener noreferrer">Open short URL</a>
             <button class="button button--ghost" id="download-cv-button" type="button">Save CV as PDF</button>
           </div>
         </div>
@@ -152,6 +158,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=19" defer></script>
+  <script src="admin.js?v=20" defer></script>
 </body>
 </html>

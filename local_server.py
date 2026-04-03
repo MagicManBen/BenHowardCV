@@ -1875,10 +1875,41 @@ def read_application_by_short_code(short_code, config=None):
   return None
 
 
+# ---------------------------------------------------------------------------
+# Usage log helpers
+# ---------------------------------------------------------------------------
+
+USAGE_LOG_PATH = Path(__file__).resolve().parent / "local-cache" / "usage-log.jsonl"
+
+
+def append_usage_log(entry):
+  """Append a JSON line to the local usage log."""
+  USAGE_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+  with open(USAGE_LOG_PATH, "a", encoding="utf-8") as f:
+    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def read_usage_log():
+  """Read all usage log entries as a list of dicts."""
+  if not USAGE_LOG_PATH.exists():
+    return []
+  entries = []
+  with open(USAGE_LOG_PATH, "r", encoding="utf-8") as f:
+    for line in f:
+      line = line.strip()
+      if line:
+        try:
+          entries.append(json.loads(line))
+        except json.JSONDecodeError:
+          pass
+  return entries
+
+
 def build_application_urls(application, config=None):
   config = config or load_local_config()
   full_url = f"{config['publicCvBaseUrl']}?ref={quote(str(application.get('ref', '')).strip())}"
-  direct_qr_url = urljoin(config["publicCvBaseUrl"], f"cv-qr.html?ref={quote(str(application.get('ref', '')).strip())}")
+  # LEGACY: cv-qr.html is inactive. directQrUrl now points to the full CV page.
+  direct_qr_url = f"{config['publicCvBaseUrl']}?ref={quote(str(application.get('ref', '')).strip())}"
 
   short_code = str(application.get("shortCode", "")).strip()
   if short_code:
@@ -2552,6 +2583,16 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(200, payload)
       return
 
+    if parsed.path == "/api/usage-log":
+      try:
+        entries = read_usage_log()
+        qs = parse_qs(parsed.query)
+        limit = int(qs.get("limit", [str(len(entries))])[0])
+        self.send_json(200, entries[-limit:] if limit < len(entries) else entries)
+      except Exception as exc:
+        self.send_json(500, {"error": str(exc)})
+      return
+
     if parsed.path == "/api/opencode-quota-status":
       self.send_json(200, opencode_quota_status())
       return
@@ -3068,6 +3109,27 @@ class AppHandler(SimpleHTTPRequestHandler):
         result = generate_application_from_advert(advert_text, config)
       else:
         result = generate_personalised_content(application, config)
+
+      # Write usage log entry if generation returned usage data
+      meta = result.get("meta") if isinstance(result, dict) else None
+      if isinstance(meta, dict) and meta.get("usage"):
+        try:
+          append_usage_log({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "model": meta.get("model", ""),
+            "provider": meta.get("provider", "openai"),
+            "input_tokens": meta["usage"].get("input_tokens", 0),
+            "output_tokens": meta["usage"].get("output_tokens", 0),
+            "total_tokens": meta["usage"].get("total_tokens", 0),
+            "estimated_cost_usd": meta.get("estimated_cost_usd", 0),
+            "companyName": meta.get("companyName", ""),
+            "roleTitle": meta.get("roleTitle", ""),
+            "stage": meta.get("stage", ""),
+            "success": meta.get("success", False),
+          })
+        except Exception:
+          pass  # usage log write should not break generation
+
       self.send_json(200, result)
     except Exception as exc:
       self.send_json(500, {

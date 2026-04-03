@@ -15,7 +15,7 @@ find_free_port() {
 PORT="$(find_free_port 8000)"
 BASE_URL="http://127.0.0.1:${PORT}"
 PUBLIC_URL="${BASE_URL}/"
-ADMIN_URL="${BASE_URL}/local-admin/"
+ADMIN_URL="${BASE_URL}/local-admin/jobspy.html"
 LOG_FILE="/tmp/benhowardcv-http.log"
 
 python3 local_server.py "${PORT}" >"${LOG_FILE}" 2>&1 &
@@ -37,8 +37,7 @@ for _ in {1..50}; do
   sleep 0.1
 done
 
-print -r -- "Ben Howard CV running at ${PUBLIC_URL}"
-open "${PUBLIC_URL}"
+print -r -- "Ben Howard CV running at ${BASE_URL}"
 open "${ADMIN_URL}"
 
 wait "${SERVER_PID}"

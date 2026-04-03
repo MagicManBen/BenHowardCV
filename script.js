@@ -4,13 +4,15 @@
 // CV preview: render the personalised page and printable PDF view.
 
 const CV_BASE_URL = new URL("cv.html", window.location.href).href;
-const CV_QR_BASE_URL = new URL("cv-qr.html", window.location.href).href;
+// LEGACY: cv-qr.html is inactive. All QR traffic now routes to the full CV page.
+const CV_QR_BASE_URL = CV_BASE_URL;
 const NEW_JOB_URL = new URL("new-job.html", window.location.href).href;
 const LOCAL_ADMIN_URL = new URL("local-admin/", window.location.href).href;
 const IS_LOCAL_RUNTIME = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const LOCAL_API_BASE = "/api";
 const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : CV_BASE_URL;
-const PUBLIC_QR_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv-qr.html" : CV_QR_BASE_URL;
+// LEGACY: cv-qr.html is inactive.
+const PUBLIC_QR_CV_BASE_URL = PUBLIC_CV_BASE_URL;
 const PUBLIC_JOB_BASE_URL = new URL("j/", PUBLIC_CV_BASE_URL).href;
 const APPLICATIONS_STORE_KEY = "cv_applications_local";
 const APPLICATIONS_INDEX_PATH = "data/applications.json";
@@ -558,12 +560,11 @@ function renderSavedApplicationCard(application) {
       </div>
       <div class="saved-application-actions">
         <button class="saved-action" type="button" data-action="open-preview" data-ref="${escapeHtml(application.ref)}">Open CV</button>
-        <button class="saved-action" type="button" data-action="open-qr" data-ref="${escapeHtml(application.ref)}">Open QR</button>
         <button class="saved-action" type="button" data-action="open-pdf" data-ref="${escapeHtml(application.ref)}">PDF view</button>
         <button class="saved-action" type="button" data-action="copy-url" data-ref="${escapeHtml(application.ref)}">Copy URL</button>
-        <button class="saved-action" type="button" data-action="copy-qr" data-ref="${escapeHtml(application.ref)}">Copy QR</button>
+        <button class="saved-action" type="button" data-action="copy-qr" data-ref="${escapeHtml(application.ref)}">Copy Short URL</button>
       </div>
-      <p class="saved-application-meta">Open the full employer page, or use the separate QR/mobile route for print and QR sharing.</p>
+      <p class="saved-application-meta">Open the full employer page, or use the short URL for print and QR sharing.</p>
     </article>
   `;
 }

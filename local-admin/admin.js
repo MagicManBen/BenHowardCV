@@ -2,7 +2,8 @@ const EDGE_FN_BASE = "https://jntpyqguonknixyksqbp.supabase.co/functions/v1";
 const SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
 const DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html";
-const DEFAULT_PUBLIC_QR_BASE_URL = new URL("cv-qr.html", DEFAULT_PUBLIC_CV_BASE_URL).href;
+// LEGACY: cv-qr.html is inactive. All QR traffic now routes to the full CV page.
+const DEFAULT_PUBLIC_QR_BASE_URL = DEFAULT_PUBLIC_CV_BASE_URL;
 
 const REVIEW_FIELDS = [
   ["companyName", "Company"],
@@ -96,6 +97,7 @@ async function initLocalAdminPage() {
     resultsTitle:     document.getElementById("results-title"),
     advertResults:    document.getElementById("advert-results"),
     contentResults:   document.getElementById("content-results"),
+    usageSummary:     document.getElementById("usage-summary"),
     debugJson:        document.getElementById("debug-json"),
     confirmButton:    document.getElementById("confirm-button"),
     confirmStatus:    document.getElementById("confirm-status"),
@@ -276,9 +278,11 @@ async function initLocalAdminPage() {
 
     /* STEP 2 \u2014 Generate */
     setPill(dom.pillGenerate, "running");
+    var generationMeta = null;
     try {
       const result = await generateApplicationFromAdvert(rawText);
       const meta = result && result.meta ? result.meta : {};
+      generationMeta = meta;
       if (!result || !result.application) {
         throw new Error("Generation returned no application object.");
       }
@@ -313,6 +317,7 @@ async function initLocalAdminPage() {
       evidenceSelection: pendingApplication.evidenceSelection || { count: 0, error: null, examples: [] },
       meta: { success: true, source: "local-openai" },
     });
+    renderUsageSummary(dom, generationMeta);
     dom.confirmButton.disabled = false;
     dom.confirmStatus.textContent = "Review the generated output, then confirm.";
     showToast(dom, "Generated with OpenAI.");
@@ -401,6 +406,24 @@ function renderAdvertGroup(app) {
   }
   parts.push('</div>');
   return parts.join("");
+}
+
+function renderUsageSummary(dom, meta) {
+  if (!dom.usageSummary || !meta) return;
+  var usage = meta.usage;
+  var cost = meta.estimated_cost_usd;
+  if (!usage) return;
+  var fmt = function(n) { return (n || 0).toLocaleString(); };
+  var parts = [];
+  parts.push('<p class="results-group-heading">Token usage</p>');
+  parts.push('<p style="font-size:0.95em;color:#555">');
+  parts.push('Model: <strong>' + (meta.model || 'unknown') + '</strong>');
+  parts.push(' &middot; Tokens: ' + fmt(usage.input_tokens) + ' in / ' + fmt(usage.output_tokens) + ' out');
+  parts.push(' (' + fmt((usage.input_tokens || 0) + (usage.output_tokens || 0)) + ' total)');
+  if (cost != null) parts.push(' &middot; Est. cost: <strong>$' + cost.toFixed(6) + '</strong>');
+  parts.push('</p>');
+  dom.usageSummary.innerHTML = parts.join('');
+  dom.usageSummary.hidden = false;
 }
 
 function renderContentGroup(dom, result) {

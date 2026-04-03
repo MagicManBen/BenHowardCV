@@ -272,6 +272,44 @@ DEFAULT_OPENAI_GENERATION_MODEL = "gpt-4.1-mini"
 OPENAI_RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses"
 OPENAI_REQUEST_TIMEOUT_SECONDS = 120
 
+# Estimated pricing per 1M tokens (USD). Update when OpenAI changes prices.
+OPENAI_PRICING = {
+    "gpt-4.1-mini": {"input": 0.40, "output": 1.60},
+    "gpt-4.1":      {"input": 2.00, "output": 8.00},
+    "gpt-4.1-nano": {"input": 0.10, "output": 0.40},
+    "gpt-4o-mini":  {"input": 0.15, "output": 0.60},
+    "gpt-4o":       {"input": 2.50, "output": 10.00},
+}
+
+
+def _extract_usage(response_data):
+    """Extract token usage dict from an OpenAI Responses API response."""
+    usage = response_data.get("usage") if isinstance(response_data, dict) else None
+    if not isinstance(usage, dict):
+        return {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+    return {
+        "input_tokens": int(usage.get("input_tokens", 0)),
+        "output_tokens": int(usage.get("output_tokens", 0)),
+        "total_tokens": int(usage.get("total_tokens", 0)),
+    }
+
+
+def _estimate_cost(usage, model):
+    """Return estimated cost in USD for a usage dict and model name."""
+    prices = OPENAI_PRICING.get(model, OPENAI_PRICING.get(DEFAULT_OPENAI_GENERATION_MODEL, {}))
+    input_cost = usage.get("input_tokens", 0) * prices.get("input", 0) / 1_000_000
+    output_cost = usage.get("output_tokens", 0) * prices.get("output", 0) / 1_000_000
+    return round(input_cost + output_cost, 6)
+
+
+def _merge_usage(a, b):
+    """Sum two usage dicts."""
+    return {
+        "input_tokens": a.get("input_tokens", 0) + b.get("input_tokens", 0),
+        "output_tokens": a.get("output_tokens", 0) + b.get("output_tokens", 0),
+        "total_tokens": a.get("total_tokens", 0) + b.get("total_tokens", 0),
+    }
+
 ADVERT_EXTRACTION_SYSTEM_PROMPT = """You are extracting structured application data from a raw job advert.
 
 Return ONLY valid JSON.
@@ -774,16 +812,17 @@ def _extract_openai_output_text(response_data):
 def call_openai_responses_json(api_key, model, system_prompt, user_prompt, schema, schema_name, temperature=0.3):
     """Call OpenAI Responses API and return parsed JSON.
 
-    Returns (result_dict, error_message_or_none).
+    Returns (result_dict, error_message_or_none, usage_dict).
     """
+    empty_usage = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
     if not api_key:
-        return None, "OpenAI API key is missing."
+        return None, "OpenAI API key is missing.", empty_usage
     if not model:
-        return None, "OpenAI model is missing."
+        return None, "OpenAI model is missing.", empty_usage
     try:
         validate_openai_response_schema(schema, schema_name)
     except ValueError as exc:
-        return None, f"Local schema validation failed: {exc}"
+        return None, f"Local schema validation failed: {exc}", empty_usage
 
     request_body = {
         "model": model,
@@ -829,24 +868,26 @@ def call_openai_responses_json(api_key, model, system_prompt, user_prompt, schem
                 message = err_json.get("message") if isinstance(err_json, dict) else error_body[:500]
         except json.JSONDecodeError:
             message = error_body[:500]
-        return None, f"OpenAI API error ({exc.code}): {message}"
+        return None, f"OpenAI API error ({exc.code}): {message}", empty_usage
     except URLError as exc:
-        return None, f"Could not reach OpenAI: {exc.reason}"
+        return None, f"Could not reach OpenAI: {exc.reason}", empty_usage
     except TimeoutError:
-        return None, f"OpenAI request timed out after {OPENAI_REQUEST_TIMEOUT_SECONDS}s."
+        return None, f"OpenAI request timed out after {OPENAI_REQUEST_TIMEOUT_SECONDS}s.", empty_usage
     except socket.timeout:
-        return None, f"OpenAI request timed out after {OPENAI_REQUEST_TIMEOUT_SECONDS}s."
+        return None, f"OpenAI request timed out after {OPENAI_REQUEST_TIMEOUT_SECONDS}s.", empty_usage
     except json.JSONDecodeError as exc:
-        return None, f"Invalid JSON from OpenAI: {exc}"
+        return None, f"Invalid JSON from OpenAI: {exc}", empty_usage
+
+    usage = _extract_usage(response_data)
 
     try:
         content_str = _extract_openai_output_text(response_data)
         json_str = _extract_json_object(content_str)
         result = json.loads(json_str)
     except (KeyError, ValueError, json.JSONDecodeError) as exc:
-        return None, f"Could not parse OpenAI response JSON: {exc}"
+        return None, f"Could not parse OpenAI response JSON: {exc}", usage
 
-    return result, None
+    return result, None, usage
 
 
 def call_openai_personalised_content(api_key, model, application, evidence_rows):
@@ -900,7 +941,7 @@ def generate_application_from_advert(advert_text, config):
             },
         }
 
-    extracted_raw, extraction_error = call_openai_responses_json(
+    extracted_raw, extraction_error, extraction_usage = call_openai_responses_json(
         api_key=openai_api_key,
         model=openai_model,
         system_prompt=ADVERT_EXTRACTION_SYSTEM_PROMPT,
@@ -920,6 +961,8 @@ def generate_application_from_advert(advert_text, config):
                 "error": extraction_error,
                 "model": openai_model,
                 "provider": "openai",
+                "usage": extraction_usage,
+                "estimated_cost_usd": _estimate_cost(extraction_usage, openai_model),
             },
         }
 
@@ -941,6 +984,8 @@ def generate_application_from_advert(advert_text, config):
     personalised = generate_personalised_content(application, config)
     generated_content = personalised.get("generatedContent")
     evidence_selection = personalised.get("evidenceSelection") or {"count": 0, "error": None, "examples": []}
+    personalised_usage = (personalised.get("meta") or {}).get("usage") or {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+    total_usage = _merge_usage(extraction_usage, personalised_usage)
 
     if not generated_content:
         return {
@@ -955,6 +1000,8 @@ def generate_application_from_advert(advert_text, config):
                 "provider": "openai",
                 "companyName": application.get("companyName", ""),
                 "roleTitle": application.get("roleTitle", ""),
+                "usage": total_usage,
+                "estimated_cost_usd": _estimate_cost(total_usage, openai_model),
             },
         }
 
@@ -978,6 +1025,8 @@ def generate_application_from_advert(advert_text, config):
             "provider": "openai",
             "companyName": application.get("companyName", ""),
             "roleTitle": application.get("roleTitle", ""),
+            "usage": total_usage,
+            "estimated_cost_usd": _estimate_cost(total_usage, openai_model),
         },
     }
 
@@ -1029,7 +1078,7 @@ def generate_personalised_content(application, config):
         }
 
     # Step 2: Call OpenAI
-    generated, generation_error = call_openai_personalised_content(
+    generated, generation_error, gen_usage = call_openai_personalised_content(
         openai_api_key, openai_model, application, evidence_rows,
     )
 
@@ -1042,6 +1091,8 @@ def generate_personalised_content(application, config):
                 "error": generation_error,
                 "model": openai_model,
                 "provider": "openai",
+                "usage": gen_usage,
+                "estimated_cost_usd": _estimate_cost(gen_usage, openai_model),
             },
         }
 
@@ -1056,5 +1107,7 @@ def generate_personalised_content(application, config):
             "provider": "openai",
             "companyName": application.get("companyName", ""),
             "roleTitle": application.get("roleTitle", ""),
+            "usage": gen_usage,
+            "estimated_cost_usd": _estimate_cost(gen_usage, openai_model),
         },
     }

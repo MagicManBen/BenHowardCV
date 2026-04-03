@@ -202,17 +202,19 @@ async function initLocalAdminPage() {
     }
   });
 
-  dom.copyUrlButton.addEventListener("click", async () => {
-    const url = dom.resultUrl.value;
-    if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-      showToast(dom, "URL copied.");
-    } catch {
-      dom.resultUrl.focus();
-      dom.resultUrl.select();
-    }
-  });
+  if (dom.copyUrlButton) {
+    dom.copyUrlButton.addEventListener("click", async () => {
+      const url = dom.resultUrl.value;
+      if (!url) return;
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast(dom, "URL copied.");
+      } catch {
+        dom.resultUrl.focus();
+        dom.resultUrl.select();
+      }
+    });
+  }
 
   if (dom.copyQrUrlButton) {
     dom.copyQrUrlButton.addEventListener("click", async () => {

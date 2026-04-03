@@ -1,0 +1,28 @@
+{
+  "plugins": {
+    "opencode-antigravity-auth": {
+      "npmUrl": "https://www.npmjs.com/package/opencode-antigravity-auth/v/1.6.0",
+      "packageName": "opencode-antigravity-auth",
+      "publishedAt": "2026-02-20T18:58:53.562Z",
+      "referenceDir": "references/upstream-plugins/opencode-antigravity-auth",
+      "repo": "NoeFabris/opencode-antigravity-auth",
+      "version": "1.6.0"
+    },
+    "opencode-cursor-oauth": {
+      "npmUrl": "https://www.npmjs.com/package/opencode-cursor-oauth/v/0.0.9",
+      "packageName": "opencode-cursor-oauth",
+      "publishedAt": "2026-03-22T20:35:43.105Z",
+      "referenceDir": "references/upstream-plugins/opencode-cursor-oauth",
+      "repo": "ephraimduncan/opencode-cursor",
+      "version": "0.0.9"
+    },
+    "opencode-qwencode-auth": {
+      "npmUrl": "https://www.npmjs.com/package/opencode-qwencode-auth/v/1.3.0",
+      "packageName": "opencode-qwencode-auth",
+      "publishedAt": "2026-02-12T20:09:01.111Z",
+      "referenceDir": "references/upstream-plugins/opencode-qwencode-auth",
+      "repo": "gustavodiasdev/opencode-qwencode-auth",
+      "version": "1.3.0"
+    }
+  }
+}

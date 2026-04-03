@@ -141,12 +141,14 @@
       rawJobs: [],
       sourceStatus: [],
       stats: null,
-      reviewedJobs: {}
+      reviewedJobs: {},
+      dismissedJobs: {}
     };
 
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
+      loadDismissedJobs();
       bindFilterEvents();
       await loadReviewedJobs();
       await loadProfile();
@@ -439,12 +441,17 @@
 
       var fp = jobFingerprint(job);
       var isReviewed = !!state.reviewedJobs[fp];
+      var isDismissed = !!state.dismissedJobs[fp];
       var reviewBtnClass = isReviewed ? "review-btn review-btn--active" : "review-btn";
       var reviewBtnLabel = isReviewed ? "✓ Reviewed" : "⊕ Review";
       var reviewBtnTitle = isReviewed ? "Already sent for AI review" : "Send to AI for review against your CV";
+      var dismissBtnLabel = isDismissed ? "Undo" : "✗ No";
+      var cardClasses = "job-card job-card--ranked";
+      if (isDismissed) cardClasses += " job-card--dismissed";
+      else if (isReviewed) cardClasses += " job-card--reviewed";
 
       return ''
-        + '<article class="job-card job-card--ranked" data-fp="' + JobBoardUI.esc(fp) + '">'
+        + '<article class="' + cardClasses + '" data-fp="' + JobBoardUI.esc(fp) + '">'
         + '<div class="job-card__top">'
         + '<div class="job-card__title-block">'
         + '<div class="job-card__sources">' + sourceChips + "</div>"
@@ -458,6 +465,7 @@
         + '<span class="fit-score__label">fit</span>'
         + '</div>'
         + '<button class="' + reviewBtnClass + '" title="' + reviewBtnTitle + '" onclick="handleReview(this)">' + reviewBtnLabel + '</button>'
+        + '<button class="dismiss-btn" onclick="handleDismiss(this)">' + dismissBtnLabel + '</button>'
         + '</div>'
         + '</div>'
         + '<div class="indicator-row">' + indicators + '</div>'
@@ -583,6 +591,33 @@
       } catch (e) {
         // Silently ignore if endpoint not available yet
       }
+    }
+
+    function loadDismissedJobs() {
+      try {
+        var stored = localStorage.getItem("dismissedJobs");
+        if (stored) state.dismissedJobs = JSON.parse(stored);
+      } catch (e) {
+        state.dismissedJobs = {};
+      }
+    }
+
+    function saveDismissedJobs() {
+      try {
+        localStorage.setItem("dismissedJobs", JSON.stringify(state.dismissedJobs));
+      } catch (e) { /* quota exceeded — ignore */ }
+    }
+
+    function handleDismiss(btn) {
+      var card = btn.closest(".job-card");
+      var fp = card.getAttribute("data-fp");
+      if (state.dismissedJobs[fp]) {
+        delete state.dismissedJobs[fp];
+      } else {
+        state.dismissedJobs[fp] = true;
+      }
+      saveDismissedJobs();
+      applyClientFilters();
     }
   </script>
 </body>

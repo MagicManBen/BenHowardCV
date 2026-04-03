@@ -1,0 +1,78 @@
+{
+  "name": "@slkiser/opencode-quota",
+  "version": "2.13.0",
+  "description": "OpenCode quota & tokens usage with zero context window pollution. Supports GitHub Copilot, OpenAI (Plus/Pro), Qwen Code, Chutes AI, Firmware AI, Google Antigravity, Z.ai coding plan and more.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/copy-data.mjs",
+    "pricing:refresh": "node scripts/refresh-modelsdev-pricing.mjs",
+    "pricing:refresh:if-stale": "node scripts/refresh-modelsdev-pricing-if-stale.mjs",
+    "upstream:check": "node scripts/check-upstream-plugin-updates.mjs",
+    "upstream:prepare-review": "node scripts/prepare-upstream-plugin-review.mjs",
+    "upstream:sync": "node scripts/sync-upstream-plugin-references.mjs",
+    "verify:release-version": "node scripts/verify-release-version.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "quota",
+    "toast",
+    "github",
+    "copilot",
+    "google",
+    "antigravity",
+    "gemini",
+    "claude"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slkiser/opencode-quota.git"
+  },
+  "bugs": {
+    "url": "https://github.com/slkiser/opencode-quota/issues"
+  },
+  "homepage": "https://github.com/slkiser/opencode-quota#readme",
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.1.14",
+    "@types/node": "^22.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.17",
+    "zod": "4.1.8"
+  },
+  "dependencies": {
+    "opencode-antigravity-auth": "^1.2.8",
+    "xdg-basedir": "^5.1.0"
+  },
+  "overrides": {
+    "zod": "4.1.8"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

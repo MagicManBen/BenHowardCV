@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ben T. Howard | Strategic Portfolio and Transformation Lead</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1018;
+      --bg-soft: #101827;
+      --panel: rgba(14, 22, 35, 0.78);
+      --panel-strong: rgba(18, 28, 44, 0.92);
+      --card: rgba(20, 31, 49, 0.72);
+      --card-2: rgba(15, 23, 37, 0.88);
+      --line: rgba(147, 176, 217, 0.16);
+      --line-strong: rgba(147, 176, 217, 0.3);
+      --text: #eff4fb;
+      --text-soft: #a6b6ca;
+      --muted: #7f90a7;
+      --blue: #6bb6ff;
+      --blue-strong: #3088f4;
+      --gold: #d5b36f;
+      --gold-soft: rgba(213, 179, 111, 0.14);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      --content-width: 1360px;
+      --sidebar-width: 280px;
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(48, 136, 244, 0.18), transparent 24%),
+        radial-gradient(circle at top right, rgba(213, 179, 111, 0.12), transparent 18%),
+        linear-gradient(180deg, #09111c 0%, #0b1018 34%, #0e1623 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.02), transparent 34%),
+        repeating-linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.015) 0,
+          rgba(255, 255, 255, 0.015) 1px,
+          transparent 1px,
+          transparent 120px
+        );
+      opacity: 0.55;
+      z-index: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    p,
+    ul {
+      margin: 0;
+    }
+
+    ul {
+      padding-left: 1.1rem;
+    }
+
+    li {
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+
+    li + li {
+      margin-top: 0.45rem;
+    }
+
+    .serif {
+      font-family: "Fraunces", Georgia, serif;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 0;
+    }
+
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+      z-index: 20;
+      padding: 0.8rem 1rem;
+      background: #fff;
+      color: #000;
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 24px), var(--content-width));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      gap: 28px;
+      padding: 24px 0 32px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      min-height: calc(100vh - 48px);
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background: linear-gradient(180deg, rgba(10, 16, 28, 0.95), rgba(10, 16, 28, 0.82));
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 28px;
+      backdrop-filter: blur(18px);
+    }
+
+    .brand-lockup {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+    }
+
+    .brand-mark {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, var(--blue), var(--gold));
+      color: #07111d;
+      display: grid;
+      place-items: center;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      box-shadow: 0 18px 38px rgba(48, 136, 244, 0.22);
+    }
+
+    .brand-copy small,
+    .sidebar-kicker,
+    .eyebrow,
+    .meta-label,
+    .rail-note,
+    .tag,
+    .mini-label,
+    .contact-label {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .brand-copy small,
+    .sidebar-kicker,
+    .rail-note,
+    .meta-label,
+    .contact-label,
+    .mini-label {
+      color: var(--muted);
+    }
+
+    .brand-copy strong {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 1.65rem;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .sidebar-kicker {
+      color: var(--gold);
+    }
+
+    .sidebar-nav {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      color: var(--text-soft);
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+
+    .sidebar-nav a::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--gold), var(--blue));
+      opacity: 0.55;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a:focus-visible {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      transform: translateX(3px);
+      outline: none;
+    }
+
+    .sidebar-footer {
+      display: grid;
+      gap: 10px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .sidebar-footer a {
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .content {
+      display: grid;
+      gap: 22px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(24px, 4vw, 40px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(16, 24, 39, 0.86), rgba(10, 16, 27, 0.92));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% -38% 36%;
+      height: 240px;
+      background: radial-gradient(circle, rgba(48, 136, 244, 0.18), transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.28fr) minmax(300px, 0.72fr);
+      gap: 24px;
+      min-height: min(84vh, 880px);
+      align-items: stretch;
+    }
+
+    .hero-copy {
+      display: grid;
+      gap: 22px;
+      align-content: start;
+    }
+
+    .hero-topline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--blue);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 34px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0.5rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-soft);
+    }
+
+    .hero h1 {
+      font-size: clamp(3.1rem, 8vw, 6.4rem);
+      line-height: 0.9;
+      letter-spacing: -0.06em;
+      max-width: 10ch;
+    }
+
+    .hero-role {
+      max-width: 28ch;
+      font-size: clamp(1rem, 1.6vw, 1.25rem);
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .hero-statement {
+      max-width: 54ch;
+      color: var(--text-soft);
+      font-size: 1rem;
+      line-height: 1.82;
+    }
+
+    .hero-proof-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card,
+    .fit-card,
+    .summary-card,
+    .evidence-card,
+    .brand-card,
+    .contact-card,
+    .info-card {
+      position: relative;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(23, 34, 53, 0.68), rgba(11, 17, 27, 0.9));
+    }
+
+    .stat-card {
+      min-height: 138px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .stat-value {
+      font-size: clamp(1.95rem, 4vw, 3rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      color: var(--text);
+    }
+
+    .stat-label {
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-copy {
+      color: var(--text-soft);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .feature-card {
+      display: grid;
+      gap: 16px;
+      min-height: 100%;
+      padding: 22px;
+      border: 1px solid rgba(107, 182, 255, 0.2);
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(13, 20, 32, 0.92), rgba(13, 20, 32, 0.8)),
+        radial-gradient(circle at top right, rgba(107, 182, 255, 0.12), transparent 38%);
+    }
+
+    .feature-card h2 {
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 10ch;
+    }
+
+    .feature-copy {
+      color: var(--text-soft);
+      line-height: 1.72;
+    }
+
+    .feature-list,
+    .contact-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .feature-item,
+    .contact-line {
+      display: grid;
+      gap: 4px;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .feature-item strong,
+    .contact-line strong {
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .feature-item span,
+    .contact-line span {
+      color: var(--text-soft);
+      line-height: 1.55;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 0.52rem 0.82rem;
+      border-radius: 999px;
+      border: 1px solid rgba(213, 179, 111, 0.18);
+      background: var(--gold-soft);
+      color: var(--text);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      font-weight: 700;
+    }
+
+    .chip::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--gold), var(--blue));
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.6fr);
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    .section-head h2 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 12ch;
+    }
+
+    .section-note {
+      max-width: 34ch;
+      color: var(--text-soft);
+      line-height: 1.7;
+      justify-self: end;
+    }
+
+    .about-grid,
+    .summary-grid,
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      gap: 18px;
+    }
+
+    .about-copy,
+    .summary-copy {
+      display: grid;
+      gap: 18px;
+    }
+
+    .lead {
+      font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+      line-height: 1.55;
+      color: var(--text);
+      max-width: 42ch;
+    }
+
+    .muted-copy {
+      color: var(--text-soft);
+      line-height: 1.85;
+      max-width: 60ch;
+    }
+
+    .info-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .info-card {
+      display: grid;
+      gap: 10px;
+      min-height: 148px;
+    }
+
+    .info-card p {
+      color: var(--text-soft);
+      line-height: 1.7;
+    }
+
+    .brands-panel {
+      background:
+        linear-gradient(180deg, rgba(15, 23, 37, 0.96), rgba(13, 18, 30, 0.9)),
+        radial-gradient(circle at top right, rgba(213, 179, 111, 0.1), transparent 30%);
+    }
+
+    .brands-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .brand-card {
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 14px;
+      min-height: 150px;
+      text-align: center;
+    }
+
+    .brand-card img {
+      max-height: 44px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      opacity: 0.92;
+    }
+
+    .brand-card.brand-card-merlin img {
+      filter: brightness(0) invert(86%) sepia(18%) saturate(519%) hue-rotate(356deg) brightness(98%) contrast(90%);
+      opacity: 0.95;
+    }
+
+    .brand-card span {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .fit-grid,
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .fit-card,
+    .evidence-card,
+    .summary-card,
+    .contact-card {
+      display: grid;
+      gap: 12px;
+      min-height: 220px;
+    }
+
+    .fit-card h3,
+    .evidence-card h3,
+    .summary-card h3,
+    .contact-card h3 {
+      font-size: 1.28rem;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+
+    .fit-card p,
+    .evidence-card p,
+    .summary-card p,
+    .contact-card p {
+      color: var(--text-soft);
+      line-height: 1.7;
+    }
+
+    .fit-tags,
+    .evidence-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .fit-tags span,
+    .evidence-meta span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-soft);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .evidence-card {
+      min-height: 0;
+    }
+
+    .evidence-index {
+      color: var(--gold);
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .summary-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary-metric {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .summary-metric strong {
+      display: block;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .summary-metric span {
+      color: var(--text-soft);
+      line-height: 1.55;
+      font-size: 0.9rem;
+    }
+
+    .summary-evidence {
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-evidence-line {
+      padding-left: 14px;
+      border-left: 2px solid rgba(107, 182, 255, 0.42);
+      color: var(--text-soft);
+      line-height: 1.65;
+    }
+
+    .contact-grid {
+      align-items: stretch;
+    }
+
+    .contact-card.contact-primary {
+      min-height: 100%;
+      justify-content: space-between;
+      background:
+        linear-gradient(180deg, rgba(15, 22, 35, 0.9), rgba(11, 17, 27, 0.95)),
+        radial-gradient(circle at top right, rgba(107, 182, 255, 0.14), transparent 34%);
+    }
+
+    .contact-callout {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 10ch;
+    }
+
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0.8rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .button-link.primary {
+      background: linear-gradient(135deg, var(--blue-strong), var(--gold));
+      border: 0;
+      color: #08111d;
+    }
+
+    .footer {
+      width: min(calc(100% - 24px), var(--content-width));
+      margin: 0 auto 26px;
+      padding: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 8px;
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      will-change: opacity, transform;
+    }
+
+    [data-reveal].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1180px) {
+      .page-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: relative;
+        top: 0;
+        min-height: 0;
+        grid-template-rows: auto auto auto auto;
+      }
+
+      .sidebar-nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .hero,
+      .about-grid,
+      .summary-grid,
+      .contact-grid,
+      .section-head {
+        grid-template-columns: 1fr;
+      }
+
+      .section-note {
+        justify-self: start;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .hero-proof-grid,
+      .brands-grid,
+      .fit-grid,
+      .evidence-grid,
+      .summary-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-shell {
+        width: min(calc(100% - 16px), var(--content-width));
+        gap: 16px;
+        padding-top: 16px;
+      }
+
+      .sidebar,
+      .panel {
+        border-radius: 24px;
+        padding: 20px;
+      }
+
+      .sidebar-nav,
+      .hero-proof-grid,
+      .brands-grid,
+      .fit-grid,
+      .evidence-grid,
+      .summary-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-lockup {
+        grid-template-columns: 48px minmax(0, 1fr);
+      }
+
+      .brand-mark {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+
+      [data-reveal] {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="page-shell">
+    <aside class="sidebar" data-reveal>
+      <div class="brand-lockup">
+        <div class="brand-mark">BH</div>
+        <div class="brand-copy">
+          <small>Portfolio and transformation</small>
+          <strong>Ben Howard</strong>
+        </div>
+      </div>
+
+      <div>
+        <div class="sidebar-kicker" id="sidebar-kicker">Prepared for this opportunity</div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Section navigation">
+        <a href="#hero">Overview</a>
+        <a href="#about">Why me</a>
+        <a href="#brands">Brands</a>
+        <a href="#fit">Role fit</a>
+        <a href="#evidence">Evidence</a>
+        <a href="#summary">Summary</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>
+          <div class="contact-label">Phone</div>
+          <a href="tel:07507789672">07507 789672</a>
+        </div>
+        <div>
+          <div class="contact-label">Email</div>
+          <a href="mailto:benthoward@outlook.com">benthoward@outlook.com</a>
+        </div>
+        <div>
+          <div class="contact-label">LinkedIn</div>
+          <a href="https://linkedin.com/in/benthoward" target="_blank" rel="noreferrer">linkedin.com/in/benthoward</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content" id="main-content">
+      <section class="panel hero" id="hero">
+        <div class="hero-copy" data-reveal>
+          <div class="hero-topline">
+            <span class="eyebrow" id="hero-kicker">Prepared for this opportunity</span>
+            <span class="tag" id="hero-topline-meta-1">Strategic delivery</span>
+            <span class="tag" id="hero-topline-meta-2">United Kingdom</span>
+          </div>
+
+          <div>
+            <h1 class="serif" id="hero-name">Ben T. Howard</h1>
+            <p class="hero-role" id="hero-role">Senior operations, portfolio and transformation leader</p>
+          </div>
+
+          <p class="hero-role" id="hero-positioning">Operational turnaround. Governance. Executive-ready reporting.</p>
+          <p class="hero-statement" id="hero-statement">I build the structure, reporting rhythm and operational follow-through that allow senior teams to make better decisions and deliver change with control.</p>
+
+          <div class="chip-list" id="hero-focus-list" aria-label="Immediate fit">
+            <span class="chip">Portfolio governance</span>
+            <span class="chip">Strategic alignment</span>
+            <span class="chip">Executive reporting</span>
+            <span class="chip">Benefits realisation</span>
+          </div>
+
+          <div class="hero-proof-grid" id="proof-grid">
+            <article class="stat-card">
+              <div>
+                <div class="stat-label mini-label">Proof point</div>
+                <div class="stat-value">£149.9k</div>
+              </div>
+              <p class="stat-copy">Profit improvement delivered while tightening reporting visibility and operational control.</p>
+            </article>
+            <article class="stat-card">
+              <div>
+                <div class="stat-label mini-label">Proof point</div>
+                <div class="stat-value">29% to 39%</div>
+              </div>
+              <p class="stat-copy">Gross margin improvement in manufacturing through stronger controls, prioritisation and execution.</p>
+            </article>
+            <article class="stat-card">
+              <div>
+                <div class="stat-label mini-label">Proof point</div>
+                <div class="stat-value">300+</div>
+              </div>
+              <p class="stat-copy">Large operational teams coordinated across multi-site, high-pressure delivery environments.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="hero-side" data-reveal>
+          <article class="feature-card">
+            <div>
+              <div class="eyebrow">Prepared For</div>
+              <h2 class="serif" id="hero-tailored-heading">Your team</h2>
+            </div>
+
+            <p class="feature-copy" id="hero-context-line">Operations leadership opportunity · United Kingdom</p>
+
+            <div class="feature-list">
+              <div class="feature-item">
+                <strong>Why this company</strong>
+                <span id="hero-company-note">Service-led organisation where reliability, governance and delivery discipline matter.</span>
+              </div>
+              <div class="feature-item">
+                <strong>Why this role</strong>
+                <span id="hero-role-note">Leadership brief centred on prioritisation, reporting quality and measurable follow-through.</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="mini-label">Quick context</div>
+              <div class="chip-list" id="hero-meta-list">
+                <span class="chip">United Kingdom</span>
+                <span class="chip">Portfolio leadership</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="about">
+        <div class="section-head" data-reveal>
+          <div>
+            <div class="eyebrow">Why Me</div>
+            <h2 class="serif">A cleaner, sharper view of my fit for this role.</h2>
+          </div>
+          <p class="section-note" id="intro-note">Cross-sector leadership with direct relevance to organisations that need stronger governance, clearer reporting and confident delivery.</p>
+        </div>
+
+        <div class="about-grid">
+          <div class="about-copy" data-reveal>
+            <p class="lead" id="intro-summary">I usually add the most value where leaders need strategic structure without losing delivery pace: clearer portfolio governance, stronger reporting, tighter prioritisation and practical execution.</p>
+            <p class="muted-copy" id="intro-detail">That has included NHS primary care, specialist manufacturing, visitor operations and regulated services, with repeated focus on stabilising performance, improving decision quality and creating disciplined operating rhythms.</p>
+            <div class="fit-tags" id="intro-strength-lines">
+              <span>Portfolio governance</span>
+              <span>Change delivery</span>
+              <span>Executive dashboards</span>
+              <span>Strategic reporting</span>
+            </div>
+          </div>
+
+          <div class="info-stack" data-reveal>
+            <article class="info-card">
+              <div class="mini-label">Company signal</div>
+              <p id="intro-company-signal">Prepared around the company context already captured in the application data.</p>
+            </article>
+            <article class="info-card">
+              <div class="mini-label">Practical context</div>
+              <div class="chip-list" id="intro-traits">
+                <span class="chip">Structured</span>
+                <span class="chip">Delivery-focused</span>
+                <span class="chip">Influential</span>
+                <span class="chip">Professional</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel brands-panel" id="brands">
+        <div class="section-head" data-reveal>
+          <div>
+            <div class="eyebrow">Brands</div>
+            <h2 class="serif">Experience built across recognisable organisations.</h2>
+          </div>
+          <p class="section-note">These logos make the sector range immediately legible without forcing the page into a heavy chronological CV layout.</p>
+        </div>
+
+        <div class="brands-grid" data-reveal>
+          <article class="brand-card">
+            <img src="National_Health_Service_(England)_logo.svg.png" alt="NHS England logo">
+            <span>NHS leadership, service redesign and performance improvement.</span>
+          </article>
+          <article class="brand-card">
+            <img src="NHS_Digital_logo.svg.png" alt="NHS Digital logo">
+            <span>Regulated service environments with reporting, standards and change delivery.</span>
+          </article>
+          <article class="brand-card brand-card-merlin">
+            <img src="Merlin_Entertainments.svg" alt="Merlin Entertainments logo">
+            <span>Enterprise-scale, multi-site operations with large teams and visible KPIs.</span>
+          </article>
+          <article class="brand-card">
+            <img src="Alton_Towers_Resort_Logo.png" alt="Alton Towers logo">
+            <span>Guest-facing operations where performance had to land in real time.</span>
+          </article>
+          <article class="brand-card">
+            <img src="Legoland_logo.svg.png" alt="Legoland logo">
+            <span>High-volume live environments demanding consistency, standards and leadership.</span>
+          </article>
+          <article class="brand-card">
+            <img src="copper alloys.png" alt="Copper Alloys logo">
+            <span>Commercial and manufacturing delivery with margin improvement and control.</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="fit">
+        <div class="section-head" data-reveal>
+          <div>
+            <div class="eyebrow">Role Fit</div>
+            <h2 class="serif">What this role seems to need, and how I would contribute.</h2>
+          </div>
+          <p class="section-note" id="fit-note">This section translates the advert into a set of practical expectations and shows where my background maps directly.</p>
+        </div>
+
+        <div class="fit-grid" id="fit-grid" data-reveal></div>
+      </section>
+
+      <section class="panel" id="evidence">
+        <div class="section-head" data-reveal>
+          <div>
+            <div class="eyebrow">Evidence</div>
+            <h2 class="serif">Selected examples that strengthen the case.</h2>
+          </div>
+          <p class="section-note" id="evidence-note">Short, high-signal examples that support the pitch rather than repeating the full CV.</p>
+        </div>
+
+        <div class="evidence-grid" id="evidence-grid" data-reveal></div>
+      </section>
+
+      <section class="panel" id="summary">
+        <div class="section-head" data-reveal>
+          <div>
+            <div class="eyebrow">Summary</div>
+            <h2 class="serif" id="summary-heading">Why I am a strong fit for this opportunity.</h2>
+          </div>
+          <p class="section-note" id="tailored-note">A concise final readout for someone who has already seen the CV and wants the case made more directly.</p>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-copy" data-reveal>
+            <article class="summary-card">
+              <div class="mini-label">Overall fit</div>
+              <h3 id="tailored-company-line">Prepared for your team.</h3>
+              <p id="tailored-rationale">Operational leadership grounded in measurable outcomes, cross-functional delivery and practical problem-solving.</p>
+              <p id="why-this-role">Operational leadership built on visible results and practical delivery.</p>
+              <p id="role-summary">Cross-sector experience in turnaround, service design, financial grip and team leadership.</p>
+            </article>
+
+            <div class="summary-evidence" id="summary-evidence-lines"></div>
+          </div>
+
+          <div class="summary-copy" data-reveal>
+            <div class="summary-metrics">
+              <div class="summary-metric">
+                <strong id="detail-company">Your team</strong>
+                <span>Company</span>
+              </div>
+              <div class="summary-metric">
+                <strong id="detail-role">Operations leadership opportunity</strong>
+                <span>Role</span>
+              </div>
+              <div class="summary-metric">
+                <strong id="detail-location">United Kingdom</strong>
+                <span>Location</span>
+              </div>
+              <div class="summary-metric">
+                <strong id="detail-sector">Operations</strong>
+                <span>Sector</span>
+              </div>
+              <div class="summary-metric" id="employment-metric">
+                <strong id="detail-employment">Not specified</strong>
+                <span>Employment type</span>
+              </div>
+              <div class="summary-metric" id="salary-metric">
+                <strong id="detail-salary">Not specified</strong>
+                <span>Salary</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="contact">
+        <div class="section-head" data-reveal>
+          <div>
+            <div class="eyebrow">Contact</div>
+            <h2 class="serif">A direct close.</h2>
+          </div>
+          <p class="section-note" id="contact-note-top">A simple final section for moving the conversation forward.</p>
+        </div>
+
+        <div class="contact-grid">
+          <article class="contact-card contact-primary" data-reveal>
+            <div>
+              <div class="mini-label">Next step</div>
+              <div class="contact-callout serif" id="contact-heading">Let’s discuss the opportunity.</div>
+            </div>
+            <p id="contact-copy">Thank you for reviewing this tailored page. I would welcome the chance to discuss how my experience could support the role.</p>
+            <div class="contact-actions">
+              <a class="button-link primary" href="mailto:benthoward@outlook.com">Email Ben</a>
+              <a class="button-link" href="tel:07507789672">Call 07507 789672</a>
+            </div>
+          </article>
+
+          <article class="contact-card" data-reveal>
+            <div class="mini-label">Contact details</div>
+            <div class="contact-list">
+              <div class="contact-line">
+                <strong>Phone</strong>
+                <span><a href="tel:07507789672">07507 789672</a></span>
+              </div>
+              <div class="contact-line">
+                <strong>Email</strong>
+                <span><a href="mailto:benthoward@outlook.com">benthoward@outlook.com</a></span>
+              </div>
+              <div class="contact-line">
+                <strong>LinkedIn</strong>
+                <span><a href="https://linkedin.com/in/benthoward" target="_blank" rel="noreferrer">linkedin.com/in/benthoward</a></span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>Ben T. Howard</span>
+      <span>Strategic portfolio, operations and transformation leadership</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const defaults = {
+        ref: "general-preview",
+        companyName: "Your team",
+        roleTitle: "Operations leadership opportunity",
+        location: "United Kingdom",
+        sector: "Operations",
+        salary: "Not specified",
+        employmentType: "Not specified",
+        shortCompanyReason: "Service-led organisation where reliability, standards and customer experience matter.",
+        shortRoleReason: "Leadership role centred on people, performance and day-to-day operational control.",
+        hours: "",
+        workplaceType: "",
+        companySummary: "",
+        roleSummary: "",
+        headlineAttraction: "",
+        rolePurpose: "",
+        travelRequired: "",
+        advertSummary: "",
+        personalisedIntro: "",
+        whyThisRole: "The brief points to a role where leadership, operational performance and service quality need to move together.",
+        toneKeywords: ["leadership", "accountable", "collaborative", "operational excellence"],
+        probablePriorities: [
+          "Operational performance and follow-through",
+          "Team leadership and accountability",
+          "Service quality and delivery standards"
+        ],
+        keyFocusAreas: [
+          "KPI governance and reporting",
+          "Continuous improvement",
+          "Cross-functional coordination"
+        ],
+        companyPridePoints: [],
+        coreResponsibilities: [],
+        essentialRequirements: [],
+        preferredRequirements: [],
+        skillsWanted: [],
+        toolsMethodsMentioned: [],
+        stakeholderGroups: [],
+        teamTypesMentioned: [],
+        senioritySignals: [],
+        cultureSignals: [],
+        likelyBusinessNeeds: [],
+        impliedStrategicGoals: [],
+        deliverablesLikely: [],
+        possibleHeadlineFacts: [],
+        matchCategories: [],
+        genPersonalisedOpening: "",
+        genWhyThisCompany: "",
+        genWhyThisRole: "",
+        genFitSummary: "",
+        genLikelyContribution: "",
+        genCultureFit: "",
+        genClosingSummary: "",
+        genCompanyHighlights: [],
+        genEvidenceExamples: []
+      };
+
+      const fallbackEvidence = [
+        {
+          exampleTitle: "NHS transformation and reporting",
+          shortLine: "Led profit improvement while building clearer reporting and operational control in NHS primary care.",
+          whyChosen: "Shows structured transformation delivery in a regulated environment.",
+          suggestedUsage: "Hero proof"
+        },
+        {
+          exampleTitle: "Manufacturing operational delivery",
+          shortLine: "Improved gross margin and reporting discipline in a manufacturing scale-up setting.",
+          whyChosen: "Demonstrates commercial grip, performance improvement and delivery discipline.",
+          suggestedUsage: "Commercial evidence"
+        },
+        {
+          exampleTitle: "Cross-site improvement leadership",
+          shortLine: "Coordinated large frontline teams across complex multi-site operations with visible KPI ownership.",
+          whyChosen: "Useful for roles needing senior coordination and accountability.",
+          suggestedUsage: "Culture fit"
+        }
+      ];
+
+      function cleanString(value) {
+        return typeof value === "string" ? value.trim() : "";
+      }
+
+      function cleanArray(value) {
+        return Array.isArray(value) ? value.map((item) => cleanString(item)).filter(Boolean) : [];
+      }
+
+      function decodePayload(encoded) {
+        try {
+          const base64 = encoded.replaceAll("-", "+").replaceAll("_", "/");
+          const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+          const binary = atob(padded);
+          const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+          return JSON.parse(new TextDecoder().decode(bytes));
+        } catch {
+          return null;
+        }
+      }
+
+      function readEmbeddedApplication() {
+        try {
+          const hash = window.location.hash.replace(/^#/, "");
+          if (!hash) return null;
+          const params = new URLSearchParams(hash);
+          const encoded = cleanString(params.get("app"));
+          if (!encoded) return null;
+          const parsed = decodePayload(encoded);
+          return parsed && typeof parsed === "object" ? parsed : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function compactValue(value) {
+        return value && value !== "Not specified" ? value : "";
+      }
+
+      function formatList(values) {
+        const items = values.filter(Boolean);
+        if (!items.length) return "";
+        if (items.length === 1) return items[0];
+        if (items.length === 2) return `${items[0]} and ${items[1]}`;
+        return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+      }
+
+      function pickLines(primary, secondary, limit) {
+        const first = primary.filter(Boolean);
+        const second = secondary.filter(Boolean);
+        return (first.length ? first : second).slice(0, limit);
+      }
+
+      function normaliseApplication(input) {
+        const data = input || {};
+        const nested = data.personalisedContent && typeof data.personalisedContent === "object" ? data.personalisedContent : {};
+        const companyName = cleanString(data.companyName || data.c) || defaults.companyName;
+        const roleTitle = cleanString(data.roleTitle || data.r) || defaults.roleTitle;
+        const location = cleanString(data.location || data.l) || defaults.location;
+        const evidence = Array.isArray(nested.selectedEvidenceExamples) ? nested.selectedEvidenceExamples : [];
+
+        return {
+          ref: cleanString(data.ref) || cleanString(data.slug) || defaults.ref,
+          companyName,
+          roleTitle,
+          location,
+          sector: cleanString(data.sector || data.s) || defaults.sector,
+          salary: cleanString(data.salary || data.y) || defaults.salary,
+          employmentType: cleanString(data.employmentType || data.e) || defaults.employmentType,
+          hours: cleanString(data.hours || data.h) || defaults.hours,
+          workplaceType: cleanString(data.workplaceType || data.wp) || defaults.workplaceType,
+          shortCompanyReason: cleanString(data.shortCompanyReason || data.n) || defaults.shortCompanyReason,
+          shortRoleReason: cleanString(data.shortRoleReason || data.o) || defaults.shortRoleReason,
+          companySummary: cleanString(data.companySummary || data.cs) || defaults.companySummary,
+          roleSummary: cleanString(data.roleSummary || data.rs) || defaults.roleSummary,
+          headlineAttraction: cleanString(data.headlineAttraction || data.ha) || defaults.headlineAttraction,
+          rolePurpose: cleanString(data.rolePurpose || data.rp) || defaults.rolePurpose,
+          travelRequired: cleanString(data.travelRequired) || defaults.travelRequired,
+          advertSummary: cleanString(data.advertSummary || data.a) || defaults.advertSummary,
+          personalisedIntro: cleanString(data.personalisedIntro || data.i) || defaults.personalisedIntro,
+          whyThisRole: cleanString(data.whyThisRole || data.w) || defaults.whyThisRole,
+          toneKeywords: cleanArray(data.toneKeywords || data.t).length ? cleanArray(data.toneKeywords || data.t) : defaults.toneKeywords,
+          probablePriorities: cleanArray(data.probablePriorities || data.p).length ? cleanArray(data.probablePriorities || data.p) : defaults.probablePriorities,
+          keyFocusAreas: cleanArray(data.keyFocusAreas || data.f).length ? cleanArray(data.keyFocusAreas || data.f) : defaults.keyFocusAreas,
+          companyPridePoints: cleanArray(data.companyPridePoints || data.cpp),
+          coreResponsibilities: cleanArray(data.coreResponsibilities),
+          essentialRequirements: cleanArray(data.essentialRequirements),
+          preferredRequirements: cleanArray(data.preferredRequirements),
+          skillsWanted: cleanArray(data.skillsWanted),
+          toolsMethodsMentioned: cleanArray(data.toolsMethodsMentioned),
+          stakeholderGroups: cleanArray(data.stakeholderGroups),
+          teamTypesMentioned: cleanArray(data.teamTypesMentioned),
+          senioritySignals: cleanArray(data.senioritySignals),
+          cultureSignals: cleanArray(data.cultureSignals),
+          likelyBusinessNeeds: cleanArray(data.likelyBusinessNeeds),
+          impliedStrategicGoals: cleanArray(data.impliedStrategicGoals),
+          deliverablesLikely: cleanArray(data.deliverablesLikely),
+          possibleHeadlineFacts: cleanArray(data.possibleHeadlineFacts || data.phf),
+          matchCategories: cleanArray(data.matchCategories || data.mc),
+          genPersonalisedOpening: cleanString(data.genPersonalisedOpening || data.gpo || nested.personalisedOpening),
+          genWhyThisCompany: cleanString(data.genWhyThisCompany || data.gwc || nested.whyThisCompany),
+          genWhyThisRole: cleanString(data.genWhyThisRole || data.gwr || nested.whyThisRole),
+          genFitSummary: cleanString(data.genFitSummary || data.gfs || nested.fitSummary),
+          genLikelyContribution: cleanString(data.genLikelyContribution || data.glc || nested.likelyContributionSummary),
+          genCultureFit: cleanString(data.genCultureFit || data.gcf || nested.cultureFitSummary),
+          genClosingSummary: cleanString(data.genClosingSummary || data.gcs || nested.closingSummary),
+          genCompanyHighlights: cleanArray(data.genCompanyHighlights || data.gch || nested.companyHighlights),
+          genEvidenceExamples: Array.isArray(data.genEvidenceExamples || data.gee)
+            ? (data.genEvidenceExamples || data.gee)
+            : evidence
+        };
+      }
+
+      const SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
+
+      async function fetchApplicationByRef(ref) {
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        if (isLocal) {
+          const response = await fetch(`/api/application?ref=${encodeURIComponent(ref)}&t=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`Could not load application record for ${ref}`);
+          return response.json();
+        }
+
+        const url = `${SUPABASE_URL}/rest/v1/applications?ref=eq.${encodeURIComponent(ref)}&select=application&limit=1`;
+        const response = await fetch(url, {
+          headers: { apikey: SUPABASE_ANON_KEY, Accept: "application/json" },
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error(`Could not load application record for ${ref}`);
+        const rows = await response.json();
+        if (!rows.length || !rows[0].application) throw new Error(`No application found for ${ref}`);
+        return rows[0].application;
+      }
+
+      async function fetchApplicationByShortCode(sc) {
+        const url = `${SUPABASE_URL}/rest/v1/applications?short_code=eq.${encodeURIComponent(sc)}&select=application&limit=1`;
+        const response = await fetch(url, {
+          headers: { apikey: SUPABASE_ANON_KEY, Accept: "application/json" },
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error(`Could not load application for short code ${sc}`);
+        const rows = await response.json();
+        if (!rows.length || !rows[0].application) throw new Error(`No application found for short code ${sc}`);
+        return rows[0].application;
+      }
+
+      function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      }
+
+      function setHtml(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = value;
+      }
+
+      function renderChipList(id, values, className = "chip") {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = "";
+        values.filter(Boolean).forEach((value) => {
+          const span = document.createElement("span");
+          span.className = className;
+          span.textContent = value;
+          el.appendChild(span);
+        });
+      }
+
+      function buildHeroStatement(state) {
+        if (state.genPersonalisedOpening) return state.genPersonalisedOpening;
+        if (state.companyName !== defaults.companyName) {
+          return `This page is designed as the sharper second read after my CV: why ${state.companyName}, why this role, and why my background is directly relevant.`;
+        }
+        return "This page is designed as the sharper second read after my CV: the pitch, the fit and the evidence in a more direct format.";
+      }
+
+      function buildRoleContext(state) {
+        return [state.roleTitle, compactValue(state.location)].filter(Boolean).join(" · ");
+      }
+
+      function buildCompanyNote(state) {
+        return state.genWhyThisCompany
+          || state.shortCompanyReason
+          || state.companySummary
+          || state.headlineAttraction
+          || defaults.shortCompanyReason;
+      }
+
+      function buildRoleNote(state) {
+        return state.genWhyThisRole
+          || state.shortRoleReason
+          || state.rolePurpose
+          || state.roleSummary
+          || defaults.shortRoleReason;
+      }
+
+      function buildFitCards(state) {
+        const cards = [];
+        const priorities = pickLines(state.probablePriorities, state.keyFocusAreas, 4);
+        const needs = pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 4);
+        const delivery = pickLines(state.coreResponsibilities, state.deliverablesLikely, 4);
+        const stakeholders = pickLines([...state.stakeholderGroups, ...state.teamTypesMentioned], state.matchCategories, 4);
+        const requirements = [...state.essentialRequirements, ...state.preferredRequirements].filter(Boolean).slice(0, 4);
+        const tools = [...state.skillsWanted, ...state.toolsMethodsMentioned].filter(Boolean).slice(0, 4);
+
+        if (priorities.length) {
+          cards.push({ title: "What the role needs most", copy: formatList(priorities), tags: priorities });
+        }
+        if (needs.length) {
+          cards.push({ title: "Business needs behind the advert", copy: formatList(needs), tags: needs });
+        }
+        if (delivery.length) {
+          cards.push({ title: "Likely deliverables", copy: formatList(delivery), tags: delivery });
+        }
+        if (stakeholders.length) {
+          cards.push({ title: "Stakeholder environment", copy: formatList(stakeholders), tags: stakeholders });
+        }
+        if (requirements.length) {
+          cards.push({ title: "Experience signals they want", copy: formatList(requirements), tags: requirements });
+        }
+        if (tools.length) {
+          cards.push({ title: "Methods and working style", copy: formatList(tools), tags: tools });
+        }
+
+        return cards.slice(0, 6);
+      }
+
+      function renderFitCards(cards) {
+        const grid = document.getElementById("fit-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+
+        cards.forEach((card) => {
+          const article = document.createElement("article");
+          article.className = "fit-card";
+
+          const label = document.createElement("div");
+          label.className = "mini-label";
+          label.textContent = "Role match";
+
+          const title = document.createElement("h3");
+          title.textContent = card.title;
+
+          const copy = document.createElement("p");
+          copy.textContent = card.copy;
+
+          const tags = document.createElement("div");
+          tags.className = "fit-tags";
+          (card.tags || []).slice(0, 4).forEach((tag) => {
+            const span = document.createElement("span");
+            span.textContent = tag;
+            tags.appendChild(span);
+          });
+
+          article.appendChild(label);
+          article.appendChild(title);
+          article.appendChild(copy);
+          if (tags.childElementCount) article.appendChild(tags);
+          grid.appendChild(article);
+        });
+      }
+
+      function buildEvidence(state) {
+        const source = (state.genEvidenceExamples || []).filter((item) => item && (item.shortLine || item.whyChosen || item.exampleTitle));
+        return (source.length ? source : fallbackEvidence).slice(0, 6);
+      }
+
+      function renderEvidence(examples) {
+        const grid = document.getElementById("evidence-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+
+        examples.forEach((ex, index) => {
+          const article = document.createElement("article");
+          article.className = "evidence-card";
+
+          const idx = document.createElement("div");
+          idx.className = "evidence-index";
+          idx.textContent = String(index + 1).padStart(2, "0");
+
+          const title = document.createElement("h3");
+          title.textContent = ex.exampleTitle || ex.suggestedUsage || "Relevant example";
+
+          const line = document.createElement("p");
+          line.textContent = ex.shortLine || ex.whyChosen || "Selected because it supports the brief.";
+
+          const meta = document.createElement("div");
+          meta.className = "evidence-meta";
+          [ex.whyChosen, ex.suggestedUsage].filter(Boolean).slice(0, 2).forEach((value) => {
+            const span = document.createElement("span");
+            span.textContent = value;
+            meta.appendChild(span);
+          });
+
+          article.appendChild(idx);
+          article.appendChild(title);
+          article.appendChild(line);
+          if (meta.childElementCount) article.appendChild(meta);
+          grid.appendChild(article);
+        });
+      }
+
+      function renderSummaryEvidence(examples) {
+        const el = document.getElementById("summary-evidence-lines");
+        if (!el) return;
+        el.innerHTML = "";
+        examples.filter((item) => item && item.shortLine).slice(0, 3).forEach((item) => {
+          const line = document.createElement("div");
+          line.className = "summary-evidence-line";
+          line.textContent = item.shortLine;
+          el.appendChild(line);
+        });
+      }
+
+      function setMetric(id, value, fallback, wrapperId) {
+        const el = document.getElementById(id);
+        const wrapper = wrapperId ? document.getElementById(wrapperId) : null;
+        const resolved = value || fallback;
+        if (el) el.textContent = resolved;
+        if (wrapper) {
+          wrapper.style.display = !value || value === fallback || value === "Not specified" ? "none" : "";
+        }
+      }
+
+      function applyState(state) {
+        document.title = `Ben T. Howard | ${state.roleTitle}`;
+
+        const fitCards = buildFitCards(state);
+        const evidence = buildEvidence(state);
+        const focusAreas = pickLines(state.keyFocusAreas, state.probablePriorities, 4);
+        const quickFacts = [compactValue(state.location), compactValue(state.sector), compactValue(state.workplaceType), compactValue(state.employmentType)].filter(Boolean).slice(0, 4);
+        const companyHighlights = cleanArray(state.genCompanyHighlights).length
+          ? cleanArray(state.genCompanyHighlights).slice(0, 4)
+          : pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4);
+        const traitLines = cleanArray(state.toneKeywords).slice(0, 4);
+
+        setText("sidebar-kicker", state.companyName === defaults.companyName ? "Prepared for this opportunity" : `Prepared for ${state.companyName}`);
+        setText("hero-kicker", state.companyName === defaults.companyName ? "Prepared for this opportunity" : `Prepared for ${state.companyName}`);
+        setText("hero-topline-meta-1", compactValue(state.sector) || "Strategic delivery");
+        setText("hero-topline-meta-2", compactValue(state.location) || compactValue(state.workplaceType) || "United Kingdom");
+        setText("hero-role", state.roleTitle);
+        setText("hero-positioning", state.headlineAttraction || state.rolePurpose || "Operational turnaround. Governance. Executive-ready reporting.");
+        setText("hero-statement", buildHeroStatement(state));
+        setText("hero-tailored-heading", state.companyName);
+        setText("hero-context-line", buildRoleContext(state));
+        setText("hero-company-note", buildCompanyNote(state));
+        setText("hero-role-note", buildRoleNote(state));
+        renderChipList("hero-focus-list", focusAreas.length ? focusAreas : defaults.keyFocusAreas);
+        renderChipList("hero-meta-list", quickFacts.length ? quickFacts : [defaults.location, defaults.sector]);
+
+        setText("intro-note", buildCompanyNote(state));
+        setText("intro-company-signal", state.companySummary || buildCompanyNote(state));
+        setText("intro-summary", state.genWhyThisCompany || state.companySummary || buildCompanyNote(state));
+        setText("intro-detail", state.genFitSummary || state.advertSummary || state.roleSummary || state.shortRoleReason);
+        renderChipList("intro-strength-lines", companyHighlights.length ? companyHighlights : focusAreas);
+        renderChipList("intro-traits", traitLines.length ? traitLines : defaults.toneKeywords);
+
+        setText("fit-note", state.advertSummary || "This section translates the role brief into the practical demands sitting underneath it.");
+        renderFitCards(fitCards.length ? fitCards : buildFitCards(defaults));
+
+        setText("evidence-note", state.genLikelyContribution || "Selected examples that support the role fit without repeating the whole CV.");
+        renderEvidence(evidence);
+        renderSummaryEvidence(evidence);
+
+        setText("summary-heading", state.companyName === defaults.companyName ? "Why I am a strong fit for this opportunity." : `Why I am a strong fit for ${state.companyName}.`);
+        setText("tailored-note", state.genCultureFit || "A concise final readout for someone who has already seen the CV and wants the case made more directly.");
+        setText("tailored-company-line", state.companyName === defaults.companyName ? "Prepared for your team." : `Prepared for ${state.companyName}.`);
+        setText("tailored-rationale", state.genFitSummary || state.headlineAttraction || state.shortCompanyReason || defaults.shortCompanyReason);
+        setText("why-this-role", state.genWhyThisRole || state.shortRoleReason || state.rolePurpose || defaults.whyThisRole);
+        setText("role-summary", state.genLikelyContribution || state.roleSummary || state.advertSummary || defaults.shortRoleReason);
+
+        setMetric("detail-company", state.companyName, defaults.companyName);
+        setMetric("detail-role", state.roleTitle, defaults.roleTitle);
+        setMetric("detail-location", state.location, defaults.location);
+        setMetric("detail-sector", state.sector, defaults.sector);
+        setMetric("detail-employment", compactValue(state.employmentType), defaults.employmentType, "employment-metric");
+        setMetric("detail-salary", compactValue(state.salary), defaults.salary, "salary-metric");
+
+        setText("contact-note-top", state.companyName === defaults.companyName ? "A simple final section for moving the conversation forward." : `A simple final section for moving the conversation forward with ${state.companyName}.`);
+        setText("contact-heading", state.companyName === defaults.companyName ? "Let’s discuss the opportunity." : `Let’s discuss the ${state.roleTitle} opportunity.`);
+        setText("contact-copy", state.genClosingSummary || `Thank you for reviewing this tailored page. I would welcome the chance to discuss how my background could support ${state.companyName === defaults.companyName ? "the role" : `${state.companyName} in this role`}.`);
+      }
+
+      function initReveal() {
+        const targets = document.querySelectorAll("[data-reveal]");
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+          targets.forEach((target) => target.classList.add("is-visible"));
+          return;
+        }
+
+        const observer = new IntersectionObserver((entries, activeObserver) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            activeObserver.unobserve(entry.target);
+          });
+        }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+
+        targets.forEach((target, index) => {
+          target.style.transitionDelay = `${Math.min(index * 55, 260)}ms`;
+          observer.observe(target);
+        });
+      }
+
+      async function loadState() {
+        const embedded = readEmbeddedApplication();
+        if (embedded) return normaliseApplication(embedded);
+
+        const params = new URLSearchParams(window.location.search);
+        const sc = cleanString(params.get("sc"));
+        if (sc) {
+          try {
+            return normaliseApplication(await fetchApplicationByShortCode(sc));
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        const ref = cleanString(params.get("ref"));
+        if (ref) {
+          try {
+            return normaliseApplication(await fetchApplicationByRef(ref));
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        return defaults;
+      }
+
+      loadState()
+        .then((state) => {
+          applyState(state);
+          initReveal();
+        })
+        .catch(() => {
+          applyState(defaults);
+          initReveal();
+        });
+    })();
+  </script>
+</body>
+</html>

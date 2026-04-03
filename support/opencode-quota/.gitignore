@@ -1,0 +1,31 @@
+node_modules/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Build / tooling artifacts
+*.tsbuildinfo
+coverage/
+
+# Local-only config/secrets
+.env
+.env.*
+.npmrc
+opencode.json
+
+# Local scratch & AI Slop
+references/*
+!references/upstream-plugins/
+!references/upstream-plugins/**
+.git.backup-*/
+docs/
+AGENTS.md
+.repo_ignore
+.superset

@@ -1121,3 +1121,75 @@ textarea:focus {
   padding-top: 0.8rem;
   margin-top: 0.35rem;
 }
+
+/* Reviewed job card — dark blue italic title */
+.job-card--reviewed h3 a {
+  color: #1a3d7c;
+  font-style: italic;
+}
+
+/* Dismiss button */
+.dismiss-btn {
+  appearance: none;
+  border: 1px solid rgba(157, 47, 47, 0.2);
+  background: rgba(157, 47, 47, 0.06);
+  color: #9d2f2f;
+  border-radius: var(--radius-pill);
+  padding: 0.42rem 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.dismiss-btn:hover {
+  background: rgba(157, 47, 47, 0.14);
+  border-color: rgba(157, 47, 47, 0.35);
+}
+
+/* Dismissed job card — collapsed grey */
+.job-card--dismissed {
+  background: #eae7e2;
+  border-color: rgba(50, 41, 31, 0.08);
+  box-shadow: none;
+  opacity: 0.6;
+  padding: 0.6rem 1rem;
+}
+
+.job-card--dismissed:hover {
+  transform: none;
+  border-color: rgba(50, 41, 31, 0.08);
+}
+
+.job-card--dismissed h3 {
+  font-size: 0.9rem;
+}
+
+.job-card--dismissed h3 a {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+.job-card--dismissed .indicator-row,
+.job-card--dismissed .tag-row,
+.job-card--dismissed .match-panel,
+.job-card--dismissed .description,
+.job-card--dismissed .actions,
+.job-card--dismissed .review-result,
+.job-card--dismissed .meta-row {
+  display: none;
+}
+
+.job-card--dismissed .job-card__right-col .review-btn {
+  display: none;
+}
+
+.job-card--dismissed .dismiss-btn {
+  background: rgba(50, 41, 31, 0.08);
+  border-color: rgba(50, 41, 31, 0.12);
+  color: var(--text-faint);
+}
+
+.job-card--dismissed .fit-score {
+  opacity: 0.5;
+}

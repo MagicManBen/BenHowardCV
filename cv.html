@@ -1473,8 +1473,8 @@
         <div class="hero-topline draw-line" data-reveal>
           <span id="hero-kicker"><strong>Prepared for this opportunity</strong> / tailored introduction</span>
           <div class="hero-topline-right">
-            <span id="hero-topline-meta-1">Healthcare, manufacturing, leisure, regulated services</span>
-            <span id="hero-topline-meta-2">United Kingdom</span>
+            <span id="hero-topline-meta-1">Companion to my CV</span>
+            <span id="hero-topline-meta-2">Focused on fit and evidence</span>
           </div>
         </div>
 
@@ -1510,7 +1510,7 @@
           <div class="hero-tailored-header">
             <span class="hero-tailored-label">Application snapshot</span>
             <p class="hero-tailored-heading" id="hero-tailored-heading">Role snapshot</p>
-            <p class="hero-context-line" id="hero-context-line">A focused supporting page to sit alongside my CV.</p>
+            <p class="hero-context-line" id="hero-context-line">A clearer view of why this opportunity fits my background.</p>
           </div>
           <div class="hero-detail-list">
             <div class="row" id="hero-row-company">
@@ -1535,7 +1535,7 @@
             </div>
           </div>
           <div class="hero-priority-block">
-            <span class="hero-margin-label">Evidence at a glance</span>
+            <span class="hero-margin-label">Relevant evidence</span>
             <div class="hero-focus-list" id="hero-focus-list">
               <span class="hero-focus-chip">Operational performance</span>
               <span class="hero-focus-chip">Team leadership</span>
@@ -1567,7 +1567,7 @@
             <span class="hero-meta-chip">KPI governance</span>
             <span class="hero-meta-chip">Workforce planning</span>
           </div>
-          <div class="hero-tone-wrap">
+          <div class="hero-tone-wrap" id="hero-tone-wrap">
             <strong>Tone</strong>
             <div class="hero-tone-list" id="hero-tone-list">
               <span class="hero-tone-chip">Leadership</span>
@@ -1597,7 +1597,7 @@
             <p id="intro-note">Healthcare, manufacturing, leisure and regulated services.</p>
           </div>
           <div class="intro-side-block">
-            <span class="intro-side-label">What stood out</span>
+            <span class="intro-side-label">Context that matters</span>
             <div class="intro-lines" id="intro-traits">
               <span>Calm under pressure</span>
               <span>Clear standards and accountability</span>
@@ -1738,13 +1738,13 @@
           </div>
 
           <div class="tailored-copy" data-reveal>
-            <p id="tailored-company-line">Prepared for your team.</p>
+            <p id="tailored-company-line">Why the fit is credible</p>
             <div class="tailored-list" id="tailored-highlight-list">
               <span>Inclusive environment</span>
               <span>Digital transformation focus</span>
             </div>
-            <p id="why-this-role" style="margin-top: 0.8rem;">Operational leadership built on visible results and practical delivery.</p>
-            <p id="role-summary" style="margin-top: 0.45rem;">Cross-sector experience in turnaround, service design, financial grip and team leadership.</p>
+            <p id="why-this-role" style="margin-top: 0.8rem;">I can bring structured delivery, visible reporting, and practical follow-through into the role.</p>
+            <p id="role-summary" style="margin-top: 0.45rem;">My background combines operational leadership, service improvement, and cross-functional coordination across complex environments.</p>
             <div id="summary-evidence-lines" style="margin-top: 0.6rem; display: none;"></div>
           </div>
         </div>
@@ -1818,8 +1818,8 @@
         travelRequired: "",
         advertSummary: "",
         personalisedIntro: "",
-        whyThisRole: "The brief points to a role where leadership, operational performance and service quality need to move together.",
-        toneKeywords: ["leadership", "accountable", "collaborative", "operational excellence"],
+        whyThisRole: "The brief points to a role where clearer priorities, steadier reporting, and practical follow-through all matter.",
+        toneKeywords: ["steady", "collaborative", "accountable", "practical"],
         probablePriorities: [
           "Operational performance and follow-through",
           "Team leadership and accountability",
@@ -1859,6 +1859,18 @@
         genClosingSummary: "",
         genEvidenceExamples: []
       };
+
+      const STOPWORDS = new Set([
+        "about", "across", "along", "also", "although", "always", "among", "and", "around", "because",
+        "before", "being", "bring", "brief", "build", "built", "clear", "clearly", "could", "company",
+        "deliver", "delivering", "delivery", "employer", "environment", "experience", "focus", "focused",
+        "from", "have", "help", "into", "itself", "likely", "more", "most", "much", "need", "needs",
+        "opportunity", "organisation", "organization", "practical", "role", "roles", "same", "seems",
+        "show", "shows", "still", "strong", "stronger", "support", "supports", "team", "teams", "that",
+        "their", "them", "then", "there", "these", "they", "this", "those", "through", "together",
+        "under", "used", "using", "value", "very", "where", "which", "while", "with", "work", "working",
+        "would", "your"
+      ]);
 
       function cleanString(value) {
         return typeof value === "string" ? value.trim() : "";
@@ -2065,14 +2077,58 @@
         return cleanString(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
       }
 
+      function textWordCount(value) {
+        return cleanString(value).split(/\s+/).filter(Boolean).length;
+      }
+
+      function textLength(value) {
+        return cleanString(value).length;
+      }
+
+      function similarityThreshold(value) {
+        const words = textWordCount(value);
+        if (words <= 2) return 0.92;
+        if (words <= 4) return 0.82;
+        return 0.7;
+      }
+
+      function textSimilarity(left, right) {
+        const a = cleanString(left);
+        const b = cleanString(right);
+        if (!a || !b) return 0;
+
+        const aKey = normaliseKey(a);
+        const bKey = normaliseKey(b);
+        if (aKey && aKey === bKey) return 1;
+
+        const shorter = a.length <= b.length ? a : b;
+        const longer = shorter === a ? b : a;
+        if (shorter.length >= 40 && normaliseKey(longer).includes(normaliseKey(shorter))) return 0.95;
+
+        const leftTokens = tokenise(a);
+        const rightTokens = tokenise(b);
+        if (!leftTokens.size || !rightTokens.size) return 0;
+
+        let overlap = 0;
+        leftTokens.forEach((token) => {
+          if (rightTokens.has(token)) overlap += 1;
+        });
+
+        return overlap / Math.min(leftTokens.size, rightTokens.size);
+      }
+
+      function isSimilarText(left, right, threshold = similarityThreshold(left || right)) {
+        return textSimilarity(left, right) >= threshold;
+      }
+
       function uniqueStrings(values, limit = Infinity, exclusions = []) {
-        const seen = new Set(exclusions.map((item) => normaliseKey(item)).filter(Boolean));
+        const comparisonPool = exclusions.map((item) => cleanString(item)).filter(Boolean);
         const output = [];
         values.forEach((value) => {
           const cleaned = cleanString(value);
-          const key = normaliseKey(cleaned);
-          if (!key || seen.has(key)) return;
-          seen.add(key);
+          if (!cleaned) return;
+          if (comparisonPool.some((item) => isSimilarText(cleaned, item))) return;
+          comparisonPool.push(cleaned);
           output.push(cleaned);
         });
         return output.slice(0, limit);
@@ -2086,9 +2142,27 @@
         return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
       }
 
+      function shortenText(value, maxLength = 170) {
+        const cleaned = cleanString(value).replace(/\s+/g, " ");
+        if (cleaned.length <= maxLength) return cleaned;
+        const shortened = cleaned.slice(0, maxLength);
+        const lastBreak = Math.max(
+          shortened.lastIndexOf(". "),
+          shortened.lastIndexOf("; "),
+          shortened.lastIndexOf(", "),
+          shortened.lastIndexOf(" ")
+        );
+        const cutAt = lastBreak > Math.max(70, Math.floor(maxLength * 0.55)) ? lastBreak : maxLength;
+        return `${shortened.slice(0, cutAt).trim()}...`;
+      }
+
       function tokenise(value) {
         return new Set(
-          cleanString(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").split(" ").filter((token) => token.length >= 3)
+          cleanString(value)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .split(" ")
+            .filter((token) => token.length >= 4 && !STOPWORDS.has(token))
         );
       }
 
@@ -2098,6 +2172,64 @@
           if (cleaned) return cleaned;
         }
         return "";
+      }
+
+      function pickDistinctText(candidates, usedTexts = [], fallback = "") {
+        const pool = candidates.map((value) => cleanString(value)).filter(Boolean);
+        for (const candidate of pool) {
+          if (!usedTexts.some((used) => isSimilarText(candidate, used))) {
+            return candidate;
+          }
+        }
+
+        const fallbackValue = cleanString(fallback);
+        if (fallbackValue && !usedTexts.some((used) => isSimilarText(fallbackValue, used))) {
+          return fallbackValue;
+        }
+
+        return pool[0] || fallbackValue;
+      }
+
+      function pickOptionalDistinctText(candidates, usedTexts = []) {
+        const pool = candidates.map((value) => cleanString(value)).filter(Boolean);
+        for (const candidate of pool) {
+          if (!usedTexts.some((used) => isSimilarText(candidate, used))) {
+            return candidate;
+          }
+        }
+        return "";
+      }
+
+      function rememberText(store, ...values) {
+        values.forEach((value) => {
+          const cleaned = cleanString(value);
+          if (cleaned) store.push(cleaned);
+        });
+      }
+
+      function pruneDisplayTags(tags, context = []) {
+        const contextValues = context.map((value) => cleanString(value)).filter(Boolean);
+        return uniqueStrings(tags, 4, contextValues).filter((tag) => (
+          !contextValues.some((value) => isSimilarText(tag, value, 0.86))
+        ));
+      }
+
+      function filterDistinctCards(cards, maxCards = 4) {
+        const kept = [];
+        const seen = [];
+        cards.forEach((card) => {
+          if (!card || !cleanString(card.title) || !cleanString(card.copy)) return;
+          const cardCopy = cleanString(card.copy);
+          const cardTitle = cleanString(card.title);
+          if (seen.some((value) => isSimilarText(cardCopy, value) || isSimilarText(cardTitle, value, 0.86))) return;
+          kept.push({
+            title: cardTitle,
+            copy: cardCopy,
+            tags: pruneDisplayTags(card.tags || [], [cardTitle, cardCopy])
+          });
+          seen.push(cardCopy, cardTitle);
+        });
+        return kept.slice(0, maxCards);
       }
 
       function buildContractFact(state) {
@@ -2128,86 +2260,92 @@
         const facts = buildAdvertFactExclusions(state);
         const strengths = uniqueStrings(
           [
+            ...state.skillsWanted,
+            ...state.matchCategories,
             ...cleanFocusAreasToBring(state.genFocusAreasToBring).map((item) => item.title),
             ...state.keyFocusAreas,
-            ...state.skillsWanted,
-            ...state.matchCategories
           ],
-          4,
+          3,
           facts
         );
-        if (strengths.length) return strengths.join(", ");
-        return "Operational turnaround, service redesign, measurable improvement";
+        if (strengths.length) return strengths.join(" · ");
+        return "Operational leadership · reporting clarity · practical improvement";
       }
 
       function buildHeroStatement(state) {
         return pickFirst(
-          state.genPersonalisedOpening,
           state.personalisedIntro,
-          "Thank you for reviewing my CV. This page adds focused context on why this opportunity fits my background and where I could contribute."
+          "I work best in roles that need clearer priorities, steadier reporting, and stronger operational follow-through. The brief suggests exactly that kind of opportunity, which is why I wanted to add some focused context alongside my CV."
         );
       }
 
-      function buildHeroPullNote(state) {
-        const contextLine = pickFirst(state.rolePurpose, state.shortRoleReason);
-        if (contextLine) {
-          return `<strong>Why this page</strong>${contextLine}`;
-        }
-        return `<strong>Why this page</strong>${buildHeroStrengthLine(state)}.`;
+      function buildHeroPullNote(state, fitSummary, likelyContribution) {
+        const note = pickFirst(likelyContribution, fitSummary, buildFitSummary(state));
+        return `<strong>What I would bring</strong>${shortenText(note || buildHeroStrengthLine(state), 155)}`;
       }
 
       function buildHeroKickerCopy(state) {
-        return pickFirst(state.shortCompanyReason, state.headlineAttraction, buildHeroStrengthLine(state));
+        return pickFirst(
+          formatList(uniqueStrings([...state.matchCategories, ...state.keyFocusAreas], 3, buildAdvertFactExclusions(state))),
+          state.shortRoleReason,
+          "Operational leadership across healthcare, manufacturing, live operations, and regulated service environments"
+        );
       }
 
       function buildCompanyHighlights(state) {
         return uniqueStrings(
           [
             ...state.genCompanyHighlights,
-            ...state.companyPridePoints,
-            ...state.cultureSignals
+            ...state.companyPridePoints
           ],
-          6,
+          4,
           buildAdvertFactExclusions(state)
         );
       }
 
       function buildHeroKickerNotes(state) {
-        const evidenceTitles = state.genEvidenceExamples.map((item) => item.exampleTitle);
+        const evidenceTitles = cleanEvidenceExamples(state.genEvidenceExamples).map((item) => item.exampleTitle);
         return uniqueStrings(
-          [...evidenceTitles, ...buildCompanyHighlights(state)],
-          3,
+          [...evidenceTitles, ...state.matchCategories, ...state.keyFocusAreas],
+          2,
           buildAdvertFactExclusions(state)
         );
       }
 
       function buildWhyCompany(state) {
+        const highlights = buildCompanyHighlights(state);
         return pickFirst(
-          state.genWhyThisCompany,
           state.shortCompanyReason,
           state.companySummary,
-          "I am most drawn to roles where operational discipline supports teams doing visible, high-value work."
+          highlights.length
+            ? `What appeals to me most about the organisation is the sense of ${formatList(highlights.slice(0, 3))}. That usually points to an environment where practical leadership and well-run operations are valued.`
+            : "The company detail in the advert is fairly light, but the environment still comes across as one where practical leadership and steady delivery would matter."
         );
       }
 
       function buildWhyRole(state) {
+        const roleThemes = uniqueStrings(
+          [...state.probablePriorities, ...state.keyFocusAreas],
+          3,
+          buildAdvertFactExclusions(state)
+        );
         return pickFirst(
-          state.genWhyThisRole,
           state.whyThisRole,
           state.shortRoleReason,
           state.roleSummary,
-          "I am at my best in roles that bring together structure, delivery rhythm, stakeholder clarity, and practical improvement."
+          roleThemes.length
+            ? `What appeals to me most is the work itself: ${formatList(roleThemes.slice(0, 3))}. That is the kind of operational brief where I can usually add value quickly by bringing structure, visibility, and follow-through.`
+            : "I am at my best in roles that bring together delivery rhythm, stakeholder clarity, and practical improvement."
         );
       }
 
       function buildRoleNeedsSummary(state) {
-        if (state.genRoleNeedsSummary) return state.genRoleNeedsSummary;
         const priorities = uniqueStrings(state.probablePriorities, 4, buildAdvertFactExclusions(state));
         const businessNeeds = uniqueStrings(state.likelyBusinessNeeds, 3, buildAdvertFactExclusions(state));
         if (priorities.length || businessNeeds.length) {
           const clauses = [];
           if (priorities.length) clauses.push(`keep ${formatList(priorities.slice(0, 3))} moving with clarity`);
-          if (businessNeeds.length) clauses.push(`improve ${formatList(businessNeeds.slice(0, 2)).toLowerCase()}`);
+          if (businessNeeds.length) clauses.push(`improve ${formatList(businessNeeds.slice(0, 2))}`);
           return `From the brief, I read this as a role that needs someone who can ${clauses.join(" and ")}. That is typically where my background in structured operations, reporting, and cross-functional delivery is most useful.`;
         }
         return pickFirst(
@@ -2219,128 +2357,123 @@
       }
 
       function buildFitSummary(state) {
+        const strengths = uniqueStrings(
+          [...state.matchCategories, ...state.skillsWanted, ...state.keyFocusAreas],
+          4,
+          buildAdvertFactExclusions(state)
+        );
         return pickFirst(
-          state.genFitSummary,
-          state.advertSummary,
-          "I bring a mix of operational planning, performance improvement, and structured delivery experience that translates well into roles like this."
+          strengths.length
+            ? `My background lines up well with the role's need for ${formatList(strengths.slice(0, 3))}. I tend to be most useful where teams need clearer structure, steadier reporting, and stronger follow-through.`
+            : "My background is strongest where operational control, reporting, and cross-functional coordination all need to work together."
         );
       }
 
       function buildLikelyContribution(state) {
-        if (state.genLikelyContribution) return state.genLikelyContribution;
         const priorities = uniqueStrings(
           [...state.keyFocusAreas, ...state.probablePriorities],
           3,
           buildAdvertFactExclusions(state)
         );
         if (priorities.length) {
-          return `Based on the brief, I would expect to focus first on ${formatList(priorities).toLowerCase()}, while keeping workload visibility, reporting, and follow-through steady.`;
+          return `From the brief, I would expect to add the most value by bringing clearer visibility to ${formatList(priorities)} while keeping reporting, coordination, and follow-through steady.`;
         }
         return "Based on the brief, I would expect to focus on tightening delivery rhythm, improving visibility, and helping the team operate with clearer priorities.";
       }
 
       function buildCultureFit(state) {
-        if (state.genCultureFit) return state.genCultureFit;
         const signals = uniqueStrings(
           [...state.toneKeywords, ...state.cultureSignals],
           4,
           buildAdvertFactExclusions(state)
         );
         if (signals.length) {
-          return `I work best in ${formatList(signals).toLowerCase()} environments where expectations are clear and improvement is practical.`;
+          return `I work best in ${formatList(signals)} environments where expectations are clear and improvement is practical.`;
         }
         return "I tend to do my best work in collaborative, structured environments where expectations are clear and improvement is practical.";
       }
 
       function buildClosingSummary(state) {
         return pickFirst(
-          state.genClosingSummary,
-          "I would welcome the chance to discuss how my background could support this role and the wider team."
+          buildLikelyContribution(state)
+            ? `I would welcome the chance to bring that mix of structured delivery, operational judgement, and practical follow-through into the role.`
+            : "I would welcome the chance to discuss how my background could support this role and the wider team."
         );
       }
 
       function buildIntroTraits(state) {
         const facts = buildAdvertFactExclusions(state);
         const primarySignals = uniqueStrings(
-          [...state.companyPridePoints, ...state.cultureSignals],
-          4,
+          [...buildCompanyHighlights(state), ...state.cultureSignals],
+          3,
           facts
         );
         if (primarySignals.length) return primarySignals;
-        return uniqueStrings(buildCompanyHighlights(state), 4, facts);
+        return uniqueStrings(state.companyPridePoints, 3, facts);
       }
 
       function buildIntroStrengthLines(state) {
         return uniqueStrings(
-          [...state.matchCategories, ...state.keyFocusAreas, ...state.skillsWanted],
+          [...cleanEvidenceExamples(state.genEvidenceExamples).map((item) => item.exampleTitle), ...state.matchCategories, ...state.keyFocusAreas],
           4,
           buildAdvertFactExclusions(state)
         );
       }
 
-      function buildRoleNeedsCards(state) {
+      function buildRoleNeedsCards(state, roleNeedsSummary) {
         const facts = buildAdvertFactExclusions(state);
-        const priorities = uniqueStrings(state.probablePriorities, 4, facts);
+        const priorities = uniqueStrings([...state.probablePriorities, ...state.keyFocusAreas], 4, facts);
         const businessNeeds = uniqueStrings(state.likelyBusinessNeeds, 4, facts);
-        const goals = uniqueStrings(state.impliedStrategicGoals, 4, facts);
-        const deliverables = uniqueStrings(state.deliverablesLikely, 4, facts);
+        const outcomes = uniqueStrings([...state.impliedStrategicGoals, ...state.deliverablesLikely], 4, facts);
         const cards = [];
 
         cards.push({
-          title: "Role purpose",
-          copy: buildRoleNeedsSummary(state),
+          title: "My read on the brief",
+          copy: roleNeedsSummary,
           tags: uniqueStrings([state.rolePurpose, state.headlineAttraction], 2, facts)
         });
 
         if (priorities.length) {
           cards.push({
-            title: "Likely priorities",
-            copy: `I read the brief as needing visible control over ${formatList(priorities).toLowerCase()}.`,
-            tags: priorities
+            title: "Where the pressure likely sits",
+            copy: `I read the role as needing someone who can keep ${formatList(priorities.slice(0, 3))} clear, visible, and moving.`,
+            tags: priorities.slice(0, 4)
           });
         }
 
-        if (businessNeeds.length) {
+        if (businessNeeds.length || outcomes.length) {
+          const supportTags = uniqueStrings([...businessNeeds, ...outcomes], 4, facts);
           cards.push({
-            title: "Business needs behind the brief",
-            copy: `Underneath the advert, this seems to be about ${formatList(businessNeeds).toLowerCase()}.`,
-            tags: businessNeeds
+            title: "What the role is there to improve",
+            copy: businessNeeds.length
+              ? `Underneath the advert, this looks to be about ${formatList(businessNeeds.slice(0, 3))}, so the team can operate with less friction and more confidence.`
+              : `Success here seems to depend on stronger control around ${formatList(outcomes.slice(0, 3))}.`,
+            tags: supportTags
           });
         }
 
-        if (goals.length || deliverables.length) {
-          const tags = uniqueStrings([...goals, ...deliverables], 4, facts);
-          cards.push({
-            title: "What success likely looks like",
-            copy: tags.length
-              ? `The outcome seems to be stronger delivery around ${formatList(tags.slice(0, 3)).toLowerCase()}.`
-              : "The outcome seems to be steadier delivery, clearer governance, and better operational confidence.",
-            tags
-          });
-        }
-
-        return cards.slice(0, 4);
+        return filterDistinctCards(cards, 3);
       }
 
-      function buildFitCards(state) {
+      function buildFitCards(state, fitSummary, likelyContribution, cultureFit) {
         const facts = buildAdvertFactExclusions(state);
-        const cards = [
+        const cards = filterDistinctCards([
           {
-            title: "Overall fit",
-            copy: buildFitSummary(state),
+            title: "Where I fit best",
+            copy: fitSummary,
             tags: uniqueStrings([...state.matchCategories, ...state.skillsWanted], 4, facts)
           },
           {
-            title: "Likely contribution",
-            copy: buildLikelyContribution(state),
+            title: "What I would add early",
+            copy: likelyContribution,
             tags: uniqueStrings([...state.keyFocusAreas, ...state.probablePriorities], 4, facts)
           },
           {
             title: "Working style",
-            copy: buildCultureFit(state),
-            tags: uniqueStrings([...state.toneKeywords, ...state.cultureSignals], 4, facts)
+            copy: cultureFit,
+            tags: uniqueStrings([...state.toneKeywords, ...state.cultureSignals], 3, facts)
           }
-        ];
+        ], 3);
         return cards.filter((card) => card.copy);
       }
 
@@ -2371,33 +2504,58 @@
         const generated = cleanExperienceMappings(state.genExperienceMappings);
         if (generated.length) return generated;
 
+        const examples = cleanEvidenceExamples(state.genEvidenceExamples);
+        if (!examples.length) return [];
+
         const needs = uniqueStrings(
           [...state.essentialRequirements, ...state.skillsWanted, ...state.matchCategories, ...state.keyFocusAreas],
           4,
           buildAdvertFactExclusions(state)
         );
-        const examples = cleanEvidenceExamples(state.genEvidenceExamples);
 
         return needs.map((need) => {
           const example = pickBestEvidenceForNeed(need, examples);
           return {
             roleNeed: need,
-            myEvidence: example ? pickFirst(example.shortLine, example.exampleTitle, buildFitSummary(state)) : buildFitSummary(state),
+            myEvidence: example ? pickFirst(example.shortLine, example.exampleTitle) : buildFitSummary(state),
             relevance: example
-              ? pickFirst(example.whyChosen, example.suggestedUsage, "This is directly relevant to the brief.")
+              ? pickFirst(example.whyChosen, example.suggestedUsage, `That experience maps directly to the role's need for ${need}.`)
               : "This maps well to the kind of operational support the brief appears to need."
           };
         }).filter((item) => item.roleNeed && item.myEvidence);
       }
 
+      function buildFocusSummary(title) {
+        const key = normaliseKey(title);
+        if (key.includes("capacity") || key.includes("resource") || key.includes("planning")) {
+          return "I would want demand, capacity, and forward planning to be visible enough that the team can make better decisions earlier.";
+        }
+        if (key.includes("governance") || key.includes("workflow") || key.includes("jira") || key.includes("report")) {
+          return "I would tighten the operating rhythm around workflow visibility, ownership, and reporting so progress is easier to track and problems surface sooner.";
+        }
+        if (key.includes("stakeholder") || key.includes("communication") || key.includes("coordination")) {
+          return "I would keep expectations clear across teams through practical updates, visible priorities, and quicker handling of blockers.";
+        }
+        if (key.includes("vendor") || key.includes("procurement") || key.includes("financial")) {
+          return "I would bring order to supplier, procurement, and spend-related work so avoidable friction does not slow delivery down.";
+        }
+        if (key.includes("improvement") || key.includes("continuous")) {
+          return "I would look for targeted process improvements that reduce ambiguity, improve flow, and make delivery easier to sustain.";
+        }
+        return `I would bring a more structured, visible approach to ${title}, with clearer ownership and steadier follow-through.`;
+      }
+
       function buildFocusCards(state) {
         const generated = cleanFocusAreasToBring(state.genFocusAreasToBring);
         if (generated.length) {
-          return generated.slice(0, 4).map((item) => ({
-            title: item.title,
-            copy: item.summary,
-            tags: []
-          }));
+          return filterDistinctCards(
+            generated.slice(0, 4).map((item) => ({
+              title: item.title,
+              copy: item.summary,
+              tags: []
+            })),
+            4
+          );
         }
 
         const focusAreas = uniqueStrings(
@@ -2406,11 +2564,11 @@
           buildAdvertFactExclusions(state)
         );
 
-        return focusAreas.map((title) => ({
+        return filterDistinctCards(focusAreas.map((title) => ({
           title,
-          copy: `I would bring a structured, visible approach to ${title.toLowerCase()}, keeping priorities, reporting, and follow-through clear.`,
+          copy: buildFocusSummary(title),
           tags: []
-        }));
+        })), 4);
       }
 
       function buildSkillsCards(state) {
@@ -2422,29 +2580,27 @@
 
         if (skillAreas.length) {
           cards.push({
-            title: "Core strengths",
-            copy: `The strongest match areas here are ${formatList(skillAreas.slice(0, 4)).toLowerCase()}.`,
-            tags: skillAreas
+            title: "Where my experience is strongest",
+            copy: `The strongest overlap here sits around ${formatList(skillAreas.slice(0, 4))}. That is the kind of work I have repeatedly had to make visible, structured, and accountable.`,
+            tags: skillAreas.slice(0, 4)
           });
         }
 
-        if (tools.length) {
+        if (stakeholderGroups.length || tools.length >= 2) {
+          const collaboratorSentence = stakeholderGroups.length
+            ? `I am used to keeping ${formatList(stakeholderGroups.slice(0, 4))} aligned around priorities, updates, and blockers.`
+            : "";
+          const toolingSentence = tools.length >= 2
+            ? ` Where workflow tools or formal methods matter, I can work comfortably within ${formatList(tools.slice(0, 3))} environments without needing everything to be invented from scratch.`
+            : "";
           cards.push({
-            title: "Tools and methods",
-            copy: `I can bring transferable experience across ${formatList(tools.slice(0, 4))}${tools.length > 4 ? " and adjacent workflow tooling." : "."}`,
-            tags: tools
+            title: "How I work across delivery",
+            copy: `${collaboratorSentence}${toolingSentence}`.trim(),
+            tags: uniqueStrings([...stakeholderGroups.slice(0, 3), ...tools.slice(0, 3)], 5, facts)
           });
         }
 
-        if (stakeholderGroups.length) {
-          cards.push({
-            title: "Working across teams",
-            copy: `I am used to coordinating with ${formatList(stakeholderGroups.slice(0, 4)).toLowerCase()} while keeping delivery and blockers visible.`,
-            tags: stakeholderGroups
-          });
-        }
-
-        return cards;
+        return filterDistinctCards(cards, 3);
       }
 
       function buildFirst90DaysPlan(state) {
@@ -2460,21 +2616,21 @@
             phase: "First 30 days",
             focus: "Understand the operating rhythm",
             detail: priorities.length
-              ? `I would start by understanding the current approach to ${formatList(priorities).toLowerCase()}, the stakeholder landscape, and the reporting cadence.`
+              ? `I would start by understanding the current approach to ${formatList(priorities)}, the stakeholder landscape, and the reporting cadence.`
               : "I would start by understanding the operating rhythm, stakeholder expectations, and where current delivery feels most stretched."
           },
           {
             phase: "Days 30-60",
             focus: "Improve visibility and prioritisation",
             detail: needs.length
-              ? `I would focus on improving visibility around ${formatList(needs).toLowerCase()} and tightening prioritisation where needed.`
+              ? `I would focus on improving visibility around ${formatList(needs)} and tightening prioritisation where needed.`
               : "I would focus on improving workload visibility, surfacing blockers earlier, and tightening prioritisation where needed."
           },
           {
             phase: "Days 60-90",
             focus: "Embed a steadier delivery rhythm",
             detail: goals.length
-              ? `I would look to embed governance that supports ${formatList(goals).toLowerCase()} with clearer forecasting and fewer surprises.`
+              ? `I would look to embed governance that supports ${formatList(goals)} with clearer forecasting and fewer surprises.`
               : "I would look to embed a steadier delivery rhythm with clearer governance, stronger forecasting confidence, and fewer avoidable blockers."
           }
         ];
@@ -2504,7 +2660,7 @@
         const container = document.getElementById(containerId);
         if (!section || !container) return;
 
-        const usableCards = cards.filter((card) => card && card.title && card.copy);
+        const usableCards = filterDistinctCards(cards);
         container.innerHTML = "";
         if (!usableCards.length) {
           section.style.display = "none";
@@ -2526,7 +2682,7 @@
           article.appendChild(heading);
           article.appendChild(copy);
 
-          const tags = uniqueStrings(card.tags || [], 6);
+          const tags = pruneDisplayTags(card.tags || [], [card.title, card.copy]).slice(0, 4);
           if (tags.length) {
             const tagsEl = document.createElement("div");
             tagsEl.className = "theme-tags";
@@ -2642,7 +2798,7 @@
       function renderTailoredHighlights(values) {
         const container = document.getElementById("tailored-highlight-list");
         if (!container) return;
-        const highlights = uniqueStrings(values, 6);
+        const highlights = uniqueStrings(values, 4);
         container.innerHTML = "";
         if (!highlights.length) {
           container.style.display = "none";
@@ -2680,30 +2836,159 @@
         span.textContent = cleaned;
       }
 
+      function setElementVisibility(id, visible) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = visible ? "" : "none";
+      }
+
+      function setParagraph(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const cleaned = cleanString(value);
+        el.textContent = cleaned;
+        el.style.display = cleaned ? "" : "none";
+      }
+
+      function buildClosingHighlights(state, evidenceExamples) {
+        return uniqueStrings(
+          [
+            ...evidenceExamples.map((item) => item.exampleTitle),
+            ...state.matchCategories,
+            ...state.skillsWanted,
+            ...state.keyFocusAreas
+          ],
+          4,
+          buildAdvertFactExclusions(state)
+        );
+      }
+
+      function buildClosingQuote(state, closingSummary, fitSummary, likelyContribution) {
+        const quoteThemes = uniqueStrings(
+          [...state.keyFocusAreas, ...state.matchCategories],
+          3,
+          buildAdvertFactExclusions(state)
+        );
+        if (quoteThemes.length) {
+          return `${formatList(quoteThemes)}.`;
+        }
+
+        return shortenText(
+          pickFirst(
+            textLength(likelyContribution) <= 92 && !isSimilarText(likelyContribution, closingSummary) ? likelyContribution : "",
+            textLength(fitSummary) <= 92 && !isSimilarText(fitSummary, closingSummary) ? fitSummary : "",
+            buildHeroStrengthLine(state),
+            "Clearer priorities, better visibility, and steadier follow-through."
+          ),
+          92
+        );
+      }
+
+      function buildClosingSupportLine(state, evidenceExamples, usedTexts) {
+        const generated = pickOptionalDistinctText(
+          [buildLikelyContribution(state), buildFitSummary(state), buildWhyRole(state)],
+          usedTexts
+        );
+        if (generated) return generated;
+        if (evidenceExamples.length) {
+          const titles = uniqueStrings(evidenceExamples.map((item) => item.exampleTitle), 2);
+          if (titles.length) {
+            return `That confidence comes from having already delivered relevant work in ${formatList(titles)} settings.`;
+          }
+        }
+        return "I tend to add value quickly where structure, reporting, and cross-functional coordination all need to move together.";
+      }
+
+      function buildClosingSecondaryLine(state, evidenceExamples, usedTexts) {
+        const candidate = pickOptionalDistinctText(
+          [buildCultureFit(state), buildWhyCompany(state), state.headlineAttraction],
+          usedTexts
+        );
+        if (candidate) return candidate;
+        if (evidenceExamples.length) {
+          return `The examples above are why I feel comfortable making a practical contribution rather than just matching the job title on paper.`;
+        }
+        return "";
+      }
+
       function applyState(state) {
         const companyHighlights = buildCompanyHighlights(state);
-        const roleNeedsSummary = buildRoleNeedsSummary(state);
-        const fitSummary = buildFitSummary(state);
-        const likelyContribution = buildLikelyContribution(state);
         const evidenceExamples = cleanEvidenceExamples(state.genEvidenceExamples);
+        const usedNarrative = [];
+        const heroStatement = pickDistinctText(
+          [state.genPersonalisedOpening, state.personalisedIntro, buildHeroStatement(state)],
+          usedNarrative,
+          buildHeroStatement(state)
+        );
+        rememberText(usedNarrative, heroStatement);
+
+        const whyCompany = pickDistinctText(
+          [state.genWhyThisCompany, buildWhyCompany(state)],
+          usedNarrative,
+          buildWhyCompany(state)
+        );
+        rememberText(usedNarrative, whyCompany);
+
+        const whyRole = pickDistinctText(
+          [state.genWhyThisRole, buildWhyRole(state)],
+          usedNarrative,
+          buildWhyRole(state)
+        );
+        rememberText(usedNarrative, whyRole);
+
+        const roleNeedsSummary = pickDistinctText(
+          [state.genRoleNeedsSummary, buildRoleNeedsSummary(state)],
+          usedNarrative,
+          buildRoleNeedsSummary(state)
+        );
+        rememberText(usedNarrative, roleNeedsSummary);
+
+        const fitSummary = pickDistinctText(
+          [state.genFitSummary, buildFitSummary(state)],
+          usedNarrative,
+          buildFitSummary(state)
+        );
+        rememberText(usedNarrative, fitSummary);
+
+        const likelyContribution = pickDistinctText(
+          [state.genLikelyContribution, buildLikelyContribution(state)],
+          usedNarrative,
+          buildLikelyContribution(state)
+        );
+        rememberText(usedNarrative, likelyContribution);
+
+        const cultureFit = pickOptionalDistinctText(
+          [state.genCultureFit, buildCultureFit(state)],
+          usedNarrative
+        );
+        rememberText(usedNarrative, cultureFit);
+
+        const closingSummary = pickDistinctText(
+          [state.genClosingSummary, buildClosingSummary(state)],
+          usedNarrative,
+          buildClosingSummary(state)
+        );
+
         const experienceMappings = buildExperienceMappings(state);
         const first90DaysPlan = buildFirst90DaysPlan(state);
+        const closingHighlights = buildClosingHighlights(state, evidenceExamples);
+        const closingSupportLine = buildClosingSupportLine(state, evidenceExamples, [closingSummary, ...usedNarrative]);
+        const closingSecondaryLine = buildClosingSecondaryLine(state, evidenceExamples, [closingSummary, closingSupportLine, ...usedNarrative]);
 
         document.title = state.companyName !== defaults.companyName
           ? `Ben T. Howard | ${state.companyName} | ${state.roleTitle}`
           : `Ben T. Howard | ${state.roleTitle}`;
 
-        setText("hero-kicker", state.companyName === defaults.companyName ? "Tailored supporting page" : `Application support for ${state.companyName}`);
-        setText("hero-topline-meta-1", "Tailored supporting page");
-        setText("hero-topline-meta-2", "Built to sit alongside my CV");
+        setText("hero-kicker", state.companyName === defaults.companyName ? "Application support" : `Application support for ${state.companyName}`);
+        setText("hero-topline-meta-1", "Companion to my CV");
+        setText("hero-topline-meta-2", "Focused on fit and evidence");
         setText("hero-role", state.roleTitle);
         setText("hero-positioning", buildHeroStrengthLine(state));
-        setText("hero-statement", buildHeroStatement(state));
-        setHtml("hero-pull-note", buildHeroPullNote(state));
+        setText("hero-statement", heroStatement);
+        setHtml("hero-pull-note", buildHeroPullNote(state, fitSummary, likelyContribution));
         setText("hero-kicker-copy", buildHeroKickerCopy(state));
         renderLines("hero-kicker-notes", buildHeroKickerNotes(state));
         setText("hero-tailored-heading", "Role snapshot");
-        setText("hero-context-line", pickFirst(state.headlineAttraction, roleNeedsSummary, state.rolePurpose));
+        setText("hero-context-line", shortenText(pickFirst(roleNeedsSummary, likelyContribution, state.rolePurpose, state.headlineAttraction), 145));
         setFactRow("hero-row-company", "hero-fact-company", state.companyName);
         setFactRow("hero-row-role", "hero-fact-role", state.roleTitle);
         setFactRow("hero-row-location", "hero-fact-location", compactValue(state.location));
@@ -2713,23 +2998,24 @@
           "hero-focus-list",
           evidenceExamples.length
             ? evidenceExamples.map((item) => pickFirst(item.exampleTitle, item.shortLine))
-            : uniqueStrings([...state.keyFocusAreas, ...state.matchCategories], 4, buildAdvertFactExclusions(state)),
+            : uniqueStrings([...state.matchCategories, ...state.keyFocusAreas], 3, buildAdvertFactExclusions(state)),
           "hero-focus-chip"
         );
-        renderLines("hero-meta-list", uniqueStrings([...state.toneKeywords, ...state.cultureSignals, ...state.matchCategories], 4, buildAdvertFactExclusions(state)), "hero-meta-chip");
-        renderLines("hero-tone-list", uniqueStrings([...state.toneKeywords, ...state.cultureSignals], 4, buildAdvertFactExclusions(state)), "hero-tone-chip");
+        renderLines("hero-meta-list", uniqueStrings([...state.matchCategories, ...state.skillsWanted, ...state.keyFocusAreas], 3, buildAdvertFactExclusions(state)), "hero-meta-chip");
+        const toneCount = renderLines("hero-tone-list", uniqueStrings([...state.toneKeywords, ...state.cultureSignals], 2, buildAdvertFactExclusions(state)), "hero-tone-chip");
+        setElementVisibility("hero-tone-wrap", toneCount > 0);
 
-        setText("intro-note", pickFirst(state.headlineAttraction, companyHighlights[0], state.shortCompanyReason, "A role and company combination where structured delivery matters."));
-        setText("intro-summary", buildWhyCompany(state));
-        setText("intro-detail", buildWhyRole(state));
+        setText("intro-note", pickFirst(state.headlineAttraction, companyHighlights[0], state.shortCompanyReason, "A role and company combination where practical delivery matters."));
+        setText("intro-summary", whyCompany);
+        setText("intro-detail", whyRole);
         renderLines("intro-traits", buildIntroTraits(state));
         renderLines("intro-strength-lines", buildIntroStrengthLines(state));
 
         setText("role-needs-note", "This section shows how I have interpreted the brief rather than repeating the advert line by line.");
-        renderThemeCards("role-needs", "role-needs-grid", buildRoleNeedsCards(state));
+        renderThemeCards("role-needs", "role-needs-grid", buildRoleNeedsCards(state, roleNeedsSummary));
 
         setText("fit-note", "This brings together the strongest reasons I would be effective in the role.");
-        renderThemeCards("fit", "fit-grid", buildFitCards(state));
+        renderThemeCards("fit", "fit-grid", buildFitCards(state, fitSummary, likelyContribution, cultureFit));
 
         setText("mapping-note", "The strongest role requirements below are paired with the most relevant evidence from my background.");
         renderMappingCards(experienceMappings);
@@ -2757,13 +3043,13 @@
         );
 
         setText("tailored-heading", "A final summary for this role.");
-        setText("tailored-note", "A concise close that pulls together the case for continuing the conversation.");
-        setText("tailored-quote", pickFirst(state.rolePurpose, "Structured operations, clear delivery, relevant evidence."));
-        setText("tailored-rationale", buildClosingSummary(state));
-        setText("tailored-company-line", companyHighlights.length ? "Company highlights" : "Closing context");
-        renderTailoredHighlights(companyHighlights);
-        setText("why-this-role", pickFirst(state.rolePurpose, buildHeroStrengthLine(state)));
-        setText("role-summary", "The page above is designed to show motivation, understanding, fit, evidence, and likely contribution without repeating the advert.");
+        setText("tailored-note", "The strongest final case for fit, value, and relevant evidence.");
+        setText("tailored-quote", buildClosingQuote(state, closingSummary, fitSummary, likelyContribution));
+        setText("tailored-rationale", closingSummary);
+        setText("tailored-company-line", closingHighlights.length ? "Why the fit is credible" : "What I would bring");
+        renderTailoredHighlights(closingHighlights);
+        setParagraph("why-this-role", closingSupportLine);
+        setParagraph("role-summary", closingSecondaryLine);
 
         const summaryEvidenceEl = document.getElementById("summary-evidence-lines");
         if (summaryEvidenceEl) {
@@ -2784,7 +3070,7 @@
 
         setText("contact-heading", "Open to discussing the opportunity.");
         setText("contact-note-top", "If this feels like a strong fit, I would welcome a conversation.");
-        setText("contact-copy", "Thank you for reviewing this supporting page alongside my CV. I would welcome the chance to discuss how my background could support the role.");
+        setText("contact-copy", "Thank you for taking the time to review both this page and my CV. I would welcome the chance to discuss where my background could be most useful in the role.");
       }
 
       function initReveal() {

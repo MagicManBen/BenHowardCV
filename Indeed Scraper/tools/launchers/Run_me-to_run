@@ -1,1 +1,0 @@
-cd "/Users/benhoward/Desktop/Job Hunting/Indeed Scraper" && pkill -f "python.*app.py" 2>/dev/null; source .venv/bin/activate && open "http://127.0.0.1:5050" && python app.py

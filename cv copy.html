@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ben T. Howard | Senior Operations and Transformation Leader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f3efe7;
+      --bg-2: #ede6da;
+      --surface: rgba(255, 252, 247, 0.62);
+      --surface-strong: rgba(255, 252, 247, 0.86);
+      --text: #231f1a;
+      --text-soft: #5f564d;
+      --muted: #857867;
+      --accent: #b58d4a;
+      --border: rgba(70, 57, 39, 0.12);
+      --border-strong: rgba(70, 57, 39, 0.22);
+      --shadow: 0 18px 50px rgba(50, 38, 23, 0.07);
+      --content-width: 1140px;
+      --narrow-width: 920px;
+      --scroll-y: 0px;
+      --paper: var(--bg);
+      --paper-2: var(--bg-2);
+      --ink: var(--text);
+      --ink-soft: var(--text-soft);
+      --gold: var(--accent);
+      --line: var(--border);
+      --line-strong: var(--border-strong);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(56rem 38rem at -8% -18%, rgba(181, 141, 74, 0.14), transparent 62%),
+        radial-gradient(42rem 30rem at 108% 4%, rgba(255, 255, 255, 0.72), transparent 64%),
+        radial-gradient(26rem 20rem at 46% 76%, rgba(181, 141, 74, 0.07), transparent 72%),
+        linear-gradient(180deg, var(--bg) 0%, #f1ebe1 44%, var(--bg-2) 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(44rem 26rem at 50% -18%, rgba(255, 255, 255, 0.65), transparent 72%),
+        radial-gradient(24rem 17rem at 12% 78%, rgba(255, 255, 255, 0.35), transparent 78%);
+      z-index: 0;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    p, li {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 1rem;
+      line-height: 1.82;
+    }
+
+    ul { margin: 0; padding-left: 1.1rem; }
+    li + li { margin-top: 0.45rem; }
+
+    h1, h2, h3, h4 {
+      margin: 0;
+      color: var(--text);
+      line-height: 0.94;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+    }
+
+    .serif { font-family: "Cormorant Garamond", Georgia, serif; }
+
+    .shell,
+    .narrow {
+      width: min(calc(100% - 2rem), var(--content-width));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .narrow { width: min(calc(100% - 2rem), var(--narrow-width)); }
+
+    .skip-link { position: absolute; left: -999px; top: 0; }
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+      z-index: 50;
+      padding: 0.7rem 0.95rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .page {
+      position: relative;
+      padding-bottom: 3.8rem;
+    }
+
+    .section { padding: clamp(2.8rem, 6vw, 5.25rem) 0; }
+
+    .eyebrow,
+    .hero-meta-chip,
+    .hero-kicker-notes span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.95rem;
+      padding: 0.34rem 0.68rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.38);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.66rem;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .eyebrow::before { display: none; }
+
+    .hero-section {
+      padding-top: clamp(1.4rem, 4vw, 2.4rem);
+      padding-bottom: clamp(2.5rem, 6vw, 4rem);
+    }
+
+    .hero-editorial {
+      display: grid;
+      grid-template-columns: minmax(0, 1.38fr) minmax(280px, 0.62fr);
+      grid-template-areas:
+        "top top"
+        "left panel"
+        "foot foot";
+      gap: 1.3rem 1.8rem;
+      align-items: start;
+      padding: clamp(1.25rem, 2.2vw, 1.75rem);
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .hero-topline {
+      grid-area: top;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.95rem;
+      align-items: end;
+      padding-bottom: 1.05rem;
+      border-bottom: 1px solid var(--border-strong);
+      color: var(--muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .hero-topline strong {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .hero-topline-right {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.55rem;
+    }
+
+    .hero-left {
+      grid-area: left;
+      display: grid;
+      grid-template-columns: 3.2rem minmax(0, 1fr);
+      gap: 1rem 1.35rem;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .hero-side-label {
+      justify-items: center;
+      align-content: start;
+      gap: 0.9rem;
+      min-height: 100%;
+      padding-top: 0.85rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .hero-side-label span {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      color: var(--muted);
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    .hero-side-rule {
+      width: 1px;
+      height: clamp(8rem, 14vw, 11rem);
+      background: linear-gradient(180deg, var(--accent), var(--border-strong) 62%, transparent);
+    }
+
+    .hero-main-column {
+      min-width: 0;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-kicker-block {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(200px, 0.8fr);
+      gap: 0.75rem 1.1rem;
+      align-items: center;
+      padding: 0.1rem 0 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-kicker-copy {
+      max-width: 32ch;
+      color: var(--muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.21em;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .hero-kicker-notes {
+      display: grid;
+      gap: 0.45rem;
+      align-content: start;
+      justify-items: start;
+    }
+
+    .hero-kicker-notes span { font-size: 0.62rem; }
+
+    .hero-name-wrap {
+      display: grid;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .hero-title {
+      max-width: 8ch;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(5.2rem, 11.6vw, 8.2rem);
+      line-height: 0.76;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+    }
+
+    .hero-role {
+      max-width: 25ch;
+      color: var(--text);
+      font-size: clamp(0.98rem, 1.42vw, 1.15rem);
+      line-height: 1.3;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-top: 0.05rem;
+    }
+
+    .hero-positioning {
+      max-width: 30ch;
+      color: var(--accent);
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      font-weight: 800;
+      line-height: 1.75;
+      margin-top: 0.35rem;
+    }
+
+    .hero-statement-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(220px, 0.7fr);
+      gap: 1.1rem 1.3rem;
+      align-items: end;
+      padding: 0.95rem 0 0.45rem;
+    }
+
+    .hero-statement {
+      max-width: 36ch;
+      color: var(--text-soft);
+      font-size: 1.01rem;
+      line-height: 1.9;
+      column-count: 2;
+      column-gap: 1.2rem;
+    }
+
+    .hero-pull-note {
+      padding-top: 0.18rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.68;
+    }
+
+    .hero-pull-note strong {
+      display: block;
+      margin-bottom: 0.22rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.17em;
+      font-size: 0.64rem;
+    }
+
+    .hero-tailored-panel {
+      grid-area: panel;
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+      padding: 0.95rem 0.2rem 0.2rem 1.35rem;
+      border-left: 1px solid var(--border);
+    }
+
+    .hero-tailored-header { display: grid; gap: 0.5rem; }
+
+    .hero-tailored-label {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.19em;
+      font-size: 0.64rem;
+      font-weight: 800;
+    }
+
+    .hero-tailored-heading {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2.35rem, 4.6vw, 4rem);
+      line-height: 0.9;
+      color: var(--text);
+      max-width: 9ch;
+    }
+
+    .hero-context-line {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .hero-detail-list {
+      display: grid;
+      gap: 0.7rem;
+      padding-top: 0.2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .hero-detail-list .row {
+      display: grid;
+      gap: 0.25rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-detail-list .row strong {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.61rem;
+      color: var(--muted);
+    }
+
+    .hero-detail-list .row span {
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.58;
+    }
+
+    .hero-priority-block {
+      display: grid;
+      border-top: 1px solid var(--border);
+      padding-top: 0.85rem;
+      gap: 0.55rem;
+    }
+
+    .hero-margin-label {
+      color: var(--accent);
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    .hero-focus-list {
+      display: grid;
+      gap: 0.32rem;
+    }
+
+    .hero-focus-chip {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.52rem;
+      padding: 0.22rem 0;
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.44;
+    }
+
+    .hero-focus-chip::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 0.4rem;
+      height: 0.4rem;
+      margin-top: 0.44rem;
+      border-radius: 999px;
+      background: rgba(181, 141, 74, 0.18);
+      border: 1px solid rgba(181, 141, 74, 0.62);
+    }
+
+    .hero-proof-strip,
+    .hero-tone-wrap,
+    .hero-summary {
+      display: none;
+    }
+
+    .hero-foot {
+      grid-area: foot;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9rem 1.4rem;
+      align-items: start;
+      padding-top: 0.95rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .hero-meta-chip { font-size: 0.62rem; }
+
+    .hero-rule,
+    .section-rule,
+    .mini-rule,
+    .draw-line {
+      position: relative;
+      height: 1px;
+      background: var(--border-strong);
+      overflow: hidden;
+      display: block;
+    }
+
+    .hero-rule::after,
+    .section-rule::after,
+    .mini-rule::after,
+    .draw-line::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--accent), transparent 72%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.75s ease;
+    }
+
+    .is-visible.hero-rule::after,
+    .is-visible.section-rule::after,
+    .is-visible.mini-rule::after,
+    .is-visible.draw-line::after {
+      transform: scaleX(1);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.6fr);
+      gap: 1.3rem 1.8rem;
+      align-items: start;
+      margin-bottom: 1.8rem;
+    }
+
+    .section-head h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2.7rem, 6vw, 5.35rem);
+      line-height: 0.9;
+      max-width: 12ch;
+    }
+
+    .section-head p {
+      justify-self: end;
+      max-width: 32ch;
+      color: var(--text-soft);
+      font-size: 1rem;
+    }
+
+    #intro .narrow,
+    #proof .narrow,
+    #themes .narrow,
+    #tailored .narrow,
+    #contact .narrow {
+      padding: clamp(1.15rem, 2.4vw, 1.8rem);
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      background: linear-gradient(160deg, var(--surface-strong), var(--surface));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    #intro,
+    #proof,
+    #themes,
+    #tailored,
+    #contact {
+      display: none;
+    }
+
+    .footer {
+      padding: 0 0 1.4rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.8rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      width: min(calc(100% - 2rem), var(--narrow-width));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+      will-change: opacity, transform;
+    }
+
+    [data-reveal].is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1060px) {
+      .hero-editorial {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "top"
+          "left"
+          "panel"
+          "foot";
+      }
+
+      .hero-left { grid-template-columns: 1fr; }
+
+      .hero-side-label {
+        justify-items: start;
+        min-height: auto;
+        padding-top: 0.2rem;
+        padding-bottom: 0.4rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .hero-side-label span {
+        writing-mode: initial;
+        transform: none;
+      }
+
+      .hero-side-rule {
+        width: min(9rem, 100%);
+        height: 1px;
+        background: linear-gradient(90deg, var(--accent), var(--border-strong) 62%, transparent);
+      }
+
+      .hero-kicker-block,
+      .hero-statement-grid,
+      .hero-foot {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-statement { column-count: 1; }
+
+      .hero-tailored-panel {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+        padding-left: 0;
+        padding-top: 1rem;
+      }
+
+      .section-head { grid-template-columns: 1fr; }
+      .section-head p { justify-self: start; }
+    }
+
+    @media (max-width: 720px) {
+      .hero-editorial { border-radius: 26px; }
+      .hero-title { max-width: none; }
+      .hero-topline { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation: none !important; transition: none !important; }
+      [data-reveal] { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <main class="page" id="main-content">
+    <section class="section hero-section">
+      <div class="shell hero-editorial">
+        <div class="hero-topline draw-line" data-reveal>
+          <span id="hero-kicker"><strong>Prepared for this opportunity</strong> / tailored introduction</span>
+          <div class="hero-topline-right">
+            <span id="hero-topline-meta-1">Healthcare, manufacturing, leisure, regulated services</span>
+            <span id="hero-topline-meta-2">United Kingdom</span>
+          </div>
+        </div>
+
+        <div class="hero-left" data-reveal>
+          <div class="hero-side-label">
+            <span>Profile</span>
+            <div class="hero-side-rule draw-line"></div>
+          </div>
+
+          <div class="hero-main-column">
+            <div class="hero-kicker-block">
+              <div class="hero-kicker-copy" id="hero-kicker-copy">Operational leadership across healthcare, manufacturing, leisure and regulated service environments</div>
+              <div class="hero-kicker-notes" id="hero-kicker-notes">
+                <span>Leek, Staffordshire</span>
+                <span>Executive MBA</span>
+              </div>
+            </div>
+
+            <div class="hero-name-wrap">
+              <h1 class="hero-title serif" id="hero-name">Ben T. Howard</h1>
+              <p class="hero-role" id="hero-role">Operations and Transformation Leader</p>
+              <p class="hero-positioning" id="hero-positioning">Operational turnaround. Service redesign. Measurable improvement.</p>
+            </div>
+
+            <div class="hero-statement-grid">
+              <p class="hero-statement" id="hero-statement">I lead turnaround, redesign and measurable improvement across complex operations. Most useful where teams need clearer standards, tighter reporting and stronger follow-through.</p>
+              <div class="hero-pull-note" id="hero-pull-note"><strong>At a glance</strong>Structured operator with cross-sector experience in service delivery, workforce planning, reporting and performance improvement.</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-tailored-panel" data-reveal>
+          <div class="hero-tailored-header">
+            <span class="hero-tailored-label">Prepared for</span>
+            <p class="hero-tailored-heading" id="hero-tailored-heading">Your team</p>
+            <p class="hero-context-line" id="hero-context-line">Operations leadership opportunity · United Kingdom</p>
+          </div>
+          <div class="hero-detail-list">
+            <div class="row">
+              <strong>Company context</strong>
+              <span id="hero-company-note">Service-led organisation where reliability, standards and customer experience matter.</span>
+            </div>
+            <div class="row">
+              <strong>Role context</strong>
+              <span id="hero-role-note">Leadership brief centred on performance, accountability and day-to-day operational control.</span>
+            </div>
+          </div>
+          <div class="hero-priority-block">
+            <span class="hero-margin-label">Immediate fit</span>
+            <div class="hero-focus-list" id="hero-focus-list">
+              <span class="hero-focus-chip">Operational performance</span>
+              <span class="hero-focus-chip">Team leadership</span>
+              <span class="hero-focus-chip">Service quality</span>
+              <span class="hero-focus-chip">Continuous improvement</span>
+            </div>
+          </div>
+        </aside>
+
+        <div class="hero-proof-strip" data-reveal>
+          <article class="hero-proof-item">
+            <span class="hero-proof-value">2.09 to 4.51</span>
+            <span class="hero-proof-copy">Review score improvement</span>
+          </article>
+          <article class="hero-proof-item">
+            <span class="hero-proof-value">£149.9k</span>
+            <span class="hero-proof-copy">Profit improvement</span>
+          </article>
+          <article class="hero-proof-item">
+            <span class="hero-proof-value">300+</span>
+            <span class="hero-proof-copy">Live operations teams coordinated</span>
+          </article>
+        </div>
+
+        <div class="hero-foot" data-reveal>
+          <div class="hero-meta" id="hero-meta-list" aria-label="Quick facts">
+            <span class="hero-meta-chip">Leek, Staffordshire</span>
+            <span class="hero-meta-chip">Executive MBA</span>
+            <span class="hero-meta-chip">KPI governance</span>
+            <span class="hero-meta-chip">Workforce planning</span>
+          </div>
+          <div class="hero-tone-wrap">
+            <strong>Tone</strong>
+            <div class="hero-tone-list" id="hero-tone-list">
+              <span class="hero-tone-chip">Leadership</span>
+              <span class="hero-tone-chip">Accountable</span>
+              <span class="hero-tone-chip">Collaborative</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section intro-section" id="intro">
+      <div class="narrow intro-editorial">
+        <div class="intro-rail" data-reveal>
+          <span>Operating style</span>
+          <div class="mini-rule draw-line"></div>
+        </div>
+
+        <div class="intro-titleblock" data-reveal>
+          <p class="eyebrow">Why this company</p>
+          <h2 class="serif">Why I stand out for this role.</h2>
+        </div>
+
+        <div class="intro-side" data-reveal>
+          <div class="intro-side-block">
+            <span class="intro-side-label">Company signal</span>
+            <p id="intro-note">Healthcare, manufacturing, leisure and regulated services.</p>
+          </div>
+          <div class="intro-side-block">
+            <span class="intro-side-label">Practical context</span>
+            <div class="intro-lines" id="intro-traits">
+              <span>Calm under pressure</span>
+              <span>Clear standards and accountability</span>
+              <span>Hands-on with reporting</span>
+              <span>Improvement with follow-through</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="intro-body" data-reveal>
+          <div class="intro-main">
+            <p id="intro-summary">I usually work where service delivery, workforce planning, reporting and financial control need to move together, and where leaders need a steadier operating rhythm rather than more noise.</p>
+            <p id="intro-detail">That has included NHS primary care, specialist manufacturing, visitor operations and regulated services, with a repeated focus on service redesign, KPI visibility, practical follow-through and measurable improvement.</p>
+          </div>
+
+          <div class="intro-aside">
+            <span class="intro-aside-label">Best used for</span>
+            <div class="mini-rule draw-line"></div>
+            <div class="intro-lines" id="intro-strength-lines">
+              <span>Operational turnaround and stabilisation</span>
+              <span>Service redesign and improvement</span>
+              <span>KPI governance and reporting</span>
+              <span>Workforce planning and financial control</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="proof">
+      <div class="narrow">
+        <div class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">Why me</p>
+            <h2 class="serif">Headline evidence, surfaced early.</h2>
+          </div>
+          <p id="proof-note">The clearest outcomes are shown before the longer story so the substance lands immediately.</p>
+        </div>
+
+        <div class="proof-grid">
+          <article class="proof-item" data-reveal>
+            <span class="proof-value">2.09 to 4.51</span>
+            <span class="proof-label">Patient experience</span>
+            <p class="proof-copy">Improved Google review score in NHS primary care, while five-star reviews rose from 19.8% to 81.3% across 209 tenure-period reviews.</p>
+          </article>
+          <article class="proof-item" data-reveal>
+            <span class="proof-value">£149.9k</span>
+            <span class="proof-label">Profit improvement</span>
+            <p class="proof-copy">Supported a substantial improvement in profit before appropriation, alongside £33.3k of working capital released and higher cash at bank year on year.</p>
+          </article>
+          <article class="proof-item" data-reveal>
+            <span class="proof-value">29% to 39%</span>
+            <span class="proof-label">Manufacturing margin</span>
+            <p class="proof-copy">Contributed to stronger gross profit performance during a scale-up period where orders won also rose by 60%.</p>
+          </article>
+          <article class="proof-item" data-reveal>
+            <span class="proof-value">300+</span>
+            <span class="proof-label">Live operations</span>
+            <p class="proof-copy">Coordinated operational delivery across large frontline teams and major launches in KPI-led, guest-facing environments.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="evidence-fit" style="display: none;">
+      <div class="narrow">
+        <div class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">Relevant experience</p>
+            <h2 class="serif">Real examples, matched to this brief.</h2>
+          </div>
+          <p>Each example is drawn from a real project or outcome and selected because it connects directly to what this role needs.</p>
+        </div>
+        <div class="evidence-grid" id="evidence-grid" data-reveal></div>
+      </div>
+    </section>
+
+    <section class="section" id="themes">
+      <div class="narrow">
+        <div class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">Strengths</p>
+            <h2 class="serif">The strengths I bring into roles like this.</h2>
+          </div>
+          <p>A quieter view of strengths most relevant to this role context.</p>
+        </div>
+
+        <div class="themes-grid" id="themes-grid">
+          <article class="theme-item" data-reveal>
+            <h3>Leadership themes</h3>
+            <p>Operational turnaround and stabilisation, service redesign, commercial grip, financial control and cross-functional leadership.</p>
+            <div class="theme-tags">
+              <span>Turnaround</span>
+              <span>Redesign</span>
+              <span>Governance</span>
+              <span>Cross-functional</span>
+            </div>
+          </article>
+
+          <article class="theme-item" data-reveal>
+            <h3>Core skills</h3>
+            <p>Operational performance, KPI governance and reporting, financial oversight, workforce utilisation, service delivery and stakeholder engagement.</p>
+            <div class="theme-tags">
+              <span>Power BI</span>
+              <span>EMIS</span>
+              <span>Accurx</span>
+              <span>Reporting</span>
+            </div>
+          </article>
+
+          <article class="theme-item" data-reveal>
+            <h3>Sector range</h3>
+            <p>NHS and healthcare operations, specialist manufacturing, leisure and visitor operations, and regulated data services.</p>
+            <div class="theme-tags">
+              <span>Healthcare</span>
+              <span>Manufacturing</span>
+              <span>Live operations</span>
+              <span>Regulated services</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tailored">
+      <div class="narrow">
+        <div class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">Summary</p>
+            <h2 class="serif" id="tailored-heading">A final summary for this role.</h2>
+          </div>
+          <p id="tailored-note">This closing section pulls together the company context, the role and the fit.</p>
+        </div>
+
+        <div class="tailored-grid">
+          <div class="tailored-copy" data-reveal>
+            <div class="pullquote serif">The right experience for the right role.</div>
+            <div class="meta-block">
+              <p id="tailored-rationale">Operational leadership grounded in measurable outcomes, cross-functional delivery and practical problem-solving.</p>
+            </div>
+          </div>
+
+          <div class="tailored-copy" data-reveal>
+            <p id="tailored-company-line">Prepared for your team.</p>
+            <div class="tailored-list">
+              <span id="detail-company">Your team</span>
+              <span id="detail-role">Operations leadership opportunity</span>
+              <span id="detail-location">United Kingdom</span>
+              <span id="detail-sector">Operations</span>
+              <span id="detail-employment">Not specified</span>
+              <span id="detail-salary">Not specified</span>
+            </div>
+            <p id="why-this-role" style="margin-top: 0.8rem;">Operational leadership built on visible results and practical delivery.</p>
+            <p id="role-summary" style="margin-top: 0.45rem;">Cross-sector experience in turnaround, service design, financial grip and team leadership.</p>
+            <div id="summary-evidence-lines" style="margin-top: 0.6rem; display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="narrow">
+        <div class="section-head" data-reveal>
+          <div>
+            <p class="eyebrow">Contact</p>
+            <h2 class="serif">Let's talk.</h2>
+          </div>
+          <p id="contact-note-top">A direct final step if this feels like a strong fit.</p>
+        </div>
+
+        <div class="contact-grid">
+          <article class="contact-card" data-reveal>
+            <h2 class="serif" id="contact-heading">Open to discussing the opportunity.</h2>
+            <p id="contact-copy">Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support the role.</p>
+            <div class="contact-lines">
+              <div class="contact-line">
+                <strong>Phone</strong>
+                <span><a href="tel:07507789672">07507 789672</a></span>
+              </div>
+              <div class="contact-line">
+                <strong>Email</strong>
+                <span><a href="mailto:benthoward@outlook.com">benthoward@outlook.com</a></span>
+              </div>
+              <div class="contact-line">
+                <strong>LinkedIn</strong>
+                <span><a href="https://linkedin.com/in/benthoward" target="_blank" rel="noreferrer">linkedin.com/in/benthoward</a></span>
+              </div>
+            </div>
+          </article>
+
+          <div class="contact-figure draw-line" data-reveal>
+            <div class="mark">BH</div>
+            <div class="contact-caption">Ben T. Howard — operations leadership across healthcare, manufacturing, leisure and regulated services.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="narrow footer-inner">
+      <span>Ben T. Howard</span>
+      <span>Senior Operations and Transformation Leader</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const defaults = {
+        ref: "general-preview",
+        companyName: "Your team",
+        roleTitle: "Operations leadership opportunity",
+        location: "United Kingdom",
+        sector: "Operations",
+        salary: "Not specified",
+        employmentType: "Not specified",
+        shortCompanyReason: "Service-led organisation where reliability, standards and customer experience matter.",
+        shortRoleReason: "Leadership role centred on people, performance and day-to-day operational control.",
+        hours: "",
+        workplaceType: "",
+        companySummary: "",
+        roleSummary: "",
+        headlineAttraction: "",
+        rolePurpose: "",
+        travelRequired: "",
+        advertSummary: "",
+        personalisedIntro: "",
+        whyThisRole: "The brief points to a role where leadership, operational performance and service quality need to move together.",
+        toneKeywords: ["leadership", "accountable", "collaborative", "operational excellence"],
+        probablePriorities: [
+          "Operational performance and follow-through",
+          "Team leadership and accountability",
+          "Service quality and delivery standards"
+        ],
+        keyFocusAreas: [
+          "KPI governance and reporting",
+          "Continuous improvement",
+          "Cross-functional coordination"
+        ],
+        companyPridePoints: [],
+        coreResponsibilities: [],
+        essentialRequirements: [],
+        preferredRequirements: [],
+        skillsWanted: [],
+        toolsMethodsMentioned: [],
+        stakeholderGroups: [],
+        teamTypesMentioned: [],
+        senioritySignals: [],
+        cultureSignals: [],
+        likelyBusinessNeeds: [],
+        impliedStrategicGoals: [],
+        deliverablesLikely: [],
+        possibleHeadlineFacts: [],
+        matchCategories: []
+      };
+
+      const workingStyleLines = [
+        "Calm under pressure",
+        "Clear standards and accountability",
+        "Hands-on with reporting",
+        "Improvement with follow-through"
+      ];
+
+      const baseStrengthLines = [
+        "Operational turnaround and stabilisation",
+        "Service redesign and improvement",
+        "KPI governance and reporting",
+        "Workforce planning and financial control"
+      ];
+
+      function cleanString(value) {
+        return typeof value === "string" ? value.trim() : "";
+      }
+
+      function cleanArray(value) {
+        return Array.isArray(value) ? value.map((item) => cleanString(item)).filter(Boolean) : [];
+      }
+
+      function decodePayload(encoded) {
+        try {
+          const base64 = encoded.replaceAll("-", "+").replaceAll("_", "/");
+          const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+          const binary = atob(padded);
+          const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+          return JSON.parse(new TextDecoder().decode(bytes));
+        } catch {
+          return null;
+        }
+      }
+
+      function readEmbeddedApplication() {
+        try {
+          const hash = window.location.hash.replace(/^#/, "");
+          if (!hash) return null;
+          const params = new URLSearchParams(hash);
+          const encoded = cleanString(params.get("app"));
+          if (!encoded) return null;
+          const parsed = decodePayload(encoded);
+          return parsed && typeof parsed === "object" ? parsed : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function normaliseApplication(input) {
+        const data = input || {};
+        const companyName = cleanString(data.companyName || data.c) || defaults.companyName;
+        const roleTitle = cleanString(data.roleTitle || data.r) || defaults.roleTitle;
+        const location = cleanString(data.location || data.l) || defaults.location;
+
+        return {
+          ref: cleanString(data.ref) || cleanString(data.slug) || defaults.ref,
+          companyName,
+          roleTitle,
+          location,
+          sector: cleanString(data.sector || data.s) || defaults.sector,
+          salary: cleanString(data.salary || data.y) || defaults.salary,
+          employmentType: cleanString(data.employmentType || data.e) || defaults.employmentType,
+          hours: cleanString(data.hours || data.h) || defaults.hours,
+          workplaceType: cleanString(data.workplaceType || data.wp) || defaults.workplaceType,
+          shortCompanyReason: cleanString(data.shortCompanyReason || data.n) || defaults.shortCompanyReason,
+          shortRoleReason: cleanString(data.shortRoleReason || data.o) || defaults.shortRoleReason,
+          companySummary: cleanString(data.companySummary || data.cs) || defaults.companySummary,
+          roleSummary: cleanString(data.roleSummary || data.rs) || defaults.roleSummary,
+          headlineAttraction: cleanString(data.headlineAttraction || data.ha) || defaults.headlineAttraction,
+          rolePurpose: cleanString(data.rolePurpose || data.rp) || defaults.rolePurpose,
+          travelRequired: cleanString(data.travelRequired) || defaults.travelRequired,
+          advertSummary: cleanString(data.advertSummary || data.a) || defaults.advertSummary,
+          personalisedIntro: cleanString(data.personalisedIntro || data.i) || defaults.personalisedIntro,
+          whyThisRole: cleanString(data.whyThisRole || data.w) || defaults.whyThisRole,
+          toneKeywords: cleanArray(data.toneKeywords || data.t).length ? cleanArray(data.toneKeywords || data.t) : defaults.toneKeywords,
+          probablePriorities: cleanArray(data.probablePriorities || data.p).length ? cleanArray(data.probablePriorities || data.p) : defaults.probablePriorities,
+          keyFocusAreas: cleanArray(data.keyFocusAreas || data.f).length ? cleanArray(data.keyFocusAreas || data.f) : defaults.keyFocusAreas,
+          companyPridePoints: cleanArray(data.companyPridePoints || data.cpp),
+          coreResponsibilities: cleanArray(data.coreResponsibilities),
+          essentialRequirements: cleanArray(data.essentialRequirements),
+          preferredRequirements: cleanArray(data.preferredRequirements),
+          skillsWanted: cleanArray(data.skillsWanted),
+          toolsMethodsMentioned: cleanArray(data.toolsMethodsMentioned),
+          stakeholderGroups: cleanArray(data.stakeholderGroups),
+          teamTypesMentioned: cleanArray(data.teamTypesMentioned),
+          senioritySignals: cleanArray(data.senioritySignals),
+          cultureSignals: cleanArray(data.cultureSignals),
+          likelyBusinessNeeds: cleanArray(data.likelyBusinessNeeds),
+          impliedStrategicGoals: cleanArray(data.impliedStrategicGoals),
+          deliverablesLikely: cleanArray(data.deliverablesLikely),
+          possibleHeadlineFacts: cleanArray(data.possibleHeadlineFacts || data.phf),
+          matchCategories: cleanArray(data.matchCategories || data.mc),
+          // Generated content (Stage 4) — optional, backwards compatible
+          genPersonalisedOpening: cleanString(data.genPersonalisedOpening || data.gpo),
+          genWhyThisCompany: cleanString(data.genWhyThisCompany || data.gwc),
+          genWhyThisRole: cleanString(data.genWhyThisRole || data.gwr),
+          genFitSummary: cleanString(data.genFitSummary || data.gfs),
+          genLikelyContribution: cleanString(data.genLikelyContribution || data.glc),
+          genCultureFit: cleanString(data.genCultureFit || data.gcf),
+          genClosingSummary: cleanString(data.genClosingSummary || data.gcs),
+          genCompanyHighlights: cleanArray(data.genCompanyHighlights || data.gch),
+          genEvidenceExamples: Array.isArray(data.genEvidenceExamples || data.gee) ? (data.genEvidenceExamples || data.gee) : []
+        };
+      }
+
+      const SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
+
+      async function fetchApplicationByRef(ref) {
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+        if (isLocal) {
+          const response = await fetch(`/api/application?ref=${encodeURIComponent(ref)}&t=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`Could not load application record for ${ref}`);
+          return response.json();
+        }
+
+        // Fetch from Supabase (public read via anon key + RLS)
+        const url = `${SUPABASE_URL}/rest/v1/applications?ref=eq.${encodeURIComponent(ref)}&select=application&limit=1`;
+        const response = await fetch(url, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Accept": "application/json" },
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error(`Could not load application record for ${ref}`);
+        const rows = await response.json();
+        if (!rows.length || !rows[0].application) throw new Error(`No application found for ${ref}`);
+        return rows[0].application;
+      }
+
+      async function fetchApplicationByShortCode(sc) {
+        const url = `${SUPABASE_URL}/rest/v1/applications?short_code=eq.${encodeURIComponent(sc)}&select=application&limit=1`;
+        const response = await fetch(url, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Accept": "application/json" },
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error(`Could not load application for short code ${sc}`);
+        const rows = await response.json();
+        if (!rows.length || !rows[0].application) throw new Error(`No application found for short code ${sc}`);
+        return rows[0].application;
+      }
+
+      function compactValue(value) {
+        return value && value !== "Not specified" ? value : "";
+      }
+
+      function formatList(values) {
+        const items = values.filter(Boolean);
+        if (!items.length) return "";
+        if (items.length === 1) return items[0];
+        if (items.length === 2) return `${items[0]} and ${items[1]}`;
+        return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+      }
+
+      function pickLines(primary, secondary, limit) {
+        const first = primary.filter(Boolean);
+        const second = secondary.filter(Boolean);
+        return (first.length ? first : second).slice(0, limit);
+      }
+
+      function renderLines(id, values, className = "") {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = "";
+        values.filter(Boolean).forEach((value) => {
+          const line = document.createElement("span");
+          if (className) line.className = className;
+          line.textContent = value;
+          el.appendChild(line);
+        });
+      }
+
+      function buildHeroStatement(state) {
+        if (state.genPersonalisedOpening) {
+          return state.genPersonalisedOpening;
+        }
+        if (state.companyName !== defaults.companyName) {
+          return `Thank you for reviewing my CV. I wanted to give you a clearer picture of why ${state.companyName} and this role stood out to me, and why my operations background could be relevant here.`;
+        }
+        return "Thank you for reviewing my CV. This page gives a clearer picture of the role context, the company signals and the experience behind my fit.";
+      }
+
+      function buildHeroPullNote(state) {
+        const focusAreas = pickLines(state.keyFocusAreas, state.probablePriorities, 2);
+        if (state.companyName !== defaults.companyName && focusAreas.length) {
+          return `<strong>Role angle</strong>${state.roleTitle} with emphasis on ${focusAreas.join(" and ")}.`;
+        }
+        return "<strong>At a glance</strong>Structured operator with cross-sector experience in service delivery, workforce planning, reporting and performance improvement.";
+      }
+
+      function buildTailoredAngle(state) {
+        if (state.genWhyThisRole) return state.genWhyThisRole;
+        const priorities = pickLines(state.probablePriorities, state.keyFocusAreas, 3);
+        if (priorities.length) {
+          return `The brief points to ${formatList(priorities)}, which aligns well with my background in operational control and measurable improvement.`;
+        }
+        return "The brief points to visible leadership, operational control and measurable improvement.";
+      }
+
+      function buildRoleContext(state) {
+        return [state.roleTitle, compactValue(state.location)].filter(Boolean).join(" · ");
+      }
+
+      function buildToplineMetaOne(state) {
+        return compactValue(state.sector) || "Operations";
+      }
+
+      function buildToplineMetaTwo(state) {
+        return compactValue(state.location) || compactValue(state.employmentType) || "United Kingdom";
+      }
+
+      function buildCompanyNote(state) {
+        return state.genWhyThisCompany
+          || state.headlineAttraction
+          || state.shortCompanyReason
+          || state.companySummary
+          || "Service-led organisation where reliability, standards and customer experience matter.";
+      }
+
+      function buildRoleNote(state) {
+        if (state.rolePurpose) return state.rolePurpose;
+        if (state.shortRoleReason) return state.shortRoleReason;
+        if (state.roleSummary) return state.roleSummary;
+        const focusAreas = pickLines(state.keyFocusAreas, state.probablePriorities, 3);
+        if (focusAreas.length) {
+          return `Role centred on ${formatList(focusAreas)}.`;
+        }
+        return "Leadership role centred on people, performance and day-to-day operational control.";
+      }
+
+      function buildHeroMeta(state) {
+        const values = [
+          compactValue(state.location),
+          compactValue(state.sector),
+          compactValue(state.workplaceType),
+          compactValue(state.hours)
+        ].filter(Boolean);
+        return values.slice(0, 4);
+      }
+
+      function buildHeroKickerNotes(state) {
+        return [state.companyName === defaults.companyName ? "Prepared specifically for this opportunity" : `Prepared for ${state.companyName}`];
+      }
+
+      function buildToneKeywords(state) {
+        return state.toneKeywords.filter(Boolean).slice(0, 4);
+      }
+
+      function buildIntroNote(state) {
+        if (state.sector && state.sector !== defaults.sector) {
+          return `Cross-sector experience with direct relevance to ${state.sector.toLowerCase()}.`;
+        }
+        return "Healthcare, manufacturing, leisure and regulated services.";
+      }
+
+      function buildIntroDetail(state) {
+        const facts = pickLines(
+          [
+            compactValue(state.workplaceType),
+            compactValue(state.hours),
+            compactValue(state.travelRequired),
+            compactValue(state.location),
+            compactValue(state.sector)
+          ],
+          [],
+          5
+        );
+        const companyNotes = pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 3);
+        const lines = [];
+        if (facts.length) {
+          lines.push(`Practical context: ${formatList(facts)}.`);
+        }
+        if (companyNotes.length) {
+          lines.push(`Notable advert signals: ${formatList(companyNotes)}.`);
+        }
+        if (!lines.length) {
+          lines.push("This introduction stays grounded in the company and role details already captured in the application.");
+        }
+        return lines.join(" ");
+      }
+
+      function buildCompanyAttraction(state) {
+        return state.genWhyThisCompany
+          || state.headlineAttraction
+          || state.shortCompanyReason
+          || state.companySummary
+          || "A tailored view that keeps the company and role context front and centre.";
+      }
+
+      function buildCompanyFactLines(state) {
+        return [
+          compactValue(state.location),
+          compactValue(state.sector),
+          compactValue(state.workplaceType),
+          compactValue(state.hours),
+          compactValue(state.travelRequired)
+        ].filter(Boolean).slice(0, 4);
+      }
+
+      function buildRolePitch(state) {
+        const lines = [
+          state.shortRoleReason,
+          state.roleSummary,
+          state.rolePurpose
+        ].map((value) => compactValue(value)).filter(Boolean);
+        return lines.length ? lines.slice(0, 3) : [buildTailoredAngle(state)];
+      }
+
+      function buildRequirementCards(state) {
+        return [
+          {
+            title: "What matters most",
+            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3)),
+            tags: pickLines(state.probablePriorities, state.keyFocusAreas, 3)
+          },
+          {
+            title: "What they are looking for",
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3)),
+            tags: [
+              ...cleanArray(state.essentialRequirements).slice(0, 2),
+              ...cleanArray(state.preferredRequirements).slice(0, 2)
+            ]
+          },
+          {
+            title: "How the role works",
+            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned)].slice(0, 5)),
+            tags: [
+              ...cleanArray(state.skillsWanted).slice(0, 2),
+              ...cleanArray(state.toolsMethodsMentioned).slice(0, 2)
+            ]
+          },
+          {
+            title: "Who the role works with",
+            copy: formatList([
+              ...cleanArray(state.stakeholderGroups),
+              ...cleanArray(state.teamTypesMentioned),
+              ...cleanArray(state.matchCategories)
+            ].slice(0, 5)),
+            tags: [
+              ...cleanArray(state.stakeholderGroups).slice(0, 2),
+              ...cleanArray(state.teamTypesMentioned).slice(0, 2)
+            ]
+          }
+        ].filter(card => card.copy);
+      }
+
+      function buildBusinessNeedCards(state) {
+        return [
+          {
+            title: "What the business seems to need",
+            copy: formatList(pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)),
+            tags: pickLines(state.likelyBusinessNeeds, state.impliedStrategicGoals, 3)
+          },
+          {
+            title: "Where the role could help",
+            copy: formatList(cleanArray(state.impliedStrategicGoals).slice(0, 4)),
+            tags: cleanArray(state.impliedStrategicGoals).slice(0, 3)
+          },
+          {
+            title: "What this role is likely to produce",
+            copy: formatList(cleanArray(state.deliverablesLikely).slice(0, 4)),
+            tags: cleanArray(state.deliverablesLikely).slice(0, 3)
+          }
+        ].filter(card => card.copy);
+      }
+
+      function buildCultureCards(state) {
+        return [
+          {
+            title: "Tone and pace",
+            copy: state.genCultureFit || formatList([...cleanArray(state.toneKeywords), ...cleanArray(state.cultureSignals)].slice(0, 5)),
+            tags: [...cleanArray(state.toneKeywords).slice(0, 2), ...cleanArray(state.cultureSignals).slice(0, 2)]
+          },
+          {
+            title: "Seniority and setting",
+            copy: formatList([...cleanArray(state.senioritySignals), compactValue(state.workplaceType)].filter(Boolean).slice(0, 4)),
+            tags: [...cleanArray(state.senioritySignals).slice(0, 2), compactValue(state.workplaceType)].filter(Boolean)
+          },
+          {
+            title: "Teams and stakeholders",
+            copy: formatList([...cleanArray(state.stakeholderGroups), ...cleanArray(state.teamTypesMentioned)].slice(0, 5)),
+            tags: [...cleanArray(state.stakeholderGroups).slice(0, 2), ...cleanArray(state.teamTypesMentioned).slice(0, 2)]
+          }
+        ].filter(card => card.copy);
+      }
+
+      function buildWrapUpSummary(state) {
+        if (state.genFitSummary) return state.genFitSummary;
+        const parts = [
+          state.headlineAttraction,
+          state.shortCompanyReason,
+          state.shortRoleReason,
+          state.rolePurpose
+        ].map((value) => compactValue(value)).filter(Boolean);
+        return parts.length ? parts.slice(0, 3).join(" ") : "Operational leadership grounded in measurable outcomes, cross-functional delivery and practical problem-solving.";
+      }
+
+      function renderEditorialCards(containerId, cards) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = "";
+
+        if (!cards.length) {
+          container.style.display = "none";
+          return;
+        }
+        container.style.display = "";
+
+        cards.forEach((card) => {
+          const article = document.createElement("article");
+          article.className = "theme-item";
+          const heading = document.createElement("h3");
+          heading.textContent = card.title;
+          const copy = document.createElement("p");
+          copy.textContent = card.copy;
+          const tags = document.createElement("div");
+          tags.className = "theme-tags";
+          (card.tags || []).filter(Boolean).slice(0, 4).forEach((tag) => {
+            const span = document.createElement("span");
+            span.textContent = tag;
+            tags.appendChild(span);
+          });
+
+          article.appendChild(heading);
+          article.appendChild(copy);
+          if (tags.childElementCount) {
+            article.appendChild(tags);
+          }
+          container.appendChild(article);
+        });
+      }
+
+      function renderProofCards(cards) {
+        const validCards = cards.filter(card => card.copy);
+        const items = document.querySelectorAll("#proof .proof-item");
+        items.forEach((item, index) => {
+          const card = validCards[index];
+          if (!card) {
+            item.style.display = "none";
+            return;
+          }
+          item.style.display = "";
+          const valueEl = item.querySelector(".proof-value");
+          const labelEl = item.querySelector(".proof-label");
+          const copyEl = item.querySelector(".proof-copy");
+          if (valueEl) valueEl.textContent = card.value;
+          if (labelEl) labelEl.textContent = card.label;
+          if (copyEl) copyEl.textContent = card.copy;
+        });
+      }
+
+      function renderEvidenceExamples(examples) {
+        const section = document.getElementById("evidence-fit");
+        const grid = document.getElementById("evidence-grid");
+        if (!section || !grid) return;
+
+        const usable = (examples || [])
+          .filter(ex => ex && (ex.shortLine || ex.whyChosen))
+          .slice(0, 5);
+
+        if (!usable.length) {
+          section.style.display = "none";
+          return;
+        }
+
+        section.style.display = "";
+        grid.innerHTML = "";
+
+        usable.forEach((ex, i) => {
+          const item = document.createElement("div");
+          item.className = "evidence-item";
+
+          const marker = document.createElement("span");
+          marker.className = "evidence-marker";
+          marker.textContent = String(i + 1).padStart(2, "0");
+
+          const title = document.createElement("span");
+          title.className = "evidence-title";
+          title.textContent = ex.exampleTitle || ex.suggestedUsage || "";
+
+          item.appendChild(marker);
+          item.appendChild(title);
+
+          if (ex.shortLine) {
+            const line = document.createElement("span");
+            line.className = "evidence-line";
+            line.textContent = ex.shortLine;
+            item.appendChild(line);
+          }
+
+          if (ex.whyChosen && ex.whyChosen !== ex.shortLine) {
+            const usage = document.createElement("span");
+            usage.className = "evidence-usage";
+            usage.textContent = ex.whyChosen;
+            item.appendChild(usage);
+          } else if (ex.suggestedUsage && ex.suggestedUsage !== (ex.exampleTitle || "")) {
+            const usage = document.createElement("span");
+            usage.className = "evidence-usage";
+            usage.textContent = ex.suggestedUsage;
+            item.appendChild(usage);
+          }
+
+          grid.appendChild(item);
+        });
+      }
+
+      function setSectionHeader(sectionId, eyebrow, heading, note) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        const eyebrowEl = section.querySelector(".eyebrow");
+        const headingEl = section.querySelector("h2.serif");
+        const noteEl = section.querySelector(".section-head > p");
+        if (eyebrowEl && eyebrow) eyebrowEl.textContent = eyebrow;
+        if (headingEl && heading) headingEl.textContent = heading;
+        if (noteEl && note) noteEl.textContent = note;
+      }
+
+      function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      }
+
+      function setDetailSpan(id, value, defaultValue, hideIfDefault) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const resolved = value || defaultValue;
+        if (hideIfDefault && (!value || value === defaultValue || value === "Not specified")) {
+          el.style.display = "none";
+        } else {
+          el.style.display = "";
+          el.textContent = resolved;
+        }
+      }
+
+      function setHtml(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = value;
+      }
+
+      function applyState(state) {
+        document.title = `Ben T. Howard | ${state.roleTitle}`;
+        const introSection = document.getElementById("intro");
+        const proofSection = document.getElementById("proof");
+        const themesSection = document.getElementById("themes");
+        const tailoredSection = document.getElementById("tailored");
+        const contactSection = document.getElementById("contact");
+        const heroSection = document.querySelector(".hero-section");
+
+        if (introSection) introSection.style.display = "none";
+        if (proofSection) proofSection.style.display = "none";
+        if (themesSection) themesSection.style.display = "none";
+        if (tailoredSection) tailoredSection.style.display = "none";
+        if (contactSection) contactSection.style.display = "none";
+        if (heroSection) heroSection.style.display = "";
+
+        const companyIntro = buildCompanyAttraction(state);
+        const companyFacts = buildCompanyFactLines(state);
+        const rolePitch = buildRolePitch(state);
+        const requirementCards = buildRequirementCards(state);
+        const businessNeedCards = buildBusinessNeedCards(state);
+        const cultureCards = buildCultureCards(state);
+
+        setText("hero-kicker", state.companyName === defaults.companyName
+          ? "Prepared for this opportunity / tailored introduction"
+          : `Prepared for ${state.companyName} / tailored introduction`);
+        setText("hero-topline-meta-1", buildToplineMetaOne(state));
+        setText("hero-topline-meta-2", buildToplineMetaTwo(state));
+        setText("hero-statement", buildHeroStatement(state));
+        setText("hero-positioning", state.headlineAttraction || state.rolePurpose || "Operational turnaround. Service redesign. Measurable improvement.");
+        setHtml("hero-pull-note", buildHeroPullNote(state));
+        setText("hero-kicker-copy", state.companyName === defaults.companyName
+          ? "Operational leadership across healthcare, manufacturing, leisure and regulated service environments"
+          : `Prepared for ${state.companyName}.`);
+        renderLines("hero-kicker-notes", buildHeroKickerNotes(state));
+        setText("hero-tailored-heading", state.companyName);
+        setText("hero-context-line", buildRoleContext(state));
+        setText("hero-company-note", buildCompanyNote(state));
+        setText("hero-role-note", buildRoleNote(state));
+        renderLines("hero-focus-list", pickLines(state.keyFocusAreas, state.probablePriorities, 4), "hero-focus-chip");
+        renderLines("hero-meta-list", buildHeroMeta(state), "hero-meta-chip");
+        renderLines("hero-tone-list", buildToneKeywords(state), "hero-tone-chip");
+
+        setText("intro-note", buildCompanyNote(state));
+        const introHeading = document.querySelector("#intro .intro-titleblock h2.serif");
+        if (introHeading) {
+          introHeading.textContent = state.companyName === defaults.companyName
+            ? "Why I stand out for this role."
+            : `Why I stand out for ${state.companyName}.`;
+        }
+        const introSideLabels = document.querySelectorAll("#intro .intro-side-label");
+        if (introSideLabels[0]) introSideLabels[0].textContent = "Company signal";
+        if (introSideLabels[1]) introSideLabels[1].textContent = "Practical context";
+        setHtml("intro-lede", state.companyName === defaults.companyName
+          ? "This introduction stays grounded in the company and role details already captured in the application."
+          : `Prepared for <em>${state.companyName}</em> and the <em>${state.roleTitle}</em> brief.`);
+        setText("intro-summary", state.genWhyThisCompany || state.companySummary || state.shortCompanyReason || "A tailored company-facing introduction grounded in the role and company details.");
+        setText("intro-detail", buildIntroDetail(state));
+        renderLines("intro-traits", companyFacts.length ? companyFacts : workingStyleLines);
+        renderLines("intro-strength-lines", cleanArray(state.genCompanyHighlights).length
+          ? cleanArray(state.genCompanyHighlights).slice(0, 4)
+          : (pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4).length
+            ? pickLines(state.companyPridePoints, state.possibleHeadlineFacts, 4)
+            : baseStrengthLines));
+
+        setSectionHeader(
+          "proof",
+          "Why me",
+          "Why my background fits this role.",
+          "The strongest results are shown first so the substance lands before the story."
+        );
+        renderProofCards([
+          {
+            value: "01",
+            label: "Role pitch",
+            copy: rolePitch.slice(0, 2).join(" ")
+          },
+          {
+            value: "02",
+            label: "What matters most",
+            copy: formatList(pickLines(state.probablePriorities, state.keyFocusAreas, 3))
+          },
+          {
+            value: "03",
+            label: "What they are looking for",
+            copy: formatList([...cleanArray(state.essentialRequirements), ...cleanArray(state.preferredRequirements)].slice(0, 3))
+          },
+          {
+            value: "04",
+            label: "How the role works",
+            copy: formatList([...cleanArray(state.skillsWanted), ...cleanArray(state.toolsMethodsMentioned), compactValue(state.workplaceType), compactValue(state.hours)].filter(Boolean).slice(0, 4))
+          }
+        ]);
+
+        // Render selected evidence examples between proof and career story
+        renderEvidenceExamples(state.genEvidenceExamples);
+
+        // Update proof section header when evidence examples are available
+        if (state.genEvidenceExamples && state.genEvidenceExamples.length) {
+          setSectionHeader(
+            "proof",
+            "Why me",
+            "Why my background fits this role.",
+            "Matched to what the brief asks for, with hands-on examples below."
+          );
+        }
+
+        setSectionHeader(
+          "themes",
+          "Strengths",
+          "The strengths I bring into roles like this.",
+          "Themes drawn from repeated patterns across healthcare, manufacturing, leisure and regulated environments."
+        );
+        renderEditorialCards("themes-grid", cultureCards.slice(0, 2));
+
+        // Hide the themes section entirely if no culture cards were rendered
+        const themesSection = document.getElementById("themes");
+        if (themesSection && !cultureCards.length) {
+          themesSection.style.display = "none";
+        }
+
+        setSectionHeader(
+          "tailored",
+          "Summary",
+          "Closing summary.",
+          "The key details for this application, pulled together in one place."
+        );
+        setText("tailored-company-line", state.companyName === defaults.companyName ? "Prepared for your team." : `Prepared for ${state.companyName}.`);
+        setDetailSpan("detail-company", state.companyName, defaults.companyName);
+        setDetailSpan("detail-role", state.roleTitle, defaults.roleTitle);
+        setDetailSpan("detail-location", state.location, defaults.location);
+        setDetailSpan("detail-sector", state.sector, defaults.sector);
+        setDetailSpan("detail-employment", state.employmentType, defaults.employmentType, true);
+        setDetailSpan("detail-salary", state.salary, defaults.salary, true);
+        setText("tailored-rationale", buildWrapUpSummary(state));
+        setText("why-this-role", state.genWhyThisRole
+          || (state.likelyBusinessNeeds.length
+            ? formatList(cleanArray(state.likelyBusinessNeeds).slice(0, 3))
+            : "Operational leadership built on visible results and practical delivery."));
+        setText("role-summary", state.genLikelyContribution
+          || (state.impliedStrategicGoals.length
+            ? formatList(cleanArray(state.impliedStrategicGoals).slice(0, 3))
+            : "Cross-sector experience in turnaround, service design, financial grip and team leadership."));
+
+        // Show up to 3 evidence short lines as supporting points in the summary
+        const summaryEvidenceEl = document.getElementById("summary-evidence-lines");
+        if (summaryEvidenceEl) {
+          const summaryExamples = (state.genEvidenceExamples || [])
+            .filter(ex => ex && ex.shortLine)
+            .slice(0, 3);
+          if (summaryExamples.length) {
+            summaryEvidenceEl.style.display = "";
+            summaryEvidenceEl.innerHTML = "";
+            summaryExamples.forEach(ex => {
+              const span = document.createElement("span");
+              span.className = "summary-evidence-line";
+              span.textContent = ex.shortLine;
+              summaryEvidenceEl.appendChild(span);
+            });
+          }
+        }
+
+        setText("contact-heading", state.companyName === defaults.companyName
+          ? "Let's talk."
+          : `Let's talk about the ${state.roleTitle} opportunity.`);
+        setText("contact-note-top", state.companyName === defaults.companyName
+          ? "A direct final step if this feels like a strong fit."
+          : `A direct final step if this feels like a strong fit for ${state.companyName}.`);
+        setText("contact-copy", state.genClosingSummary
+          || (state.companyName === defaults.companyName
+            ? "Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support the role."
+            : `Thank you for reviewing this tailored version of my CV. I would welcome the chance to discuss how my operations background could support ${state.companyName} in the ${state.roleTitle} position.`));
+      }
+
+      function initReveal() {
+        const targets = document.querySelectorAll("[data-reveal]");
+        const drawTargets = document.querySelectorAll(".draw-line");
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+          targets.forEach((target) => target.classList.add("is-visible"));
+          drawTargets.forEach((target) => target.classList.add("is-visible"));
+          return;
+        }
+
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            entry.target.querySelectorAll?.(".draw-line").forEach((line) => line.classList.add("is-visible"));
+            observer.unobserve(entry.target);
+          });
+        }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+
+        targets.forEach((target, index) => {
+          target.style.transitionDelay = `${Math.min(index * 45, 260)}ms`;
+          revealObserver.observe(target);
+        });
+      }
+
+      function initScrollVariable() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const update = () => {
+          document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
+        };
+        update();
+        window.addEventListener("scroll", update, { passive: true });
+      }
+
+      async function loadState() {
+        const embedded = readEmbeddedApplication();
+        if (embedded) return normaliseApplication(embedded);
+
+        const params = new URLSearchParams(window.location.search);
+        const sc = cleanString(params.get("sc"));
+        if (sc) {
+          try {
+            return normaliseApplication(await fetchApplicationByShortCode(sc));
+          } catch (error) {
+            console.error(error);
+          }
+        }
+        const ref = cleanString(params.get("ref"));
+        if (ref) {
+          try {
+            return normaliseApplication(await fetchApplicationByRef(ref));
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        return defaults;
+      }
+
+      loadState()
+        .then((state) => {
+          applyState(state);
+          initReveal();
+          initScrollVariable();
+        })
+        .catch(() => {
+          applyState(defaults);
+          initReveal();
+          initScrollVariable();
+        });
+    })();
+  </script>
+</body>
+</html>

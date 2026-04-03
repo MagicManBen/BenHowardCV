@@ -27,6 +27,46 @@ const REVIEW_FIELDS = [
   ["impliedStrategicGoals", "Implied strategic goals"],
 ];
 
+const KNOWN_APPLICATION_KEYS = new Set([
+  "ref", "slug", "createdAt", "updatedAt",
+  "companyName", "roleTitle", "location", "sector", "salary",
+  "employmentType", "hours", "workplaceType",
+  "cvText", "candidateCvText", "candidateCv", "cvSummary", "candidateCvSummary",
+  "shortCompanyReason", "shortRoleReason", "companySummary", "roleSummary",
+  "headlineAttraction", "rolePurpose", "travelRequired", "advertSummary",
+  "personalisedIntro", "whyThisRole",
+  "toneKeywords", "probablePriorities", "keyFocusAreas", "companyPridePoints",
+  "coreResponsibilities", "essentialRequirements", "preferredRequirements",
+  "skillsWanted", "toolsMethodsMentioned", "stakeholderGroups", "teamTypesMentioned",
+  "senioritySignals", "cultureSignals", "likelyBusinessNeeds",
+  "impliedStrategicGoals", "deliverablesLikely", "possibleHeadlineFacts", "matchCategories",
+  "personalisedContent", "generatedContent", "evidenceSelection",
+  "heroPositioning", "personalisedOpening", "whyThisCompany",
+  "roleNeedsSummary", "experienceMappings", "focusAreasToBring",
+  "fitSummary", "likelyContributionSummary", "companyHighlights", "cultureFitSummary",
+  "first90DaysPlan", "closingSummary", "closingProofPoints",
+  "selectedEvidenceExamples", "contentNotes"
+]);
+
+const KNOWN_PERSONALISED_KEYS = new Set([
+  "heroPositioning",
+  "personalisedOpening",
+  "whyThisCompany",
+  "whyThisRole",
+  "selectedEvidenceExamples",
+  "roleNeedsSummary",
+  "experienceMappings",
+  "focusAreasToBring",
+  "fitSummary",
+  "likelyContributionSummary",
+  "companyHighlights",
+  "cultureFitSummary",
+  "first90DaysPlan",
+  "closingSummary",
+  "closingProofPoints",
+  "contentNotes",
+]);
+
 let toastTimer = null;
 let publicCvBaseUrl = DEFAULT_PUBLIC_CV_BASE_URL;
 let publicJobBaseUrl = new URL("j/", DEFAULT_PUBLIC_CV_BASE_URL).href;
@@ -53,7 +93,6 @@ async function initLocalAdminPage() {
     contentResults:   document.getElementById("content-results"),
     debugJson:        document.getElementById("debug-json"),
     confirmButton:    document.getElementById("confirm-button"),
-    regenerateButton: document.getElementById("regenerate-button"),
     confirmStatus:    document.getElementById("confirm-status"),
     confirmError:     document.getElementById("confirm-error"),
     resultPanel:      document.getElementById("result-panel"),
@@ -90,13 +129,6 @@ async function initLocalAdminPage() {
     dom.pipelineError.hidden = true;
     dom.confirmError.hidden = true;
     showToast(dom, "Cleared.");
-  });
-
-  dom.regenerateButton.addEventListener("click", async () => {
-    if (!pendingApplication) return;
-    dom.regenerateButton.hidden = true;
-    await runGeneration(dom, pendingApplication);
-    dom.regenerateButton.hidden = false;
   });
 
   dom.confirmButton.addEventListener("click", async () => {
@@ -242,63 +274,28 @@ async function initLocalAdminPage() {
     dom.resultsPanel.hidden = false;
     dom.resultsTitle.textContent = pendingApplication.companyName + " \u2014 " + pendingApplication.roleTitle;
     dom.advertResults.innerHTML = renderAdvertGroup(pendingApplication);
-    dom.pipelineMessage.textContent = "Generating tailored content\u2026";
-    await runGeneration(dom, pendingApplication);
-
-    dom.confirmButton.disabled = false;
-    dom.confirmStatus.textContent = "Review the results, then confirm.";
-    dom.regenerateButton.hidden = false;
-  }
-
-  async function runGeneration(dom, app) {
-    setPill(dom.pillGenerate, "running");
-    dom.pipelineMessage.textContent = "Generating tailored content\u2026";
-
-    try {
-      if (app.personalisedContent) {
-        setPill(dom.pillGenerate, "done");
-        dom.pipelineMessage.textContent = "Used pasted personalised content.";
-        renderContentGroup(dom, {
-          generatedContent: app.personalisedContent,
-          evidenceSelection: app.evidenceSelection || { count: 0, error: null, examples: [] },
-          meta: {
-            success: true,
-            source: "pasted-json",
-          },
-        });
-        dom.debugJson.textContent = JSON.stringify(app, null, 2);
-        showToast(dom, "Pasted personalised content loaded.");
-        return;
-      }
-
-      const result = await generatePersonalisedContent(app);
-      const meta = result.meta || {};
-
-      if (!meta.success) {
-        setPill(dom.pillGenerate, "error");
-        dom.pipelineMessage.textContent = "Generation failed.";
-        showError(dom.pipelineError, meta.error || "Generation did not succeed.");
-        dom.confirmButton.disabled = false;
-        dom.confirmStatus.textContent = "You can still publish without generated content.";
-        return;
-      }
-
-      app.personalisedContent = result.generatedContent;
-      app.evidenceSelection = result.evidenceSelection;
-
-      setPill(dom.pillGenerate, "done");
-      dom.pipelineMessage.textContent = "All done.";
-
-      renderContentGroup(dom, result);
-      dom.debugJson.textContent = JSON.stringify(app, null, 2);
-      showToast(dom, "Pipeline complete.");
-    } catch (error) {
+    if (!pendingApplication.personalisedContent) {
       setPill(dom.pillGenerate, "error");
-      dom.pipelineMessage.textContent = "Generation failed.";
-      showError(dom.pipelineError, error instanceof Error ? error.message : "Generation failed.");
-      dom.confirmButton.disabled = false;
-      dom.confirmStatus.textContent = "You can still publish without generated content.";
+      dom.pipelineMessage.textContent = "Tailored content missing in pasted JSON.";
+      showError(dom.pipelineError, "This local-admin workflow is paste-only. Include a personalisedContent object in the pasted JSON.");
+      dom.contentResults.hidden = true;
+      dom.debugJson.textContent = JSON.stringify(pendingApplication, null, 2);
+      dom.confirmButton.disabled = true;
+      dom.confirmStatus.textContent = "Add personalisedContent, then run Go again.";
+      return;
     }
+
+    setPill(dom.pillGenerate, "done");
+    dom.pipelineMessage.textContent = "Using pasted tailored content (no generation).";
+    renderContentGroup(dom, {
+      generatedContent: pendingApplication.personalisedContent,
+      evidenceSelection: pendingApplication.evidenceSelection || { count: 0, error: null, examples: [] },
+      meta: { success: true, source: "pasted-json" },
+    });
+    dom.debugJson.textContent = JSON.stringify(pendingApplication, null, 2);
+    dom.confirmButton.disabled = false;
+    dom.confirmStatus.textContent = "Review the pasted JSON, then confirm.";
+    showToast(dom, "Pasted JSON loaded.");
   }
 }
 
@@ -323,7 +320,7 @@ function renderAdvertGroup(app) {
 
 function renderContentGroup(dom, result) {
   var content = result.generatedContent || {};
-  var parts = ['<p class="results-group-heading">Generated content</p>'];
+  var parts = ['<p class="results-group-heading">Pasted tailored content</p>'];
 
   var textFields = [
     ["Hero positioning", content.heroPositioning],
@@ -449,10 +446,6 @@ async function publishApplication(application) {
   return payload;
 }
 
-async function generatePersonalisedContent(application) {
-  throw new Error("Content generation is not available in online mode. Paste pre-generated JSON instead.");
-}
-
 /* ── Utility ───────────────────────────────────────── */
 
 function buildClientContext() {
@@ -471,7 +464,17 @@ function normaliseApplicationPayload(input) {
   if (!ref) throw new Error("Could not build a usable ref.");
   var now = new Date().toISOString();
   var providedContent = normaliseProvidedPersonalisedContent(input);
-  return {
+  if (!providedContent) throw new Error("personalisedContent is required for this paste-only workflow.");
+
+  var preservedTopLevel = {};
+  for (var inputKey in input) {
+    if (!Object.prototype.hasOwnProperty.call(input, inputKey)) continue;
+    if (inputKey === "__proto__" || inputKey === "constructor" || inputKey === "prototype") continue;
+    if (KNOWN_APPLICATION_KEYS.has(inputKey)) continue;
+    preservedTopLevel[inputKey] = input[inputKey];
+  }
+
+  var normalised = {
     ref: ref, companyName: companyName, roleTitle: roleTitle, location: location,
     sector: str(input.sector), salary: str(input.salary),
     employmentType: str(input.employmentType), hours: str(input.hours),
@@ -498,6 +501,8 @@ function normaliseApplicationPayload(input) {
     evidenceSelection: buildEvidenceSelectionFromContent(providedContent),
     createdAt: str(input.createdAt) || now, updatedAt: now,
   };
+
+  return Object.assign({}, preservedTopLevel, normalised);
 }
 
 function sanitizeApplicationForPublish(application) {
@@ -533,7 +538,15 @@ function normaliseProvidedPersonalisedContent(input) {
 
   if (!source) return null;
 
-  return {
+  var preserved = {};
+  for (var key in source) {
+    if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
+    if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
+    if (KNOWN_PERSONALISED_KEYS.has(key)) continue;
+    preserved[key] = source[key];
+  }
+
+  var normalised = {
     heroPositioning: str(source.heroPositioning),
     personalisedOpening: str(source.personalisedOpening),
     whyThisCompany: str(source.whyThisCompany),
@@ -551,21 +564,27 @@ function normaliseProvidedPersonalisedContent(input) {
     closingProofPoints: arr(source.closingProofPoints),
     contentNotes: arr(source.contentNotes),
   };
+
+  return Object.assign({}, preserved, normalised);
 }
 
 function normaliseEvidenceExamples(value) {
   if (!Array.isArray(value)) return [];
   return value.map(function (item) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return null;
-    return {
-      exampleId: str(item.exampleId),
-      exampleTitle: str(item.exampleTitle),
-      bestMatchedRoleNeed: str(item.bestMatchedRoleNeed),
-      proofAngle: str(item.proofAngle),
-      whyChosen: str(item.whyChosen),
-      suggestedUsage: str(item.suggestedUsage),
-      shortLine: str(item.shortLine),
-    };
+    var output = {};
+    for (var key in item) {
+      if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
+      if (Object.prototype.hasOwnProperty.call(item, key)) output[key] = item[key];
+    }
+    output.exampleId = str(item.exampleId);
+    output.exampleTitle = str(item.exampleTitle);
+    output.bestMatchedRoleNeed = str(item.bestMatchedRoleNeed);
+    output.proofAngle = str(item.proofAngle);
+    output.whyChosen = str(item.whyChosen);
+    output.suggestedUsage = str(item.suggestedUsage);
+    output.shortLine = str(item.shortLine);
+    return output;
   }).filter(Boolean);
 }
 
@@ -573,13 +592,17 @@ function normaliseExperienceMappings(value) {
   if (!Array.isArray(value)) return [];
   return value.map(function (item) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return null;
-    return {
-      roleNeed: str(item.roleNeed),
-      evidenceExampleId: str(item.evidenceExampleId),
-      myEvidence: str(item.myEvidence),
-      relevance: str(item.relevance),
-      proofAngle: str(item.proofAngle),
-    };
+    var output = {};
+    for (var key in item) {
+      if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
+      if (Object.prototype.hasOwnProperty.call(item, key)) output[key] = item[key];
+    }
+    output.roleNeed = str(item.roleNeed);
+    output.evidenceExampleId = str(item.evidenceExampleId);
+    output.myEvidence = str(item.myEvidence);
+    output.relevance = str(item.relevance);
+    output.proofAngle = str(item.proofAngle);
+    return output;
   }).filter(function (item) {
     return item && (item.roleNeed || item.myEvidence || item.relevance);
   });
@@ -589,10 +612,14 @@ function normaliseFocusAreasToBring(value) {
   if (!Array.isArray(value)) return [];
   return value.map(function (item) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return null;
-    return {
-      title: str(item.title),
-      summary: str(item.summary),
-    };
+    var output = {};
+    for (var key in item) {
+      if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
+      if (Object.prototype.hasOwnProperty.call(item, key)) output[key] = item[key];
+    }
+    output.title = str(item.title);
+    output.summary = str(item.summary);
+    return output;
   }).filter(function (item) {
     return item && (item.title || item.summary);
   });
@@ -602,11 +629,15 @@ function normaliseFirst90DaysPlan(value) {
   if (!Array.isArray(value)) return [];
   return value.map(function (item) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return null;
-    return {
-      phase: str(item.phase),
-      focus: str(item.focus),
-      detail: str(item.detail),
-    };
+    var output = {};
+    for (var key in item) {
+      if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
+      if (Object.prototype.hasOwnProperty.call(item, key)) output[key] = item[key];
+    }
+    output.phase = str(item.phase);
+    output.focus = str(item.focus);
+    output.detail = str(item.detail);
+    return output;
   }).filter(function (item) {
     return item && (item.phase || item.focus || item.detail);
   });

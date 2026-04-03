@@ -39,7 +39,7 @@
       <div class="header-row">
         <div>
           <h1>New application</h1>
-          <p class="subtitle">Paste JSON, hit Go, review the results, confirm.</p>
+          <p class="subtitle">Paste ready-to-publish JSON with tailored content already included, review, then confirm.</p>
         </div>
         <div class="header-actions">
           <a class="button button--ghost" href="dashboard.html">Dashboard</a>
@@ -57,8 +57,9 @@
 
     <!-- Input -->
     <section class="card">
-      <h2>Paste the advert JSON</h2>
+      <h2>Paste ready-to-publish application JSON</h2>
       <textarea id="job-json-input" rows="12" placeholder='{"companyName":"Acme Ltd","roleTitle":"Operations Manager", ...}'></textarea>
+      <p class="inline-feedback" style="margin-top:0.6rem;">This workflow does not generate or rewrite content. Your pasted JSON is treated as final.</p>
       <div class="action-row action-row--spread" style="margin-top:0.75rem;">
         <div class="action-row">
           <button class="button" id="go-button" type="button">Go</button>
@@ -71,10 +72,10 @@
 
     <!-- Pipeline progress -->
     <section class="card" id="pipeline-panel" hidden>
-      <h2>Pipeline</h2>
+      <h2>Validation</h2>
       <div class="pipeline-pills">
         <span class="pill pill--waiting" id="pill-parse">Parse</span>
-        <span class="pill pill--waiting" id="pill-generate">Generate</span>
+        <span class="pill pill--waiting" id="pill-generate">Tailored content</span>
       </div>
       <p class="inline-feedback" id="pipeline-message" aria-live="polite"></p>
       <p class="error-message" id="pipeline-error" role="alert" hidden></p>
@@ -95,7 +96,6 @@
       <!-- Confirm bar -->
       <div class="confirm-bar">
         <button class="button" id="confirm-button" type="button" disabled>Confirm &amp; Publish</button>
-        <button class="button button--ghost" id="regenerate-button" type="button" hidden>Regenerate</button>
         <p class="inline-feedback" id="confirm-status" aria-live="polite"></p>
       </div>
       <p class="error-message" id="confirm-error" role="alert" hidden></p>
@@ -135,6 +135,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=14" defer></script>
+  <script src="admin.js?v=15" defer></script>
 </body>
 </html>

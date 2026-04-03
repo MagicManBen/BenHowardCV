@@ -546,6 +546,133 @@ def _build_extraction_user_prompt(advert_text):
     )
 
 
+def _string_schema():
+    return {"type": "string"}
+
+
+def _string_array_schema():
+    return {"type": "array", "items": {"type": "string"}}
+
+
+def _object_schema(properties):
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": list(properties.keys()),
+        "additionalProperties": False,
+    }
+
+
+def _object_array_schema(properties):
+    return {"type": "array", "items": _object_schema(properties)}
+
+
+ADVERT_EXTRACTION_RESPONSE_SCHEMA = _object_schema({
+    "companyName": _string_schema(),
+    "roleTitle": _string_schema(),
+    "location": _string_schema(),
+    "sector": _string_schema(),
+    "salary": _string_schema(),
+    "employmentType": _string_schema(),
+    "hours": _string_schema(),
+    "workplaceType": _string_schema(),
+    "shortCompanyReason": _string_schema(),
+    "shortRoleReason": _string_schema(),
+    "companySummary": _string_schema(),
+    "roleSummary": _string_schema(),
+    "advertSummary": _string_schema(),
+    "toneKeywords": _string_array_schema(),
+    "probablePriorities": _string_array_schema(),
+    "keyFocusAreas": _string_array_schema(),
+    "companyPridePoints": _string_array_schema(),
+    "headlineAttraction": _string_schema(),
+    "rolePurpose": _string_schema(),
+    "coreResponsibilities": _string_array_schema(),
+    "essentialRequirements": _string_array_schema(),
+    "preferredRequirements": _string_array_schema(),
+    "skillsWanted": _string_array_schema(),
+    "toolsMethodsMentioned": _string_array_schema(),
+    "stakeholderGroups": _string_array_schema(),
+    "teamTypesMentioned": _string_array_schema(),
+    "senioritySignals": _string_array_schema(),
+    "cultureSignals": _string_array_schema(),
+    "likelyBusinessNeeds": _string_array_schema(),
+    "impliedStrategicGoals": _string_array_schema(),
+    "deliverablesLikely": _string_array_schema(),
+    "travelRequired": _string_schema(),
+    "possibleHeadlineFacts": _string_array_schema(),
+    "matchCategories": _string_array_schema(),
+})
+
+
+PERSONALISED_CONTENT_RESPONSE_SCHEMA = _object_schema({
+    "heroPositioning": _string_schema(),
+    "personalisedOpening": _string_schema(),
+    "whyThisCompany": _string_schema(),
+    "whyThisRole": _string_schema(),
+    "selectedEvidenceExamples": _object_array_schema({
+        "exampleId": _string_schema(),
+        "exampleTitle": _string_schema(),
+        "bestMatchedRoleNeed": _string_schema(),
+        "proofAngle": _string_schema(),
+        "whyChosen": _string_schema(),
+        "suggestedUsage": _string_schema(),
+        "shortLine": _string_schema(),
+    }),
+    "roleNeedsSummary": _string_schema(),
+    "experienceMappings": _object_array_schema({
+        "roleNeed": _string_schema(),
+        "evidenceExampleId": _string_schema(),
+        "myEvidence": _string_schema(),
+        "relevance": _string_schema(),
+        "proofAngle": _string_schema(),
+    }),
+    "focusAreasToBring": _object_array_schema({
+        "title": _string_schema(),
+        "summary": _string_schema(),
+    }),
+    "fitSummary": _string_schema(),
+    "likelyContributionSummary": _string_schema(),
+    "companyHighlights": _string_array_schema(),
+    "cultureFitSummary": _string_schema(),
+    "first90DaysPlan": _object_array_schema({
+        "phase": _string_schema(),
+        "focus": _string_schema(),
+        "detail": _string_schema(),
+    }),
+    "closingSummary": _string_schema(),
+    "closingProofPoints": _string_array_schema(),
+    "contentNotes": _string_array_schema(),
+})
+
+
+def _validate_openai_schema_node(node, path="$"):
+    if not isinstance(node, dict):
+        raise ValueError(f"{path}: schema node must be an object/dict")
+
+    node_type = node.get("type")
+
+    if node_type == "object":
+        properties = node.get("properties")
+        if properties is None:
+            raise ValueError(f"{path}: object schema missing properties")
+        if not isinstance(properties, dict):
+            raise ValueError(f"{path}: object schema properties must be a dict")
+        for key, child in properties.items():
+            _validate_openai_schema_node(child, f"{path}.properties.{key}")
+
+    if node_type == "array":
+        if "items" not in node:
+            raise ValueError(f"{path}: array schema missing items")
+        _validate_openai_schema_node(node["items"], f"{path}.items")
+
+
+def validate_openai_response_schema(schema, schema_name):
+    if not isinstance(schema_name, str) or not schema_name.strip():
+        raise ValueError("schema_name must be a non-empty string")
+    _validate_openai_schema_node(schema, f"{schema_name}")
+
+
 def _extract_openai_output_text(response_data):
     if isinstance(response_data.get("output_text"), str) and response_data.get("output_text", "").strip():
         return response_data.get("output_text", "")
@@ -580,7 +707,7 @@ def _extract_openai_output_text(response_data):
     raise ValueError("No assistant output text found in OpenAI response.")
 
 
-def call_openai_responses_json(api_key, model, system_prompt, user_prompt, temperature=0.3):
+def call_openai_responses_json(api_key, model, system_prompt, user_prompt, schema, schema_name, temperature=0.3):
     """Call OpenAI Responses API and return parsed JSON.
 
     Returns (result_dict, error_message_or_none).
@@ -589,6 +716,10 @@ def call_openai_responses_json(api_key, model, system_prompt, user_prompt, tempe
         return None, "OpenAI API key is missing."
     if not model:
         return None, "OpenAI model is missing."
+    try:
+        validate_openai_response_schema(schema, schema_name)
+    except ValueError as exc:
+        return None, f"Local schema validation failed: {exc}"
 
     request_body = {
         "model": model,
@@ -601,12 +732,9 @@ def call_openai_responses_json(api_key, model, system_prompt, user_prompt, tempe
         "text": {
             "format": {
                 "type": "json_schema",
-                "name": "structured_payload",
-                "strict": False,
-                "schema": {
-                    "type": "object",
-                    "additionalProperties": True,
-                },
+                "name": schema_name,
+                "strict": True,
+                "schema": schema,
             }
         },
     }
@@ -665,6 +793,8 @@ def call_openai_personalised_content(api_key, model, application, evidence_rows)
         model=model,
         system_prompt=SYSTEM_PROMPT,
         user_prompt=user_prompt,
+        schema=PERSONALISED_CONTENT_RESPONSE_SCHEMA,
+        schema_name="personalised_content",
         temperature=0.4,
     )
 
@@ -711,6 +841,8 @@ def generate_application_from_advert(advert_text, config):
         model=openai_model,
         system_prompt=ADVERT_EXTRACTION_SYSTEM_PROMPT,
         user_prompt=_build_extraction_user_prompt(advert_text),
+        schema=ADVERT_EXTRACTION_RESPONSE_SCHEMA,
+        schema_name="advert_extraction",
         temperature=0.2,
     )
     if extraction_error:

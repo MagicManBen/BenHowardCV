@@ -10,12 +10,12 @@
   "hours": "Full-time",
   "workplaceType": "",
   "shortCompanyReason": "Well established, market leading manufacturing company",
-  "shortRoleReason": "Lead continuous improvement initiatives to enhance processes and achieve savings",
+  "shortRoleReason": "Lead continuous improvement initiatives and lean strategy deployment",
   "companySummary": "A well established, growing manufacturing company and market leader in their field.",
-  "roleSummary": "Lead change initiatives and deploy lean tools across operations, manufacturing, supply chain, and support functions to improve safety, quality, cost, service, and inventory management while developing people.",
-  "headlineAttraction": "Lead continuous improvement in a market leading manufacturing company with competitive salary and benefits",
-  "rolePurpose": "To lead and manage continuous improvement initiatives across the business to enhance processes, reduce costs, and foster a culture of continuous improvement.",
-  "travelRequired": "Not specified",
+  "roleSummary": "Lead change initiatives, develop and deploy continuous improvement strategies using lean tools, achieve project savings, and foster a culture of continuous improvement across the business.",
+  "headlineAttraction": "Continuous Improvement Manager role with a market leading manufacturing company in Stockport",
+  "rolePurpose": "To lead and implement continuous improvement initiatives across the business to enhance safety, quality, cost, service, and inventory management while developing people.",
+  "travelRequired": "",
   "toneKeywords": [
     "professional",
     "motivational",
@@ -23,49 +23,53 @@
     "engaging"
   ],
   "probablePriorities": [
-    "implement lean methodologies",
-    "achieve cost savings",
-    "develop people",
-    "improve operational efficiency"
-  ],
-  "advertSummary": "Permanent full-time Continuous Improvement Manager role based in Stockport with a market leading manufacturing company, focusing on lean methodologies, project management, and continuous improvement to deliver business savings and growth.",
-  "slug": "michael-page-procurement-supply-chain-continuous-improvement-manager-stockport-c",
-  "personalisedIntro": "I bring hands-on experience leading continuous improvement initiatives in manufacturing and operations settings, focusing on lean methodologies that enhance safety, quality, and cost efficiency. This role aligns with my background in deploying structured change and coaching teams to embed sustainable improvements.",
-  "whyThisRole": "The role\u2019s emphasis on leading lean deployment across multiple functions matches my experience managing cross-functional projects and driving operational discipline. I\u2019m motivated by the challenge of embedding continuous improvement culture while delivering measurable savings and efficiency gains.",
-  "keyFocusAreas": [
-    "continuous improvement strategy",
-    "lean tools deployment",
+    "process improvement",
+    "cost reduction",
+    "employee development",
     "project management",
-    "training and coaching",
-    "process improvement"
+    "lean implementation"
+  ],
+  "advertSummary": "Seeking a Continuous Improvement Manager to lead lean and Six Sigma initiatives, drive process improvements in safety, quality, cost, service, and inventory, and coach teams to meet business KPIs in a manufacturing environment.",
+  "slug": "michael-page-procurement-supply-chain-continuous-improvement-manager-stockport-c",
+  "personalisedIntro": "I bring hands-on experience leading continuous improvement initiatives that enhance operational performance and cost efficiency. This role aligns with my background in deploying lean tools and coaching teams to embed a culture of continuous improvement across manufacturing and supply chain functions.",
+  "whyThisRole": "Leading change initiatives and deploying lean strategies across multiple business areas is exactly where I add value. I\u2019m motivated by roles that require both hands-on project delivery and developing people through coaching and training, which this position clearly demands.",
+  "keyFocusAreas": [
+    "Lean Six Sigma",
+    "Kaizen events",
+    "5S",
+    "Value Stream Mapping",
+    "project savings",
+    "OEE improvement"
   ],
   "companyPridePoints": [
-    "market leader in manufacturing",
-    "well established and growing"
+    "market leader",
+    "well established",
+    "growing company"
   ],
   "coreResponsibilities": [
     "Lead change initiatives across operations, manufacturing, supply chain, and support functions",
-    "Develop and deploy continuous improvement strategy using lean tools",
-    "Implement lean tools including Kaizen, Lean Six Sigma, 5S",
-    "Coach and train managers, supervisors, and staff in lean methodologies",
-    "Achieve annualized project savings aligned with business strategy",
-    "Coordinate project activities and support operations with project management",
-    "Conduct root cause analysis and corrective action plans",
-    "Promote Lean/CI benefits and culture across the organization",
+    "Develop and deploy CI strategy using lean tools and techniques",
+    "Coach and train managers and staff in lean methodologies",
+    "Lead Kaizen and 5S events",
+    "Achieve annualized project savings",
+    "Support operations with project management and departmental goals",
+    "Conduct root cause analysis and corrective actions",
+    "Promote Lean/CI culture throughout the organization",
     "Maintain flexibility to adapt CI approach to business needs",
-    "Use process improvement tools like Value Stream Mapping and Standard Work",
-    "Manage Kaizen calendar and support related activities",
-    "Support Value Analysis/Value Engineering events"
+    "Use process improvement tools like VSM and Standard Work",
+    "Manage Kaizen calendar and activities",
+    "Support VAVE events for cost reduction"
   ],
   "essentialRequirements": [
     "Proven continuous improvement management experience in manufacturing",
-    "Experience in production, operations or quality within manufacturing",
-    "Six Sigma training or equivalent demonstrated experience",
+    "Experience in production, operations or quality background",
+    "Six Sigma training or equivalent",
     "Experience in manufacturing, warehouse or engineering environment",
-    "Ability to engage and motivate people at all business levels",
+    "Ability to engage and motivate teams",
+    "Experience working with all business levels",
     "Collaborative approach",
     "Experience training cross-functional groups",
-    "IT literate with proficiency in SAP and SharePoint"
+    "IT literate with SAP and SharePoint proficiency"
   ],
   "preferredRequirements": [],
   "skillsWanted": [
@@ -75,19 +79,18 @@
     "Project management",
     "Root cause analysis",
     "Coaching and training",
-    "Value Stream Mapping",
-    "Standard Work",
+    "Process improvement",
     "SAP",
     "SharePoint"
   ],
   "toolsMethodsMentioned": [
-    "Kaizen",
     "Lean Six Sigma",
+    "Kaizen",
     "5S",
     "Value Stream Mapping",
     "Standard Work",
     "Root cause analysis",
-    "Value Analysis/Value Engineering (VAVE)"
+    "VAVE"
   ],
   "stakeholderGroups": [
     "Managers",
@@ -97,35 +100,42 @@
     "Cross-functional groups"
   ],
   "teamTypesMentioned": [
+    "Managers",
+    "Supervisors",
     "Cross-functional teams"
   ],
   "senioritySignals": [
-    "Manager"
+    "Manager",
+    "Lead",
+    "Proven experience"
   ],
   "cultureSignals": [
     "Collaborative",
     "Engaging",
-    "Continuous improvement focused"
+    "Continuous improvement ethos"
   ],
   "likelyBusinessNeeds": [
-    "Process improvement",
-    "Cost reduction",
-    "Operational efficiency",
-    "Employee development"
+    "Process efficiency",
+    "Cost savings",
+    "Quality improvement",
+    "Employee development",
+    "Project delivery"
   ],
   "impliedStrategicGoals": [
     "Business growth",
-    "Savings achievement",
-    "Lean culture embedding"
+    "Operational excellence",
+    "Lean transformation",
+    "Cost reduction"
   ],
   "deliverablesLikely": [
     "Annualized project savings",
-    "Improved operational KPIs",
+    "Improved OEE",
     "Lean deployment plans",
-    "Training and coaching programs"
+    "Training and coaching sessions",
+    "Kaizen event outcomes"
   ],
   "possibleHeadlineFacts": [
-    "Salary \u00a360,000 - \u00a370,000 plus bonus",
+    "\u00a360,000 - \u00a370,000 salary",
     "Permanent full-time role",
     "Based in Stockport",
     "Market leading manufacturing company"
@@ -133,116 +143,118 @@
   "matchCategories": [
     "Continuous Improvement",
     "Manufacturing",
-    "Operations Management",
-    "Lean Six Sigma"
+    "Lean Management",
+    "Project Management",
+    "Operations"
   ],
   "personalisedContent": {
-    "heroPositioning": "Driving lean transformation and operational resilience in manufacturing environments",
-    "personalisedOpening": "I bring hands-on experience leading continuous improvement initiatives in manufacturing and operations settings, focusing on lean methodologies that enhance safety, quality, and cost efficiency. This role aligns with my background in deploying structured change and coaching teams to embed sustainable improvements.",
-    "whyThisCompany": "This company stands out as a market leader in manufacturing with a clear growth trajectory, which offers a solid platform to apply and expand my continuous improvement expertise. The established yet evolving environment is appealing for delivering impactful operational enhancements.",
-    "whyThisRole": "The role\u2019s emphasis on leading lean deployment across multiple functions matches my experience managing cross-functional projects and driving operational discipline. I\u2019m motivated by the challenge of embedding continuous improvement culture while delivering measurable savings and efficiency gains.",
+    "heroPositioning": "Driving lean transformation and operational excellence in manufacturing environments",
+    "personalisedOpening": "I bring hands-on experience leading continuous improvement initiatives that enhance operational performance and cost efficiency. This role aligns with my background in deploying lean tools and coaching teams to embed a culture of continuous improvement across manufacturing and supply chain functions.",
+    "whyThisCompany": "The opportunity to join a well-established, market-leading manufacturer that is growing excites me because it offers a platform to apply structured improvement strategies at scale. The company\u2019s commitment to operational excellence and continuous improvement fits well with my experience and approach.",
+    "whyThisRole": "Leading change initiatives and deploying lean strategies across multiple business areas is exactly where I add value. I\u2019m motivated by roles that require both hands-on project delivery and developing people through coaching and training, which this position clearly demands.",
     "selectedEvidenceExamples": [
       {
         "exampleId": "4",
         "exampleTitle": "Manufacturing scale-up and delivery discipline",
-        "bestMatchedRoleNeed": "Leading continuous improvement initiatives in manufacturing",
-        "proofAngle": "Operational improvement and delivery control",
-        "whyChosen": "I led day-to-day operations during a manufacturing scale-up, improving delivery reliability and operational resilience, which directly relates to driving lean initiatives and process discipline here.",
-        "suggestedUsage": "Hero metric and supporting point for manufacturing operations leadership",
-        "shortLine": "I strengthened operational performance and delivery discipline during a manufacturing growth phase."
+        "bestMatchedRoleNeed": "Lead change initiatives and improve operational resilience during growth",
+        "proofAngle": "Operational performance and delivery control",
+        "whyChosen": "This example shows my ability to strengthen operational discipline and delivery reliability in a manufacturing environment during a growth phase, directly relevant to the role\u2019s focus on lean deployment and operational improvement.",
+        "suggestedUsage": "Hero metric and supporting point on manufacturing leadership",
+        "shortLine": "I led operations through a manufacturing scale-up, improving delivery discipline and operational resilience."
       },
       {
         "exampleId": "3",
         "exampleTitle": "Profit and working-capital improvement",
-        "bestMatchedRoleNeed": "Achieving cost savings and financial discipline",
-        "proofAngle": "Financial control and operational improvement",
-        "whyChosen": "I supported tighter financial and operational controls that improved profit and working capital, demonstrating my ability to deliver cost savings aligned with business strategy.",
-        "suggestedUsage": "Supporting point for cost reduction and financial impact",
-        "shortLine": "I contributed to profit improvement and released working capital through operational controls."
+        "bestMatchedRoleNeed": "Achieve project savings and improve financial control",
+        "proofAngle": "Financial discipline and operational improvement",
+        "whyChosen": "This demonstrates my ability to drive financial improvements through tighter operational control, aligning with the role\u2019s emphasis on cost reduction and project savings.",
+        "suggestedUsage": "Supporting point on cost and financial impact",
+        "shortLine": "I supported tighter operational control that contributed to a \u00a3149.9k profit improvement and better cash flow."
       },
       {
-        "exampleId": "9",
-        "exampleTitle": "Complex annual projects and team leadership",
-        "bestMatchedRoleNeed": "Coaching and training cross-functional teams",
-        "proofAngle": "Project delivery and team leadership",
-        "whyChosen": "I managed complex projects and led a team in a high-pressure environment, which shows my capability to coach and engage teams effectively in continuous improvement activities.",
-        "suggestedUsage": "Supporting point for leadership and coaching skills",
-        "shortLine": "I led and supported teams delivering complex projects while maintaining service standards."
+        "exampleId": "13",
+        "exampleTitle": "Ride compliance and operator progression tracking",
+        "bestMatchedRoleNeed": "Coach and train teams, promote compliance and continuous improvement culture",
+        "proofAngle": "Stakeholder coordination and compliance tracking",
+        "whyChosen": "This example highlights my experience creating practical systems to support compliance and team progression, reflecting the role\u2019s need for coaching and promoting continuous improvement ethos.",
+        "suggestedUsage": "Supporting point on training and culture fit",
+        "shortLine": "I developed a compliance tracking system that improved operational oversight and team progression."
       }
     ],
-    "roleNeedsSummary": "This role requires someone who can lead and embed lean continuous improvement across manufacturing and support functions, delivering cost savings and operational efficiencies while developing people. It needs a practical leader who can adapt CI approaches to evolving business needs and engage teams at all levels.",
+    "roleNeedsSummary": "This role requires someone who can lead and embed continuous improvement across manufacturing and support functions, balancing project delivery with people development. It\u2019s about driving measurable savings, improving quality and efficiency, and fostering a lean culture that adapts to evolving business needs.",
     "experienceMappings": [
       {
-        "roleNeed": "Lead continuous improvement initiatives across manufacturing and operations",
+        "roleNeed": "Lead change initiatives across operations and manufacturing",
         "evidenceExampleId": "4",
-        "myEvidence": "I managed operations during a manufacturing scale-up, improving delivery discipline and resilience.",
-        "relevance": "Direct experience leading operational improvements in manufacturing environments.",
+        "myEvidence": "I managed day-to-day operations during a manufacturing scale-up, improving delivery discipline and operational resilience.",
+        "relevance": "Shows direct experience leading operational improvements in manufacturing growth environments.",
         "proofAngle": "Operational improvement"
       },
       {
-        "roleNeed": "Achieve cost savings aligned with business strategy",
+        "roleNeed": "Achieve project savings and cost reduction",
         "evidenceExampleId": "3",
-        "myEvidence": "I supported tighter financial and operational controls that improved profit and working capital.",
-        "relevance": "Proven ability to deliver financial benefits through operational improvements.",
-        "proofAngle": "Cost reduction"
+        "myEvidence": "I supported tighter financial and operational controls that resulted in significant profit improvement and working capital release.",
+        "relevance": "Demonstrates ability to deliver financial benefits through operational improvements.",
+        "proofAngle": "Cost savings"
       },
       {
-        "roleNeed": "Coach and train managers, supervisors, and staff in lean methodologies",
-        "evidenceExampleId": "9",
-        "myEvidence": "I led and supported teams through complex projects, maintaining standards and developing capability.",
-        "relevance": "Experience in team leadership and coaching under pressure.",
-        "proofAngle": "Leadership and training"
+        "roleNeed": "Coach and train managers and staff in lean methodologies",
+        "evidenceExampleId": "13",
+        "myEvidence": "I created a user input system to monitor compliance and progression, supporting team development and operational standards.",
+        "relevance": "Reflects experience in coaching and enabling teams to adopt continuous improvement practices.",
+        "proofAngle": "Training and culture"
       }
     ],
     "focusAreasToBring": [
       {
-        "title": "Lean Deployment Across Functions",
-        "summary": "I would focus on embedding lean tools like Kaizen and 5S across operations, manufacturing, and supply chain, tailoring approaches to meet specific team needs."
+        "title": "Structured Lean Deployment",
+        "summary": "I would apply proven lean tools like Kaizen, 5S, and Value Stream Mapping to identify waste and improve process flow across manufacturing and supply chain."
       },
       {
-        "title": "Cost and Operational Efficiency",
-        "summary": "I aim to identify and deliver targeted cost savings and operational improvements that align with strategic goals and enhance overall business performance."
+        "title": "Financial and Operational Discipline",
+        "summary": "I focus on embedding tighter operational controls that directly contribute to cost savings and improved working capital."
       },
       {
         "title": "People Development and Engagement",
-        "summary": "I would prioritize coaching and training to build continuous improvement capabilities and foster a collaborative culture throughout the organisation."
+        "summary": "I prioritize coaching and training to build capability and foster a continuous improvement mindset throughout all levels of the business."
       }
     ],
-    "fitSummary": "My background in managing manufacturing operations and leading continuous improvement projects fits well with this role\u2019s requirements. I bring a balance of operational discipline, financial awareness, and people leadership that supports sustainable lean transformation.",
-    "likelyContributionSummary": "In the first year, I would expect to deliver measurable savings through lean project deployment, improve process reliability, and strengthen team capabilities in continuous improvement. I would also focus on embedding a culture that embraces ongoing operational excellence.",
+    "fitSummary": "My background in manufacturing operations and continuous improvement aligns well with the role\u2019s requirements. I\u2019ve led operational improvements during growth phases, delivered financial benefits through tighter controls, and coached teams to adopt lean practices, matching the role\u2019s blend of project delivery and people development.",
+    "likelyContributionSummary": "In the first year, I expect to focus on deploying lean tools to improve process efficiency and cost control, leading Kaizen events to engage teams, and embedding a culture of continuous improvement. I would also support project management discipline to ensure timely delivery of savings and operational targets.",
     "companyHighlights": [
-      "Market leader in manufacturing",
-      "Well established and growing company"
+      "Well established and growing manufacturing market leader",
+      "Committed to operational excellence and continuous improvement",
+      "Collaborative and engaging culture focused on lean transformation"
     ],
-    "cultureFitSummary": "I work best in collaborative, engaging environments where continuous improvement is valued. I\u2019m comfortable working across teams and levels to build consensus and drive change.",
+    "cultureFitSummary": "I work collaboratively and engage people at all levels to take them on the improvement journey. My approach is practical and flexible, adapting lean methods to fit the business context while fostering a culture where continuous improvement is part of everyday work.",
     "first90DaysPlan": [
       {
         "phase": "First 30 days",
-        "focus": "Understanding and assessment",
-        "detail": "I would review current CI initiatives, meet key stakeholders, and assess operational challenges and opportunities."
+        "focus": "Understanding and Assessment",
+        "detail": "I would immerse myself in current operations, review existing continuous improvement initiatives, and build relationships with key stakeholders across functions."
       },
       {
         "phase": "Days 30-60",
-        "focus": "Planning and early deployment",
-        "detail": "I would develop targeted lean deployment plans, initiate quick-win projects, and begin coaching key managers and supervisors."
+        "focus": "Planning and Early Wins",
+        "detail": "I would identify priority improvement projects, lead initial Kaizen events, and begin coaching managers and teams on lean tools and techniques."
       },
       {
         "phase": "Days 60-90",
-        "focus": "Embedding and scaling",
-        "detail": "I would support wider roll-out of CI activities, track savings delivery, and refine training programs to build sustainable capability."
+        "focus": "Embedding and Scaling",
+        "detail": "I would establish a structured Kaizen calendar, support project management rigor, and work to embed continuous improvement behaviors across the business."
       }
     ],
-    "closingSummary": "I\u2019m ready to lead continuous improvement efforts that deliver real operational and financial benefits while building a strong lean culture.",
+    "closingSummary": "I\u2019m ready to lead practical, measurable continuous improvement that strengthens operations and builds capability across your manufacturing business.",
     "closingProofPoints": [
-      "Led manufacturing operations through scale-up, improving delivery and resilience.",
-      "Supported profit and working capital improvements through tighter operational controls.",
-      "Managed complex projects and coached teams to maintain high standards."
+      "Led operational improvements during manufacturing scale-up, enhancing delivery and resilience.",
+      "Supported financial improvements delivering nearly \u00a3150k profit uplift and better cash flow.",
+      "Developed compliance tracking systems that improved team progression and operational oversight."
     ],
     "contentNotes": [
-      "The advert provides strong detail on role expectations and culture, enabling focused content.",
-      "Evidence examples are well matched to manufacturing operations and continuous improvement needs.",
-      "Company highlights are limited to market leadership and growth; no further culture details available.",
-      "First 90 days plan is based on typical CI manager onboarding and role priorities."
+      "Advert provides strong detail on role responsibilities and company context, enabling focused content.",
+      "Evidence bank includes relevant manufacturing and operational improvement examples, though not all directly manufacturing; selection prioritizes closest matches.",
+      "Limited direct Six Sigma project examples; emphasis placed on lean and operational leadership experience.",
+      "Company culture signals are limited but suggest collaboration and continuous improvement ethos; content reflects this."
     ]
   },
   "evidenceSelection": {
@@ -254,39 +266,39 @@
         "title": "\u201cProfit and working-capital improvement\u201d",
         "employer": "\u201cNHS Primary Care\u201d",
         "sector": "\u201cPresent\u201d",
-        "matchScore": 0.1184
+        "matchScore": 0.1473
       },
       {
         "id": "13",
         "title": "\u201cRide compliance and operator progression tracking\u201d",
         "employer": "\u201cMerlin Entertainments plc\u201d",
         "sector": "\u201cLeisure / Attractions\u201d",
-        "matchScore": 0.1184
+        "matchScore": 0.1109
       },
       {
         "id": "4",
         "title": "\u201cManufacturing scale-up and delivery discipline\u201d",
         "employer": "\u201cCopper Alloys Ltd\u201d",
         "sector": "\u201cSpecialist Manufacturing\u201d",
-        "matchScore": 0.102
+        "matchScore": 0.0745
       },
       {
         "id": "9",
         "title": "\u201cComplex annual projects and team leadership\u201d",
         "employer": "\u201cExperian\u201d",
         "sector": "\u201cData Services / Regulated Corporate\u201d",
-        "matchScore": 0.0692
+        "matchScore": 0.0745
       },
       {
         "id": "1",
         "title": "\u201cFounder-build of CheckLoops compliance platform\u201d",
         "employer": "\u201cCheckLoops\u201d",
         "sector": "\u201cHealthTech / SaaS / Compliance\u201d",
-        "matchScore": 0.0528
+        "matchScore": 0.0564
       }
     ]
   },
-  "createdAt": "2026-04-03T23:00:23.832Z",
-  "updatedAt": "2026-04-03T23:00:23.832Z",
-  "shortCode": "kl04qbdn"
+  "createdAt": "2026-04-03T23:09:13.738Z",
+  "updatedAt": "2026-04-03T23:09:13.738Z",
+  "shortCode": "5wsc2uqv"
 }

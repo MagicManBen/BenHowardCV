@@ -956,21 +956,21 @@ textarea:focus {
 }
 
 .indicator-box--yes {
-  background: rgba(44, 154, 83, 0.12);
-  color: #1a7a3a;
-  border-color: rgba(44, 154, 83, 0.18);
+  background: rgba(34, 170, 68, 0.18);
+  color: #167a2f;
+  border-color: rgba(34, 170, 68, 0.28);
 }
 
 .indicator-box--no {
-  background: rgba(140, 130, 120, 0.1);
-  color: var(--text-faint);
-  border-color: rgba(140, 130, 120, 0.12);
+  background: rgba(178, 56, 56, 0.12);
+  color: #9d2f2f;
+  border-color: rgba(178, 56, 56, 0.2);
 }
 
 .indicator-box--unknown {
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--text-faint);
-  border-color: rgba(50, 41, 31, 0.08);
+  background: rgba(80, 72, 65, 0.1);
+  color: #4a433c;
+  border-color: rgba(80, 72, 65, 0.16);
 }
 
 /* Right column with score + review button */

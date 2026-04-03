@@ -2909,10 +2909,10 @@ class AppHandler(SimpleHTTPRequestHandler):
       "location": str(payload.get("location", ""))[:500],
       "url": str(payload.get("url", ""))[:2000],
       "salary": str(payload.get("salary", ""))[:200],
-      "description": str(payload.get("description", ""))[:10000],
-      "match_score": int(payload.get("matchScore", 0)),
+      "description": str(payload.get("description", "")).replace("\x00", "")[:10000],
+      "match_score": int(payload.get("matchScore", 0) or 0),
       "posted_at": str(payload.get("postedAt", ""))[:100] or None,
-      "source_labels": payload.get("sourceLabels", []),
+      "source_labels": [str(s) for s in (payload.get("sourceLabels") or []) if s],
       "is_remote": bool(payload.get("isRemote")),
       "is_hybrid": bool(payload.get("isHybrid")),
       "review": review,
@@ -2921,14 +2921,20 @@ class AppHandler(SimpleHTTPRequestHandler):
     try:
       status, result = supabase_request_json(
         config,
-        f"/rest/v1/{SUPABASE_REVIEWED_JOBS_TABLE}",
+        f"/rest/v1/{SUPABASE_REVIEWED_JOBS_TABLE}?on_conflict=fingerprint",
         method="POST",
         payload=row,
-        extra_headers={"Prefer": "return=representation"},
+        extra_headers={
+          "Prefer": "return=representation,resolution=merge-duplicates",
+        },
       )
       if not (200 <= status < 300):
-        err_msg = result.get("message", "Supabase insert failed") if isinstance(result, dict) else f"Status {status}"
-        self.send_json(status, {"error": err_msg})
+        err_detail = ""
+        if isinstance(result, dict):
+          err_detail = result.get("message", "") or result.get("details", "") or result.get("hint", "") or json.dumps(result)
+        else:
+          err_detail = f"Status {status}"
+        self.send_json(status, {"error": f"Supabase insert failed: {err_detail}"})
         return
     except Exception as exc:
       self.send_json(500, {"error": f"Supabase save failed: {exc}"})

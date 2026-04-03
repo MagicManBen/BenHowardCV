@@ -2,8 +2,6 @@ const EDGE_FN_BASE = "https://jntpyqguonknixyksqbp.supabase.co/functions/v1";
 const SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
 const DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html";
-// LEGACY: cv-qr.html is inactive. All QR traffic now routes to the full CV page.
-const DEFAULT_PUBLIC_QR_BASE_URL = DEFAULT_PUBLIC_CV_BASE_URL;
 
 const REVIEW_FIELDS = [
   ["companyName", "Company"],
@@ -71,8 +69,6 @@ const KNOWN_PERSONALISED_KEYS = new Set([
 
 let toastTimer = null;
 let publicCvBaseUrl = DEFAULT_PUBLIC_CV_BASE_URL;
-let publicQrBaseUrl = DEFAULT_PUBLIC_QR_BASE_URL;
-let publicJobBaseUrl = new URL("j/", DEFAULT_PUBLIC_CV_BASE_URL).href;
 
 document.addEventListener("DOMContentLoaded", initLocalAdminPage);
 
@@ -110,11 +106,8 @@ async function initLocalAdminPage() {
     resultUrl:        document.getElementById("result-url"),
     copyUrlButton:    document.getElementById("copy-url-button"),
     openPreviewLink:  document.getElementById("open-preview-link"),
-    openQrLink:       document.getElementById("open-qr-link"),
     downloadCvButton: document.getElementById("download-cv-button"),
     resultQrImage:    document.getElementById("result-qr-image"),
-    resultQrUrl:      document.getElementById("result-qr-url"),
-    copyQrUrlButton:  document.getElementById("copy-qr-url-button"),
     toast:            document.getElementById("toast"),
   };
 
@@ -182,9 +175,8 @@ async function initLocalAdminPage() {
       const response = await publishApplication(publishApplicationData);
       const application = response.application || pendingApplication;
       const fullUrl = response.fullUrl || buildFullEmployerPageUrl(application);
-      const qrUrl = buildQrDestinationUrl(application);
 
-      await renderPublishedResult(dom, application, fullUrl, qrUrl);
+      await renderPublishedResult(dom, application, fullUrl);
       dom.resultPanel.hidden = false;
       dom.confirmStatus.textContent = "Published.";
       showToast(dom, response.publishedToSupabase || response.publishedToGitHub ? "CV saved." : "Saved locally.");
@@ -208,7 +200,7 @@ async function initLocalAdminPage() {
       if (!url) return;
       try {
         await navigator.clipboard.writeText(url);
-        showToast(dom, "Full URL copied.");
+        showToast(dom, "URL copied.");
       } catch {
         dom.resultUrl.focus();
         dom.resultUrl.select();
@@ -216,28 +208,15 @@ async function initLocalAdminPage() {
     });
   }
 
-  if (dom.copyQrUrlButton) {
-    dom.copyQrUrlButton.addEventListener("click", async () => {
-      const url = dom.resultQrUrl ? dom.resultQrUrl.value : "";
-      if (!url) return;
-      try {
-        await navigator.clipboard.writeText(url);
-        showToast(dom, "QR URL copied.");
-      } catch {
-        if (dom.resultQrUrl) { dom.resultQrUrl.focus(); dom.resultQrUrl.select(); }
-      }
-    });
-  }
-
   dom.downloadCvButton.addEventListener("click", async () => {
-    var qrUrl = dom.resultQrUrl ? dom.resultQrUrl.value : "";
+    var cvUrl = dom.resultUrl ? dom.resultUrl.value : "";
     var roleTitle = dom.resultRole ? dom.resultRole.value : "";
     var companyName = dom.resultCompany ? dom.resultCompany.value : "";
-    if (!qrUrl) { showToast(dom, "No short URL available yet."); return; }
+    if (!cvUrl) { showToast(dom, "No CV URL available yet."); return; }
     dom.downloadCvButton.disabled = true;
     dom.downloadCvButton.textContent = "Generating PDF\u2026";
     try {
-      await downloadCvWithQr(qrUrl, roleTitle, companyName);
+      await downloadCvWithQr(cvUrl, roleTitle, companyName);
       showToast(dom, "PDF downloaded.");
     } catch (err) {
       showToast(dom, "Download failed: " + (err.message || err));
@@ -784,32 +763,19 @@ function buildEvidenceSelectionFromContent(content) {
   };
 }
 
-async function renderPublishedResult(dom, application, fullUrl, qrUrl) {
+async function renderPublishedResult(dom, application, fullUrl) {
   dom.resultCompany.value = application.companyName || "";
   dom.resultRole.value = application.roleTitle || "";
   dom.resultLocation.value = application.location || "";
   dom.resultRef.value = application.ref || "";
   dom.resultUrl.value = fullUrl;
 
-  if (dom.resultQrUrl) dom.resultQrUrl.value = qrUrl;
   if (dom.openPreviewLink) dom.openPreviewLink.href = fullUrl;
-  if (dom.openQrLink) dom.openQrLink.href = qrUrl;
-  try { await renderQrImage(dom.resultQrImage, qrUrl); } catch (_) { dom.resultQrImage.hidden = true; }
+  try { await renderQrImage(dom.resultQrImage, fullUrl); } catch (_) { dom.resultQrImage.hidden = true; }
 }
 
 function buildFullEmployerPageUrl(app) {
   return publicCvBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
-}
-function buildDirectQrPageUrl(app) {
-  return publicQrBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
-}
-function buildShortQrUrl(app) {
-  // Use the ref-based short route as the stable QR target.
-  // This avoids hard failures when a short-code redirect file was not published.
-  return publicJobBaseUrl + "?r=" + encodeURIComponent(app.ref || "");
-}
-function buildQrDestinationUrl(app) {
-  return buildShortQrUrl(app) || buildDirectQrPageUrl(app);
 }
 
 function buildEmbeddedPayload(a) {
@@ -887,9 +853,9 @@ async function renderQrImage(img, text) {
   img.hidden = false;
 }
 
-async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
+async function downloadCvWithQr(cvUrl, roleTitle, companyName) {
   /* 1. Generate QR data-URI */
-  var qr = new window.QRious({ value: shortUrl, size: 240, level: "M", background: "#ffffff", foreground: "#284a5b" });
+  var qr = new window.QRious({ value: cvUrl, size: 240, level: "M", background: "#ffffff", foreground: "#284a5b" });
   var qrDataUrl = qr.toDataURL();
 
   /* 2. Fetch the base CV HTML */
@@ -906,7 +872,7 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
     return (
       '<section class="sidebar-card" style="margin-top:auto; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">'
       + '<h2>Tailored CV</h2>'
-      + '<a href="' + esc(shortUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.45rem; background:#fff; padding:6px; border-radius:6px; line-height:0;">'
+      + '<a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.45rem; background:#fff; padding:6px; border-radius:6px; line-height:0;">'
       + '<img src="' + qrDataUrl + '" width="100" height="100" alt="QR code" style="display:block; width:100px; height:100px;">'
       + '</a>'
       + '<p style="margin-top:0.45rem; font-size:0.65rem; line-height:1.4; color:rgba(245,245,241,0.88);">' + label + '</p>'

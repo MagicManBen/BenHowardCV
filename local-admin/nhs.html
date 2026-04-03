@@ -10,7 +10,8 @@
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
     <a href="indeed.html">Indeed</a>
-    <a href="jobspy.html">Multi-Site</a>
+    <a href="jobspy.html">Job Search</a>
+    <a href="reviews.html">Reviews</a>
     <a href="reed.html">Reed</a>
     <a href="nhs.html" class="active">NHS Jobs</a>
     <a href="adzuna.html">Adzuna</a>
@@ -61,19 +62,14 @@
 
   <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
-    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
-    var EDGE_FN = SUPABASE_URL + "/functions/v1/search-nhs-jobs";
-
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
       try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref&limit=1", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        if (!res.ok) throw new Error(res.status);
-        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "green", "Connected");
+        var res = await fetch("/api/status");
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || ("Status failed (" + res.status + ")"));
+        JobBoardUI.setStatus("dot-supabase", "lbl-supabase", data.supabaseAccessOk ? "green" : "amber", data.supabaseAccessOk ? "Connected" : "Optional");
       } catch (e) {
         JobBoardUI.setStatus("dot-supabase", "lbl-supabase", "red", e.message);
       }
@@ -88,18 +84,14 @@
       document.getElementById("results").innerHTML = '<p class="empty-msg">Searching NHS Jobs...</p>';
 
       try {
-        var res = await fetch(EDGE_FN, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            keyword: document.getElementById("q").value,
-            location: document.getElementById("loc").value,
-            distance: document.getElementById("dist").value,
-            page: 1,
-            limit: 50,
-            sort: "publicationDateDesc"
-          })
-        });
+        var url = new URL("/api/nhs-search", window.location.origin);
+        url.searchParams.set("q", document.getElementById("q").value);
+        url.searchParams.set("l", document.getElementById("loc").value);
+        url.searchParams.set("distance", document.getElementById("dist").value);
+        url.searchParams.set("page", "1");
+        url.searchParams.set("limit", "50");
+        url.searchParams.set("sort", "publicationDateDesc");
+        var res = await fetch(url.toString());
         var data = await res.json();
         if (!res.ok || data.error) throw new Error(data.error || ("Search failed (" + res.status + ")"));
 

@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi-Site Search</title>
+  <title>Job Search</title>
   <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
+    <a href="jobspy.html" class="active">Job Search</a>
+    <a href="reviews.html">Reviews</a>
     <a href="indeed.html">Indeed</a>
-    <a href="jobspy.html" class="active">Multi-Site</a>
     <a href="reed.html">Reed</a>
     <a href="nhs.html">NHS Jobs</a>
     <a href="adzuna.html">Adzuna</a>
@@ -19,267 +20,569 @@
   </nav>
 
   <main class="page-shell">
-    <section class="page-hero">
-      <p class="eyebrow">Job Search</p>
-      <h1 class="page-title">Multi-Site</h1>
-      <p class="page-subtitle">One search across the boards already wired into your system, with the multi-board GitHub direction coming from JobSpy.</p>
-      <div class="source-tabs">
-        <a href="indeed.html">Indeed</a>
-        <a href="jobspy.html" class="active">Multi-Site</a>
+    <section class="page-hero page-hero--search">
+      <p class="eyebrow">Job Search Workspace</p>
+      <h1 class="page-title">One ranked list across every source</h1>
+      <p class="page-subtitle">This view pulls all configured sources, collapses duplicates, scores each advert against your CV, and starts from the saved criteria in <code>local-admin/job-search-preferences.json</code>.</p>
+      <div class="hero-note-grid">
+        <div class="hero-note">
+          <strong>Profile</strong>
+          <span id="profile-label">Loading…</span>
+        </div>
+        <div class="hero-note">
+          <strong>Base location</strong>
+          <span id="profile-location">Leek, Staffordshire</span>
+        </div>
+        <div class="hero-note">
+          <strong>CV basis</strong>
+          <span id="profile-cv">BH CV.html</span>
+        </div>
       </div>
     </section>
 
     <div class="page-grid">
-      <section class="note-card">
-        Multi-board repo found: <a href="https://github.com/speedyapply/JobSpy" target="_blank" rel="noopener noreferrer">speedyapply/JobSpy</a>. This tab uses that as the multi-source reference and combines your available sources: Indeed, Reed, NHS Jobs, and Adzuna.
+      <section class="status-bar status-bar--split" id="source-status">
+        <div class="status-item"><span class="status-dot status-dot--grey"></span> Loading source status…</div>
       </section>
 
-      <section class="surface-card search-panel">
-        <div class="search-grid">
-          <div class="field field--span-5">
-            <label for="q">Keywords</label>
-            <input id="q" value="operations manager OR continuous improvement OR factory manager">
+      <section class="surface-card search-workspace">
+        <div class="workspace-head">
+          <div>
+            <h2 class="section-title">Saved Search Criteria</h2>
+            <p class="section-copy">Defaults come from the saved preferences file, but every control below can be overridden on the fly.</p>
+          </div>
+          <div class="workspace-actions">
+            <button id="search-btn" onclick="runSearch()">Run Search</button>
+            <button class="button--ghost" onclick="resetToProfile()">Reset To Saved Profile</button>
+          </div>
+        </div>
+
+        <div class="search-grid search-grid--wide">
+          <div class="field field--span-6">
+            <label for="q">Search keywords</label>
+            <input id="q" placeholder="practice manager">
           </div>
           <div class="field field--span-3">
-            <label for="loc">Location</label>
-            <input id="loc" value="Staffordshire">
+            <label for="location">Search location</label>
+            <input id="location" placeholder="Leek, Staffordshire">
+          </div>
+          <div class="field field--span-1 field--compact">
+            <label for="radius">Miles</label>
+            <input id="radius" type="number" min="1" max="100" value="20">
+          </div>
+          <div class="field field--span-1 field--compact">
+            <label for="days">Days old</label>
+            <input id="days" type="number" min="1" max="90" value="50">
+          </div>
+          <div class="field field--span-1 field--compact">
+            <label for="per-source">Per source</label>
+            <input id="per-source" type="number" min="5" max="200" value="100">
           </div>
           <div class="field field--span-2 field--compact">
-            <label for="distance">Radius</label>
-            <input id="distance" type="number" min="1" max="100" value="25">
+            <label for="salary-min">Minimum salary</label>
+            <input id="salary-min" type="number" min="0" step="1000" value="30000">
           </div>
           <div class="field field--span-2 field--compact">
-            <label for="limit">Per source</label>
-            <input id="limit" type="number" min="1" max="25" value="10">
-          </div>
-          <div class="field field--span-2 field--compact">
-            <label for="days">Posted within (days)</label>
-            <input id="days" type="number" min="1" max="30" placeholder="Any">
-          </div>
-          <div class="field field--span-2 field--compact">
-            <label for="country">Indeed country</label>
-            <select id="country">
-              <option value="UK" selected>UK</option>
-              <option value="USA">USA</option>
-              <option value="CANADA">Canada</option>
-              <option value="AUSTRALIA">Australia</option>
-              <option value="IRELAND">Ireland</option>
+            <label for="sort-by">Sort results</label>
+            <select id="sort-by">
+              <option value="best_fit">Best fit</option>
+              <option value="salary_desc">Highest pay</option>
+              <option value="newest">Newest</option>
+              <option value="closest">Closest</option>
             </select>
           </div>
         </div>
 
-        <div class="search-actions">
-          <button id="search-btn" onclick="runSearch()">Search All Sources</button>
-          <button class="button--ghost" onclick="loadSample()">Load sample</button>
-          <span class="search-summary" id="search-summary">Ready.</span>
+        <div class="toggle-cluster">
+          <label class="toggle-pill"><input type="checkbox" id="remote-only"> <span>Remote or hybrid only</span></label>
+          <label class="toggle-pill"><input type="checkbox" id="hide-low-fit" checked> <span>Hide low-fit roles</span></label>
+          <label class="toggle-pill"><input type="checkbox" id="show-unknown-salary" checked> <span>Keep salary-not-stated roles</span></label>
+        </div>
+
+        <div class="source-filter-bar">
+          <span class="filter-heading">Sources</span>
+          <label class="toggle-pill"><input type="checkbox" class="source-toggle" value="indeed" checked> <span>Indeed</span></label>
+          <label class="toggle-pill"><input type="checkbox" class="source-toggle" value="reed" checked> <span>Reed</span></label>
+          <label class="toggle-pill"><input type="checkbox" class="source-toggle" value="nhs" checked> <span>NHS Jobs</span></label>
+          <label class="toggle-pill"><input type="checkbox" class="source-toggle" value="adzuna" checked> <span>Adzuna</span></label>
+        </div>
+
+        <div class="search-summary-bar">
+          <span class="search-summary" id="search-summary">Loading saved profile…</span>
+          <span class="search-summary search-summary--muted" id="profile-file">Preferences file: local-admin/job-search-preferences.json</span>
         </div>
       </section>
 
-      <section class="results-shell">
-        <div id="source-counts"></div>
-        <div id="results"><p class="empty-msg">Run a search to combine multiple sources.</p></div>
+      <section class="surface-card result-overview">
+        <div class="workspace-head">
+          <div>
+            <h2 class="section-title">Result Overview</h2>
+            <p class="section-copy">Top matches are ranked first against your CV and current priorities. You can re-sort locally without re-running the search.</p>
+          </div>
+        </div>
+        <div id="result-stats" class="result-chip-row">
+          <span class="result-chip">Waiting for first search…</span>
+        </div>
+      </section>
+
+      <section class="results-shell results-shell--stacked">
+        <div id="results-groups">
+          <p class="empty-msg">Running initial search…</p>
+        </div>
       </section>
     </div>
   </main>
 
   <script src="job-board-ui.js"></script>
   <script>
-    var SUPABASE_URL = "https://jntpyqguonknixyksqbp.supabase.co";
+    var state = {
+      preferences: null,
+      cvProfile: null,
+      rawJobs: [],
+      sourceStatus: [],
+      stats: null,
+      reviewedJobs: {}
+    };
+
+    document.addEventListener("DOMContentLoaded", init);
+
+    async function init() {
+      bindFilterEvents();
+      await loadReviewedJobs();
+      await loadProfile();
+      await runSearch();
+    }
+
+    function bindFilterEvents() {
+      ["remote-only", "hide-low-fit", "show-unknown-salary", "salary-min", "sort-by"].forEach(function(id) {
+        var node = document.getElementById(id);
+        if (node) node.addEventListener("change", applyClientFilters);
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(".source-toggle"), function(node) {
+        node.addEventListener("change", applyClientFilters);
+      });
+    }
+
+    async function loadProfile() {
+      var res = await fetch("/api/job-search-preferences");
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || ("Profile load failed (" + res.status + ")"));
+      state.preferences = data.preferences;
+      state.cvProfile = data.cvProfile;
+
+      var defaults = (state.preferences && state.preferences.searchDefaults) || {};
+      var home = (state.preferences && state.preferences.homeLocation) || {};
+      document.getElementById("q").value = defaults.keywords || "";
+      document.getElementById("location").value = defaults.location || home.label || "";
+      document.getElementById("radius").value = defaults.radiusMiles || home.radiusMiles || 50;
+      document.getElementById("days").value = defaults.postedWithinDays || 30;
+      document.getElementById("per-source").value = defaults.perSourceLimit || 25;
+      document.getElementById("salary-min").value = defaults.minimumSalaryAnnual || 30000;
+      document.getElementById("sort-by").value = defaults.sortBy || "best_fit";
+      document.getElementById("remote-only").checked = !!defaults.remoteOnly;
+      document.getElementById("hide-low-fit").checked = defaults.hideLowFit !== false;
+      document.getElementById("show-unknown-salary").checked = defaults.showUnknownSalary !== false;
+
+      var sources = state.preferences.sources || {};
+      Array.prototype.forEach.call(document.querySelectorAll(".source-toggle"), function(node) {
+        node.checked = sources[node.value] !== false;
+      });
+
+      document.getElementById("profile-label").textContent = state.preferences.profileName || "Saved profile";
+      document.getElementById("profile-location").textContent = (home.label || "Leek, Staffordshire") + (home.postcode ? " · " + home.postcode : "");
+      document.getElementById("profile-cv").textContent = (state.cvProfile && state.cvProfile.roleTitles && state.cvProfile.roleTitles.length)
+        ? state.cvProfile.roleTitles.slice(0, 3).join(" / ")
+        : "BH CV.html";
+      document.getElementById("profile-file").textContent = "Preferences file: " + (data.preferencesPath || "local-admin/job-search-preferences.json");
+      document.getElementById("search-summary").textContent = "Saved profile loaded.";
+    }
+
+    function resetToProfile() {
+      if (!state.preferences) return;
+      var defaults = state.preferences.searchDefaults || {};
+      var home = state.preferences.homeLocation || {};
+      document.getElementById("q").value = defaults.keywords || "";
+      document.getElementById("location").value = defaults.location || home.label || "";
+      document.getElementById("radius").value = defaults.radiusMiles || home.radiusMiles || 50;
+      document.getElementById("days").value = defaults.postedWithinDays || 30;
+      document.getElementById("per-source").value = defaults.perSourceLimit || 25;
+      document.getElementById("salary-min").value = defaults.minimumSalaryAnnual || 30000;
+      document.getElementById("sort-by").value = defaults.sortBy || "best_fit";
+      document.getElementById("remote-only").checked = !!defaults.remoteOnly;
+      document.getElementById("hide-low-fit").checked = defaults.hideLowFit !== false;
+      document.getElementById("show-unknown-salary").checked = defaults.showUnknownSalary !== false;
+      Array.prototype.forEach.call(document.querySelectorAll(".source-toggle"), function(node) {
+        node.checked = (state.preferences.sources || {})[node.value] !== false;
+      });
+      applyClientFilters();
+      document.getElementById("search-summary").textContent = "Reset to saved profile.";
+    }
+
+    function selectedSources() {
+      return Array.prototype.slice.call(document.querySelectorAll(".source-toggle:checked")).map(function(node) {
+        return node.value;
+      });
+    }
 
     async function runSearch() {
       var btn = document.getElementById("search-btn");
-      var summary = document.getElementById("search-summary");
-      var q = document.getElementById("q").value;
-      var loc = document.getElementById("loc").value;
-      var distance = parseInt(document.getElementById("distance").value, 10) || 25;
-      var limit = parseInt(document.getElementById("limit").value, 10) || 10;
-      var days = document.getElementById("days").value.trim();
-      var country = document.getElementById("country").value;
-
       btn.disabled = true;
       btn.textContent = "Searching...";
-      summary.textContent = "Searching all sources...";
-      document.getElementById("results").innerHTML = '<p class="empty-msg">Combining job boards...</p>';
-      document.getElementById("source-counts").innerHTML = "";
-
-      var indeedUrl = new URL("/api/indeed-search", window.location.origin);
-      indeedUrl.searchParams.set("q", q);
-      indeedUrl.searchParams.set("l", loc);
-      indeedUrl.searchParams.set("distance", String(distance));
-      indeedUrl.searchParams.set("limit", String(limit));
-      indeedUrl.searchParams.set("country", country);
-      if (days) indeedUrl.searchParams.set("days", days);
-
-      var reedUrl = new URL("/api/reed-search", window.location.origin);
-      reedUrl.searchParams.set("q", q);
-      reedUrl.searchParams.set("l", loc);
-      reedUrl.searchParams.set("distance", String(distance));
-      reedUrl.searchParams.set("limit", String(limit));
-
-      var adzunaUrl = new URL("/api/adzuna-search", window.location.origin);
-      adzunaUrl.searchParams.set("q", q);
-      adzunaUrl.searchParams.set("l", loc);
-      adzunaUrl.searchParams.set("distance", String(distance));
-      adzunaUrl.searchParams.set("days", String(days ? parseInt(days, 10) : 14));
-      adzunaUrl.searchParams.set("sort", "date");
-      adzunaUrl.searchParams.set("page", "1");
-      adzunaUrl.searchParams.set("limit", String(limit));
+      document.getElementById("search-summary").textContent = "Pulling all enabled sources…";
+      document.getElementById("results-groups").innerHTML = '<p class="empty-msg">Searching all sources and collapsing duplicates…</p>';
 
       try {
-        var results = await Promise.allSettled([
-          fetch(indeedUrl.toString()).then(readJson),
-          fetch(reedUrl.toString()).then(readJson),
-          fetch(SUPABASE_URL + "/functions/v1/search-nhs-jobs", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              keyword: q,
-              location: loc,
-              distance: distance,
-              limit: limit,
-              page: 1,
-              sort: "publicationDateDesc"
-            })
-          }).then(readJson),
-          fetch(adzunaUrl.toString()).then(readJson)
-        ]);
+        var url = new URL("/api/job-search", window.location.origin);
+        url.searchParams.set("q", document.getElementById("q").value);
+        url.searchParams.set("location", document.getElementById("location").value);
+        url.searchParams.set("distance", document.getElementById("radius").value);
+        url.searchParams.set("days", document.getElementById("days").value);
+        url.searchParams.set("limit", document.getElementById("per-source").value);
+        url.searchParams.set("sort", document.getElementById("sort-by").value);
+        url.searchParams.set("sources", selectedSources().join(","));
 
-        var counts = [];
-        var jobs = [];
-        var notes = [];
+        var res = await fetch(url.toString());
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || ("Search failed (" + res.status + ")"));
 
-        if (results[0].status === "fulfilled" && !results[0].value.error) {
-          var indeedJobs = (results[0].value.jobs || []).map(function(job) {
-            var badges = [];
-            if (job.remote) badges.push({ label: "Remote", tone: "brand" });
-            return {
-              source: "Indeed",
-              title: job.title,
-              company: job.company,
-              location: job.location,
-              salary: job.salary,
-              url: job.job_url,
-              applyUrl: job.job_url_direct,
-              dateText: job.date_posted ? "Posted " + JobBoardUI.fmtDate(job.date_posted) : "",
-              dateSort: job.date_posted || "",
-              description: job.description ? job.description.substring(0, 700) : "",
-              badges: badges
-            };
-          });
-          counts.push({ label: "Indeed", count: indeedJobs.length });
-          jobs = jobs.concat(indeedJobs);
-        }
-
-        if (results[1].status === "fulfilled" && !results[1].value.error) {
-          if (results[1].value.requiresApiKey) {
-            counts.push({ label: "Reed", count: "site" });
-            notes.push('<div class="note-card"><strong>Reed website fallback</strong><p>Local Reed API credentials are not configured, so Reed results open on the website.</p><p><a class="button--ghost" href="' + JobBoardUI.esc(results[1].value.fallbackUrl || "https://www.reed.co.uk/jobs") + '" target="_blank" rel="noopener noreferrer">Open Reed results</a></p></div>');
-          } else {
-            var reedJobs = (results[1].value.jobs || []).map(function(job) {
-              var badges = [];
-              if (job.expirationDate && JobBoardUI.isClosingSoon(job.expirationDate)) badges.push({ label: "Closing Soon", tone: "accent" });
-              if (job.applications !== undefined) badges.push({ label: job.applications + " apps", tone: "neutral" });
-              return {
-                source: "Reed",
-                title: job.title,
-                company: job.employer,
-                location: job.location,
-                salary: job.salary,
-                url: job.url,
-                dateText: job.postDate ? "Posted " + JobBoardUI.fmtDate(job.postDate) : "",
-                dateSort: job.postDate || "",
-                description: job.description ? job.description.substring(0, 700) : "",
-                badges: badges
-              };
-            });
-            counts.push({ label: "Reed", count: reedJobs.length });
-            jobs = jobs.concat(reedJobs);
-          }
-        }
-
-        if (results[2].status === "fulfilled" && !results[2].value.error) {
-          var nhsJobs = (results[2].value.jobs || []).map(function(job) {
-            var badges = [];
-            if (job.closeDate && JobBoardUI.isClosingSoon(job.closeDate)) badges.push({ label: "Closing Soon", tone: "accent" });
-            return {
-              source: "NHS Jobs",
-              title: job.title,
-              company: job.employer,
-              location: job.location,
-              salary: job.salary,
-              url: job.url,
-              dateText: job.postDate ? "Posted " + JobBoardUI.fmtDate(job.postDate) : "",
-              dateSort: job.postDate || "",
-              description: job.description ? job.description.substring(0, 700) : "",
-              badges: badges
-            };
-          });
-          counts.push({ label: "NHS Jobs", count: nhsJobs.length });
-          jobs = jobs.concat(nhsJobs);
-        }
-
-        if (results[3].status === "fulfilled" && !results[3].value.error) {
-          var adzunaJobs = (results[3].value.jobs || []).map(function(job) {
-            var badges = [];
-            if (job.contractType) badges.push({ label: job.contractType, tone: "neutral" });
-            if (job.contractTime) badges.push({ label: job.contractTime, tone: "brand" });
-            return {
-              source: "Adzuna",
-              title: job.title,
-              company: job.company,
-              location: job.location,
-              salary: job.salary,
-              url: job.url,
-              dateText: job.created ? "Posted " + JobBoardUI.fmtDate(job.created) : "",
-              dateSort: job.created || "",
-              description: job.description ? job.description.substring(0, 700) : "",
-              badges: badges
-            };
-          });
-          counts.push({ label: "Adzuna", count: adzunaJobs.length });
-          jobs = jobs.concat(adzunaJobs);
-        }
-
-        jobs.sort(function(a, b) {
-          return new Date(b.dateSort || 0).getTime() - new Date(a.dateSort || 0).getTime();
-        });
-
-        document.getElementById("source-counts").innerHTML = counts.length
-          ? (notes.join("") + '<div class="result-chip-row">' + counts.map(function(item) {
-              return '<span class="result-chip">' + JobBoardUI.esc(item.label) + ': ' + JobBoardUI.esc(item.count) + "</span>";
-            }).join("") + "</div>")
-          : "";
-
-        JobBoardUI.renderJobs("results", jobs, {
-          summary: jobs.length + " combined adverts across " + counts.length + " sources",
-          emptyText: "No combined results returned."
-        });
-        summary.textContent = "Loaded " + jobs.length + " adverts from " + counts.length + " sources.";
+        state.rawJobs = data.jobs || [];
+        state.sourceStatus = data.sourceStatus || [];
+        state.stats = data.stats || null;
+        renderSourceStatus();
+        applyClientFilters();
       } catch (error) {
-        document.getElementById("results").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(error.message) + "</p>";
-        summary.textContent = "Search failed.";
+        document.getElementById("results-groups").innerHTML = '<p class="error-msg">' + JobBoardUI.esc(error.message) + "</p>";
+        document.getElementById("search-summary").textContent = "Search failed.";
       } finally {
         btn.disabled = false;
-        btn.textContent = "Search All Sources";
+        btn.textContent = "Run Search";
       }
     }
 
-    async function readJson(res) {
-      var data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || ("Request failed (" + res.status + ")"));
-      }
-      return data;
+    function renderSourceStatus() {
+      var html = state.sourceStatus.map(function(item) {
+        var tone = item.ok ? "green" : "red";
+        if (item.ok && item.requiresApiKey) tone = "amber";
+        return '<div class="status-item">'
+          + '<span class="status-dot status-dot--' + JobBoardUI.esc(tone) + '"></span> '
+          + JobBoardUI.esc(item.sourceLabel) + ': '
+          + '<span>' + JobBoardUI.esc(item.ok ? (item.count + " loaded") : item.message) + "</span>"
+          + "</div>";
+      }).join("");
+      document.getElementById("source-status").innerHTML = html || '<div class="status-item"><span class="status-dot status-dot--grey"></span> No source status yet.</div>';
     }
 
-    function loadSample() {
-      document.getElementById("q").value = "operations manager OR continuous improvement OR factory manager";
-      document.getElementById("loc").value = "Staffordshire";
-      document.getElementById("distance").value = "25";
-      document.getElementById("limit").value = "10";
-      document.getElementById("days").value = "";
-      document.getElementById("country").value = "UK";
-      document.getElementById("search-summary").textContent = "Sample values loaded.";
+    function applyClientFilters() {
+      var sources = selectedSources();
+      var remoteOnly = document.getElementById("remote-only").checked;
+      var hideLowFit = document.getElementById("hide-low-fit").checked;
+      var showUnknownSalary = document.getElementById("show-unknown-salary").checked;
+      var minSalary = parseInt(document.getElementById("salary-min").value, 10) || 0;
+      var sortBy = document.getElementById("sort-by").value;
+
+      var jobs = (state.rawJobs || []).filter(function(job) {
+        if (sources.length && !(job.sourceKeys || []).some(function(source) { return sources.indexOf(source) !== -1; })) return false;
+        if (remoteOnly && !job.isRemote && !job.isHybrid) return false;
+        if (hideLowFit && (job.matchScore || 0) < 40) return false;
+        var salary = job.salaryMaxAnnual || job.salaryMinAnnual;
+        if (minSalary) {
+          if (salary === null || salary === undefined) return showUnknownSalary;
+          if (salary < minSalary) return false;
+        }
+        return true;
+      });
+
+      jobs = sortJobs(jobs, sortBy);
+      renderOverview(jobs);
+      renderGroupedJobs(jobs);
+      document.getElementById("search-summary").textContent = "Showing " + jobs.length + " ranked adverts.";
+    }
+
+    function sortJobs(jobs, sortBy) {
+      var list = jobs.slice();
+      list.sort(function(a, b) {
+        if (sortBy === "salary_desc") {
+          return compareDesc(a.salaryMaxAnnual || a.salaryMinAnnual || -1, b.salaryMaxAnnual || b.salaryMinAnnual || -1)
+            || compareDesc(a.matchScore || 0, b.matchScore || 0);
+        }
+        if (sortBy === "newest") {
+          return compareDesc(dateValue(a.postedAt), dateValue(b.postedAt))
+            || compareDesc(a.matchScore || 0, b.matchScore || 0);
+        }
+        if (sortBy === "closest") {
+          return compareDesc(a.locationScore || 0, b.locationScore || 0)
+            || compareDesc(a.matchScore || 0, b.matchScore || 0);
+        }
+        return compareDesc(a.matchScore || 0, b.matchScore || 0)
+          || compareDesc(a.salaryMaxAnnual || a.salaryMinAnnual || -1, b.salaryMaxAnnual || b.salaryMinAnnual || -1)
+          || compareDesc(dateValue(a.postedAt), dateValue(b.postedAt));
+      });
+      return list;
+    }
+
+    function compareDesc(a, b) {
+      return (b || 0) - (a || 0);
+    }
+
+    function dateValue(value) {
+      var parsed = Date.parse(value || "");
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function renderOverview(jobs) {
+      var top = jobs.filter(function(job) { return (job.matchScore || 0) >= 80; }).length;
+      var strong = jobs.filter(function(job) { return (job.matchScore || 0) >= 60 && (job.matchScore || 0) < 80; }).length;
+      var review = jobs.filter(function(job) { return (job.matchScore || 0) >= 40 && (job.matchScore || 0) < 60; }).length;
+      var chips = [];
+      chips.push('<span class="result-chip">Visible: ' + JobBoardUI.esc(jobs.length) + "</span>");
+      chips.push('<span class="result-chip">Top matches: ' + JobBoardUI.esc(top) + "</span>");
+      chips.push('<span class="result-chip">Strong matches: ' + JobBoardUI.esc(strong) + "</span>");
+      chips.push('<span class="result-chip">Worth reviewing: ' + JobBoardUI.esc(review) + "</span>");
+      if (state.stats) {
+        chips.push('<span class="result-chip">Duplicates removed: ' + JobBoardUI.esc(state.stats.duplicatesRemoved || 0) + "</span>");
+      }
+      document.getElementById("result-stats").innerHTML = chips.join("");
+    }
+
+    function renderGroupedJobs(jobs) {
+      if (!jobs.length) {
+        document.getElementById("results-groups").innerHTML = '<p class="empty-msg">No jobs match the current filters.</p>';
+        return;
+      }
+
+      var groups = [
+        { key: "Top Match", title: "Top Matches", min: 80 },
+        { key: "Strong Match", title: "Strong Matches", min: 60, max: 79 },
+        { key: "Worth Reviewing", title: "Worth Reviewing", min: 40, max: 59 },
+        { key: "Low Match", title: "Low Match", min: 0, max: 39 }
+      ];
+
+      var html = groups.map(function(group) {
+        var items = jobs.filter(function(job) {
+          var score = job.matchScore || 0;
+          if (group.max === undefined) return score >= group.min;
+          return score >= group.min && score <= group.max;
+        });
+        if (!items.length) return "";
+        return '<section class="group-block">'
+          + '<div class="results-header"><p class="result-count">' + JobBoardUI.esc(group.title + " · " + items.length) + "</p></div>"
+          + '<div class="jobs-grid jobs-grid--stacked">' + items.map(renderJobCard).join("") + "</div>"
+          + "</section>";
+      }).join("");
+
+      document.getElementById("results-groups").innerHTML = html;
+    }
+
+    function detectIndicator(job, key) {
+      var text = ((job.title || "") + " " + (job.description || "") + " " + (job.location || "") + " " + (job.salary || "") + " " + (job.salaryText || "") + " " + (job.metaText || "")).toLowerCase();
+      if (key === "remote") {
+        if (job.isRemote) return true;
+        if (/\b(remote|work from home|wfh)\b/.test(text)) return true;
+        if (job.isHybrid || /\bhybrid\b/.test(text)) return "hybrid";
+        return false;
+      }
+      if (key === "nearby") {
+        if (job.commuteMinutes !== undefined && job.commuteMinutes !== null) return job.commuteMinutes <= 15;
+        if (job.distanceMiles !== undefined && job.distanceMiles !== null) return job.distanceMiles <= 10;
+        return "unknown";
+      }
+      if (key === "fresh") {
+        if (!job.postedAt) return "unknown";
+        var age = (Date.now() - new Date(job.postedAt).getTime()) / 86400000;
+        return age <= 14;
+      }
+      if (key === "fulltime") {
+        if (/\b(full[\s-]?time)\b/.test(text)) return true;
+        if (/\b(part[\s-]?time)\b/.test(text)) return false;
+        return "unknown";
+      }
+      if (key === "permanent") {
+        if (/\b(permanent)\b/.test(text)) return true;
+        if (/\b(temporary|temp|contract|fixed[\s-]?term|freelance)\b/.test(text)) return false;
+        return "unknown";
+      }
+      return "unknown";
+    }
+
+    function indicatorBox(label, value) {
+      if (value === true) return '<span class="indicator-box indicator-box--yes" title="' + JobBoardUI.esc(label) + '">✓ ' + JobBoardUI.esc(label) + '</span>';
+      if (value === false) return '<span class="indicator-box indicator-box--no" title="' + JobBoardUI.esc(label) + '">✗ ' + JobBoardUI.esc(label) + '</span>';
+      if (value === "hybrid") return '<span class="indicator-box indicator-box--yes" title="Hybrid">✓ Hybrid</span>';
+      return '<span class="indicator-box indicator-box--unknown" title="' + JobBoardUI.esc(label) + '">? ' + JobBoardUI.esc(label) + '</span>';
+    }
+
+    function jobFingerprint(job) {
+      return btoa(unescape(encodeURIComponent((job.title || "") + "|" + (job.company || "") + "|" + (job.url || "")))).replace(/[^a-zA-Z0-9]/g, "").substring(0, 32);
+    }
+
+    function renderJobCard(job) {
+      var sourceChips = (job.sourceLabels || []).map(function(label) {
+        return '<span class="source-pill">' + JobBoardUI.esc(label) + "</span>";
+      }).join("");
+      var salary = formatSalary(job);
+      var posted = job.postedAt ? "Posted " + JobBoardUI.fmtDate(job.postedAt) : "";
+      var closing = job.closingAt ? "Closes " + JobBoardUI.fmtDate(job.closingAt) : "";
+      var metaLine = [job.company, job.location, salary].filter(Boolean).join(" · ");
+      var reasons = (job.matchReasons || []).map(function(reason) {
+        return '<li>' + JobBoardUI.esc(reason) + "</li>";
+      }).join("");
+      var tags = (job.tags || []).map(function(tag) {
+        return '<span class="badge badge--' + JobBoardUI.esc(tag.tone || "neutral") + '">' + JobBoardUI.esc(tag.label) + "</span>";
+      }).join("");
+
+      var indicators = ''
+        + indicatorBox("Remote", detectIndicator(job, "remote"))
+        + indicatorBox("Near", detectIndicator(job, "nearby"))
+        + indicatorBox("< 14d", detectIndicator(job, "fresh"))
+        + indicatorBox("Full-time", detectIndicator(job, "fulltime"))
+        + indicatorBox("Permanent", detectIndicator(job, "permanent"));
+
+      var fp = jobFingerprint(job);
+      var isReviewed = !!state.reviewedJobs[fp];
+      var reviewBtnClass = isReviewed ? "review-btn review-btn--active" : "review-btn";
+      var reviewBtnLabel = isReviewed ? "✓ Reviewed" : "⊕ Review";
+      var reviewBtnTitle = isReviewed ? "Already sent for AI review" : "Send to AI for review against your CV";
+
+      return ''
+        + '<article class="job-card job-card--ranked" data-fp="' + JobBoardUI.esc(fp) + '">'
+        + '<div class="job-card__top">'
+        + '<div class="job-card__title-block">'
+        + '<div class="job-card__sources">' + sourceChips + "</div>"
+        + '<h3><a href="' + JobBoardUI.esc(job.url || "#") + '" target="_blank" rel="noopener noreferrer">' + JobBoardUI.esc(job.title || "Untitled") + "</a></h3>"
+        + '<div class="meta">' + JobBoardUI.esc(metaLine) + "</div>"
+        + '<div class="meta-row">' + JobBoardUI.esc([posted, closing].filter(Boolean).join(" · ")) + "</div>"
+        + '</div>'
+        + '<div class="job-card__right-col">'
+        + '<div class="fit-score">'
+        + '<span class="fit-score__value">' + JobBoardUI.esc(job.matchScore || 0) + "</span>"
+        + '<span class="fit-score__label">fit</span>'
+        + '</div>'
+        + '<button class="' + reviewBtnClass + '" title="' + reviewBtnTitle + '" onclick="handleReview(this)">' + reviewBtnLabel + '</button>'
+        + '</div>'
+        + '</div>'
+        + '<div class="indicator-row">' + indicators + '</div>'
+        + '<div class="tag-row">' + tags + "</div>"
+        + (reasons ? '<div class="match-panel"><strong>Why it matches</strong><ul>' + reasons + "</ul></div>" : "")
+        + (job.description ? '<div class="description">' + JobBoardUI.esc(job.description.substring(0, 420)) + (job.description.length > 420 ? "…" : "") + "</div>" : "")
+        + '<div class="actions">'
+        + '<a href="' + JobBoardUI.esc(job.url || "#") + '" target="_blank" rel="noopener noreferrer">Open advert</a>'
+        + (job.applyUrl ? '<a href="' + JobBoardUI.esc(job.applyUrl) + '" target="_blank" rel="noopener noreferrer">Direct link</a>' : "")
+        + '</div>'
+        + '<div class="review-result" id="review-' + JobBoardUI.esc(fp) + '" style="display:none;"></div>'
+        + '</article>';
+    }
+
+    function formatSalary(job) {
+      if (job.salaryText) return job.salaryText;
+      var low = job.salaryMinAnnual;
+      var high = job.salaryMaxAnnual;
+      if (low === null || low === undefined) return "";
+      if (high !== null && high !== undefined && high !== low) {
+        return "£" + numberWithCommas(Math.round(low)) + " - £" + numberWithCommas(Math.round(high));
+      }
+      return "£" + numberWithCommas(Math.round(low));
+    }
+
+    function numberWithCommas(value) {
+      return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function findJobByFingerprint(fp) {
+      return (state.rawJobs || []).find(function(job) {
+        return jobFingerprint(job) === fp;
+      });
+    }
+
+    async function handleReview(btn) {
+      var card = btn.closest(".job-card");
+      var fp = card.getAttribute("data-fp");
+      if (state.reviewedJobs[fp]) return;
+
+      var job = findJobByFingerprint(fp);
+      if (!job) { alert("Job not found in current results."); return; }
+
+      btn.disabled = true;
+      btn.textContent = "Reviewing…";
+      btn.classList.add("review-btn--loading");
+
+      try {
+        var res = await fetch("/api/review-job", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fingerprint: fp,
+            title: job.title || "",
+            company: job.company || "",
+            location: job.location || "",
+            url: job.url || "",
+            salary: formatSalary(job),
+            description: job.description || "",
+            matchScore: job.matchScore || 0,
+            postedAt: job.postedAt || "",
+            sourceLabels: job.sourceLabels || [],
+            isRemote: !!job.isRemote,
+            isHybrid: !!job.isHybrid
+          })
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Review failed");
+
+        state.reviewedJobs[fp] = true;
+        btn.className = "review-btn review-btn--active";
+        btn.textContent = "✓ Reviewed";
+        btn.title = "Already sent for AI review";
+        btn.disabled = false;
+        btn.classList.remove("review-btn--loading");
+
+        var resultDiv = document.getElementById("review-" + fp);
+        if (resultDiv && data.review) {
+          resultDiv.style.display = "block";
+          resultDiv.innerHTML = renderReviewResult(data.review);
+        }
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = "⊕ Review";
+        btn.classList.remove("review-btn--loading");
+        alert("Review failed: " + e.message);
+      }
+    }
+
+    function renderReviewResult(review) {
+      var html = '<div class="ai-review-panel">';
+      if (review.strengths && review.strengths.length) {
+        html += '<div class="ai-section ai-section--green"><strong>✓ Strongest Matches</strong><ul>';
+        review.strengths.forEach(function(p) { html += '<li>' + JobBoardUI.esc(p) + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (review.weaknesses && review.weaknesses.length) {
+        html += '<div class="ai-section ai-section--amber"><strong>⚠ Weak Points</strong><ul>';
+        review.weaknesses.forEach(function(p) { html += '<li>' + JobBoardUI.esc(p) + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (review.dealbreakers && review.dealbreakers.length) {
+        html += '<div class="ai-section ai-section--red"><strong>⛔ Dealbreakers</strong><ul>';
+        review.dealbreakers.forEach(function(p) { html += '<li>' + JobBoardUI.esc(p) + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (review.summary) {
+        html += '<div class="ai-section ai-section--neutral"><strong>Summary</strong><p>' + JobBoardUI.esc(review.summary) + '</p></div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    async function loadReviewedJobs() {
+      try {
+        var res = await fetch("/api/reviewed-jobs");
+        var data = await res.json();
+        if (res.ok && Array.isArray(data)) {
+          data.forEach(function(item) {
+            state.reviewedJobs[item.fingerprint] = true;
+          });
+        }
+      } catch (e) {
+        // Silently ignore if endpoint not available yet
+      }
     }
   </script>
 </body>

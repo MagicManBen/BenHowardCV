@@ -1,0 +1,113 @@
+{
+  "profileName": "Ben Howard",
+  "homeLocation": {
+    "label": "Leek, Staffordshire",
+    "postcode": "ST13 5QR",
+    "radiusMiles": 50,
+    "priorityLocationTerms": [
+      "leek",
+      "st13",
+      "staffordshire",
+      "stoke",
+      "newcastle-under-lyme",
+      "ashbourne",
+      "buxton",
+      "uttoxeter",
+      "congleton",
+      "macclesfield"
+    ]
+  },
+  "searchDefaults": {
+    "keywords": "practice manager",
+    "location": "Leek, Staffordshire",
+    "radiusMiles": 20,
+    "postedWithinDays": 50,
+    "minimumSalaryAnnual": 30000,
+    "perSourceLimit": 100,
+    "sortBy": "best_fit",
+    "remoteOnly": false,
+    "hideLowFit": true,
+    "showUnknownSalary": true
+  },
+  "sources": {
+    "indeed": true,
+    "reed": true,
+    "nhs": true,
+    "adzuna": true
+  },
+  "priorityRules": [
+    {
+      "label": "GP Practice Leadership",
+      "weight": 90,
+      "keywords": [
+        "practice manager",
+        "gp practice",
+        "gp surgery",
+        "medical practice",
+        "primary care",
+        "practice operations",
+        "patient services manager"
+      ]
+    },
+    {
+      "label": "Operations / Transformation Leadership",
+      "weight": 60,
+      "keywords": [
+        "operations manager",
+        "operations director",
+        "director of operations",
+        "associate director of operations",
+        "transformation manager",
+        "service improvement manager",
+        "continuous improvement manager",
+        "operational excellence"
+      ]
+    },
+    {
+      "label": "Digital / Systems Improvement",
+      "weight": 42,
+      "keywords": [
+        "digital transformation",
+        "systems improvement",
+        "process improvement",
+        "power bi",
+        "workflow",
+        "emis",
+        "accurx",
+        "service redesign"
+      ]
+    }
+  ],
+  "cvKeywords": [
+    "nhs primary care",
+    "operations",
+    "transformation",
+    "continuous improvement",
+    "service redesign",
+    "kpi reporting",
+    "financial control",
+    "workforce planning",
+    "patient access",
+    "power bi",
+    "emis",
+    "accurx",
+    "manufacturing operations"
+  ],
+  "excludeKeywords": [
+    "healthcare assistant",
+    "staff nurse",
+    "registered nurse",
+    "clinical fellow",
+    "consultant",
+    "occupational therapist",
+    "physiotherapist",
+    "radiographer",
+    "pharmacist",
+    "dentist",
+    "doctor",
+    "gp partner",
+    "care assistant",
+    "support worker",
+    "midwife"
+  ]
+}

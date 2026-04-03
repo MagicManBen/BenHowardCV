@@ -3,40 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — API Usage</title>
+  <title>Usage</title>
   <link rel="stylesheet" href="dashboard.css">
-  <style>
-    .usage-grid { display:grid; grid-template-columns:1fr; gap:1rem; margin-top:1rem; }
-    .usage-card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:1rem 1.2rem; }
-    .usage-card h2 { margin:0 0 0.4rem; font-size:1rem; display:flex; align-items:center; gap:0.5rem; }
-    .tag { font-size:0.65rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:3px; text-transform:uppercase; }
-    .tag--free { background:#d4edda; color:#155724; }
-    .tag--limited { background:#fff3cd; color:#856404; }
-    .tag--paid { background:#f8d7da; color:#721c24; }
-    .usage-table { width:100%; border-collapse:collapse; margin-top:0.5rem; font-size:0.82rem; }
-    .usage-table th { text-align:left; font-weight:600; color:#555; padding:0.3rem 0.6rem; border-bottom:1px solid #e0e0e0; }
-    .usage-table td { padding:0.3rem 0.6rem; border-bottom:1px solid #f0f0f0; }
-    .usage-table td:first-child { color:#333; font-weight:500; }
-    .advice { margin-top:0.5rem; padding:0.5rem 0.7rem; background:#fff8e1; border-left:3px solid #f1c40f; font-size:0.8rem; border-radius:0 4px 4px 0; }
-    .advice--ok { background:#e8f5e9; border-left-color:#2ecc40; }
-    .advice--danger { background:#fce4ec; border-left-color:#e74c3c; }
-    .gauge-row { display:flex; align-items:center; gap:0.5rem; margin:0.4rem 0; }
-    .gauge-label { font-size:0.8rem; color:#555; width:160px; }
-    .gauge-track { flex:1; height:14px; background:#e0e0e0; border-radius:7px; overflow:hidden; position:relative; max-width:300px; }
-    .gauge-bar { height:100%; border-radius:7px; transition:width 0.5s; position:relative; }
-    .gauge-bar--green { background:linear-gradient(90deg, #2ecc40, #27ae60); }
-    .gauge-bar--yellow { background:linear-gradient(90deg, #f1c40f, #e67e22); }
-    .gauge-bar--red { background:linear-gradient(90deg, #e74c3c, #c0392b); }
-    .gauge-val { font-size:0.78rem; font-weight:600; color:#333; white-space:nowrap; }
-    .supa-stat { display:inline-block; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:4px; padding:0.2rem 0.6rem; margin:0.15rem 0.3rem 0.15rem 0; font-size:0.8rem; }
-    .supa-stat strong { color:#1a73e8; }
-  </style>
 </head>
 <body>
   <nav class="dash-nav">
     <a href="dashboard.html">Applied Jobs</a>
-    <a href="indeed.html">Indeed</a>
-    <a href="jobspy.html">Multi-Site</a>
+    <a href="jobspy.html">Job Search</a>
+    <a href="reviews.html">Reviews</a>
     <a href="reed.html">Reed</a>
     <a href="nhs.html">NHS Jobs</a>
     <a href="adzuna.html">Adzuna</a>
@@ -44,274 +18,109 @@
     <a href="index.html" class="nav-link--muted">New Application</a>
   </nav>
 
-  <div class="page-shell">
+  <main class="page-shell">
     <section class="page-hero">
-      <p class="eyebrow">Operations</p>
-      <h1 class="page-title">API Usage &amp; Limits</h1>
-      <p class="page-subtitle">Overview of quotas, free tiers, and operational costs across the sources in this job-search workflow.</p>
+      <p class="eyebrow">Tooling</p>
+      <h1 class="page-title">OpenCode Quota</h1>
+      <p class="page-subtitle">The old manual quota notes have been replaced with the installed <code>opencode-quota</code> repo so this page now reflects the tool you actually want to use for Copilot, OpenAI and token tracking.</p>
     </section>
 
-    <div class="usage-grid">
+    <div class="page-grid">
+      <section class="status-bar" id="quota-status">
+        <div class="status-item"><span class="status-dot status-dot--grey"></span> Loading plugin status…</div>
+      </section>
 
-      <!-- Supabase -->
-      <div class="usage-card">
-        <h2>Supabase <span class="tag tag--free">Free tier</span></h2>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Allowance (Free Plan)</th><th>Status</th></tr>
-          <tr><td>Database rows</td><td>Unlimited (500 MB storage)</td><td id="supa-db">checking…</td></tr>
-          <tr><td>Edge Function invocations</td><td>500,000/month</td><td>—</td></tr>
-          <tr><td>Edge Function runtime</td><td>100 hours/month (wall-clock)</td><td>—</td></tr>
-          <tr><td>Storage</td><td>1 GB total</td><td>—</td></tr>
-          <tr><td>Bandwidth</td><td>5 GB/month</td><td>—</td></tr>
-          <tr><td>Resets</td><td>Monthly (calendar)</td><td>—</td></tr>
-          <tr><td>Cost</td><td colspan="2"><strong>$0</strong> — no billing required</td></tr>
-        </table>
-        <div id="supa-stats" style="margin-top:0.5rem;"></div>
-        <div class="advice advice--ok">Supabase Free tier is generous. At current usage, well within limits.</div>
-      </div>
-
-      <!-- Indeed (RapidAPI) -->
-      <div class="usage-card">
-        <h2>Indeed Scraper <span class="tag tag--limited">RapidAPI — 1/day free</span></h2>
-        <div id="indeed-gauge">
-          <div class="gauge-row">
-            <span class="gauge-label">Daily requests:</span>
-            <div class="gauge-track"><div class="gauge-bar gauge-bar--green" id="indeed-bar" style="width:100%"></div></div>
-            <span class="gauge-val" id="indeed-val">—</span>
+      <section class="surface-card">
+        <div class="workspace-head">
+          <div>
+            <h2 class="section-title">Local Install</h2>
+            <p class="section-copy">This project now includes a local copy of the repo you asked for.</p>
           </div>
-          <div style="font-size:0.78rem; color:#888;" id="indeed-reset"></div>
         </div>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Provider</td><td>RapidAPI — indeed-scraper-api</td></tr>
-          <tr><td>App</td><td>default-application_11754973</td></tr>
-          <tr><td>Free tier</td><td><strong>1 request/day</strong></td></tr>
-          <tr><td>Max results/request</td><td>15 jobs</td></tr>
-          <tr><td>Cost (paid)</td><td>$10/mo for 100 req/day, $50/mo for 500/day</td></tr>
-          <tr><td>Data</td><td>Indeed UK job listings, real-time scraping</td></tr>
-        </table>
-        <div class="advice">Very limited on free tier. Best run once at 6am daily. Supplement with Reed and Adzuna.</div>
-      </div>
-
-      <!-- Reed -->
-      <div class="usage-card">
-        <h2>Reed.co.uk <span class="tag tag--free">Free — 25,000/day</span></h2>
-        <div class="gauge-row">
-          <span class="gauge-label">Daily limit:</span>
-          <div class="gauge-track"><div class="gauge-bar gauge-bar--green" style="width:100%"></div></div>
-          <span class="gauge-val">25,000/day (unlimited for practical use)</span>
+        <div class="result-chip-row" id="quota-install-summary">
+          <span class="result-chip">Checking install…</span>
         </div>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Authentication</td><td>API key (Basic auth)</td></tr>
-          <tr><td>Free tier</td><td><strong>25,000 requests/day</strong></td></tr>
-          <tr><td>Max results/request</td><td>100 jobs (paginated)</td></tr>
-          <tr><td>Cost</td><td><strong>$0</strong> — forever free for developers</td></tr>
-          <tr><td>Data</td><td>All Reed.co.uk job listings (UK's largest job board)</td></tr>
-          <tr><td>Features</td><td>Salary data, application counts, employer names</td></tr>
-        </table>
-        <div class="advice advice--ok">Best free source. Unlimited practical use. Fetches all results automatically.</div>
-      </div>
-
-      <!-- NHS Jobs -->
-      <div class="usage-card">
-        <h2>NHS Jobs <span class="tag tag--free">Free / public</span></h2>
-        <div class="gauge-row">
-          <span class="gauge-label">Rate limit:</span>
-          <div class="gauge-track"><div class="gauge-bar gauge-bar--green" style="width:100%"></div></div>
-          <span class="gauge-val">Unlimited — public API</span>
+        <div class="note-card">
+          Installed path: <code>support/opencode-quota</code><br>
+          Source repo: <a href="https://github.com/slkiser/opencode-quota" target="_blank" rel="noopener noreferrer">slkiser/opencode-quota</a>
         </div>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Authentication</td><td>None required</td></tr>
-          <tr><td>Rate limit</td><td>Not documented — appears unrestricted</td></tr>
-          <tr><td>Max per request</td><td>100 results (API-enforced)</td></tr>
-          <tr><td>Cost</td><td><strong>$0</strong> — government service</td></tr>
-          <tr><td>Data</td><td>All NHS England vacancies, real-time</td></tr>
-          <tr><td>Notes</td><td>Only accepts single place names/postcodes (no commas)</td></tr>
-        </table>
-        <div class="advice advice--ok">Completely free. Fetches all pages automatically.</div>
-      </div>
+      </section>
 
-      <!-- Adzuna -->
-      <div class="usage-card">
-        <h2>Adzuna <span class="tag tag--free">Free tier</span></h2>
-        <div class="gauge-row">
-          <span class="gauge-label">Monthly quota:</span>
-          <div class="gauge-track"><div class="gauge-bar gauge-bar--green" style="width:100%"></div></div>
-          <span class="gauge-val">Free developer access</span>
+      <section class="surface-card">
+        <div class="workspace-head">
+          <div>
+            <h2 class="section-title">How To Use It</h2>
+            <p class="section-copy">This plugin is for OpenCode itself. It is not a browser widget inside this CV admin tool.</p>
+          </div>
         </div>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>App ID</td><td>f2492ed5</td></tr>
-          <tr><td>Authentication</td><td>API key in query params</td></tr>
-          <tr><td>Free tier</td><td>Developer access (rate limits apply but generous)</td></tr>
-          <tr><td>Max per request</td><td>50 results (paginated)</td></tr>
-          <tr><td>Cost</td><td><strong>$0</strong> for developer use</td></tr>
-          <tr><td>Data</td><td>Multi-country job aggregator (Indeed, Reed, etc.)</td></tr>
-          <tr><td>Features</td><td>Salary estimates, categories, contract types</td></tr>
-        </table>
-        <div class="advice advice--ok">Good free source. Aggregates from multiple job boards. Fetches all pages automatically.</div>
-      </div>
-
-      <!-- StepStone (RapidAPI) -->
-      <div class="usage-card">
-        <h2>StepStone / Totaljobs <span class="tag tag--limited">RapidAPI — 100/month</span></h2>
-        <div class="gauge-row">
-          <span class="gauge-label">Monthly requests:</span>
-          <div class="gauge-track"><div class="gauge-bar gauge-bar--yellow" style="width:100%"></div></div>
-          <span class="gauge-val" id="stepstone-val">100/month (free tier)</span>
+        <div class="match-panel">
+          <strong>Config snippet</strong>
+          <pre><code>{
+  "plugin": ["@slkiser/opencode-quota"]
+}</code></pre>
         </div>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Provider</td><td>RapidAPI — stepstone-api</td></tr>
-          <tr><td>App</td><td>default-application_11754973</td></tr>
-          <tr><td>Free tier</td><td><strong>100 requests/month</strong></td></tr>
-          <tr><td>Function</td><td>Get job details by Totaljobs URL (not a search API)</td></tr>
-          <tr><td>Cost (paid)</td><td>Varies by plan</td></tr>
-          <tr><td>Notes</td><td>Lookup only — requires a Totaljobs URL. Not suitable for job searching.</td></tr>
-        </table>
-        <div class="advice">Utility only — fetches full details for a specific Totaljobs listing by URL. Not a search engine.</div>
-      </div>
+        <div class="match-panel">
+          <strong>Commands after setup</strong>
+          <ul>
+            <li><code>/quota_status</code> to confirm provider detection</li>
+            <li><code>/quota</code> for the grouped quota report</li>
+            <li><code>/tokens_today</code>, <code>/tokens_weekly</code>, <code>/tokens_monthly</code> for usage history</li>
+          </ul>
+        </div>
+      </section>
 
-      <!-- RapidAPI Account Summary -->
-      <div class="usage-card">
-        <h2>RapidAPI Account <span class="tag tag--limited">Shared key</span></h2>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>App name</td><td>default-application_11754973</td></tr>
-          <tr><td>API key</td><td style="font-family:monospace; font-size:0.75rem;">e3ffc…57e5</td></tr>
-          <tr><td>APIs subscribed</td><td>Indeed Scraper (1/day), StepStone (100/month)</td></tr>
-          <tr><td>Billing</td><td>Free tiers on both — no payment method required</td></tr>
-        </table>
-        <div class="advice advice--ok">Both RapidAPI subscriptions are on free tiers. No charges unless upgraded.</div>
-      </div>
-
-      <!-- GitHub Copilot -->
-      <div class="usage-card">
-        <h2>GitHub Copilot <span class="tag tag--paid">Pro plan</span></h2>
-        <div id="copilot-status">Manage on GitHub</div>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Plan</td><td id="copilot-plan">GitHub Copilot Pro</td></tr>
-          <tr><td>Seat</td><td id="copilot-seat">Personal account</td></tr>
-          <tr><td>Premium requests</td><td id="copilot-premium"><a href="https://github.com/settings/copilot" target="_blank">View on GitHub</a></td></tr>
-          <tr><td>Billing cycle</td><td id="copilot-billing"><a href="https://github.com/settings/billing/summary" target="_blank">View billing</a></td></tr>
-          <tr><td>Cost</td><td id="copilot-cost">Managed on GitHub</td></tr>
-        </table>
+      <section class="surface-card">
+        <div class="workspace-head">
+          <div>
+            <h2 class="section-title">Next Step</h2>
+            <p class="section-copy">The repo is installed locally. The only thing still missing on this machine is the OpenCode CLI itself.</p>
+          </div>
+        </div>
         <div class="advice">
-          View full usage at <a href="https://github.com/settings/copilot" target="_blank">github.com/settings/copilot</a>
-          and billing at <a href="https://github.com/settings/billing/summary" target="_blank">github.com/settings/billing</a>.
+          Once OpenCode is available on your path, point it at the plugin above and use the commands from the repo. Until then, use these links directly:
+          <br><br>
+          <a href="https://github.com/settings/copilot" target="_blank" rel="noopener noreferrer">GitHub Copilot settings</a><br>
+          <a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">OpenAI usage</a><br>
+          <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener noreferrer">OpenAI billing</a>
         </div>
-      </div>
-
-      <!-- OpenAI -->
-      <div class="usage-card">
-        <h2>OpenAI <span class="tag tag--paid">API credits</span></h2>
-        <div id="openai-status">Managed on the OpenAI website</div>
-        <div id="openai-gauges"></div>
-        <table class="usage-table">
-          <tr><th>Metric</th><th>Details</th></tr>
-          <tr><td>Organisation</td><td id="openai-org"><a href="https://platform.openai.com/settings/organization/general" target="_blank">Open settings</a></td></tr>
-          <tr><td>Credit balance</td><td id="openai-balance"><a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank">View billing</a></td></tr>
-          <tr><td>Usage (this month)</td><td id="openai-usage"><a href="https://platform.openai.com/usage" target="_blank">View usage</a></td></tr>
-          <tr><td>Rate limit tier</td><td id="openai-tier"><a href="https://platform.openai.com/settings/organization/limits" target="_blank">View limits</a></td></tr>
-        </table>
-        <div class="advice">
-          OpenAI usage and billing are managed directly on the OpenAI website. This dashboard does not ask for or store an OpenAI API key.
-        </div>
-      </div>
-
-      <!-- Alternatives / future -->
-      <div class="usage-card">
-        <h2>Other sources <span class="tag" style="background:#e0e0e0; color:#333;">Future</span></h2>
-        <table class="usage-table">
-          <tr><th>Service</th><th>Cost</th><th>Notes</th></tr>
-          <tr><td><a href="https://findajob.dwp.gov.uk/" target="_blank">Find a Job (DWP)</a></td><td>Free</td><td>UK government job board — has RSS feeds</td></tr>
-          <tr><td><a href="https://www.cv-library.co.uk/" target="_blank">CV-Library</a></td><td>Unknown</td><td>Large UK job board — no public API</td></tr>
-        </table>
-      </div>
-
+      </section>
     </div>
-
-  </div>
+  </main>
 
   <script>
-    var SUPABASE_URL  = "https://jntpyqguonknixyksqbp.supabase.co";
-    var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpudHB5cWd1b25rbml4eWtzcWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODYxNTEsImV4cCI6MjA5MDY2MjE1MX0.Tx2nMTKuguGIRnSwLR2Wm47d68p99DrH2ldIWWKOuBs";
-    var debugData = {};
-
     document.addEventListener("DOMContentLoaded", init);
 
     async function init() {
-      await Promise.all([checkSupabase(), checkServiceStatus()]);
-      debugLog(debugData);
-    }
-
-    async function checkSupabase() {
       try {
-        var res = await fetch(SUPABASE_URL + "/rest/v1/applications?select=ref", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        if (!res.ok) throw new Error(res.status);
-        var rows = await res.json();
-        var count = rows.length;
-        document.getElementById("supa-db").textContent = count + " applications stored";
-        document.getElementById("supa-db").style.color = "#2ecc40";
-
-        var res2 = await fetch(SUPABASE_URL + "/rest/v1/cookies?select=source,updated_at", {
-          headers: { apikey: SUPABASE_ANON, Authorization: "Bearer " + SUPABASE_ANON }
-        });
-        var cookies = res2.ok ? await res2.json() : [];
-
-        var statsHtml = '<span class="supa-stat">Applications: <strong>' + count + '</strong></span>';
-        statsHtml += '<span class="supa-stat">Cookie entries: <strong>' + cookies.length + '</strong></span>';
-        cookies.forEach(function(c) {
-          var age = c.updated_at ? timeSince(new Date(c.updated_at)) : "unknown";
-          statsHtml += '<span class="supa-stat">' + esc(c.source) + ': <strong>' + age + ' old</strong></span>';
-        });
-        document.getElementById("supa-stats").innerHTML = statsHtml;
-        debugData.supabase = { applications: count, cookies: cookies };
-      } catch (e) {
-        document.getElementById("supa-db").textContent = "Error: " + e.message;
-        document.getElementById("supa-db").style.color = "#e74c3c";
-        debugData.supabase = { error: e.message };
-      }
-    }
-
-    function timeSince(date) {
-      var s = Math.floor((Date.now() - date.getTime()) / 1000);
-      if (s < 60) return s + "s";
-      if (s < 3600) return Math.floor(s / 60) + "m";
-      if (s < 86400) return Math.floor(s / 3600) + "h";
-      return Math.floor(s / 86400) + "d";
-    }
-
-    function debugLog(obj) { return obj; }
-    function esc(s) { if (!s) return ""; var d = document.createElement("div"); d.textContent = String(s); return d.innerHTML; }
-
-    async function checkServiceStatus() {
-      try {
-        var res = await fetch("/api/status");
+        var res = await fetch("/api/opencode-quota-status");
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || ("Status failed (" + res.status + ")"));
-
-        document.getElementById("copilot-status").innerHTML = data.githubAccessOk
-          ? '<span style="color:#2ecc40; font-weight:600;">OK</span> GitHub token linked locally'
-          : '<span style="color:#888;">Website only</span> Open GitHub to manage Copilot';
-        debugData.copilot = {
-          githubTokenConfigured: data.hasGithubToken,
-          githubAccessOk: data.githubAccessOk,
-          githubMessage: data.githubMessage
-        };
-        document.getElementById("openai-status").innerHTML = '<span style="color:#888;">Website only</span> Open OpenAI directly for usage and billing';
-        debugData.openai = { managedViaWebsite: true };
-      } catch (e) {
-        document.getElementById("copilot-status").innerHTML = '<span style="color:#888;">Website only</span> Open GitHub directly';
-        document.getElementById("openai-status").innerHTML = '<span style="color:#888;">Website only</span> Open OpenAI directly';
-        debugData.copilot = { error: e.message };
-        debugData.openai = { managedViaWebsite: true, statusError: e.message };
+        renderStatus(data);
+      } catch (error) {
+        document.getElementById("quota-status").innerHTML =
+          '<div class="status-item"><span class="status-dot status-dot--red"></span> Plugin status: <span>' + escapeHtml(error.message) + "</span></div>";
       }
+    }
+
+    function renderStatus(data) {
+      var statusHtml = [];
+      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.installed ? 'green' : 'red') + '"></span> Repo: <span>' + (data.installed ? 'Installed' : 'Missing') + "</span></div>");
+      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.nodeVersion ? 'green' : 'red') + '"></span> Node: <span>' + escapeHtml(data.nodeVersion || 'Missing') + "</span></div>");
+      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.npmVersion ? 'green' : 'red') + '"></span> npm: <span>' + escapeHtml(data.npmVersion || 'Missing') + "</span></div>");
+      statusHtml.push('<div class="status-item"><span class="status-dot status-dot--' + (data.hasOpencodeCli ? 'green' : 'amber') + '"></span> OpenCode CLI: <span>' + (data.hasOpencodeCli ? 'Available' : 'Not installed yet') + "</span></div>");
+      document.getElementById("quota-status").innerHTML = statusHtml.join("");
+
+      var chips = [];
+      chips.push('<span class="result-chip">Package: ' + escapeHtml(data.name || '@slkiser/opencode-quota') + "</span>");
+      chips.push('<span class="result-chip">Version: ' + escapeHtml(data.version || 'unknown') + "</span>");
+      chips.push('<span class="result-chip">Path: ' + escapeHtml(data.path || 'support/opencode-quota') + "</span>");
+      document.getElementById("quota-install-summary").innerHTML = chips.join("");
+    }
+
+    function escapeHtml(value) {
+      var node = document.createElement("div");
+      node.textContent = String(value || "");
+      return node.innerHTML;
     }
   </script>
 </body>

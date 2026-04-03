@@ -120,6 +120,8 @@ APPLICATIONS_INDEX_PATH = "data/applications.json"
 DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
 SUPABASE_DEFAULT_BUCKET = "cv-files"
 SUPABASE_APPLICATIONS_TABLE = "applications"
+SUPABASE_REVIEWED_JOBS_TABLE = "reviewed_jobs"
+KEYCHAIN_SERVICE_OPENAI_KEY = "benhowardcv-openai-api-key"
 INDEED_SEARCH_QUERY_TEMPLATE = """
 query GetJobData {{
   jobSearch(
@@ -252,6 +254,7 @@ def load_local_config():
   keychain_adzuna_app_id = read_keychain_secret(KEYCHAIN_SERVICE_ADZUNA_APP_ID)
   keychain_adzuna_api_key = read_keychain_secret(KEYCHAIN_SERVICE_ADZUNA_API_KEY)
   keychain_reed_api_key = read_keychain_secret(KEYCHAIN_SERVICE_REED_API_KEY)
+  keychain_openai_api_key = read_keychain_secret(KEYCHAIN_SERVICE_OPENAI_KEY)
 
   if not LOCAL_CONFIG_PATH.exists():
     return {
@@ -266,6 +269,7 @@ def load_local_config():
       "adzunaAppId": os.environ.get("ADZUNA_APP_ID", "").strip() or keychain_adzuna_app_id,
       "adzunaApiKey": os.environ.get("ADZUNA_API_KEY", "").strip() or keychain_adzuna_api_key,
       "reedApiKey": os.environ.get("REED_API_KEY", "").strip() or keychain_reed_api_key,
+      "openaiApiKey": os.environ.get("OPENAI_API_KEY", "").strip() or keychain_openai_api_key,
     }
 
   try:
@@ -285,6 +289,7 @@ def load_local_config():
     "adzunaAppId": str(payload.get("adzunaAppId", "")).strip() or os.environ.get("ADZUNA_APP_ID", "").strip() or keychain_adzuna_app_id,
     "adzunaApiKey": str(payload.get("adzunaApiKey", "")).strip() or os.environ.get("ADZUNA_API_KEY", "").strip() or keychain_adzuna_api_key,
     "reedApiKey": str(payload.get("reedApiKey", "")).strip() or os.environ.get("REED_API_KEY", "").strip() or keychain_reed_api_key,
+    "openaiApiKey": str(payload.get("openaiApiKey", "")).strip() or os.environ.get("OPENAI_API_KEY", "").strip() or keychain_openai_api_key,
   }
 
 
@@ -491,6 +496,51 @@ def compact_currency(currency_code):
     "AUD": "AUD ",
     "EUR": "EUR ",
   }.get(code, (code + " ") if code else "")
+
+
+def call_openai_chat(api_key, prompt, model="gpt-4o-mini"):
+  """Call OpenAI chat completions and return parsed JSON response."""
+  body = json.dumps({
+    "model": model,
+    "messages": [{"role": "user", "content": prompt}],
+    "temperature": 0.3,
+    "max_tokens": 1500,
+  }).encode("utf-8")
+
+  req = Request(
+    "https://api.openai.com/v1/chat/completions",
+    data=body,
+    headers={
+      "Content-Type": "application/json",
+      "Authorization": f"Bearer {api_key}",
+    },
+    method="POST",
+  )
+
+  try:
+    with urlopen(req, timeout=60) as resp:
+      data = json.loads(resp.read().decode("utf-8"))
+  except HTTPError as exc:
+    error_body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+    raise RuntimeError(f"OpenAI API returned {exc.code}: {error_body}") from exc
+  except URLError as exc:
+    raise RuntimeError(f"OpenAI connection error: {exc.reason}") from exc
+
+  content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+  content = content.strip()
+  if content.startswith("```"):
+    content = re.sub(r"^```(?:json)?\s*", "", content)
+    content = re.sub(r"\s*```$", "", content)
+
+  try:
+    return json.loads(content)
+  except json.JSONDecodeError:
+    return {
+      "strengths": [],
+      "weaknesses": [],
+      "dealbreakers": [],
+      "summary": content,
+    }
 
 
 def salary_range_summary(min_amount=None, max_amount=None, currency_code="", interval=""):
@@ -2433,6 +2483,21 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(200, opencode_quota_status())
       return
 
+    if parsed.path == "/api/reviewed-jobs":
+      try:
+        config = load_local_config()
+        status, rows = supabase_request_json(
+          config,
+          f"/rest/v1/{SUPABASE_REVIEWED_JOBS_TABLE}?select=*&order=created_at.desc",
+        )
+        if 200 <= status < 300:
+          self.send_json(200, rows if isinstance(rows, list) else [])
+        else:
+          self.send_json(status, {"error": rows.get("message", "Supabase error") if isinstance(rows, dict) else "Supabase error"})
+      except Exception as exc:
+        self.send_json(500, {"error": str(exc)})
+      return
+
     if self.is_blocked_path(parsed.path):
       self.send_error(404)
       return
@@ -2449,8 +2514,12 @@ class AppHandler(SimpleHTTPRequestHandler):
 
   def do_POST(self):
     parsed = urlparse(self.path)
-    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf", "/api/delete-application"):
+    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf", "/api/delete-application", "/api/review-job"):
       self.send_error(404)
+      return
+
+    if parsed.path == "/api/review-job":
+      self._handle_review_job()
       return
 
     if parsed.path == "/api/generate":
@@ -2772,6 +2841,100 @@ class AppHandler(SimpleHTTPRequestHandler):
     self.send_header("Cache-Control", "no-store")
     self.end_headers()
     self.wfile.write(pdf_bytes)
+
+  def _handle_review_job(self):
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    fingerprint = str(payload.get("fingerprint", "")).strip()
+    if not fingerprint:
+      self.send_json(400, {"error": "Missing fingerprint"})
+      return
+
+    try:
+      config = load_local_config()
+    except RuntimeError as exc:
+      self.send_json(500, {"error": str(exc)})
+      return
+
+    openai_key = config.get("openaiApiKey", "")
+    if not openai_key:
+      self.send_json(400, {"error": "No OpenAI API key configured. Add openaiApiKey to secrets.local.json."})
+      return
+
+    cv_profile = extract_cv_profile()
+    cv_html = ""
+    if CV_HTML_PATH.exists():
+      cv_html = CV_HTML_PATH.read_text(encoding="utf-8")
+    cv_text = html_to_text(cv_html)[:6000] if cv_html else ""
+
+    job_text = (
+      f"Title: {payload.get('title', '')}\n"
+      f"Company: {payload.get('company', '')}\n"
+      f"Location: {payload.get('location', '')}\n"
+      f"Salary: {payload.get('salary', '')}\n"
+      f"Remote: {payload.get('isRemote', False)}\n"
+      f"Posted: {payload.get('postedAt', '')}\n\n"
+      f"Description:\n{payload.get('description', '')}"
+    )
+
+    prompt = (
+      "You are reviewing a job advert against the candidate's CV. "
+      "Return a JSON object with these keys:\n"
+      "- strengths: array of bullet point strings listing the candidate's strongest matches for this role\n"
+      "- weaknesses: array of bullet point strings listing weak points or gaps\n"
+      "- dealbreakers: array of bullet point strings prefixed with ! for any hard requirements the candidate lacks (e.g. specific qualifications, certifications, mandatory experience)\n"
+      "- summary: a short 2-3 sentence summary of overall thoughts\n\n"
+      "Respond ONLY with valid JSON, no markdown.\n\n"
+      f"--- CANDIDATE CV ---\n{cv_text}\n\n"
+      f"--- JOB ADVERT ---\n{job_text}"
+    )
+
+    try:
+      review = call_openai_chat(openai_key, prompt)
+    except Exception as exc:
+      self.send_json(502, {"error": f"OpenAI call failed: {exc}"})
+      return
+
+    row = {
+      "fingerprint": fingerprint,
+      "title": str(payload.get("title", ""))[:500],
+      "company": str(payload.get("company", ""))[:500],
+      "location": str(payload.get("location", ""))[:500],
+      "url": str(payload.get("url", ""))[:2000],
+      "salary": str(payload.get("salary", ""))[:200],
+      "description": str(payload.get("description", ""))[:10000],
+      "match_score": int(payload.get("matchScore", 0)),
+      "posted_at": str(payload.get("postedAt", ""))[:100] or None,
+      "source_labels": payload.get("sourceLabels", []),
+      "is_remote": bool(payload.get("isRemote")),
+      "is_hybrid": bool(payload.get("isHybrid")),
+      "review": review,
+    }
+
+    try:
+      status, result = supabase_request_json(
+        config,
+        f"/rest/v1/{SUPABASE_REVIEWED_JOBS_TABLE}",
+        method="POST",
+        payload=row,
+        extra_headers={"Prefer": "return=representation"},
+      )
+      if not (200 <= status < 300):
+        err_msg = result.get("message", "Supabase insert failed") if isinstance(result, dict) else f"Status {status}"
+        self.send_json(status, {"error": err_msg})
+        return
+    except Exception as exc:
+      self.send_json(500, {"error": f"Supabase save failed: {exc}"})
+      return
+
+    self.send_json(200, {"ok": True, "review": review, "fingerprint": fingerprint})
 
   def _handle_generate(self):
     length = int(self.headers.get("Content-Length", "0") or 0)

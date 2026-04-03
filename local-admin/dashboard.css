@@ -934,3 +934,190 @@ textarea:focus {
     grid-column: auto;
   }
 }
+
+/* Indicator boxes on job cards */
+.indicator-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.65rem;
+}
+
+.indicator-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+}
+
+.indicator-box--yes {
+  background: rgba(44, 154, 83, 0.12);
+  color: #1a7a3a;
+  border-color: rgba(44, 154, 83, 0.18);
+}
+
+.indicator-box--no {
+  background: rgba(140, 130, 120, 0.1);
+  color: var(--text-faint);
+  border-color: rgba(140, 130, 120, 0.12);
+}
+
+.indicator-box--unknown {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-faint);
+  border-color: rgba(50, 41, 31, 0.08);
+}
+
+/* Right column with score + review button */
+.job-card__right-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+/* Review button */
+.review-btn {
+  appearance: none;
+  border: 1px solid rgba(13, 108, 91, 0.2);
+  background: rgba(13, 108, 91, 0.06);
+  color: var(--brand);
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  white-space: nowrap;
+}
+
+.review-btn:hover {
+  background: rgba(13, 108, 91, 0.12);
+  border-color: rgba(13, 108, 91, 0.3);
+  transform: translateY(-1px);
+}
+
+.review-btn--active {
+  background: rgba(44, 154, 83, 0.12);
+  color: #1a7a3a;
+  border-color: rgba(44, 154, 83, 0.22);
+  cursor: default;
+}
+
+.review-btn--active:hover {
+  transform: none;
+}
+
+.review-btn--loading {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.review-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* AI review sections */
+.review-result {
+  margin-top: 0.8rem;
+}
+
+.ai-review-panel {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.ai-section {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-small);
+  border: 1px solid rgba(50, 41, 31, 0.08);
+}
+
+.ai-section strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ai-section ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+.ai-section p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+.ai-section--green {
+  background: rgba(44, 154, 83, 0.06);
+  border-color: rgba(44, 154, 83, 0.12);
+}
+
+.ai-section--green strong {
+  color: #1a7a3a;
+}
+
+.ai-section--amber {
+  background: rgba(201, 139, 61, 0.06);
+  border-color: rgba(201, 139, 61, 0.12);
+}
+
+.ai-section--amber strong {
+  color: var(--warning);
+}
+
+.ai-section--red {
+  background: rgba(178, 76, 76, 0.06);
+  border-color: rgba(178, 76, 76, 0.12);
+}
+
+.ai-section--red strong {
+  color: var(--danger);
+}
+
+.ai-section--neutral {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.ai-section--neutral strong {
+  color: var(--text-soft);
+}
+
+/* Review toggle on reviews page */
+.review-toggle {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  padding: 0.55rem 0;
+  text-align: left;
+  width: 100%;
+}
+
+.review-toggle:hover {
+  color: var(--brand-strong);
+}
+
+.review-card__body {
+  border-top: 1px solid rgba(50, 41, 31, 0.08);
+  padding-top: 0.8rem;
+  margin-top: 0.35rem;
+}

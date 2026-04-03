@@ -12,7 +12,6 @@ const LOCAL_API_BASE = "/api";
 const PUBLIC_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv.html" : CV_BASE_URL;
 const PUBLIC_QR_CV_BASE_URL = IS_LOCAL_RUNTIME ? "https://checkloops.co.uk/cv-qr.html" : CV_QR_BASE_URL;
 const PUBLIC_JOB_BASE_URL = new URL("j/", PUBLIC_CV_BASE_URL).href;
-const PUBLIC_REDIRECT_BASE_URL = new URL("r/", PUBLIC_CV_BASE_URL).href;
 const APPLICATIONS_STORE_KEY = "cv_applications_local";
 const APPLICATIONS_INDEX_PATH = "data/applications.json";
 
@@ -588,11 +587,8 @@ function buildPublicFullEmployerUrl(application) {
 }
 
 function buildShortJobUrl(application) {
-  const shortCode = application && application.shortCode ? application.shortCode : "";
   const ref = application && application.ref ? application.ref : "";
-  if (shortCode) {
-    return new URL(`${encodeURIComponent(shortCode)}/`, PUBLIC_REDIRECT_BASE_URL).href;
-  }
+  // Use the ref short route as the reliable QR URL.
   return `${PUBLIC_JOB_BASE_URL}?r=${encodeURIComponent(ref)}`;
 }
 

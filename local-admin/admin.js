@@ -72,7 +72,6 @@ let toastTimer = null;
 let publicCvBaseUrl = DEFAULT_PUBLIC_CV_BASE_URL;
 let publicQrBaseUrl = DEFAULT_PUBLIC_QR_BASE_URL;
 let publicJobBaseUrl = new URL("j/", DEFAULT_PUBLIC_CV_BASE_URL).href;
-let publicRedirectBaseUrl = new URL("r/", DEFAULT_PUBLIC_CV_BASE_URL).href;
 
 document.addEventListener("DOMContentLoaded", initLocalAdminPage);
 
@@ -181,7 +180,7 @@ async function initLocalAdminPage() {
       const response = await publishApplication(publishApplicationData);
       const application = response.application || pendingApplication;
       const fullUrl = response.fullUrl || buildFullEmployerPageUrl(application);
-      const qrUrl = response.qrUrl || buildQrDestinationUrl(application);
+      const qrUrl = buildQrDestinationUrl(application);
 
       await renderPublishedResult(dom, application, fullUrl, qrUrl);
       dom.resultPanel.hidden = false;
@@ -234,15 +233,15 @@ async function initLocalAdminPage() {
     var companyName = dom.resultCompany ? dom.resultCompany.value : "";
     if (!qrUrl) { showToast(dom, "No short URL available yet."); return; }
     dom.downloadCvButton.disabled = true;
-    dom.downloadCvButton.textContent = "Uploading\u2026";
+    dom.downloadCvButton.textContent = "Generating PDF\u2026";
     try {
-      var publicUrl = await downloadCvWithQr(qrUrl, roleTitle, companyName);
-      showToast(dom, publicUrl ? "CV uploaded and downloaded." : "CV downloaded.");
+      await downloadCvWithQr(qrUrl, roleTitle, companyName);
+      showToast(dom, "PDF downloaded.");
     } catch (err) {
       showToast(dom, "Download failed: " + (err.message || err));
     } finally {
       dom.downloadCvButton.disabled = false;
-      dom.downloadCvButton.textContent = "Download CV";
+      dom.downloadCvButton.textContent = "Save CV as PDF";
     }
   });
 
@@ -782,9 +781,8 @@ function buildDirectQrPageUrl(app) {
   return publicQrBaseUrl + "?ref=" + encodeURIComponent(app.ref || "");
 }
 function buildShortQrUrl(app) {
-  if (app.shortCode) {
-    return new URL(encodeURIComponent(app.shortCode) + "/", publicRedirectBaseUrl).href;
-  }
+  // Use the ref-based short route as the stable QR target.
+  // This avoids hard failures when a short-code redirect file was not published.
   return publicJobBaseUrl + "?r=" + encodeURIComponent(app.ref || "");
 }
 function buildQrDestinationUrl(app) {
@@ -913,24 +911,23 @@ async function downloadCvWithQr(shortUrl, roleTitle, companyName) {
   /* 5. Build a safe filename */
   var safeName = "Ben Howard CV" + (companyName ? " - " + companyName : "");
 
-  /* 6. Upload HTML via Supabase Edge Function */
-  var uploadRes = await fetch(EDGE_FN_BASE + "/upload-cv", {
+  /* 6. Generate and download PDF locally */
+  var pdfRes = await fetch("/api/pdf", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ filename: safeName, content: html }),
   });
-  var uploadPayload = await uploadRes.json().catch(function () { return {}; });
-  if (!uploadRes.ok) throw new Error(uploadPayload.error || "Upload failed.");
-
-  /* 7. Download via the uploaded Supabase URL */
-  var publicUrl = uploadPayload.publicUrl || "";
-  if (publicUrl) {
-    var a = document.createElement("a");
-    a.href = publicUrl;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.click();
+  if (!pdfRes.ok) {
+    var errPayload = await pdfRes.json().catch(function () { return {}; });
+    throw new Error(errPayload.error || ("PDF generation failed with status " + pdfRes.status));
   }
-
-  return publicUrl;
+  var blob = await pdfRes.blob();
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = safeName + ".pdf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
 }

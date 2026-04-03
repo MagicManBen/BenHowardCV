@@ -8,15 +8,9 @@
 </head>
 <body>
   <nav class="dash-nav">
-    <a href="dashboard.html">Applied Jobs</a>
     <a href="jobspy.html" class="active">Job Search</a>
     <a href="reviews.html">Reviews</a>
-    <a href="indeed.html">Indeed</a>
-    <a href="reed.html">Reed</a>
-    <a href="nhs.html">NHS Jobs</a>
-    <a href="adzuna.html">Adzuna</a>
     <a href="usage.html">Usage</a>
-    <a href="index.html" class="nav-link--muted">New Application</a>
   </nav>
 
   <main class="page-shell">
@@ -424,7 +418,7 @@
       var salary = formatSalary(job);
       var posted = job.postedAt ? "Posted " + JobBoardUI.fmtDate(job.postedAt) : "";
       var closing = job.closingAt ? "Closes " + JobBoardUI.fmtDate(job.closingAt) : "";
-      var metaLine = [job.company, job.location, salary].filter(Boolean).join(" · ");
+      var metaLine = [job.location, salary].filter(Boolean).join(" · ");
       var reasons = (job.matchReasons || []).map(function(reason) {
         return '<li>' + JobBoardUI.esc(reason) + "</li>";
       }).join("");
@@ -454,7 +448,10 @@
         + '<article class="' + cardClasses + '" data-fp="' + JobBoardUI.esc(fp) + '">'
         + '<div class="job-card__top">'
         + '<div class="job-card__title-block">'
-        + '<div class="job-card__sources">' + sourceChips + "</div>"
+        + '<div class="job-card__company-row">'
+        + (job.company ? '<span class="company-tag">' + JobBoardUI.esc(job.company) + '</span>' : '')
+        + sourceChips
+        + '</div>'
         + '<h3><a href="' + JobBoardUI.esc(job.url || "#") + '" target="_blank" rel="noopener noreferrer">' + JobBoardUI.esc(job.title || "Untitled") + "</a></h3>"
         + '<div class="meta">' + JobBoardUI.esc(metaLine) + "</div>"
         + '<div class="meta-row">' + JobBoardUI.esc([posted, closing].filter(Boolean).join(" · ")) + "</div>"
@@ -542,10 +539,14 @@
         btn.disabled = false;
         btn.classList.remove("review-btn--loading");
 
+        // Mark card as reviewed visually
+        card.classList.add("job-card--reviewed");
+
+        // Show link to reviews page instead of inline result
         var resultDiv = document.getElementById("review-" + fp);
-        if (resultDiv && data.review) {
+        if (resultDiv) {
           resultDiv.style.display = "block";
-          resultDiv.innerHTML = renderReviewResult(data.review);
+          resultDiv.innerHTML = '<a href="reviews.html" class="review-link">View AI review on Reviews page →</a>';
         }
       } catch (e) {
         btn.disabled = false;
@@ -553,30 +554,6 @@
         btn.classList.remove("review-btn--loading");
         alert("Review failed: " + e.message);
       }
-    }
-
-    function renderReviewResult(review) {
-      var html = '<div class="ai-review-panel">';
-      if (review.strengths && review.strengths.length) {
-        html += '<div class="ai-section ai-section--green"><strong>✓ Strongest Matches</strong><ul>';
-        review.strengths.forEach(function(p) { html += '<li>' + JobBoardUI.esc(p) + '</li>'; });
-        html += '</ul></div>';
-      }
-      if (review.weaknesses && review.weaknesses.length) {
-        html += '<div class="ai-section ai-section--amber"><strong>⚠ Weak Points</strong><ul>';
-        review.weaknesses.forEach(function(p) { html += '<li>' + JobBoardUI.esc(p) + '</li>'; });
-        html += '</ul></div>';
-      }
-      if (review.dealbreakers && review.dealbreakers.length) {
-        html += '<div class="ai-section ai-section--red"><strong>⛔ Dealbreakers</strong><ul>';
-        review.dealbreakers.forEach(function(p) { html += '<li>' + JobBoardUI.esc(p) + '</li>'; });
-        html += '</ul></div>';
-      }
-      if (review.summary) {
-        html += '<div class="ai-section ai-section--neutral"><strong>Summary</strong><p>' + JobBoardUI.esc(review.summary) + '</p></div>';
-      }
-      html += '</div>';
-      return html;
     }
 
     async function loadReviewedJobs() {

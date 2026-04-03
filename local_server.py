@@ -2288,6 +2288,13 @@ class AppHandler(SimpleHTTPRequestHandler):
   def do_GET(self):
     parsed = urlparse(self.path)
 
+    # Redirect root to job search page
+    if parsed.path in ("/", "/index.html"):
+      self.send_response(302)
+      self.send_header("Location", "/local-admin/jobspy.html")
+      self.end_headers()
+      return
+
     if parsed.path == "/api/status":
       try:
         config = load_local_config()

@@ -1193,3 +1193,40 @@ textarea:focus {
 .job-card--dismissed .fit-score {
   opacity: 0.5;
 }
+
+/* Company headline tag */
+.job-card__company-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.company-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft-strong);
+  color: var(--brand-strong);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Review link on search page */
+.review-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 0.86rem;
+  text-decoration: none;
+}
+
+.review-link:hover {
+  text-decoration: underline;
+  color: var(--brand-strong);
+}

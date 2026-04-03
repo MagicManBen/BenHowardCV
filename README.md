@@ -1,346 +1,349 @@
 # Ben Howard CV / Checkloops
 
-This repository powers a personalised CV and job-application system for Ben Howard.
+This repository powers Ben Howard's personalised CV and application system at `checkloops.co.uk`.
 
-At a high level it does four things:
+It is not just a CV website. It is a combined application workflow covering:
 
-1. Hosts a public dashboard of live applications at `checkloops.co.uk`.
-2. Hosts a tailored employer-facing page for each application at `cv.html`.
-3. Provides a local admin and job-search workspace for creating, reviewing, publishing, and deleting applications.
-4. Uses Supabase for persistent application storage, reviewed-job storage, contact-form submissions, and uploaded CV files.
+- a public application dashboard
+- a tailored employer-facing companion page for each application
+- a second, shorter QR/mobile companion page for the same application
+- a local admin flow for generating, reviewing, and publishing applications
+- a local job-search and reviewed-jobs workspace
+- Supabase-backed storage for applications, contact requests, reviewed jobs, and downloadable CV files
+- GitHub-backed publishing for public JSON, public indexes, short redirects, and optional HTML downloads
 
-There is no build step for the public site. The public surface is plain HTML/CSS/JS. The local tooling is mostly plain HTML/JS plus a Python server in `local_server.py`.
+There is no frontend build step. The public site is plain HTML, CSS, and JavaScript. The local backend is a Python server in [`local_server.py`](./local_server.py).
 
-## Production domain
+## Production Domain
 
-- Public site domain: `checkloops.co.uk`
+- Public domain: `https://checkloops.co.uk`
 - Domain mapping file: [`CNAME`](./CNAME)
 
-## What this project contains
+## What The System Does
 
-The repo is a mix of:
+At a high level, the system does five things:
 
-- public static site files
-- a self-contained tailored CV page
-- a local admin UI
-- a local Python API/server
-- Supabase schema/config
-- sample application data and generated outputs
-- a base printable CV template used for QR-linked downloads
+1. Stores one structured application record per job.
+2. Generates persuasive first-person personalised application content from a raw advert plus Ben's evidence bank.
+3. Publishes two employer-facing page variants from the same application JSON:
+   - a fuller desktop/email page
+   - a shorter QR/mobile page
+4. Generates a QR-linked downloadable CV HTML/PDF flow.
+5. Provides Ben with a private local search/review/publish workspace.
 
-## Runtime surfaces
+## Core Product Model
 
-There are three main runtime modes.
+Each job application is one JSON object.
+
+That one object is the source of truth for:
+
+- dashboard listing data
+- full employer page content
+- QR/mobile page content
+- QR short-link destination
+- downloadable CV QR target
+- publish metadata
+
+The system does not maintain separate content pipelines for desktop and QR pages. Both render from the same application record.
+
+## Runtime Surfaces
+
+There are four main runtime surfaces.
 
 ### 1. Public hosted site
 
-This is the GitHub Pages / static-hosted side.
+This is the static site served from the repo.
 
-Key files:
+Main files:
 
 - [`index.html`](./index.html): public application dashboard
-- [`styles.css`](./styles.css): styles for the dashboard/public admin-info pages
-- [`script.js`](./script.js): public dashboard logic, preview helpers, QR support
-- [`cv.html`](./cv.html): tailored employer-facing application page
-- [`j/index.html`](./j/index.html): short-link resolver page
-- [`j/redirect.js`](./j/redirect.js): resolves short URL refs to `cv.html`
-- [`data/applications.json`](./data/applications.json): public dashboard index
-- [`data/*.json`](./data): per-application public JSON files
-- [`downloads/`](./downloads): uploaded HTML CV downloads
-- [`r/<shortcode>/index.html`](./r): generated short redirect pages
+- [`styles.css`](./styles.css): dashboard and public-page shared styling
+- [`script.js`](./script.js): public dashboard logic and some legacy/public helpers
+- [`cv.html`](./cv.html): full employer-facing page
+- [`cv-qr.html`](./cv-qr.html): QR/mobile employer-facing page
+- [`cv-runtime.js`](./cv-runtime.js): shared application loading, normalisation, dedupe, and content-selection runtime used by both page variants
+- [`cv-full.js`](./cv-full.js): full-page initialiser
+- [`cv-qr.js`](./cv-qr.js): QR/mobile renderer
+- [`j/index.html`](./j/index.html): short-link resolver shell
+- [`j/redirect.js`](./j/redirect.js): QR-first redirect logic
+- [`data/applications.json`](./data/applications.json): public application index
+- [`data/*.json`](./data): per-application public JSON payloads
+- [`r/<shortCode>/index.html`](./r): generated short-link redirect pages
+- [`downloads/`](./downloads): optional uploaded downloadable CV HTML files
 
-### 2. Local admin / search workspace
+### 2. Local admin workspace
 
-This is the operator side used on Ben's own machine.
+This is the operator-facing interface used on Ben's machine.
 
-Key files:
+Main files:
 
-- [`local-admin/index.html`](./local-admin/index.html): paste raw advert text, generate, review, publish
-- [`local-admin/admin.js`](./local-admin/admin.js): admin pipeline logic
-- [`local-admin/dashboard.html`](./local-admin/dashboard.html): published applications view with delete support
-- [`local-admin/jobspy.html`](./local-admin/jobspy.html): unified multi-source job search workspace
-- [`local-admin/job-board-ui.js`](./local-admin/job-board-ui.js): reusable rendering helpers for job boards
-- [`local-admin/reviews.html`](./local-admin/reviews.html): saved reviewed jobs
-- [`local-admin/usage.html`](./local-admin/usage.html): local tool usage/opencode-quota status
-- [`local-admin/indeed.html`](./local-admin/indeed.html), [`local-admin/reed.html`](./local-admin/reed.html), [`local-admin/nhs.html`](./local-admin/nhs.html), [`local-admin/adzuna.html`](./local-admin/adzuna.html): source-specific search pages
-- [`local-admin/job-search-preferences.json`](./local-admin/job-search-preferences.json): saved search/scoring preferences
+- [`local-admin/index.html`](./local-admin/index.html): main application creation flow
+- [`local-admin/admin.js`](./local-admin/admin.js): generation, review, publish, QR, and CV-download logic
+- [`local-admin/dashboard.html`](./local-admin/dashboard.html): local dashboard for saved/published applications
+- [`local-admin/jobspy.html`](./local-admin/jobspy.html): multi-source job-search workspace
+- [`local-admin/reviews.html`](./local-admin/reviews.html): reviewed jobs viewer
+- [`local-admin/usage.html`](./local-admin/usage.html): local status/opencode usage page
+- [`local-admin/job-board-ui.js`](./local-admin/job-board-ui.js): shared job board UI helpers
+- [`local-admin/job-search-preferences.json`](./local-admin/job-search-preferences.json): saved search and ranking preferences
+- [`local-admin/secrets.local.example.json`](./local-admin/secrets.local.example.json): example config
 
 ### 3. Local Python server
 
-This adds a local API and local-only features.
+This provides the local-only API and backend logic.
 
-Key files:
+Main files:
 
-- [`local_server.py`](./local_server.py): local HTTP server and API
-- [`content_generation.py`](./content_generation.py): evidence-bank matching + OpenAI generation
-- [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv): evidence bank used during tailored-content generation
-- [`BH CV.html`](./BH%20CV.html): base printable CV used for QR-linked downloadable CV outputs
+- [`local_server.py`](./local_server.py): local HTTP server, API, search, publish, delete, PDF, and review logic
+- [`content_generation.py`](./content_generation.py): application-generation pipeline using OpenAI + evidence bank
+- [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv): evidence bank used to personalise applications
+- [`BH CV.html`](./BH%20CV.html): base printable CV template used when building a downloadable CV with QR
 
-The local server is also responsible for:
+### 4. Supabase
 
-- serving the repo locally
-- hiding local secrets/cache paths
-- merging local/public/Supabase application sources
-- generating PDFs with headless Chrome
-- querying external job sources
-- ranking jobs against the CV profile
-- saving reviewed jobs to Supabase
-- optionally publishing to GitHub and Supabase when used through its own endpoints
+Supabase is used for:
 
-## Canonical files vs backups
+- application storage
+- reviewed jobs storage
+- contact form submissions
+- downloadable CV file storage
 
-These are the active source-of-truth files for the main experience:
+Main repo files:
 
-- [`cv.html`](./cv.html): tailored employer page
-- [`index.html`](./index.html): public dashboard
-- [`script.js`](./script.js): public dashboard script
-- [`styles.css`](./styles.css): public dashboard styling
-- [`local-admin/index.html`](./local-admin/index.html): admin entry point
-- [`local_server.py`](./local_server.py): local backend
+- [`supabase/schema.sql`](./supabase/schema.sql): tables, bucket, and RLS policies
+- [`supabase/config.toml`](./supabase/config.toml): local CLI config
 
-These files exist but are not the main source of truth:
+## Main User Journeys
 
-- `cv copy.html`
-- `cv copy 2.html`
-- `cv copy 3.html`
-- `BH CV.html` is the printable CV template, not the tailored employer page
+## 1. New Application Flow
 
-## End-to-end system flow
+This is the main Ben workflow now.
 
-### 1. Application creation flow
+Current normal flow:
 
-This is the main “new job -> tailored page -> QR link” path.
-
-1. A job advert is converted into structured JSON outside the repo.
-2. That JSON is pasted into [`local-admin/index.html`](./local-admin/index.html).
-3. [`local-admin/admin.js`](./local-admin/admin.js) normalises the payload into the application format.
-4. If the pasted JSON already contains `personalisedContent`, the admin page uses it directly.
-5. If not, the current online admin mode does not generate content in-browser. It expects pre-generated content.
-6. On publish, the application is sanitised and posted to a remote publish endpoint.
+1. Open `http://127.0.0.1:8000/local-admin/`
+2. Paste raw job advert text into [`local-admin/index.html`](./local-admin/index.html)
+3. Click `Generate & Review`
+4. [`local-admin/admin.js`](./local-admin/admin.js) sends the advert to `POST /api/generate`
+5. [`local_server.py`](./local_server.py) calls [`content_generation.py`](./content_generation.py)
+6. [`content_generation.py`](./content_generation.py) does:
+   - advert extraction
+   - evidence selection from the CSV
+   - personalised content generation with OpenAI Responses API
+   - final merged application object assembly
+7. The admin UI shows:
+   - parsed advert fields
+   - personalised content
+   - evidence selections
+   - raw JSON
+8. Ben confirms and publishes
 
 Important current detail:
 
-- `local-admin/admin.js` currently posts to Supabase edge-function URLs:
+- generation is local and server-side
+- OpenAI is called from the Python backend, never from browser JS
+- the browser only calls the local backend
+
+Backup path:
+
+- the local admin still has a hidden advanced JSON loader for debugging or recovery
+- this is not the main workflow
+
+## 2. Publish Flow
+
+After review, the admin UI publishes the application.
+
+Current publish path from [`local-admin/admin.js`](./local-admin/admin.js):
+
+- publish request goes to remote Supabase edge function:
   - `functions/v1/publish`
+- downloadable CV upload goes to remote Supabase edge function:
   - `functions/v1/upload-cv`
-- Those edge function source files are not in this repo.
-- The repo does include equivalent local logic in [`local_server.py`](./local_server.py) for `/api/publish`, `/api/upload-cv`, `/api/generate`, and `/api/pdf`.
 
-What gets stored:
+Important nuance:
 
-- `ref`: stable slug for the application
-- `shortCode`: short code used by QR links
-- raw advert-derived fields
-- generated/personalised fields
-- timestamps
+- local generation uses the local Python server
+- publish and CV upload are still edge-function-first in the admin UI
+- the repo also contains equivalent local publish/upload logic inside [`local_server.py`](./local_server.py), but the current admin page is not wired to those routes for its main publish step
 
-Where it can be stored:
+What gets written on publish:
 
-- local cache: `local-cache/data/*.json`
-- local cache index: `local-cache/data/applications.json`
-- public GitHub JSON: `data/{ref}.json`
-- public GitHub index: `data/applications.json`
-- Supabase `applications` table
+- local cache copy
+- optionally Supabase `applications`
+- optionally GitHub `data/{ref}.json`
+- optionally GitHub `data/applications.json`
+- optionally GitHub `r/{shortCode}/index.html`
 
-### 2. Public dashboard flow
+## 3. Public Employer Page Flow
 
-The public dashboard is [`index.html`](./index.html).
+Each application now has two public variants.
 
-It uses [`script.js`](./script.js) to:
+### Full employer page
 
-- fetch the application index
-- show live applications
-- build preview and print URLs
-- copy short job links
+- URL pattern: `cv.html?ref=<ref>`
+- file: [`cv.html`](./cv.html)
+- script: [`cv-full.js`](./cv-full.js)
+- shared runtime: [`cv-runtime.js`](./cv-runtime.js)
 
-Data source rules:
+Purpose:
 
-- on hosted/public runtime it reads `data/applications.json`
-- on local runtime it reads `/api/applications`
+- email links
+- desktop browsing
+- fuller editorial review
 
-The dashboard does not create applications. It is read-only from the public site.
+Content strategy:
 
-### 3. Short URL and QR flow
+- richer opening and motivation
+- role understanding
+- fit summary
+- evidence mapping
+- focus areas
+- evidence in practice
+- skills snapshot
+- first-90-days view
+- fuller closing
+- contact forms
 
-Short links are designed for QR codes on the printable CV.
+### QR/mobile page
 
-Flow:
+- URL pattern: `cv-qr.html?ref=<ref>`
+- file: [`cv-qr.html`](./cv-qr.html)
+- script: [`cv-qr.js`](./cv-qr.js)
+- shared runtime: [`cv-runtime.js`](./cv-runtime.js)
 
-1. A short code is generated for an application.
-2. GitHub publishing creates `r/<shortCode>/index.html`.
-3. That page redirects to `/j/?r=<ref>`.
-4. [`j/index.html`](./j/index.html) loads [`j/redirect.js`](./j/redirect.js).
-5. `j/redirect.js` redirects to `cv.html?ref=<ref>` or `cv.html?ref=<ref>&print=1`.
-6. [`cv.html`](./cv.html) fetches the application data by `ref` or `short_code`.
+Purpose:
 
-This two-step structure exists so short QR URLs can remain stable while the main tailored page stays at `cv.html`.
+- QR scans from the printed CV
+- mobile readers who have probably already seen the main CV
+- faster proof-led review
 
-### 4. Tailored employer page flow
+Content strategy:
 
-[`cv.html`](./cv.html) is the employer-facing companion page.
+- quick fit
+- strongest reasons
+- 2 to 3 strongest proof points
+- what Ben would bring
+- compact CTA section
+- link through to the full version
 
-It is designed to sit alongside the PDF CV, not replace it.
+Important product decision:
 
-Current responsibilities:
+- this is not just responsive design
+- it is a different user journey from the full page
 
-- load application data by `?ref=` or `?sc=`
-- normalise raw advert data and generated personalisation fields
-- render hero, motivation, fit, mapping, evidence, focus areas, skills, first-90-days, closing, and contact sections
-- support embedded preview payloads via `#app=...`
-- support a `print=1` mode
-- insert contact form submissions into Supabase
+## 4. Short URL / QR Flow
 
-Data loading rules in `cv.html`:
+Short links are used for QR codes and other compact sharing.
 
-- local runtime: fetch from `/api/application?ref=...`
-- public runtime by ref: fetch from `https://<project>.supabase.co/rest/v1/applications?...`
-- public runtime by short code: fetch from `applications?short_code=eq...`
+Current flow:
 
-The tailored page uses:
+1. each application gets a `shortCode`
+2. GitHub publish creates `r/<shortCode>/index.html`
+3. that static file redirects to `/j/?r=<ref>`
+4. [`j/index.html`](./j/index.html) loads [`j/redirect.js`](./j/redirect.js)
+5. `j/redirect.js` now resolves:
+   - default: `cv-qr.html?ref=<ref>`
+   - if `print=1`: `cv.html?ref=<ref>&print=1`
 
-- advert-derived fields for factual anchors
-- generated `personalisedContent` / `gen...` fields for the actual persuasion and narrative
+So the QR route is now QR/mobile-first.
 
-### 5. Contact form flow
+### Current public URL contract
 
-The bottom of [`cv.html`](./cv.html) contains two employer contact forms:
+- Full employer page: `cv.html?ref=<ref>`
+- QR/mobile page: `cv-qr.html?ref=<ref>`
+- Short QR route by ref: `j/?r=<ref>`
+- Short QR route by short code: `r/<shortCode>/`
 
-- “Contact Me”
-- “Contact You”
+### What the QR code should point to
 
-These write directly to Supabase using the anon key and the table:
+The QR code should point to the QR/mobile route, not the full page.
 
-- `public.cv_contact_requests`
+In practice that means:
 
-Direction values used:
+- preferred QR URL: `https://checkloops.co.uk/r/<shortCode>/`
+- fallback QR URL when no short code exists yet: `https://checkloops.co.uk/j/?r=<ref>`
 
-- `contact_me`
-- `contact_you_email`
-- `contact_you_call`
+## 5. Downloadable CV Flow
 
-This works because the schema grants anon insert access through row-level security.
-
-### 6. Downloadable CV flow
-
-The downloadable/QR-linked CV flow uses the base printable CV template:
+The downloadable CV uses the base template:
 
 - [`BH CV.html`](./BH%20CV.html)
 
-The logic in [`local-admin/admin.js`](./local-admin/admin.js):
+Current flow in [`local-admin/admin.js`](./local-admin/admin.js):
 
-1. fetches `BH CV.html`
-2. inserts a QR block linking to the short application URL
-3. uploads the resulting HTML
+1. fetch base `BH CV.html`
+2. generate a QR code image with `qrious`
+3. inject a QR block into the sidebar(s)
+4. make the QR block link to the QR/mobile URL
+5. upload the resulting HTML through `functions/v1/upload-cv`
+6. open/download the uploaded HTML CV
 
-Upload destination:
+Upload destinations:
 
-- primary: remote `functions/v1/upload-cv`
-- local equivalent exists in [`local_server.py`](./local_server.py) as `/api/upload-cv`
+- primary: Supabase Storage bucket `cv-files`
+- fallback supported in local backend: GitHub `downloads/`
 
-If the local server path is used directly, it can:
+## 6. Job Search / Review Flow
 
-- upload to Supabase Storage bucket `cv-files`
-- or fall back to GitHub `downloads/`
+The repo also contains a separate local workspace for finding and reviewing jobs.
 
-### 7. Job search and review flow
+Main entry:
 
-The repo also contains a local job-search workspace, centred on [`local-admin/jobspy.html`](./local-admin/jobspy.html).
+- [`local-admin/jobspy.html`](./local-admin/jobspy.html)
 
 That workspace:
 
-- loads saved preferences from [`local-admin/job-search-preferences.json`](./local-admin/job-search-preferences.json)
-- extracts a CV profile from [`BH CV.html`](./BH%20CV.html)
-- queries enabled job sources
-- normalises source-specific results
-- collapses duplicates across sources
-- scores jobs against Ben's CV/profile
-- ranks them into tiers such as Top Match / Strong Match / Worth Reviewing / Low Match
+- pulls jobs from multiple sources
+- scores them against Ben's profile
+- supports saving reviewed jobs
+- supports AI review when configured
 
-Local API endpoints used for job search:
+Related files:
 
-- `/api/job-search-preferences`
-- `/api/job-search`
-- `/api/indeed-search`
-- `/api/reed-search`
-- `/api/nhs-search`
-- `/api/adzuna-search`
-- `/api/review-job`
-- `/api/reviewed-jobs`
+- [`local-admin/job-board-ui.js`](./local-admin/job-board-ui.js)
+- [`local-admin/job-search-preferences.json`](./local-admin/job-search-preferences.json)
+- [`local-admin/reviews.html`](./local-admin/reviews.html)
 
-Scoring is implemented in [`local_server.py`](./local_server.py) and uses:
+## One Application Record, Two Page Variants
 
-- saved location preferences
-- title/keyword rules
-- employer-type detection
-- salary floor
-- remote/hybrid signals
-- overlap with CV role titles and skill phrases
+This is the most important architectural rule in the repo.
 
-Reviewed jobs:
+One application JSON object drives:
 
-- can be run through OpenAI
-- are stored in Supabase `reviewed_jobs`
-- are shown in the local Reviews page
+- dashboard listing
+- full employer page
+- QR/mobile page
+- QR short route
+- downloadable CV QR target
 
-## Project file map
+The code does not create a separate "QR schema".
 
-### Public site
+Instead:
 
-- [`index.html`](./index.html): application dashboard
-- [`new-job.html`](./new-job.html): public notice telling users to use the local admin on Ben's machine
-- [`cv.html`](./cv.html): tailored application page
-- [`styles.css`](./styles.css): public page styles
-- [`script.js`](./script.js): dashboard/public preview logic
-- [`vendor/qrious.min.js`](./vendor/qrious.min.js): QR generation
+- [`cv-runtime.js`](./cv-runtime.js) loads and normalises the application
+- [`cv-full.js`](./cv-full.js) renders the editorial full page
+- [`cv-qr.js`](./cv-qr.js) renders the shorter QR/mobile page
 
-### Redirects and published artefacts
+The shared runtime handles:
 
-- [`j/index.html`](./j/index.html): job-link resolver shell
-- [`j/redirect.js`](./j/redirect.js): redirect logic
-- [`r/`](./r): generated short-link folders
-- [`downloads/`](./downloads): uploaded HTML CV downloads
-- [`data/`](./data): public application JSON
+- loading by `ref`
+- loading by `sc`
+- embedded preview payloads
+- top-level and nested personalised content normalisation
+- dedupe and selectivity helpers
+- evidence cleaning
+- fallback content derivation
 
-### Local admin
+## Application Data Model
 
-- [`local-admin/index.html`](./local-admin/index.html): publish form
-- [`local-admin/admin.js`](./local-admin/admin.js): admin logic
-- [`local-admin/dashboard.html`](./local-admin/dashboard.html): published-app overview
-- [`local-admin/jobspy.html`](./local-admin/jobspy.html): unified search
-- [`local-admin/reviews.html`](./local-admin/reviews.html): stored job reviews
-- [`local-admin/usage.html`](./local-admin/usage.html): local tooling status
-- [`local-admin/dashboard.css`](./local-admin/dashboard.css): local admin/search styling
-- [`local-admin/job-board-ui.js`](./local-admin/job-board-ui.js): rendering helpers
-- [`local-admin/job-search-preferences.json`](./local-admin/job-search-preferences.json): scoring/search config
-- [`local-admin/secrets.local.example.json`](./local-admin/secrets.local.example.json): example local config
+An application record combines:
 
-### Local backend
-
-- [`local_server.py`](./local_server.py): local HTTP server + API
-- [`content_generation.py`](./content_generation.py): local personalised-content generation
-- [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv): evidence source for generation
-
-### Supabase
-
-- [`supabase/schema.sql`](./supabase/schema.sql): tables, storage bucket, RLS policies
-- [`supabase/config.toml`](./supabase/config.toml): local CLI config
-
-### Data and local-only outputs
-
-- `local-cache/`: local application mirror, not committed
-- `debug/`: publish/debug logs, not committed
-- `.har` / captured cookies: intentionally ignored
-
-## Application data shape
-
-An application object is a single JSON payload that combines:
-
-- factual advert extraction
-- inferred job structure
-- personalised/generated content
+- advert extraction
+- inferred role structure
+- personalised content
+- evidence mapping
 - publish metadata
 
-Important top-level fields include:
+### Important top-level fields
 
 - `ref`
 - `slug`
@@ -360,8 +363,10 @@ Important top-level fields include:
 - `advertSummary`
 - `headlineAttraction`
 - `rolePurpose`
+- `toneKeywords`
 - `probablePriorities`
 - `keyFocusAreas`
+- `companyPridePoints`
 - `coreResponsibilities`
 - `essentialRequirements`
 - `preferredRequirements`
@@ -379,13 +384,13 @@ Important top-level fields include:
 - `createdAt`
 - `updatedAt`
 
-Generated/personalised content is stored in one or both of these forms:
+### Personalised content fields
 
-1. nested under `personalisedContent`
-2. flattened into `gen...` fields for easier transport/rendering
+These usually live under `personalisedContent`, but may also be flattened into `gen...` fields for easier rendering and transport.
 
-Key personalised fields are:
+Key personalised fields:
 
+- `heroPositioning`
 - `personalisedOpening`
 - `whyThisCompany`
 - `whyThisRole`
@@ -399,46 +404,125 @@ Key personalised fields are:
 - `cultureFitSummary`
 - `first90DaysPlan`
 - `closingSummary`
+- `closingProofPoints`
 - `contentNotes`
 
-The code accepts both the nested and flattened forms and normalises them on load.
+### Evidence example item shape
 
-## Personalised-content generation
+Evidence examples typically contain:
 
-Generation is handled locally by:
+- `exampleId`
+- `exampleTitle`
+- `bestMatchedRoleNeed`
+- `proofAngle`
+- `whyChosen`
+- `suggestedUsage`
+- `shortLine`
+
+### Experience mapping item shape
+
+- `roleNeed`
+- `evidenceExampleId`
+- `myEvidence`
+- `relevance`
+- `proofAngle`
+
+### Focus area item shape
+
+- `title`
+- `summary`
+
+### First-90-days item shape
+
+- `phase`
+- `focus`
+- `detail`
+
+## Personalised Content Generation
+
+Generation lives in:
 
 - [`content_generation.py`](./content_generation.py)
 
-What it does:
+The generation pipeline does three main things:
 
-1. loads the evidence bank CSV
-2. tokenises the application fields
-3. scores evidence-bank rows for relevance
-4. selects a varied shortlist of examples
-5. calls OpenAI Responses API server-side with structured prompts
-6. expects valid JSON back
+1. Extracts structured advert fields.
+2. Selects relevant evidence from [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv).
+3. Generates personalised application content with OpenAI.
 
-Important details:
+### Current active AI model path
 
-- evidence source: [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv)
-- active generation model default: `gpt-4.1-mini` (configurable)
-- output is structured for the tailored `cv.html` page
+The active local-admin application-generation path uses:
 
-Local-admin flow:
+- OpenAI Responses API
+- server-side only
+- default model: `gpt-4.1-mini`
 
-- `local-admin/admin.js` calls [`/api/generate`](./local_server.py) in local server mode
-- main path is advert text → generation → review → publish
-- a backup “load finished JSON” option exists in an advanced section for recovery/debugging
+The current primary generation route is:
 
-## Supabase architecture
+- browser calls `POST /api/generate`
+- [`local_server.py`](./local_server.py) handles the request
+- [`content_generation.py`](./content_generation.py) calls OpenAI
 
-Supabase is used for four different things.
+### What OpenAI is used for
 
-### 1. Application storage
+In the application pipeline:
+
+- structured advert extraction
+- personalised content writing
+- evidence-led content shaping
+
+### Evidence bank usage
+
+The evidence bank CSV is not decorative. It is part of the generation logic.
+
+The pipeline:
+
+- tokenises advert and role signals
+- scores evidence rows for relevance
+- selects a varied shortlist
+- passes that shortlist into the structured generation step
+
+### Browser AI calls
+
+There are no browser-side OpenAI calls in the main application-generation flow.
+
+## AI Usage In This Repository
+
+The project currently uses AI in these places:
+
+### 1. Application generation
+
+- file: [`content_generation.py`](./content_generation.py)
+- entry route: `POST /api/generate`
+- provider: OpenAI
+- purpose: build the final structured application object from a raw advert plus evidence bank
+
+### 2. Reviewed job analysis
+
+- file: [`local_server.py`](./local_server.py)
+- route: `POST /api/review-job`
+- provider: OpenAI when configured
+- purpose: analyse/save reviewed jobs
+
+### 3. Legacy Ollama settings
+
+Legacy config keys still exist in [`local_server.py`](./local_server.py):
+
+- `ollamaBaseUrl`
+- `ollamaModel`
+
+These are retained for compatibility but are not the active local-admin application-generation path.
+
+## Supabase Architecture
+
+Supabase is used for four separate concerns.
+
+## 1. Applications Table
 
 Table: `public.applications`
 
-Defined in [`supabase/schema.sql`](./supabase/schema.sql) with:
+Defined in [`supabase/schema.sql`](./supabase/schema.sql) as:
 
 - `ref text primary key`
 - `company_name text`
@@ -451,113 +535,105 @@ Defined in [`supabase/schema.sql`](./supabase/schema.sql) with:
 
 Purpose:
 
-- canonical remote storage for application payloads
-- public runtime fetch source for `cv.html`
-- optional source for public/local application index
+- remote canonical application storage
+- public-page runtime fetch source
+- optional merged index source
 
 Policies:
 
 - RLS enabled
 - public `select` allowed
 
-Write behaviour:
+Expected write model:
 
-- upserts are expected via service-role access, not anon access
+- service-role writes
+- not public anon writes
 
-### 2. Reviewed jobs
+## 2. Reviewed Jobs Table
 
 Table: `public.reviewed_jobs`
 
-Used by the job-review workflow.
+Purpose:
 
-Key columns:
+- stores reviewed job records
+- supports the local review workspace
 
-- `id uuid`
-- `fingerprint text unique`
-- `title`
-- `company`
-- `location`
-- `url`
-- `salary`
-- `description`
-- `match_score integer`
-- `posted_at`
-- `source_labels text[]`
-- `is_remote boolean`
-- `is_hybrid boolean`
-- `review jsonb`
-- `created_at`
+Includes:
+
+- fingerprint
+- advert fields
+- scoring info
+- AI review JSON
 
 Policies:
 
 - RLS enabled
 - public `select` allowed
 
-Write behaviour:
-
-- local server writes reviewed jobs with service-role access after an OpenAI review
-
-### 3. Contact requests
+## 3. Contact Requests Table
 
 Table: `public.cv_contact_requests`
 
-Used by the contact forms on [`cv.html`](./cv.html).
+Purpose:
 
-Columns:
+- stores contact submissions from the full employer page
 
-- `id uuid`
-- `direction text`
-- `cv_ref text`
-- `sender_name text`
-- `sender_email text`
-- `sender_phone text`
-- `message text`
-- `page_url text`
-- `created_at`
+Important details:
+
+- full page only
+- QR/mobile page uses direct CTA links instead of forms
+
+Columns include:
+
+- `direction`
+- `cv_ref`
+- `sender_name`
+- `sender_email`
+- `sender_phone`
+- `message`
+- `page_url`
 
 Policies:
 
 - RLS enabled
 - anon `insert` allowed
 
-This is why the public page can submit contact forms directly from the browser.
+That is why the public contact forms can submit directly from browser JS.
 
-### 4. Storage bucket
+## 4. Storage Bucket
 
 Bucket: `cv-files`
 
 Purpose:
 
-- stores uploaded HTML CV downloads
-- objects are public
+- stores uploaded downloadable CV HTML files
+- bucket is public
 
-The schema bootstrap ensures the bucket exists and is public.
+## Supabase Keys And Access Model
 
-### Supabase keys and access model
+### Public browser use
 
-#### Frontend / public browser use
+The public browser runtime uses the anon key for:
 
-The frontend uses the Supabase anon key for:
+- reading application records
+- inserting contact requests
 
-- reading public application records
-- inserting contact-form rows
+This is only safe because the relevant RLS policies are narrow.
 
-This is safe only because the table policies are intentionally narrow.
-
-#### Local backend use
+### Local backend use
 
 The local backend uses the service-role key for:
 
 - upserting applications
-- reading/writing reviewed jobs
-- creating/checking storage buckets
-- uploading downloadable CV HTML files
+- reviewed jobs writes
+- storage bucket operations
+- downloadable CV uploads
 
-The service-role key should never be committed or exposed to the public browser.
+The service-role key must never be exposed in browser code.
 
-### Supabase edge functions referenced by the project
+## Edge Functions Referenced By The Repo
 
-The repo references edge functions at:
+The repo references these remote edge functions:
 
 - `functions/v1/publish`
 - `functions/v1/upload-cv`
@@ -565,17 +641,27 @@ The repo references edge functions at:
 
 Important:
 
-- their source code is not present in this repository
-- the admin UI assumes they already exist in the connected Supabase project
-- the local server contains equivalent or adjacent logic for publish/upload/generate/search, but that is separate from the remote edge-function deployment
+- their source code is not in this repository
+- the current admin UI still expects the publish and upload functions to exist remotely
+- the local Python server contains equivalent publish/upload logic, but the current UI is not using those endpoints as its main publish path
 
-### Local server API
+## Local Server API
 
-Main GET routes in [`local_server.py`](./local_server.py):
+Main server file:
+
+- [`local_server.py`](./local_server.py)
+
+Important runtime behaviour:
+
+- local `/` redirects to `/local-admin/jobspy.html`
+- local `/api/*` adds no-store behaviour and blocks local secrets paths
+
+### Main GET routes
 
 - `/api/status`
 - `/api/applications`
 - `/api/application?ref=...`
+- `/api/application?sc=...`
 - `/api/job-search-preferences`
 - `/api/job-search`
 - `/api/indeed-search`
@@ -585,27 +671,77 @@ Main GET routes in [`local_server.py`](./local_server.py):
 - `/api/opencode-quota-status`
 - `/api/reviewed-jobs`
 
-Main POST routes:
+### Main POST routes
 
-- `/api/publish`
 - `/api/generate`
+- `/api/publish`
 - `/api/upload-cv`
 - `/api/pdf`
 - `/api/delete-application`
 - `/api/review-job`
 
-The local server also:
+### What these routes do
 
-- blocks access to local secrets
-- blocks access to `local-cache/`
-- adds `Cache-Control: no-store`
+- `/api/generate`: advert -> evidence selection -> OpenAI -> final application JSON
+- `/api/publish`: local/backend publish path with URL generation and GitHub/Supabase support
+- `/api/upload-cv`: upload generated HTML CV to Supabase or GitHub
+- `/api/pdf`: build PDFs locally
+- `/api/delete-application`: delete local/remote records
+- `/api/review-job`: save reviewed jobs, optionally with AI review
 
-Special behaviour:
+## Public Data Loading Rules
 
-- when you run `local_server.py` locally, `/` redirects to `/local-admin/jobspy.html`
-- this is different from the hosted public site, where `/` is the public dashboard
+The public pages use different data sources depending on runtime.
 
-## GitHub publishing behaviour
+### Full and QR pages
+
+Shared loading lives in [`cv-runtime.js`](./cv-runtime.js).
+
+Supported load modes:
+
+- embedded preview payload via `#app=...`
+- `?ref=<ref>`
+- `?sc=<shortCode>`
+
+Data source rules:
+
+- local runtime:
+  - `/api/application?ref=...`
+  - `/api/application?sc=...`
+- hosted runtime:
+  - Supabase REST by `ref`
+  - Supabase REST by `short_code`
+
+### Dashboard
+
+[`script.js`](./script.js) loads:
+
+- hosted/public runtime: `data/applications.json`
+- local runtime: `/api/applications`
+
+## Current Page And URL Behaviour
+
+### Full employer page
+
+- public direct URL: `https://checkloops.co.uk/cv.html?ref=<ref>`
+- local direct URL: `http://127.0.0.1:8000/cv.html?ref=<ref>`
+
+### QR/mobile page
+
+- public direct URL: `https://checkloops.co.uk/cv-qr.html?ref=<ref>`
+- local direct URL: `http://127.0.0.1:8000/cv-qr.html?ref=<ref>`
+
+### Short QR route
+
+- public short route by ref: `https://checkloops.co.uk/j/?r=<ref>`
+- public short route by short code: `https://checkloops.co.uk/r/<shortCode>/`
+
+### Print route
+
+- `print=1` is treated as full-page print intent
+- short routes preserve this by resolving to `cv.html?ref=<ref>&print=1`
+
+## GitHub Publishing Behaviour
 
 When GitHub publishing is used, the system writes:
 
@@ -614,7 +750,7 @@ When GitHub publishing is used, the system writes:
 - `r/{shortCode}/index.html`
 - optionally `downloads/{filename}.html`
 
-GitHub repository settings in code:
+GitHub repo details in code:
 
 - owner: `MagicManBen`
 - repo: `BenHowardCV`
@@ -623,55 +759,21 @@ GitHub repository settings in code:
 Delete flow removes:
 
 - `data/{ref}.json`
-- matching item from `data/applications.json`
+- matching index entry
 - `r/{shortCode}/index.html`
 
-## Running the project locally
-
-### Option 1: run the Python server directly
-
-```bash
-python3 local_server.py 8000
-```
-
-Then open:
-
-- `http://127.0.0.1:8000/local-admin/jobspy.html` for job search
-- `http://127.0.0.1:8000/local-admin/index.html` for new application publishing
-- `http://127.0.0.1:8000/index.html` for the public dashboard
-
-Note:
-
-- the server itself redirects `/` to the local job-search workspace
-
-### Option 2: Docker
-
-```bash
-docker compose up --build
-```
-
-Files used:
-
-- [`docker-compose.yml`](./docker-compose.yml)
-- [`Dockerfile`](./Dockerfile)
-
-Container behaviour:
-
-- exposes port `8000`
-- runs `python3 local_server.py 8000`
-
-### Local configuration
+## Local Configuration
 
 Example file:
 
 - [`local-admin/secrets.local.example.json`](./local-admin/secrets.local.example.json)
 
-Actual local secrets file:
+Real local config file:
 
 - `local-admin/secrets.local.json`
-- ignored by git
+- gitignored
 
-Config values supported:
+### Supported config values
 
 - `githubToken`
 - `cvBaseUrl`
@@ -684,37 +786,85 @@ Config values supported:
 - `adzunaAppId`
 - `adzunaApiKey`
 - `reedApiKey`
-- `ollamaBaseUrl` (legacy/inactive for the default local-admin generation path)
-- `ollamaModel` (legacy/inactive for the default local-admin generation path)
+- `ollamaBaseUrl` (legacy/inactive for the main application-generation path)
+- `ollamaModel` (legacy/inactive for the main application-generation path)
 
-The local server can also pull secrets from:
+### Other config sources
+
+The local backend can also read credentials from:
 
 - environment variables
-- macOS Keychain for GitHub, Adzuna, Reed, and OpenAI credentials
+- macOS Keychain
 
-The Supabase URL can be derived automatically from the JWT payload if only the key is provided.
+Current keychain-backed secrets include:
 
-### Supabase setup
+- GitHub token
+- Adzuna app ID
+- Adzuna API key
+- Reed API key
+- OpenAI API key
 
-Minimum remote setup:
+### Default generation model
 
-1. create the Supabase project
-2. run [`supabase/schema.sql`](./supabase/schema.sql)
-3. create or deploy any required edge functions not included in this repo
-4. provide the anon key and service-role key to the appropriate runtime
+If nothing is configured, generation defaults to:
 
-The schema file creates:
+- `gpt-4.1-mini`
 
-- `applications`
-- `reviewed_jobs`
-- `cv_contact_requests`
-- storage bucket `cv-files`
-- update trigger for `applications.updated_at`
-- row-level security policies
+## Running Locally
 
-The repo also includes [`supabase/config.toml`](./supabase/config.toml) for local Supabase CLI use, although the active remote project is external.
+## Option 1: Python server
 
-### Security and secrets
+```bash
+python3 local_server.py 8000
+```
+
+Open:
+
+- `http://127.0.0.1:8000/local-admin/`
+- `http://127.0.0.1:8000/local-admin/jobspy.html`
+- `http://127.0.0.1:8000/index.html`
+
+Important:
+
+- local `/` redirects to the job-search workspace, not the public dashboard
+
+## Option 2: Docker
+
+```bash
+docker compose up --build
+```
+
+Relevant files:
+
+- [`Dockerfile`](./Dockerfile)
+- [`docker-compose.yml`](./docker-compose.yml)
+
+## Canonical Files vs Non-Canonical Files
+
+These are the live source-of-truth files for the main system:
+
+- [`cv.html`](./cv.html)
+- [`cv-qr.html`](./cv-qr.html)
+- [`cv-runtime.js`](./cv-runtime.js)
+- [`cv-full.js`](./cv-full.js)
+- [`cv-qr.js`](./cv-qr.js)
+- [`index.html`](./index.html)
+- [`styles.css`](./styles.css)
+- [`script.js`](./script.js)
+- [`local-admin/index.html`](./local-admin/index.html)
+- [`local-admin/admin.js`](./local-admin/admin.js)
+- [`local_server.py`](./local_server.py)
+- [`content_generation.py`](./content_generation.py)
+
+These exist but are not the live tailored employer-page implementation:
+
+- `cv copy.html`
+- `cv copy 2.html`
+- `cv copy 3.html`
+
+[`BH CV.html`](./BH%20CV.html) is also a live file, but it is the printable CV template, not the public tailored employer page.
+
+## Security And Secrets
 
 Things intentionally not committed:
 
@@ -730,81 +880,117 @@ Relevant ignore file:
 
 Security model summary:
 
-- public application reads use anon key + public select policy
+- public reads use anon key + public RLS read policies
 - public contact writes use anon key + anon insert policy
-- admin writes should use service-role access or secure edge functions
-- GitHub token stays local, not in the public frontend
+- application upserts use service-role access or secure edge functions
+- OpenAI API key remains server-side/local only
+- GitHub token remains local only
 
-## Practical caveats and current state
+## Project File Map
 
-These points matter if you are extending or debugging the system.
+### Public pages and assets
 
-#### 1. The public site and the local server do not behave identically at `/`
+- [`index.html`](./index.html): public dashboard
+- [`new-job.html`](./new-job.html): public notice page pointing users to the local admin on Ben's machine
+- [`cv.html`](./cv.html): full employer page
+- [`cv-qr.html`](./cv-qr.html): QR/mobile employer page
+- [`cv-runtime.js`](./cv-runtime.js): shared full/QR runtime
+- [`cv-full.js`](./cv-full.js): full renderer bootstrap
+- [`cv-qr.js`](./cv-qr.js): QR renderer bootstrap
+- [`styles.css`](./styles.css): shared public styles
+- [`script.js`](./script.js): dashboard/public helpers
+- [`vendor/qrious.min.js`](./vendor/qrious.min.js): QR generation library
 
-- hosted/public root: public dashboard
-- local server root: job-search workspace
+### Redirects and public artefacts
 
-#### 2. The online local-admin UI is edge-function-first
+- [`j/index.html`](./j/index.html): redirect shell
+- [`j/redirect.js`](./j/redirect.js): QR-first redirect logic
+- [`r/`](./r): generated short redirects
+- [`data/`](./data): public application JSON
+- [`downloads/`](./downloads): uploaded downloadable CV HTML files
 
-[`local-admin/admin.js`](./local-admin/admin.js) currently talks to remote edge-function URLs for publish and upload.
+### Local admin
 
-That means:
+- [`local-admin/index.html`](./local-admin/index.html): generate/review/publish page
+- [`local-admin/admin.js`](./local-admin/admin.js): admin workflow logic
+- [`local-admin/dashboard.html`](./local-admin/dashboard.html): local dashboard
+- [`local-admin/jobspy.html`](./local-admin/jobspy.html): search workspace
+- [`local-admin/reviews.html`](./local-admin/reviews.html): reviewed jobs
+- [`local-admin/usage.html`](./local-admin/usage.html): local usage/status page
+- [`local-admin/dashboard.css`](./local-admin/dashboard.css): local styling
+- [`local-admin/job-board-ui.js`](./local-admin/job-board-ui.js): board UI helpers
 
-- the local Python server is not the primary backend for that page right now
-- generation is disabled in browser “online mode”
-- the expected production publish/upload functions live outside this repo
+### Local backend and generation
 
-#### 3. The local server still contains important equivalent logic
+- [`local_server.py`](./local_server.py): local API and operational backend
+- [`content_generation.py`](./content_generation.py): application-generation logic
+- [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv): evidence bank
 
-[`local_server.py`](./local_server.py) still implements:
+### Supabase
 
-- publish
-- generate
-- upload
-- delete
-- PDF generation
-- multi-source job search
-- review-job saving
+- [`supabase/schema.sql`](./supabase/schema.sql)
+- [`supabase/config.toml`](./supabase/config.toml)
 
-So the repo contains the local backend logic, even though the current admin page points at Supabase edge functions for some operations.
-
-#### 4. `cv.html` is the main tailored page
-
-Use [`cv.html`](./cv.html) for the personalised employer-facing page.
-
-Do not treat the `cv copy*.html` files as the live implementation.
-
-#### 5. `BH CV.html` has a different role
-
-[`BH CV.html`](./BH%20CV.html) is the printable/base CV used for download generation.
-
-It is not the same thing as the tailored employer page.
-
-## Recommended starting points for maintenance
+## Recommended Starting Points For Maintenance
 
 If you need to change:
 
-- public application cards/dashboard: start with [`index.html`](./index.html), [`styles.css`](./styles.css), [`script.js`](./script.js)
-- tailored employer page: start with [`cv.html`](./cv.html)
-- admin publish flow: start with [`local-admin/index.html`](./local-admin/index.html), [`local-admin/admin.js`](./local-admin/admin.js)
+- full employer page: start with [`cv.html`](./cv.html), [`cv-runtime.js`](./cv-runtime.js), [`cv-full.js`](./cv-full.js)
+- QR/mobile page: start with [`cv-qr.html`](./cv-qr.html), [`cv-runtime.js`](./cv-runtime.js), [`cv-qr.js`](./cv-qr.js)
+- dashboard/public links: start with [`index.html`](./index.html), [`styles.css`](./styles.css), [`script.js`](./script.js)
+- short redirect behaviour: start with [`j/redirect.js`](./j/redirect.js)
+- admin generation/review flow: start with [`local-admin/index.html`](./local-admin/index.html), [`local-admin/admin.js`](./local-admin/admin.js)
+- generation logic/schema/prompting: start with [`content_generation.py`](./content_generation.py)
 - local API/backend flow: start with [`local_server.py`](./local_server.py)
-- generation behaviour: start with [`content_generation.py`](./content_generation.py)
-- Supabase structure/policies: start with [`supabase/schema.sql`](./supabase/schema.sql)
+- Supabase tables/policies: start with [`supabase/schema.sql`](./supabase/schema.sql)
 - job search ranking: start with [`local_server.py`](./local_server.py) and [`local-admin/job-search-preferences.json`](./local-admin/job-search-preferences.json)
 
-## In short
+## Practical Caveats
 
-This project is not just a CV website.
+### 1. Local root and public root are different
 
-It is a combined system for:
+- local `/` -> job-search workspace
+- public `/` -> dashboard
 
-- structured application records
-- tailored employer-facing application pages
-- QR-linked CV downloads
-- public application browsing
-- local job search and ranking
-- reviewed-jobs storage
-- employer contact capture
-- GitHub and Supabase-backed publishing
+### 2. Generation and publish are split across backends
 
-The public pages are static. The intelligence and operations sit in the local admin/search tooling and in Supabase.
+Current normal local-admin behaviour is:
+
+- generate locally through `/api/generate`
+- publish remotely through edge functions
+
+That split is intentional in the current implementation.
+
+### 3. QR route is now intentionally different from the full page
+
+Do not treat the QR/mobile page as a compressed copy of the full page.
+
+It is a distinct render path with different content-selection logic.
+
+### 4. One application JSON drives both pages
+
+Do not fork the application data model for QR unless there is a compelling reason.
+
+The current architecture depends on shared source data plus render-specific selection.
+
+## In Short
+
+This repository is a static site plus a local application engine.
+
+The public side serves:
+
+- a dashboard
+- a full employer page
+- a shorter QR/mobile page
+- short redirects
+
+The local side handles:
+
+- advert ingestion
+- AI-assisted tailored content generation
+- evidence selection
+- application review
+- publish orchestration
+- job search and review
+
+Supabase provides storage and public-data access. GitHub provides public JSON, redirects, and optional downloadable artefacts. OpenAI provides the current server-side application-generation intelligence.

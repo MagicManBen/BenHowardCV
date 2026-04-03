@@ -55,7 +55,7 @@ This is the operator side used on Ben's own machine.
 
 Key files:
 
-- [`local-admin/index.html`](./local-admin/index.html): paste JSON, review, publish
+- [`local-admin/index.html`](./local-admin/index.html): paste raw advert text, generate, review, publish
 - [`local-admin/admin.js`](./local-admin/admin.js): admin pipeline logic
 - [`local-admin/dashboard.html`](./local-admin/dashboard.html): published applications view with delete support
 - [`local-admin/jobspy.html`](./local-admin/jobspy.html): unified multi-source job search workspace
@@ -72,7 +72,7 @@ This adds a local API and local-only features.
 Key files:
 
 - [`local_server.py`](./local_server.py): local HTTP server and API
-- [`content_generation.py`](./content_generation.py): evidence-bank matching + Ollama generation
+- [`content_generation.py`](./content_generation.py): evidence-bank matching + OpenAI generation
 - [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv): evidence bank used during tailored-content generation
 - [`BH CV.html`](./BH%20CV.html): base printable CV used for QR-linked downloadable CV outputs
 
@@ -415,22 +415,20 @@ What it does:
 2. tokenises the application fields
 3. scores evidence-bank rows for relevance
 4. selects a varied shortlist of examples
-5. calls Ollama with a structured prompt
+5. calls OpenAI Responses API server-side with structured prompts
 6. expects valid JSON back
 
 Important details:
 
 - evidence source: [`ben_evidence_bank_template.csv`](./ben_evidence_bank_template.csv)
-- local model defaults:
-  - base URL: `http://localhost:11434`
-  - model: `llama3.2`
+- active generation model default: `gpt-4.1-mini` (configurable)
 - output is structured for the tailored `cv.html` page
 
-Current caveat:
+Local-admin flow:
 
-- the local generation endpoint exists in [`local_server.py`](./local_server.py) as `/api/generate`
-- the current online admin page does not call it
-- `local-admin/admin.js` currently throws an error for generation in online mode and expects pre-generated JSON to be pasted
+- `local-admin/admin.js` calls [`/api/generate`](./local_server.py) in local server mode
+- main path is advert text → generation → review → publish
+- a backup “load finished JSON” option exists in an advanced section for recovery/debugging
 
 ## Supabase architecture
 
@@ -677,8 +675,8 @@ Config values supported:
 
 - `githubToken`
 - `cvBaseUrl`
-- `ollamaBaseUrl`
-- `ollamaModel`
+- `openaiApiKey`
+- `openaiGenerationModel`
 - `supabaseUrl`
 - `supabaseAnonKey`
 - `supabaseServiceRoleKey`
@@ -686,7 +684,8 @@ Config values supported:
 - `adzunaAppId`
 - `adzunaApiKey`
 - `reedApiKey`
-- `openaiApiKey`
+- `ollamaBaseUrl` (legacy/inactive for the default local-admin generation path)
+- `ollamaModel` (legacy/inactive for the default local-admin generation path)
 
 The local server can also pull secrets from:
 

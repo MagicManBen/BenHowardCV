@@ -78,6 +78,10 @@ async function initLocalAdminPage() {
   const dom = {
     keysStatus:       document.getElementById("keys-status"),
     jobAdvertInput:   document.getElementById("job-advert-input"),
+    backupJsonInput:  document.getElementById("backup-json-input"),
+    backupJsonButton: document.getElementById("backup-json-button"),
+    backupJsonStatus: document.getElementById("backup-json-status"),
+    backupJsonError:  document.getElementById("backup-json-error"),
     goButton:         document.getElementById("go-button"),
     clearButton:      document.getElementById("clear-button"),
     inputStatus:      document.getElementById("input-status"),
@@ -117,12 +121,18 @@ async function initLocalAdminPage() {
   await loadLocalStatus(dom);
 
   dom.goButton.addEventListener("click", () => runPipeline(dom));
+  if (dom.backupJsonButton) {
+    dom.backupJsonButton.addEventListener("click", () => runBackupJsonPipeline(dom));
+  }
 
   dom.clearButton.addEventListener("click", () => {
     dom.jobAdvertInput.value = "";
+    if (dom.backupJsonInput) dom.backupJsonInput.value = "";
     pendingApplication = null;
     dom.inputStatus.textContent = "Waiting for advert text.";
+    if (dom.backupJsonStatus) dom.backupJsonStatus.textContent = "Use only for debugging or recovery.";
     dom.inputError.hidden = true;
+    if (dom.backupJsonError) dom.backupJsonError.hidden = true;
     dom.pipelinePanel.hidden = true;
     dom.resultsPanel.hidden = true;
     dom.resultPanel.hidden = true;
@@ -241,6 +251,8 @@ async function initLocalAdminPage() {
     dom.inputError.hidden = true;
     dom.pipelineError.hidden = true;
     dom.confirmError.hidden = true;
+    if (dom.backupJsonError) dom.backupJsonError.hidden = true;
+    if (dom.backupJsonStatus) dom.backupJsonStatus.textContent = "Use only for debugging or recovery.";
 
     const rawText = dom.jobAdvertInput.value.trim();
     if (!rawText) {
@@ -260,7 +272,7 @@ async function initLocalAdminPage() {
     pendingApplication = null;
 
     setPill(dom.pillParse, "done");
-    dom.pipelineMessage.textContent = "Generating tailored application locally with Ollama\u2026";
+    dom.pipelineMessage.textContent = "Generating tailored application server-side with OpenAI\u2026";
 
     /* STEP 2 \u2014 Generate */
     setPill(dom.pillGenerate, "running");
@@ -299,11 +311,76 @@ async function initLocalAdminPage() {
     renderContentGroup(dom, {
       generatedContent: pendingApplication.personalisedContent,
       evidenceSelection: pendingApplication.evidenceSelection || { count: 0, error: null, examples: [] },
-      meta: { success: true, source: "local-ollama" },
+      meta: { success: true, source: "local-openai" },
     });
     dom.confirmButton.disabled = false;
     dom.confirmStatus.textContent = "Review the generated output, then confirm.";
-    showToast(dom, "Generated locally.");
+    showToast(dom, "Generated with OpenAI.");
+  }
+
+  function runBackupJsonPipeline(dom) {
+    if (!dom.backupJsonInput) return;
+    dom.inputError.hidden = true;
+    dom.pipelineError.hidden = true;
+    dom.confirmError.hidden = true;
+    if (dom.backupJsonError) dom.backupJsonError.hidden = true;
+
+    var rawJson = dom.backupJsonInput.value.trim();
+    if (!rawJson) {
+      if (dom.backupJsonError) showError(dom.backupJsonError, "Paste a finished application JSON object first.");
+      if (dom.backupJsonStatus) dom.backupJsonStatus.textContent = "No JSON provided.";
+      return;
+    }
+
+    dom.pipelinePanel.hidden = false;
+    dom.resultsPanel.hidden = true;
+    dom.resultPanel.hidden = true;
+    setPill(dom.pillParse, "running");
+    setPill(dom.pillGenerate, "waiting");
+    dom.pipelineMessage.textContent = "Loading backup JSON\u2026";
+
+    try {
+      var parsed = JSON.parse(rawJson);
+      var source = (parsed && typeof parsed === "object" && parsed.application && typeof parsed.application === "object")
+        ? parsed.application
+        : parsed;
+      pendingApplication = normaliseApplicationPayload(source);
+      if (parsed && typeof parsed === "object") {
+        if (!pendingApplication.personalisedContent && parsed.generatedContent) {
+          pendingApplication.personalisedContent = normaliseProvidedPersonalisedContent({ personalisedContent: parsed.generatedContent });
+        }
+        if (parsed.evidenceSelection && typeof parsed.evidenceSelection === "object") {
+          pendingApplication.evidenceSelection = parsed.evidenceSelection;
+        }
+      }
+      setPill(dom.pillParse, "done");
+      setPill(dom.pillGenerate, "skipped");
+      dom.pipelineMessage.textContent = "Backup JSON loaded (generation skipped).";
+      dom.inputStatus.textContent = "Loaded backup JSON: " + pendingApplication.companyName + " / " + pendingApplication.roleTitle;
+      if (dom.backupJsonStatus) dom.backupJsonStatus.textContent = "Backup JSON loaded.";
+
+      dom.resultsPanel.hidden = false;
+      dom.resultsTitle.textContent = pendingApplication.companyName + " \u2014 " + pendingApplication.roleTitle;
+      dom.advertResults.innerHTML = renderAdvertGroup(pendingApplication);
+      renderContentGroup(dom, {
+        generatedContent: pendingApplication.personalisedContent,
+        evidenceSelection: pendingApplication.evidenceSelection || { count: 0, error: null, examples: [] },
+        meta: { success: true, source: "backup-json" },
+      });
+      dom.debugJson.textContent = JSON.stringify(parsed, null, 2);
+      dom.confirmButton.disabled = false;
+      dom.confirmStatus.textContent = "Review the loaded backup JSON, then confirm.";
+      showToast(dom, "Backup JSON loaded.");
+    } catch (error) {
+      setPill(dom.pillParse, "error");
+      setPill(dom.pillGenerate, "waiting");
+      dom.pipelineMessage.textContent = "Backup JSON load failed.";
+      if (dom.backupJsonError) showError(dom.backupJsonError, error instanceof Error ? error.message : "Invalid JSON.");
+      if (dom.backupJsonStatus) dom.backupJsonStatus.textContent = "Backup load failed.";
+      dom.inputStatus.textContent = "Backup load failed.";
+      dom.confirmButton.disabled = true;
+      dom.confirmStatus.textContent = "Fix the JSON and try again.";
+    }
   }
 }
 

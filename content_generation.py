@@ -3,7 +3,7 @@ Local content generation utilities.
 
 Provides:
   - Advert extraction into structured application fields
-  - Personalised content generation using Ollama + evidence bank
+  - Personalised content generation using OpenAI + evidence bank
   - A combined end-to-end local pipeline for local-admin
 """
 
@@ -217,12 +217,12 @@ def _format_evidence_for_prompt(rows):
 
 
 # ---------------------------------------------------------------------------
-# Ollama structured generation
+# OpenAI structured generation
 # ---------------------------------------------------------------------------
 
-DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
-DEFAULT_OLLAMA_MODEL = "llama3.2"
-OLLAMA_REQUEST_TIMEOUT_SECONDS = 180
+DEFAULT_OPENAI_GENERATION_MODEL = "gpt-4.1-mini"
+OPENAI_RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses"
+OPENAI_REQUEST_TIMEOUT_SECONDS = 120
 
 ADVERT_EXTRACTION_SYSTEM_PROMPT = """You are extracting structured application data from a raw job advert.
 
@@ -546,76 +546,122 @@ def _build_extraction_user_prompt(advert_text):
     )
 
 
-def call_ollama_json(base_url, model, system_prompt, user_prompt, temperature=0.4):
-    """Call Ollama chat and return a parsed JSON object.
+def _extract_openai_output_text(response_data):
+    if isinstance(response_data.get("output_text"), str) and response_data.get("output_text", "").strip():
+        return response_data.get("output_text", "")
+
+    output = response_data.get("output")
+    if isinstance(output, list):
+        parts = []
+        for item in output:
+            if not isinstance(item, dict):
+                continue
+            content = item.get("content")
+            if not isinstance(content, list):
+                continue
+            for chunk in content:
+                if not isinstance(chunk, dict):
+                    continue
+                if chunk.get("type") in ("output_text", "text") and isinstance(chunk.get("text"), str):
+                    parts.append(chunk["text"])
+        if parts:
+            return "\n".join(parts)
+
+    choices = response_data.get("choices")
+    if isinstance(choices, list) and choices:
+        maybe_text = (
+            ((choices[0] or {}).get("message") or {}).get("content", "")
+            if isinstance(choices[0], dict)
+            else ""
+        )
+        if isinstance(maybe_text, str) and maybe_text.strip():
+            return maybe_text
+
+    raise ValueError("No assistant output text found in OpenAI response.")
+
+
+def call_openai_responses_json(api_key, model, system_prompt, user_prompt, temperature=0.3):
+    """Call OpenAI Responses API and return parsed JSON.
 
     Returns (result_dict, error_message_or_none).
     """
-    if not base_url:
-        return None, "Ollama base URL not configured."
+    if not api_key:
+        return None, "OpenAI API key is missing."
     if not model:
-        return None, "Ollama model not configured."
-
-    chat_url = base_url.rstrip("/") + "/api/chat"
+        return None, "OpenAI model is missing."
 
     request_body = {
         "model": model,
-        "messages": [
+        "input": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        "stream": False,
-        "options": {
-            "temperature": float(temperature),
+        "temperature": float(temperature),
+        "max_output_tokens": 3500,
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": "structured_payload",
+                "strict": False,
+                "schema": {
+                    "type": "object",
+                    "additionalProperties": True,
+                },
+            }
         },
     }
 
     body_bytes = json.dumps(request_body).encode("utf-8")
     req = Request(
-        chat_url,
+        OPENAI_RESPONSES_ENDPOINT,
         data=body_bytes,
         headers={
             "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
             "User-Agent": "BenHowardCV-ContentGen/1.0",
         },
         method="POST",
     )
 
     try:
-        with urlopen(req, timeout=OLLAMA_REQUEST_TIMEOUT_SECONDS) as resp:
-            resp_data = json.loads(resp.read().decode("utf-8"))
+        with urlopen(req, timeout=OPENAI_REQUEST_TIMEOUT_SECONDS) as resp:
+            response_data = json.loads(resp.read().decode("utf-8"))
     except HTTPError as exc:
-        error_body = exc.read().decode("utf-8") if exc.fp else ""
+        error_body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
         try:
             err_json = json.loads(error_body)
-            msg = err_json.get("error") or error_body[:300]
+            err_obj = err_json.get("error") if isinstance(err_json, dict) else None
+            if isinstance(err_obj, dict):
+                message = err_obj.get("message") or json.dumps(err_obj)
+            else:
+                message = err_json.get("message") if isinstance(err_json, dict) else error_body[:500]
         except json.JSONDecodeError:
-            msg = error_body[:300]
-        return None, f"Ollama API error ({exc.code}): {msg}"
+            message = error_body[:500]
+        return None, f"OpenAI API error ({exc.code}): {message}"
     except URLError as exc:
-        return None, f"Could not reach Ollama: {exc.reason}"
+        return None, f"Could not reach OpenAI: {exc.reason}"
     except TimeoutError:
-        return None, f"Ollama request timed out after {OLLAMA_REQUEST_TIMEOUT_SECONDS}s."
+        return None, f"OpenAI request timed out after {OPENAI_REQUEST_TIMEOUT_SECONDS}s."
     except socket.timeout:
-        return None, f"Ollama request timed out after {OLLAMA_REQUEST_TIMEOUT_SECONDS}s."
+        return None, f"OpenAI request timed out after {OPENAI_REQUEST_TIMEOUT_SECONDS}s."
     except json.JSONDecodeError as exc:
-        return None, f"Invalid JSON from Ollama: {exc}"
+        return None, f"Invalid JSON from OpenAI: {exc}"
 
     try:
-        content_str = resp_data["message"]["content"]
+        content_str = _extract_openai_output_text(response_data)
         json_str = _extract_json_object(content_str)
         result = json.loads(json_str)
     except (KeyError, ValueError, json.JSONDecodeError) as exc:
-        return None, f"Could not parse Ollama response: {exc}"
+        return None, f"Could not parse OpenAI response JSON: {exc}"
 
     return result, None
 
 
-def call_ollama(base_url, model, application, evidence_rows):
+def call_openai_personalised_content(api_key, model, application, evidence_rows):
     """Generate personalised-content JSON from advert + evidence context."""
     user_prompt = _build_user_prompt(application, evidence_rows)
-    return call_ollama_json(
-        base_url=base_url,
+    return call_openai_responses_json(
+        api_key=api_key,
         model=model,
         system_prompt=SYSTEM_PROMPT,
         user_prompt=user_prompt,
@@ -631,8 +677,8 @@ def generate_application_from_advert(advert_text, config):
     """Generate a full application object from raw advert text.
 
     Pipeline:
-    1. Extract structured advert fields via Ollama
-    2. Generate personalised content via Ollama + evidence bank
+    1. Extract structured advert fields via OpenAI
+    2. Generate personalised content via OpenAI + evidence bank
     3. Return merged application ready for preview/publish
     """
     advert_text = str(advert_text or "").strip()
@@ -644,12 +690,25 @@ def generate_application_from_advert(advert_text, config):
             "meta": {"success": False, "stage": "extract", "error": "No advert text supplied."},
         }
 
-    ollama_base_url = (config.get("ollamaBaseUrl") or "").strip() or DEFAULT_OLLAMA_BASE_URL
-    ollama_model = (config.get("ollamaModel") or "").strip() or DEFAULT_OLLAMA_MODEL
+    openai_api_key = (config.get("openaiApiKey") or "").strip()
+    openai_model = (config.get("openaiGenerationModel") or "").strip() or DEFAULT_OPENAI_GENERATION_MODEL
+    if not openai_api_key:
+        return {
+            "application": None,
+            "generatedContent": None,
+            "evidenceSelection": {"count": 0, "error": "No OpenAI API key configured.", "examples": []},
+            "meta": {
+                "success": False,
+                "stage": "extract",
+                "error": "No OpenAI API key configured. Add openaiApiKey to local-admin/secrets.local.json or OPENAI_API_KEY.",
+                "model": openai_model,
+                "provider": "openai",
+            },
+        }
 
-    extracted_raw, extraction_error = call_ollama_json(
-        base_url=ollama_base_url,
-        model=ollama_model,
+    extracted_raw, extraction_error = call_openai_responses_json(
+        api_key=openai_api_key,
+        model=openai_model,
         system_prompt=ADVERT_EXTRACTION_SYSTEM_PROMPT,
         user_prompt=_build_extraction_user_prompt(advert_text),
         temperature=0.2,
@@ -663,8 +722,8 @@ def generate_application_from_advert(advert_text, config):
                 "success": False,
                 "stage": "extract",
                 "error": extraction_error,
-                "model": ollama_model,
-                "baseUrl": ollama_base_url,
+                "model": openai_model,
+                "provider": "openai",
             },
         }
 
@@ -678,8 +737,8 @@ def generate_application_from_advert(advert_text, config):
                 "success": False,
                 "stage": "extract",
                 "error": "Advert extraction did not return companyName and roleTitle.",
-                "model": ollama_model,
-                "baseUrl": ollama_base_url,
+                "model": openai_model,
+                "provider": "openai",
             },
         }
 
@@ -696,8 +755,8 @@ def generate_application_from_advert(advert_text, config):
                 "success": False,
                 "stage": "personalise",
                 "error": (personalised.get("meta") or {}).get("error") or "Personalised generation failed.",
-                "model": ollama_model,
-                "baseUrl": ollama_base_url,
+                "model": openai_model,
+                "provider": "openai",
                 "companyName": application.get("companyName", ""),
                 "roleTitle": application.get("roleTitle", ""),
             },
@@ -719,8 +778,8 @@ def generate_application_from_advert(advert_text, config):
             "success": True,
             "stage": "complete",
             "error": None,
-            "model": ollama_model,
-            "baseUrl": ollama_base_url,
+            "model": openai_model,
+            "provider": "openai",
             "companyName": application.get("companyName", ""),
             "roleTitle": application.get("roleTitle", ""),
         },
@@ -731,18 +790,18 @@ def generate_personalised_content(application, config):
     """Run the full Stage 3 generation pipeline.
 
     1. Select relevant evidence-bank examples
-    2. Call Ollama with structured prompt
+    2. Call OpenAI with structured prompt
     3. Return the generated content + metadata
 
     Args:
         application: parsed application/job dict
-        config: dict with Ollama settings and other options
+        config: dict with OpenAI settings and other options
 
     Returns:
         dict with generatedContent, evidenceSelection metadata, and debug info.
     """
-    ollama_base_url = (config.get("ollamaBaseUrl") or "").strip() or DEFAULT_OLLAMA_BASE_URL
-    ollama_model = (config.get("ollamaModel") or "").strip() or DEFAULT_OLLAMA_MODEL
+    openai_api_key = (config.get("openaiApiKey") or "").strip()
+    openai_model = (config.get("openaiGenerationModel") or "").strip() or DEFAULT_OPENAI_GENERATION_MODEL
 
     # Step 1: Select evidence
     evidence_rows, evidence_error = select_evidence_examples(application)
@@ -761,9 +820,21 @@ def generate_personalised_content(application, config):
         ],
     }
 
-    # Step 2: Call Ollama
-    generated, generation_error = call_ollama(
-        ollama_base_url, ollama_model, application, evidence_rows,
+    if not openai_api_key:
+        return {
+            "generatedContent": None,
+            "evidenceSelection": evidence_selection,
+            "meta": {
+                "success": False,
+                "error": "No OpenAI API key configured. Add openaiApiKey to local-admin/secrets.local.json or OPENAI_API_KEY.",
+                "model": openai_model,
+                "provider": "openai",
+            },
+        }
+
+    # Step 2: Call OpenAI
+    generated, generation_error = call_openai_personalised_content(
+        openai_api_key, openai_model, application, evidence_rows,
     )
 
     if generation_error:
@@ -773,8 +844,8 @@ def generate_personalised_content(application, config):
             "meta": {
                 "success": False,
                 "error": generation_error,
-                "model": ollama_model,
-                "baseUrl": ollama_base_url,
+                "model": openai_model,
+                "provider": "openai",
             },
         }
 
@@ -785,8 +856,8 @@ def generate_personalised_content(application, config):
         "meta": {
             "success": True,
             "error": None,
-            "model": ollama_model,
-            "baseUrl": ollama_base_url,
+            "model": openai_model,
+            "provider": "openai",
             "companyName": application.get("companyName", ""),
             "roleTitle": application.get("roleTitle", ""),
         },

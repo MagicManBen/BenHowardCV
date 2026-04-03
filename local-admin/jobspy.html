@@ -445,7 +445,12 @@
       else if (isReviewed) cardClasses += " job-card--reviewed";
 
       return ''
-        + '<article class="' + cardClasses + '" data-fp="' + JobBoardUI.esc(fp) + '">'
+        + '<article class="' + cardClasses + '" data-fp="' + JobBoardUI.esc(fp) + '" data-title="' + JobBoardUI.esc(job.title || 'Untitled') + '">'
+        + '<div class="job-card__collapsed-bar" onclick="toggleReviewedExpand(this)">'
+        + '<span class="collapsed-title">' + JobBoardUI.esc(job.title || 'Untitled') + '</span>'
+        + '<span class="collapsed-status">✓ Reviewed</span>'
+        + '<span class="collapsed-toggle">▸ Expand</span>'
+        + '</div>'
         + '<div class="job-card__top">'
         + '<div class="job-card__title-block">'
         + '<div class="job-card__company-row">'
@@ -539,8 +544,9 @@
         btn.disabled = false;
         btn.classList.remove("review-btn--loading");
 
-        // Mark card as reviewed visually
+        // Collapse into reviewed bar
         card.classList.add("job-card--reviewed");
+        card.classList.remove("job-card--expanded");
 
         // Show link to reviews page instead of inline result
         var resultDiv = document.getElementById("review-" + fp);
@@ -595,6 +601,17 @@
       }
       saveDismissedJobs();
       applyClientFilters();
+    }
+
+    function toggleReviewedExpand(bar) {
+      var card = bar.closest(".job-card");
+      var toggle = bar.querySelector(".collapsed-toggle");
+      card.classList.toggle("job-card--expanded");
+      if (card.classList.contains("job-card--expanded")) {
+        toggle.textContent = "▾ Collapse";
+      } else {
+        toggle.textContent = "▸ Expand";
+      }
     }
   </script>
 </body>

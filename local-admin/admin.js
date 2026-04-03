@@ -521,7 +521,9 @@ async function loadLocalStatus(dom) {
 }
 
 async function publishApplication(application) {
-  var response = await fetch(EDGE_FN_BASE + "/publish", {
+  var isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  var url = isLocal ? "/api/publish" : EDGE_FN_BASE + "/publish";
+  var response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ application: application, clientContext: buildClientContext() }),

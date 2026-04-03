@@ -872,12 +872,12 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName) {
 
   function makeQrBlock() {
     return (
-      '<section class="sidebar-card" style="margin-top:auto; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">'
+      '<section class="sidebar-card" style="margin-top:auto; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">'
       + '<h2>Tailored CV</h2>'
-      + '<a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.45rem; background:#fff; padding:6px; border-radius:6px; line-height:0;">'
-      + '<img src="' + qrDataUrl + '" width="100" height="100" alt="QR code" style="display:block; width:100px; height:100px;">'
+      + '<a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.3rem; background:#fff; padding:4px; border-radius:5px; line-height:0;">'
+      + '<img src="' + qrDataUrl + '" width="80" height="80" alt="QR code" style="display:block; width:80px; height:80px;">'
       + '</a>'
-      + '<p style="margin-top:0.45rem; font-size:0.65rem; line-height:1.4; color:rgba(245,245,241,0.88);">' + label + '</p>'
+      + '<p style="margin-top:0.3rem; font-size:0.58rem; line-height:1.35; color:rgba(245,245,241,0.88);">' + label + '</p>'
       + '</section>'
     );
   }

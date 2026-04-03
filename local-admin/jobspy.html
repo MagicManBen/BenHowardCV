@@ -469,6 +469,7 @@
         + '<span class="fit-score__label">fit</span>'
         + '</div>'
         + '<button class="' + reviewBtnClass + '" title="' + reviewBtnTitle + '" onclick="handleReview(this)">' + reviewBtnLabel + '</button>'
+        + '<button class="apply-btn" title="Apply: generate CV and open application" onclick="handleApply(this)">Apply</button>'
         + '<button class="dismiss-btn" onclick="handleDismiss(this)">' + dismissBtnLabel + '</button>'
         + '</div>'
         + '</div>'
@@ -603,6 +604,32 @@
       }
       saveDismissedJobs();
       applyClientFilters();
+    }
+
+    function handleApply(btn) {
+      var card = btn.closest(".job-card");
+      var fp = card.getAttribute("data-fp");
+      var job = findJobByFingerprint(fp);
+      if (!job) { alert("Job not found in current results."); return; }
+
+      // Build the advert text to pass to the new-job page
+      var parts = [];
+      if (job.title) parts.push(job.title);
+      if (job.company) parts.push(job.company);
+      var meta = [job.location, formatSalary(job), job.employmentType || ""].filter(Boolean).join("\n");
+      if (meta) parts.push(meta);
+      if (job.description) parts.push(job.description);
+      var advertText = parts.join("\n\n");
+
+      // Store in sessionStorage for the new-job page to pick up
+      try { sessionStorage.setItem("applyAdvertText", advertText); } catch (e) { /* ignore */ }
+
+      // Open the application link in a new tab
+      var applyUrl = job.applyUrl || job.url;
+      if (applyUrl) window.open(applyUrl, "_blank", "noopener,noreferrer");
+
+      // Navigate to the new-job page with auto-generate flag
+      window.location.href = "index.html?auto=1";
     }
 
     function toggleReviewedExpand(bar) {

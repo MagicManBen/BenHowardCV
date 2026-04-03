@@ -226,6 +226,22 @@ async function initLocalAdminPage() {
     }
   });
 
+  /* ── Auto-apply: pick up advert text from jobspy Apply button ── */
+
+  var autoParams = new URLSearchParams(window.location.search);
+  if (autoParams.get("auto") === "1") {
+    try {
+      var storedAdvert = sessionStorage.getItem("applyAdvertText");
+      if (storedAdvert) {
+        dom.jobAdvertInput.value = storedAdvert;
+        sessionStorage.removeItem("applyAdvertText");
+        // Clean URL without reloading
+        window.history.replaceState({}, "", window.location.pathname);
+        runPipeline(dom);
+      }
+    } catch (e) { /* sessionStorage not available */ }
+  }
+
   /* ── Pipeline ─────────────────────────────────────── */
 
   async function runPipeline(dom) {

@@ -1239,6 +1239,26 @@ textarea:focus {
   border-color: rgba(157, 47, 47, 0.35);
 }
 
+.apply-btn {
+  appearance: none;
+  border: 1px solid rgba(26, 115, 232, 0.25);
+  background: rgba(26, 115, 232, 0.08);
+  color: #1a73e8;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  white-space: nowrap;
+}
+
+.apply-btn:hover {
+  background: rgba(26, 115, 232, 0.16);
+  border-color: rgba(26, 115, 232, 0.4);
+  transform: translateY(-1px);
+}
+
 /* Dismissed job card — collapsed grey */
 .job-card--dismissed {
   background: #eae7e2;
@@ -1272,7 +1292,8 @@ textarea:focus {
   display: none;
 }
 
-.job-card--dismissed .job-card__right-col .review-btn {
+.job-card--dismissed .job-card__right-col .review-btn,
+.job-card--dismissed .job-card__right-col .apply-btn {
   display: none;
 }
 

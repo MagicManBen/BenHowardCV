@@ -100,14 +100,20 @@ GEN_ERROR=$(echo "$GEN_RESP" | jq -r '.meta.error // .error // empty')
 
 COMPANY=$(echo "$GEN_RESP" | jq -r '.application.companyName // "Unknown"')
 ROLE=$(echo "$GEN_RESP" | jq -r '.application.roleTitle // "Unknown"')
+LOCATION=$(echo "$GEN_RESP" | jq -r '.application.location // ""')
 COST=$(echo "$GEN_RESP" | jq -r '.meta.estimated_cost_usd // "?"')
 ok "Generated: $COMPANY — $ROLE  (cost: \$$COST)"
 
+# Build ref slug (matches admin.js slugify logic)
+REF=$(echo "$COMPANY $ROLE $LOCATION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | tr -s ' ' '-' | sed 's/^-//;s/-$//')
+[ -z "$REF" ] && REF="application-$(date +%s)"
+
 # ── Step 2: Publish ──
 info "Publishing to GitHub + Supabase…"
-PUB_PAYLOAD=$(echo "$GEN_RESP" | jq '{
+PUB_PAYLOAD=$(echo "$GEN_RESP" | jq --arg ref "$REF" '{
   application: (
     .application + {
+      ref: $ref,
       personalisedContent: (.generatedContent // {}),
       generatedContent: (.generatedContent // {}),
       personalisedIntro: (.generatedContent // {}).personalisedOpening,

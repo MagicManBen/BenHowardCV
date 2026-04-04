@@ -1306,6 +1306,13 @@ window.CVRuntime = (() => {
         if (el) el.innerHTML = value;
       }
 
+      function buildHeroHeading(state) {
+        if (state.companyName !== defaults.companyName) {
+          return `${state.roleTitle.toUpperCase()} - ${state.companyName}`;
+        }
+        return "Ben T. Howard";
+      }
+
       function setFactRow(rowId, spanId, value) {
         const row = document.getElementById(rowId);
         const span = document.getElementById(spanId);
@@ -1474,12 +1481,21 @@ window.CVRuntime = (() => {
           ? `Ben T. Howard | ${state.companyName} | ${state.roleTitle}`
           : `Ben T. Howard | ${state.roleTitle}`;
 
+        const heroNameEl = document.getElementById("hero-name");
+        const heroRoleEl = document.getElementById("hero-role");
+        if (heroNameEl) {
+          heroNameEl.textContent = buildHeroHeading(state);
+          heroNameEl.classList.toggle("hero-title--application", state.companyName !== defaults.companyName);
+        }
+        if (heroRoleEl) {
+          heroRoleEl.textContent = state.companyName !== defaults.companyName
+            ? "Ben T. Howard"
+            : state.roleTitle;
+        }
+
         setText("hero-kicker", state.companyName === defaults.companyName ? "Application support" : `Application support for ${state.companyName}`);
         setText("hero-topline-meta-1", "Companion to my CV");
         setText("hero-topline-meta-2", "Focused on fit and evidence");
-        setText("hero-role", state.companyName !== defaults.companyName
-          ? `${state.roleTitle} for ${state.companyName}`
-          : state.roleTitle);
         setText("hero-positioning", heroPositioning);
         setText("hero-statement", heroStatement);
         setHtml("hero-pull-note", buildHeroPullNote(state, fitSummary, likelyContribution));

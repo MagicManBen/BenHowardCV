@@ -962,7 +962,7 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName, shortCode) {
       var closeP = html.indexOf('</p>', rtIdx);
       if (closeP !== -1) {
         var insertAt = closeP + 4;
-        var preparedLine = '\n                            <p class="role-title" style="font-size:0.72rem; margin-top:0.15rem; letter-spacing:0.04em; opacity:0.85;">Prepared for ' + esc(companyName) + '</p>';
+        var preparedLine = '\n                            <p class="role-title" style="font-size:0.54rem; margin-top:0.12rem; letter-spacing:0.18em; opacity:0.82;">Prepared for ' + esc(companyName) + '</p>';
         html = html.slice(0, insertAt) + preparedLine + html.slice(insertAt);
       }
     }

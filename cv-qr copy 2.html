@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ben T. Howard | Tailored QR Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f8f3ea;
+      --paper-2: #fcf8f1;
+      --ink: #131313;
+      --ink-soft: #47433f;
+      --muted: #726b61;
+      --gold: #a9894f;
+      --line: rgba(19, 19, 19, 0.12);
+      --line-strong: rgba(19, 19, 19, 0.24);
+      --card: rgba(255, 255, 255, 0.74);
+      --shadow: 0 20px 45px rgba(19, 19, 19, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(169, 137, 79, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(19, 19, 19, 0.03), transparent 22%),
+        linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          rgba(19, 19, 19, 0.012) 0,
+          rgba(19, 19, 19, 0.012) 1px,
+          transparent 1px,
+          transparent 104px
+        );
+      opacity: 0.75;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    p, li { margin: 0; color: var(--ink-soft); line-height: 1.7; }
+    ul { margin: 0; padding-left: 1.1rem; }
+    h1, h2, h3 { margin: 0; color: var(--ink); letter-spacing: -0.03em; text-wrap: balance; }
+
+    .serif { font-family: "Cormorant Garamond", Georgia, serif; }
+    .page {
+      width: min(100%, 100vw);
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 1rem 1rem 3rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      padding: 1.1rem 0 1.4rem;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 2rem;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.75;
+    }
+
+    .hero-card,
+    .section-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      border-radius: 1.35rem;
+    }
+
+    .hero-card {
+      padding: 1.25rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-copy {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 9vw, 3.4rem);
+      line-height: 0.95;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 38ch;
+    }
+
+    .hero-guide {
+      display: grid;
+      gap: 0.32rem;
+      padding: 0.9rem 0.95rem;
+      border-radius: 1rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.46);
+    }
+
+    .hero-guide-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .hero-guide-copy {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--ink-soft);
+    }
+
+    .hero-role {
+      display: grid;
+      gap: 0.4rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .hero-role-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .hero-role-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .fact-chip {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink-soft);
+      border-radius: 999px;
+      padding: 0.48rem 0.8rem;
+      font-size: 0.82rem;
+      line-height: 1.2;
+    }
+
+    .section {
+      margin-top: 0;
+      position: relative;
+      padding-left: 1.15rem;
+    }
+
+    .content {
+      position: relative;
+      display: grid;
+      gap: 0.95rem;
+      margin-top: 1rem;
+    }
+
+    .content::before {
+      content: "";
+      position: absolute;
+      left: 0.38rem;
+      top: 1.2rem;
+      bottom: 1.2rem;
+      width: 1px;
+      background: linear-gradient(180deg, rgba(169, 137, 79, 0.24), rgba(19, 19, 19, 0.08));
+      opacity: 0.9;
+    }
+
+    .section::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 1.15rem;
+      width: 0.76rem;
+      height: 0.76rem;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 243, 234, 0.94));
+      box-shadow: 0 0 0 0.2rem rgba(248, 243, 234, 0.96);
+    }
+
+    .section-card {
+      padding: 1.1rem;
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .section-header {
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    .section-kicker {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .section-title {
+      font-size: clamp(1.45rem, 6vw, 2rem);
+      line-height: 1;
+    }
+
+    .section-copy {
+      font-size: 0.98rem;
+    }
+
+    .section-bridge {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .stack {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .stack--tight {
+      gap: 0.6rem;
+    }
+
+    .reason-card,
+    .proof-card,
+    .bring-card {
+      border-top: 1px solid var(--line);
+      padding-top: 0.8rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .reason-card:first-child,
+    .proof-card:first-child,
+    .bring-card:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .item-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .item-copy {
+      font-size: 0.96rem;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .cta-grid {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3rem;
+      padding: 0.8rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .cta-button--primary {
+      background: var(--ink);
+      color: #f7f3ec;
+      border-color: var(--ink);
+    }
+
+    .footer-note {
+      margin-top: 0.25rem;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .loading,
+    .error {
+      padding: 1.4rem 1.2rem;
+      margin-top: 1rem;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .loading[hidden],
+    .error[hidden],
+    .content[hidden] {
+      display: none;
+    }
+
+    @media (min-width: 760px) {
+      .page { padding-top: 1.5rem; }
+      .hero-card, .section-card { padding: 1.4rem; }
+      .cta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section { padding-left: 1.4rem; }
+      .content::before { left: 0.48rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-card">
+        <span class="eyebrow">QR companion page</span>
+        <div class="hero-copy">
+          <h1 class="hero-title serif" id="qr-hero-title">A quick read on why this role fits.</h1>
+          <p class="hero-subtitle" id="qr-hero-summary">Loading tailored application summary…</p>
+          <div class="hero-guide">
+            <span class="hero-guide-label">How to read this page</span>
+            <p class="hero-guide-copy" id="qr-hero-guide">This is the shorter phone-first version of the tailored page: a quick role read, the strongest proof behind it, and where I would expect to add value early.</p>
+          </div>
+        </div>
+        <div class="hero-role">
+          <span class="hero-role-label">Application support</span>
+          <span class="hero-role-title" id="qr-hero-role"></span>
+        </div>
+        <div class="facts" id="qr-facts"></div>
+      </div>
+    </section>
+
+    <div class="loading" id="qr-loading">Loading the tailored page…</div>
+    <div class="error" id="qr-error" hidden>
+      <h2>Could not load this application</h2>
+      <p id="qr-error-message">The link is missing the application data.</p>
+    </div>
+
+    <div class="content" id="qr-content" hidden>
+      <section class="section">
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-kicker">My read on the role</span>
+            <h2 class="section-title serif">What I think this job really turns on.</h2>
+          </div>
+          <p class="section-copy" id="qr-role-summary"></p>
+          <p class="section-bridge" id="qr-role-bridge"></p>
+          <div class="stack stack--tight" id="qr-role-signals"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-kicker">Quick fit</span>
+            <h2 class="section-title serif">Why the overlap looks real.</h2>
+          </div>
+          <p class="section-copy" id="qr-fit-summary"></p>
+          <p class="section-bridge" id="qr-fit-bridge"></p>
+          <div class="stack" id="qr-reasons"></div>
+        </div>
+      </section>
+
+      <section class="section" id="qr-proof-section">
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-kicker">Strongest proof</span>
+            <h2 class="section-title serif">The clearest evidence behind that read.</h2>
+          </div>
+          <p class="section-copy" id="qr-proof-bridge"></p>
+          <div class="stack" id="qr-proof-list"></div>
+        </div>
+      </section>
+
+      <section class="section" id="qr-bring-section">
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-kicker">What I’d bring</span>
+            <h2 class="section-title serif">Where I would add value quickly.</h2>
+          </div>
+          <p class="section-copy" id="qr-bring-summary"></p>
+          <div class="stack" id="qr-bring-list"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-kicker">Next step</span>
+            <h2 class="section-title serif">If this feels aligned, I’d welcome a conversation.</h2>
+          </div>
+          <p class="section-copy" id="qr-closing-summary"></p>
+          <div class="cta-grid">
+            <a class="cta-button cta-button--primary" href="mailto:benthoward@outlook.com">Email me</a>
+            <a class="cta-button" href="tel:+447507789672">Call me</a>
+            <a class="cta-button" href="https://linkedin.com/in/benthoward" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a class="cta-button" id="qr-full-link" href="cv.html">View full version</a>
+          </div>
+          <p class="footer-note">This QR page is intentionally shorter. The full employer page goes deeper on the role read, evidence mapping, and broader supporting context.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="cv-runtime.js?v=1" defer></script>
+  <script src="cv-qr.js?v=1" defer></script>
+</body>
+</html>

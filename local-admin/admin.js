@@ -109,7 +109,6 @@ async function initLocalAdminPage() {
     copyUrlButton:    document.getElementById("copy-url-button"),
     openPreviewLink:  document.getElementById("open-preview-link"),
     downloadCvButton: document.getElementById("download-cv-button"),
-    downloadPagePdfButton: document.getElementById("download-page-pdf-button"),
     resultQrImage:    document.getElementById("result-qr-image"),
     toast:            document.getElementById("toast"),
   };
@@ -227,42 +226,6 @@ async function initLocalAdminPage() {
     } finally {
       dom.downloadCvButton.disabled = false;
       dom.downloadCvButton.textContent = "Save CV as PDF";
-    }
-  });
-
-  dom.downloadPagePdfButton.addEventListener("click", async () => {
-    var cvUrl = dom.resultUrl ? dom.resultUrl.value : "";
-    var roleTitle = dom.resultRole ? dom.resultRole.value : "";
-    var companyName = dom.resultCompany ? dom.resultCompany.value : "";
-    if (!cvUrl) { showToast(dom, "No CV URL available yet."); return; }
-    dom.downloadPagePdfButton.disabled = true;
-    dom.downloadPagePdfButton.textContent = "Generating PDF\u2026";
-    try {
-      var safeName = "Ben Howard CV" + (roleTitle ? " - " + roleTitle : "");
-      var pdfRes = await fetch("/api/pdf-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: cvUrl, filename: safeName }),
-      });
-      if (!pdfRes.ok) {
-        var errPayload = await pdfRes.json().catch(function () { return {}; });
-        throw new Error(errPayload.error || ("PDF generation failed with status " + pdfRes.status));
-      }
-      var blob = await pdfRes.blob();
-      var dlUrl = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = dlUrl;
-      a.download = safeName + " - Full.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(function () { URL.revokeObjectURL(dlUrl); }, 2000);
-      showToast(dom, "Webpage PDF downloaded.");
-    } catch (err) {
-      showToast(dom, "Download failed: " + (err.message || err));
-    } finally {
-      dom.downloadPagePdfButton.disabled = false;
-      dom.downloadPagePdfButton.textContent = "Save Unique Webpage";
     }
   });
 

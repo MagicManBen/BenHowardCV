@@ -56,6 +56,9 @@ create table if not exists public.reviewed_jobs (
   is_remote boolean not null default false,
   is_hybrid boolean not null default false,
   review jsonb not null default '{}'::jsonb,
+  driving_time text not null default '',
+  driving_minutes integer,
+  driving_miles real,
   created_at timestamptz not null default now()
 );
 

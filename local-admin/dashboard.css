@@ -1331,8 +1331,7 @@ textarea:focus {
 
 /* Review link on search page */
 .review-link {
-  display: inline-block;
-  margin-top: 0.5rem;
+  display: inline;
   color: var(--brand);
   font-weight: 700;
   font-size: 0.86rem;
@@ -1342,4 +1341,12 @@ textarea:focus {
 .review-link:hover {
   text-decoration: underline;
   color: var(--brand-strong);
+}
+
+/* Driving time badge */
+.driving-time {
+  display: inline;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
 }

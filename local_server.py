@@ -149,6 +149,12 @@ SUPABASE_DEFAULT_BUCKET = "cv-files"
 SUPABASE_APPLICATIONS_TABLE = "applications"
 SUPABASE_REVIEWED_JOBS_TABLE = "reviewed_jobs"
 KEYCHAIN_SERVICE_OPENAI_KEY = "benhowardcv-openai-api-key"
+
+# GraphHopper driving-time config
+GRAPHHOPPER_API_KEY = "b1ddded7-02e5-40b1-adea-d82c590120a2"
+GRAPHHOPPER_HOME_LAT = 53.106
+GRAPHHOPPER_HOME_LON = -1.984  # ST13 5QR, Leek, Staffordshire
+
 INDEED_SEARCH_QUERY_TEMPLATE = """
 query GetJobData {{
   jobSearch(
@@ -572,6 +578,65 @@ def call_openai_chat(api_key, prompt, model="gpt-4o-mini"):
       "dealbreakers": [],
       "summary": content,
     }
+
+
+# ---------------------------------------------------------------------------
+# GraphHopper helpers — geocode a location string then compute driving time
+# ---------------------------------------------------------------------------
+
+def graphhopper_geocode(location_text):
+  """Return (lat, lon) for a location string, or None on failure."""
+  if not location_text or not location_text.strip():
+    return None
+  qs = urlencode({"q": location_text, "locale": "en", "limit": "1", "key": GRAPHHOPPER_API_KEY})
+  url = f"https://graphhopper.com/api/1/geocode?{qs}"
+  req = Request(url, method="GET")
+  try:
+    with urlopen(req, timeout=10) as resp:
+      data = json.loads(resp.read().decode("utf-8"))
+    hits = data.get("hits") or []
+    if not hits:
+      return None
+    return (hits[0]["point"]["lat"], hits[0]["point"]["lng"])
+  except Exception:
+    return None
+
+
+def graphhopper_driving_time(dest_lat, dest_lon):
+  """Return driving info dict {minutes, distance_miles, text} from home to dest, or None."""
+  qs = urlencode({
+    "point": [f"{GRAPHHOPPER_HOME_LAT},{GRAPHHOPPER_HOME_LON}", f"{dest_lat},{dest_lon}"],
+    "vehicle": "car",
+    "locale": "en",
+    "calc_points": "false",
+    "key": GRAPHHOPPER_API_KEY,
+  }, doseq=True)
+  url = f"https://graphhopper.com/api/1/route?{qs}"
+  req = Request(url, method="GET")
+  try:
+    with urlopen(req, timeout=10) as resp:
+      data = json.loads(resp.read().decode("utf-8"))
+    paths = data.get("paths") or []
+    if not paths:
+      return None
+    time_ms = paths[0].get("time", 0)
+    distance_m = paths[0].get("distance", 0)
+    minutes = round(time_ms / 60000)
+    miles = round(distance_m / 1609.344, 1)
+    hours = minutes // 60
+    mins = minutes % 60
+    text = f"{hours}h {mins}m" if hours else f"{mins} min"
+    return {"minutes": minutes, "distance_miles": miles, "text": f"{text} ({miles} mi)"}
+  except Exception:
+    return None
+
+
+def get_driving_time_for_location(location_text):
+  """Geocode a job location and return driving info dict, or None."""
+  coords = graphhopper_geocode(location_text)
+  if not coords:
+    return None
+  return graphhopper_driving_time(coords[0], coords[1])
 
 
 def salary_range_summary(min_amount=None, max_amount=None, currency_code="", interval=""):
@@ -3060,6 +3125,9 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(502, {"error": f"OpenAI call failed: {exc}"})
       return
 
+    # Calculate driving time from home to job location
+    driving = get_driving_time_for_location(str(payload.get("location", "")))
+
     row = {
       "fingerprint": fingerprint,
       "title": str(payload.get("title", ""))[:500],
@@ -3074,6 +3142,9 @@ class AppHandler(SimpleHTTPRequestHandler):
       "is_remote": bool(payload.get("isRemote")),
       "is_hybrid": bool(payload.get("isHybrid")),
       "review": review,
+      "driving_time": driving.get("text", "") if driving else "",
+      "driving_minutes": driving.get("minutes", None) if driving else None,
+      "driving_miles": driving.get("distance_miles", None) if driving else None,
     }
 
     try:
@@ -3098,7 +3169,7 @@ class AppHandler(SimpleHTTPRequestHandler):
       self.send_json(500, {"error": f"Supabase save failed: {exc}"})
       return
 
-    self.send_json(200, {"ok": True, "review": review, "fingerprint": fingerprint})
+    self.send_json(200, {"ok": True, "review": review, "fingerprint": fingerprint, "driving": driving})
 
   def _handle_generate(self):
     length = int(self.headers.get("Content-Length", "0") or 0)

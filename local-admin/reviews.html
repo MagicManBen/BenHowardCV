@@ -88,6 +88,7 @@
     function renderReviewCard(item) {
       var review = item.review || {};
       var meta = [item.location, item.salary].filter(Boolean).join(" · ");
+      var drivingBadge = item.driving_time ? ' · 🚗 ' + item.driving_time : '';
       var sources = (item.source_labels || []).map(function(s) {
         return '<span class="source-pill">' + JobBoardUI.esc(s) + '</span>';
       }).join("");
@@ -127,7 +128,7 @@
         + sources
         + '</div>'
         + '<h3><a href="' + JobBoardUI.esc(item.url || "#") + '" target="_blank" rel="noopener noreferrer">' + JobBoardUI.esc(item.title || "Untitled") + '</a></h3>'
-        + '<div class="meta">' + JobBoardUI.esc(meta) + '</div>'
+        + '<div class="meta">' + JobBoardUI.esc(meta) + drivingBadge + '</div>'
         + (dateLine ? '<div class="meta-row">' + JobBoardUI.esc(dateLine) + '</div>' : '')
         + '</div>'
         + '<div class="fit-score">'

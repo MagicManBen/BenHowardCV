@@ -555,7 +555,11 @@
         var resultDiv = document.getElementById("review-" + fp);
         if (resultDiv) {
           resultDiv.style.display = "block";
-          resultDiv.innerHTML = '<a href="reviews.html" class="review-link">View AI review on Reviews page →</a>';
+          var drivingHtml = "";
+          if (data.driving && data.driving.text) {
+            drivingHtml = '<span class="driving-time">🚗 ' + JobBoardUI.esc(data.driving.text) + ' from Leek</span> · ';
+          }
+          resultDiv.innerHTML = drivingHtml + '<a href="reviews.html" class="review-link">View AI review on Reviews page →</a>';
         }
       } catch (e) {
         btn.disabled = false;

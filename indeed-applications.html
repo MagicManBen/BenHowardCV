@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indeed Applications | Ben Howard</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: radial-gradient(circle at top left,rgba(13,108,91,.14),transparent 30%),radial-gradient(circle at top right,rgba(223,186,126,.24),transparent 28%),linear-gradient(180deg,var(--bg) 0%,#f8f4ee 55%,#efe9dd 100%); }
+
+    .filter-row { display:flex; flex-wrap:wrap; gap:.55rem; margin-bottom:1rem; }
+    .filter-btn { appearance:none; border:1px solid var(--border); background:var(--surface-strong); color:var(--text); padding:.5rem .9rem; border-radius:var(--radius-pill); font-weight:700; font-size:.88rem; cursor:pointer; transition:background .15s,border-color .15s; }
+    .filter-btn.active { background:var(--brand); color:#fff; border-color:var(--brand); }
+    .filter-btn .count { margin-left:.3rem; opacity:.7; }
+
+    .app-grid { display:grid; gap:.85rem; }
+
+    .job-card { background:var(--surface-muted); border:1px solid rgba(50,41,31,.08); border-radius:18px; padding:1rem; display:grid; gap:.6rem; transition:border-color .15s; }
+    .job-card:hover { border-color:rgba(13,108,91,.25); }
+    .job-card--expired { opacity:.65; }
+
+    .job-card-header { display:flex; justify-content:space-between; align-items:start; gap:.8rem; }
+    .job-card-title { margin:0; font-size:1rem; }
+    .job-card-title a { color:var(--text); text-decoration:none; }
+    .job-card-title a:hover { color:var(--brand); }
+    .job-card-company { margin:0; font-size:.92rem; color:var(--text-soft); font-weight:600; }
+    .job-card-meta { margin:0; font-size:.86rem; color:var(--text-faint); display:flex; flex-wrap:wrap; gap:.3rem .9rem; }
+
+    .status-pill { display:inline-block; padding:.25rem .65rem; border-radius:var(--radius-pill); font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+    .status-pill--applied { background:rgba(13,108,91,.12); color:var(--brand); }
+    .status-pill--saved { background:var(--accent-soft); color:var(--warning); }
+    .status-pill--expired { background:var(--danger-soft); color:var(--danger); }
+    .status-pill--open { background:rgba(13,108,91,.08); color:var(--brand-strong); }
+    .status-pill--withdrawn { background:rgba(50,41,31,.08); color:var(--text-faint); }
+
+    .company-logo { width:40px; height:40px; border-radius:10px; object-fit:contain; background:#fff; border:1px solid var(--border); flex-shrink:0; }
+
+    .import-zone { border:2px dashed rgba(50,41,31,.18); border-radius:18px; padding:1.5rem; text-align:center; color:var(--text-soft); cursor:pointer; transition:border-color .15s,background .15s; }
+    .import-zone:hover, .import-zone.drag-over { border-color:var(--brand); background:rgba(13,108,91,.04); }
+    .import-zone input { display:none; }
+
+    .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.75rem; margin-bottom:1rem; }
+    .summary-tile { background:var(--surface-muted); border:1px solid rgba(50,41,31,.06); border-radius:18px; padding:.85rem .95rem; }
+    .summary-label { font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--brand); display:block; margin-bottom:.25rem; }
+    .summary-value { font-family:"Space Grotesk","Avenir Next",sans-serif; font-size:1.6rem; font-weight:700; display:block; }
+    .summary-copy { margin:.2rem 0 0; font-size:.82rem; color:var(--text-faint); }
+
+    .back-link { color:var(--text-soft); text-decoration:none; font-weight:700; font-size:.9rem; }
+    .back-link:hover { color:var(--brand); }
+
+    @media(min-width:640px){
+      .summary-grid { grid-template-columns:repeat(4,1fr); }
+    }
+  </style>
+</head>
+<body data-page="indeed">
+  <header class="app-header">
+    <div class="shell shell--header">
+      <p class="eyebrow">Indeed Tracker</p>
+      <div class="header-row">
+        <div>
+          <h1>Indeed Applications</h1>
+          <p class="subtitle">Track your Indeed job applications and saved roles in one place. Import a HAR file from myjobs.indeed.com to refresh.</p>
+        </div>
+        <div class="header-actions">
+          <a href="index.html" class="back-link">&larr; Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell main-layout">
+    <section class="card" aria-labelledby="summary-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Overview</p>
+          <h2 id="summary-title">Application summary</h2>
+        </div>
+      </div>
+      <div class="summary-grid">
+        <article class="summary-tile">
+          <span class="summary-label">Total</span>
+          <strong class="summary-value" id="stat-total">0</strong>
+        </article>
+        <article class="summary-tile">
+          <span class="summary-label">Applied</span>
+          <strong class="summary-value" id="stat-applied">0</strong>
+        </article>
+        <article class="summary-tile">
+          <span class="summary-label">Saved</span>
+          <strong class="summary-value" id="stat-saved">0</strong>
+        </article>
+        <article class="summary-tile">
+          <span class="summary-label">Expired</span>
+          <strong class="summary-value" id="stat-expired">0</strong>
+        </article>
+      </div>
+
+      <div class="filter-row" id="filters"></div>
+    </section>
+
+    <section class="card" aria-labelledby="jobs-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Applications</p>
+          <h2 id="jobs-title">Job list</h2>
+        </div>
+        <span class="back-link" id="last-updated"></span>
+      </div>
+      <div class="app-grid" id="job-list">
+        <p class="empty-state">Loading&#8230;</p>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="import-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Refresh</p>
+          <h2 id="import-title">Import HAR file</h2>
+        </div>
+      </div>
+      <p class="card-helper">Open <a href="https://myjobs.indeed.com/applied" target="_blank" rel="noopener">myjobs.indeed.com/applied</a> in Safari, open Web Inspector &rarr; Network, reload the page, then <strong>Export HAR</strong>. Drop the file below to update your applications.</p>
+      <div class="import-zone" id="import-zone">
+        <input type="file" id="har-input" accept=".har,application/json">
+        <p><strong>Drop HAR file here</strong> or click to browse</p>
+      </div>
+      <p id="import-status" style="margin:.6rem 0 0;font-size:.9rem;color:var(--text-soft);"></p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (function() {
+    var STORAGE_KEY = "indeed-applications";
+    var DATA_URL = "data/indeed-applications.json";
+    var jobs = [];
+    var activeFilter = "all";
+
+    document.addEventListener("DOMContentLoaded", init);
+
+    function init() {
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try {
+          var parsed = JSON.parse(stored);
+          if (parsed.jobs && parsed.jobs.length) {
+            jobs = parsed.jobs;
+            render();
+            showUpdated(parsed.updatedAt);
+            return;
+          }
+        } catch(e) {}
+      }
+      fetch(DATA_URL)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          jobs = data;
+          save();
+          render();
+        })
+        .catch(function() {
+          document.getElementById("job-list").innerHTML = '<p class="empty-state">No application data found. Import a HAR file to get started.</p>';
+        });
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ jobs: jobs, updatedAt: new Date().toISOString() }));
+      showUpdated(new Date().toISOString());
+    }
+
+    function showUpdated(iso) {
+      if (!iso) return;
+      var d = new Date(iso);
+      document.getElementById("last-updated").textContent = "Updated " + d.toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" });
+    }
+
+    function render() {
+      updateStats();
+      renderFilters();
+      renderJobs();
+    }
+
+    function updateStats() {
+      var applied = 0, saved = 0, expired = 0;
+      jobs.forEach(function(j) {
+        var s = getStatus(j);
+        if (s === "applied") applied++;
+        else if (s === "saved") saved++;
+        if (j.jobExpired) expired++;
+      });
+      document.getElementById("stat-total").textContent = jobs.length;
+      document.getElementById("stat-applied").textContent = applied;
+      document.getElementById("stat-saved").textContent = saved;
+      document.getElementById("stat-expired").textContent = expired;
+    }
+
+    function getStatus(j) {
+      var us = j.statuses && j.statuses.userJobStatus;
+      if (!us) return "unknown";
+      var s = us.status;
+      if (j.withdrawn) return "withdrawn";
+      if (s === "POST_APPLY" || s === "APPLIED") return "applied";
+      if (s === "SAVED") return "saved";
+      return s.toLowerCase();
+    }
+
+    function renderFilters() {
+      var counts = { all: jobs.length, applied: 0, saved: 0, expired: 0 };
+      jobs.forEach(function(j) {
+        var s = getStatus(j);
+        if (s === "applied") counts.applied++;
+        if (s === "saved") counts.saved++;
+        if (j.jobExpired) counts.expired++;
+      });
+
+      var el = document.getElementById("filters");
+      el.innerHTML = "";
+      ["all","applied","saved","expired"].forEach(function(key) {
+        var btn = document.createElement("button");
+        btn.className = "filter-btn" + (activeFilter === key ? " active" : "");
+        btn.innerHTML = key.charAt(0).toUpperCase() + key.slice(1) + ' <span class="count">(' + counts[key] + ")</span>";
+        btn.addEventListener("click", function() {
+          activeFilter = key;
+          renderFilters();
+          renderJobs();
+        });
+        el.appendChild(btn);
+      });
+    }
+
+    function renderJobs() {
+      var el = document.getElementById("job-list");
+      var filtered = jobs.filter(function(j) {
+        if (activeFilter === "all") return true;
+        if (activeFilter === "expired") return j.jobExpired;
+        return getStatus(j) === activeFilter;
+      });
+
+      if (!filtered.length) {
+        el.innerHTML = '<p class="empty-state">No jobs match this filter.</p>';
+        return;
+      }
+
+      // Sort: most recent first
+      filtered.sort(function(a, b) {
+        var ta = a.applyTime || (a.statuses && a.statuses.userJobStatus && a.statuses.userJobStatus.timestamp) || 0;
+        var tb = b.applyTime || (b.statuses && b.statuses.userJobStatus && b.statuses.userJobStatus.timestamp) || 0;
+        return tb - ta;
+      });
+
+      el.innerHTML = filtered.map(function(j) {
+        var status = getStatus(j);
+        var pillClass = "status-pill--" + status;
+        if (j.jobExpired) pillClass = "status-pill--expired";
+        var pillText = j.jobExpired ? "Expired" : status.charAt(0).toUpperCase() + status.slice(1);
+
+        var ts = j.applyTime || (j.statuses && j.statuses.userJobStatus && j.statuses.userJobStatus.timestamp) || 0;
+        var dateStr = ts ? new Date(ts).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" }) : "";
+
+        var logo = (j.company && j.company.logoUrl)
+          ? '<img class="company-logo" src="' + esc(j.company.logoUrl) + '" alt="">'
+          : "";
+
+        var expiredClass = j.jobExpired ? " job-card--expired" : "";
+
+        return '<article class="job-card' + expiredClass + '">'
+          + '<div class="job-card-header">'
+          + '<div>'
+          + '<h3 class="job-card-title"><a href="' + esc(j.jobUrl) + '" target="_blank" rel="noopener">' + esc(j.jobTitle) + '</a></h3>'
+          + '<p class="job-card-company">' + logo + " " + esc(j.company ? j.company.name : "") + '</p>'
+          + '</div>'
+          + '<span class="status-pill ' + pillClass + '">' + esc(pillText) + '</span>'
+          + '</div>'
+          + '<p class="job-card-meta">'
+          + '<span>' + esc(j.location || "") + '</span>'
+          + (dateStr ? '<span>' + dateStr + '</span>' : "")
+          + (j.employerEstimatedResponseDays ? '<span>~' + j.employerEstimatedResponseDays + 'd response</span>' : "")
+          + '</p>'
+          + '</article>';
+      }).join("");
+    }
+
+    // --- HAR import ---
+    var zone = document.getElementById("import-zone");
+    var input = document.getElementById("har-input");
+
+    zone.addEventListener("click", function() { input.click(); });
+    zone.addEventListener("dragover", function(e) { e.preventDefault(); zone.classList.add("drag-over"); });
+    zone.addEventListener("dragleave", function() { zone.classList.remove("drag-over"); });
+    zone.addEventListener("drop", function(e) {
+      e.preventDefault();
+      zone.classList.remove("drag-over");
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    input.addEventListener("change", function() {
+      if (input.files.length) handleFile(input.files[0]);
+    });
+
+    function handleFile(f) {
+      var statusEl = document.getElementById("import-status");
+      statusEl.textContent = "Reading " + f.name + "...";
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var har = JSON.parse(e.target.result);
+          var extracted = extractJobsFromHAR(har);
+          if (!extracted.length) {
+            statusEl.textContent = "No job data found in this HAR. Make sure you exported from myjobs.indeed.com/applied.";
+            return;
+          }
+          // Merge: keep existing jobs not in new set, add new ones
+          var existingByKey = {};
+          jobs.forEach(function(j) { existingByKey[j.jobKey] = j; });
+          extracted.forEach(function(j) { existingByKey[j.jobKey] = j; });
+          jobs = Object.keys(existingByKey).map(function(k) { return existingByKey[k]; });
+          save();
+          render();
+          statusEl.textContent = "Imported " + extracted.length + " jobs. Total: " + jobs.length + ".";
+          showToast("Imported " + extracted.length + " jobs");
+        } catch(err) {
+          statusEl.textContent = "Error parsing file: " + err.message;
+        }
+      };
+      reader.readAsText(f);
+    }
+
+    function extractJobsFromHAR(har) {
+      var found = [];
+      var entries = (har.log && har.log.entries) || [];
+      entries.forEach(function(entry) {
+        var url = entry.request && entry.request.url || "";
+        if (url.indexOf("appStatusJobs") === -1) return;
+        var text = entry.response && entry.response.content && entry.response.content.text;
+        if (!text) return;
+        try {
+          var d = JSON.parse(text);
+          if (d.success && d.body && d.body.appStatusJobs) {
+            d.body.appStatusJobs.forEach(function(j) { found.push(j); });
+          }
+        } catch(e) {}
+      });
+      return found;
+    }
+
+    // --- Utilities ---
+    function esc(s) {
+      if (!s) return "";
+      var d = document.createElement("div");
+      d.appendChild(document.createTextNode(s));
+      return d.innerHTML;
+    }
+
+    function showToast(msg) {
+      var t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("is-visible");
+      setTimeout(function() { t.classList.remove("is-visible"); }, 2400);
+    }
+  })();
+  </script>
+</body>
+</html>

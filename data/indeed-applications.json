@@ -1,0 +1,376 @@
+[
+  {
+    "appTk": "1jlb388pbk48r801",
+    "jobTitle": "Operations Manager",
+    "jobKey": "2bf48285f1dcf872",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=2bf48285f1dcf872&hl=en",
+    "jobExpired": false,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Leek",
+    "company": {
+      "name": "Rudyard Hotel"
+    },
+    "statuses": {
+      "candidateStatus": {
+        "status": "APPLIED",
+        "timestamp": 1775267717154
+      },
+      "selfReportedStatus": {
+        "status": "APPLIED",
+        "timestamp": 1775267715326
+      },
+      "employerJobStatus": {
+        "status": "OPEN",
+        "timestamp": 1774953779124
+      },
+      "userJobStatus": {
+        "status": "POST_APPLY",
+        "timestamp": 1775267646609
+      }
+    },
+    "applyTime": 1775267646609,
+    "indeedApplyable": true,
+    "hasIaAppId": true,
+    "hasApplicationPreview": true,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "operations manager",
+    "messaging": null,
+    "employerEstimatedResponseDays": 1,
+    "encryptedIaAppId": "9a44a6f63eaffa33d7de46fe88dcf9ed826b12fb219ea1630cace3277f6b99df",
+    "encryptedAdvCandId": "c1dd3963f64b8a362e57",
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo80g",
+    "jobTitle": "Portfolio and Strategy Lead",
+    "jobKey": "9a5c173cac7fd311",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=9a5c173cac7fd311&hl=en",
+    "jobExpired": false,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Manchester",
+    "company": {
+      "name": "CAML"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1775148016539
+      }
+    },
+    "applyTime": 0,
+    "indeedApplyable": false,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "shift leader",
+    "messaging": null,
+    "employerEstimatedResponseDays": null,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo80b",
+    "jobTitle": "Demand Planner",
+    "jobKey": "0c5a367d88fa3326",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=0c5a367d88fa3326&hl=en",
+    "jobExpired": true,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Wilmslow",
+    "company": {
+      "name": "StaffZilla LTD",
+      "logoUrl": "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/7a8d2535cba4c12992d98f9b7ca93a5e"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774845336489
+      }
+    },
+    "applyTime": 0,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "demand planner",
+    "messaging": null,
+    "employerEstimatedResponseDays": 1,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo80h",
+    "jobTitle": "Dental Practice Manager (Senior Leadership Role) Synergy Dental Care \u2013 Biddulph",
+    "jobKey": "58cb4db445ada5be",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=58cb4db445ada5be&hl=en",
+    "jobExpired": true,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Stoke-on-Trent",
+    "company": {
+      "name": "Synergy Dental Care",
+      "logoUrl": "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/ea8676eece24004d100fbe348527c952"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774676612197
+      }
+    },
+    "applyTime": 0,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "dental practice manager",
+    "messaging": null,
+    "employerEstimatedResponseDays": null,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo80e",
+    "jobTitle": "General Manager - The Vaults",
+    "jobKey": "3623c2804cafca06",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=3623c2804cafca06&hl=en",
+    "jobExpired": false,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Stoke-on-Trent",
+    "company": {
+      "name": "Ally Consultants Ltd"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774675887289
+      }
+    },
+    "applyTime": 1774675887289,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "general manager",
+    "messaging": null,
+    "employerEstimatedResponseDays": 1,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo808",
+    "jobTitle": "Theatre Manager",
+    "jobKey": "82c59d7d51822317",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=82c59d7d51822317&hl=en",
+    "jobExpired": true,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Altrincham",
+    "company": {
+      "name": "STAR Clinic and Private Hospital"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774529627266
+      }
+    },
+    "applyTime": 1774529627266,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "theatre manager",
+    "messaging": null,
+    "employerEstimatedResponseDays": 2,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo809",
+    "jobTitle": "Site Manager",
+    "jobKey": "9ed42ba2e8fa7ee6",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=9ed42ba2e8fa7ee6&hl=en",
+    "jobExpired": false,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Stoke-on-Trent",
+    "company": {
+      "name": "The Vella Group",
+      "logoUrl": "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/a4194542f0a53f0b22ea84ea8816c779"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774529585096
+      }
+    },
+    "applyTime": 1774529585096,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "site manager",
+    "messaging": null,
+    "employerEstimatedResponseDays": null,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo80d",
+    "jobTitle": "Fostering Team Manager",
+    "jobKey": "bfa8cec45c155aa5",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=bfa8cec45c155aa5&hl=en",
+    "jobExpired": true,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Stafford",
+    "company": {
+      "name": "National Fostering Group",
+      "logoUrl": "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/57491c0d702c45e3e6d057613526a40c"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774529559828
+      }
+    },
+    "applyTime": 1774529559828,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "team leader",
+    "messaging": null,
+    "employerEstimatedResponseDays": 1,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo80c",
+    "jobTitle": "Leadership Development Manager",
+    "jobKey": "8be6307095eebe2e",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=8be6307095eebe2e&hl=en",
+    "jobExpired": false,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "United Kingdom",
+    "company": {
+      "name": "Tide Partnership",
+      "logoUrl": "https://d2q79iu7y748jz.cloudfront.net/s/_squarelogo/256x256/dcfcd0f02b438913cdd034c7ee53f723"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774529537174
+      }
+    },
+    "applyTime": 1774529512151,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "leadership development program",
+    "messaging": null,
+    "employerEstimatedResponseDays": 1,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  },
+  {
+    "appTk": "1jlb388k9rldo80a",
+    "jobTitle": "Responsible Individual/ Operations Manager \u2013 Ofsted",
+    "jobKey": "47969964e7774ac0",
+    "jobUrl": "https://uk.indeed.com/viewjob?jk=47969964e7774ac0&hl=en",
+    "jobExpired": true,
+    "jobReported": false,
+    "jobFraudulent": false,
+    "withdrawn": false,
+    "location": "Stafford",
+    "company": {
+      "name": "First Blue Healthcare Ltd"
+    },
+    "statuses": {
+      "candidateStatus": null,
+      "selfReportedStatus": null,
+      "employerJobStatus": null,
+      "userJobStatus": {
+        "status": "SAVED",
+        "timestamp": 1774529363735
+      }
+    },
+    "applyTime": 1774529363735,
+    "indeedApplyable": true,
+    "hasIaAppId": false,
+    "hasApplicationPreview": false,
+    "hasInterviewNowAccess": false,
+    "normalizedJobTitle": "operations manager",
+    "messaging": null,
+    "employerEstimatedResponseDays": 1,
+    "encryptedIaAppId": null,
+    "encryptedAdvCandId": null,
+    "applicationDraftExpiryTime": null,
+    "partnerName": null,
+    "autoApplied": false
+  }
+]

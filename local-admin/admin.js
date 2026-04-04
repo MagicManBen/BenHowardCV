@@ -28,7 +28,7 @@ const REVIEW_FIELDS = [
 ];
 
 const KNOWN_APPLICATION_KEYS = new Set([
-  "ref", "slug", "createdAt", "updatedAt",
+  "ref", "shortCode", "slug", "createdAt", "updatedAt",
   "companyName", "roleTitle", "location", "sector", "salary",
   "employmentType", "hours", "workplaceType",
   "cvText", "candidateCvText", "candidateCv", "cvSummary", "candidateCvSummary",
@@ -105,6 +105,7 @@ async function initLocalAdminPage() {
     resultLocation:   document.getElementById("result-location"),
     resultRef:        document.getElementById("result-ref"),
     resultUrl:        document.getElementById("result-url"),
+    resultShortUrl:   document.getElementById("result-short-url"),
     copyUrlButton:    document.getElementById("copy-url-button"),
     openPreviewLink:  document.getElementById("open-preview-link"),
     downloadCvButton: document.getElementById("download-cv-button"),
@@ -213,11 +214,12 @@ async function initLocalAdminPage() {
     var cvUrl = dom.resultUrl ? dom.resultUrl.value : "";
     var roleTitle = dom.resultRole ? dom.resultRole.value : "";
     var companyName = dom.resultCompany ? dom.resultCompany.value : "";
+    var shortCode = pendingApplication ? (pendingApplication.shortCode || "") : "";
     if (!cvUrl) { showToast(dom, "No CV URL available yet."); return; }
     dom.downloadCvButton.disabled = true;
     dom.downloadCvButton.textContent = "Generating PDF\u2026";
     try {
-      await downloadCvWithQr(cvUrl, roleTitle, companyName);
+      await downloadCvWithQr(cvUrl, roleTitle, companyName, shortCode);
       showToast(dom, "PDF downloaded.");
     } catch (err) {
       showToast(dom, "Download failed: " + (err.message || err));
@@ -611,7 +613,8 @@ function normaliseApplicationPayload(input) {
   }
 
   var normalised = {
-    ref: ref, companyName: companyName, roleTitle: roleTitle, location: location,
+    ref: ref, shortCode: str(input.shortCode) || generateShortCode(),
+    companyName: companyName, roleTitle: roleTitle, location: location,
     sector: str(input.sector), salary: str(input.salary),
     employmentType: str(input.employmentType), hours: str(input.hours),
     workplaceType: str(input.workplaceType),
@@ -803,6 +806,11 @@ async function renderPublishedResult(dom, application, fullUrl) {
   dom.resultRef.value = application.ref || "";
   dom.resultUrl.value = fullUrl;
 
+  var sc = application.shortCode || "";
+  if (dom.resultShortUrl) {
+    dom.resultShortUrl.value = sc ? "https://checkloops.co.uk/j/#" + sc : "";
+  }
+
   if (dom.openPreviewLink) dom.openPreviewLink.href = fullUrl;
   try { await renderQrImage(dom.resultQrImage, fullUrl); } catch (_) { dom.resultQrImage.hidden = true; }
 }
@@ -866,6 +874,12 @@ function slugify(text) {
   return String(text).normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
 }
+function generateShortCode() {
+  var chars = "abcdefghjkmnpqrstuvwxyz23456789";
+  var code = "";
+  for (var i = 0; i < 5; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+  return code;
+}
 function str(v) { return typeof v === "string" ? v.trim() : ""; }
 function arr(v) { return Array.isArray(v) ? v.map(function (i) { return typeof i === "string" ? i.trim() : ""; }).filter(Boolean) : []; }
 function showError(el, msg) { if (el) { el.hidden = false; el.textContent = msg; } }
@@ -886,9 +900,11 @@ async function renderQrImage(img, text) {
   img.hidden = false;
 }
 
-async function downloadCvWithQr(cvUrl, roleTitle, companyName) {
-  /* 1. Generate QR data-URI */
-  var qr = new window.QRious({ value: cvUrl, size: 240, level: "M", background: "#ffffff", foreground: "#284a5b" });
+async function downloadCvWithQr(cvUrl, roleTitle, companyName, shortCode) {
+  /* 1. Generate QR data-URI — encode the short URL if available, otherwise the full URL */
+  var shortUrl = shortCode ? "https://checkloops.co.uk/j/#" + shortCode : "";
+  var qrTarget = shortUrl || cvUrl;
+  var qr = new window.QRious({ value: qrTarget, size: 240, level: "M", background: "#ffffff", foreground: "#284a5b" });
   var qrDataUrl = qr.toDataURL();
 
   /* 2. Fetch the base CV HTML */
@@ -897,15 +913,21 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName) {
   var html = await response.text();
 
   /* 3. Build QR block label */
+  var shortUrlDisplay = shortCode ? "checkloops.co.uk/j/#" + esc(shortCode) : "";
   var label = companyName
-    ? "I have prepared a personalised CV for " + esc(companyName) + ". Scan or tap to view."
-    : "I have prepared a more detailed CV tailored for this role. Scan or tap to view.";
+    ? "I have prepared a personalised CV for " + esc(companyName) + "."
+    : "I have prepared a more detailed CV tailored for this role.";
+  if (shortUrlDisplay) {
+    label += '<br>Scan QR or visit <strong style="letter-spacing:0.02em;">' + shortUrlDisplay + '</strong>';
+  } else {
+    label += " Scan or tap to view.";
+  }
 
   function makeQrBlock() {
     return (
       '<section class="sidebar-card" style="margin-top:auto; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">'
       + '<h2>Tailored CV</h2>'
-      + '<a href="' + esc(cvUrl) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.3rem; background:#fff; padding:4px; border-radius:5px; line-height:0;">'
+      + '<a href="' + esc(qrTarget) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.3rem; background:#fff; padding:4px; border-radius:5px; line-height:0;">'
       + '<img src="' + qrDataUrl + '" width="80" height="80" alt="QR code" style="display:block; width:80px; height:80px;">'
       + '</a>'
       + '<p style="margin-top:0.3rem; font-size:0.58rem; line-height:1.35; color:rgba(245,245,241,0.88);">' + label + '</p>'

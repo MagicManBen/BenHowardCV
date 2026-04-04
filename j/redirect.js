@@ -10,14 +10,49 @@ async function initRedirectPage() {
   const params = new URLSearchParams(window.location.search);
 
   const ref = params.get("r") || "";
-  if (!ref) {
+  const shortCode = window.location.hash.replace(/^#/, "").trim() || params.get("s") || "";
+
+  if (!ref && !shortCode) {
     setMessage(titleEl, messageEl, "Missing job reference", "This short link does not include a job reference.");
     return;
   }
 
-  const printSuffix = params.get("print") === "1" ? "&print=1" : "";
-  const target = `${PUBLIC_FULL_CV_URL}?ref=${encodeURIComponent(ref)}${printSuffix}`;
-  window.location.replace(target);
+  /* Direct ref redirect (existing behaviour) */
+  if (ref) {
+    const printSuffix = params.get("print") === "1" ? "&print=1" : "";
+    const target = `${PUBLIC_FULL_CV_URL}?ref=${encodeURIComponent(ref)}${printSuffix}`;
+    window.location.replace(target);
+    return;
+  }
+
+  /* Short code: resolve to ref via API or scan data files */
+  try {
+    const application = await resolveShortCode(shortCode);
+    if (!application || !application.ref) {
+      setMessage(titleEl, messageEl, "Link not found", "This short code could not be resolved.");
+      return;
+    }
+    const printSuffix = params.get("print") === "1" ? "&print=1" : "";
+    const target = `${PUBLIC_FULL_CV_URL}?ref=${encodeURIComponent(application.ref)}${printSuffix}`;
+    window.location.replace(target);
+  } catch (err) {
+    setMessage(titleEl, messageEl, "Error loading link", err.message || "Could not resolve short code.");
+  }
+}
+
+async function resolveShortCode(code) {
+  if (IS_LOCAL_RUNTIME) {
+    const resp = await fetch(`${LOCAL_API_BASE}/application?sc=${encodeURIComponent(code)}&t=${Date.now()}`, { cache: "no-store" });
+    if (!resp.ok) return null;
+    return resp.json();
+  }
+  /* GitHub Pages: load applications.json and find match */
+  const resp = await fetch(`/data/applications.json?t=${Date.now()}`, { cache: "no-store" });
+  if (!resp.ok) return null;
+  const apps = await resp.json();
+  if (!Array.isArray(apps)) return null;
+  const lc = code.toLowerCase();
+  return apps.find(a => (a.shortCode || "").toLowerCase() === lc) || null;
 }
 
 async function fetchApplicationByRef(ref) {

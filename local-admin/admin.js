@@ -904,7 +904,13 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName, shortCode) {
   /* 1. Generate QR data-URI — encode the short URL if available, otherwise the full URL */
   var shortUrl = shortCode ? "https://checkloops.co.uk/j/#" + shortCode : "";
   var qrTarget = shortUrl || cvUrl;
-  var qr = new window.QRious({ value: qrTarget, size: 240, level: "M", background: "#ffffff", foreground: "#284a5b" });
+  var qr = new window.QRious({
+    value: qrTarget,
+    size: 256,
+    level: "M",
+    background: "#ffffff",
+    foreground: "#284a5b"
+  });
   var qrDataUrl = qr.toDataURL();
 
   /* 2. Fetch the base CV HTML */
@@ -925,10 +931,10 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName, shortCode) {
 
   function makeQrBlock() {
     return (
-      '<section class="sidebar-card" style="margin-top:auto; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.14); text-align:center;">'
-      + '<h2>Tailored CV</h2>'
-      + '<a href="' + esc(qrTarget) + '" target="_blank" rel="noopener noreferrer" style="display:inline-block; margin-top:0.3rem; background:#fff; padding:4px; border-radius:5px; line-height:0;">'
-      + '<img src="' + qrDataUrl + '" width="80" height="80" alt="QR code" style="display:block; width:80px; height:80px;">'
+      '<section class="sidebar-card" style="margin-top:auto; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.14); display:flex; flex-direction:column; align-items:center; text-align:center;">'
+      + '<h2 style="margin:0;">Tailored CV</h2>'
+      + '<a href="' + esc(qrTarget) + '" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:center; width:88px; height:88px; margin:0.38rem auto 0; background:#fff; border-radius:6px; line-height:0; text-decoration:none;">'
+      + '<img src="' + qrDataUrl + '" width="80" height="80" alt="QR code" style="display:block; width:80px; height:80px; margin:0 auto; object-fit:contain;">'
       + '</a>'
       + '<p style="margin-top:0.3rem; font-size:0.58rem; line-height:1.35; color:rgba(245,245,241,0.88);">' + label + '</p>'
       + '</section>'

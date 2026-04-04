@@ -293,7 +293,7 @@ def load_local_config():
     return {
       "githubToken": os.environ.get("GITHUB_TOKEN", "").strip() or keychain_github_token,
       "publicCvBaseUrl": DEFAULT_PUBLIC_CV_BASE_URL,
-      "openaiGenerationModel": os.environ.get("OPENAI_GENERATION_MODEL", "gpt-4.1-mini").strip() or "gpt-4.1-mini",
+      "openaiGenerationModel": os.environ.get("OPENAI_GENERATION_MODEL", "gpt-4.5-mini").strip() or "gpt-4.5-mini",
       # Legacy, not used by the active local-admin generation flow:
       "ollamaBaseUrl": os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
       "ollamaModel": os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
@@ -315,7 +315,7 @@ def load_local_config():
   return {
     "githubToken": str(payload.get("githubToken", "")).strip() or os.environ.get("GITHUB_TOKEN", "").strip() or keychain_github_token,
     "publicCvBaseUrl": str(payload.get("cvBaseUrl", "")).strip() or DEFAULT_PUBLIC_CV_BASE_URL,
-    "openaiGenerationModel": str(payload.get("openaiGenerationModel", "")).strip() or os.environ.get("OPENAI_GENERATION_MODEL", "gpt-4.1-mini").strip() or "gpt-4.1-mini",
+    "openaiGenerationModel": str(payload.get("openaiGenerationModel", "")).strip() or os.environ.get("OPENAI_GENERATION_MODEL", "gpt-4.5-mini").strip() or "gpt-4.5-mini",
     # Legacy, not used by the active local-admin generation flow:
     "ollamaBaseUrl": str(payload.get("ollamaBaseUrl", "")).strip() or os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").strip(),
     "ollamaModel": str(payload.get("ollamaModel", "")).strip() or os.environ.get("OLLAMA_MODEL", "llama3.2").strip(),
@@ -535,7 +535,7 @@ def compact_currency(currency_code):
   }.get(code, (code + " ") if code else "")
 
 
-def call_openai_chat(api_key, prompt, model="gpt-4o-mini"):
+def call_openai_chat(api_key, prompt, model="gpt-4.5-mini"):
   """Call OpenAI chat completions and return parsed JSON response."""
   body = json.dumps({
     "model": model,

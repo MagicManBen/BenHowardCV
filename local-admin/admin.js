@@ -898,21 +898,22 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName) {
     );
   }
 
-  /* 4. Inject into BOTH sidebars (page 1 and page 2) */
-  var positions = [];
-  var search = html;
-  var offset = 0;
-  var idx;
-  while ((idx = search.indexOf('</aside>')) !== -1) {
-    positions.push(offset + idx);
-    offset += idx + 8;
-    search = search.slice(idx + 8);
-  }
-  if (positions.length === 0) throw new Error("Could not find any sidebar in BH CV.html");
-  // Inject from last to first so earlier offsets stay valid
-  for (var i = positions.length - 1; i >= 0; i--) {
-    var pos = positions[i];
-    html = html.slice(0, pos) + makeQrBlock() + '\n' + html.slice(pos);
+  /* 4. Inject QR into FIRST sidebar only (page 1) */
+  var asideIdx = html.indexOf('</aside>');
+  if (asideIdx === -1) throw new Error("Could not find any sidebar in BH CV.html");
+  html = html.slice(0, asideIdx) + makeQrBlock() + '\n' + html.slice(asideIdx);
+
+  /* 4b. Inject "Prepared for" subheading under title */
+  if (companyName) {
+    var rtIdx = html.indexOf('class="role-title"');
+    if (rtIdx !== -1) {
+      var closeP = html.indexOf('</p>', rtIdx);
+      if (closeP !== -1) {
+        var insertAt = closeP + 4;
+        var preparedLine = '\n                            <p class="role-title" style="font-size:0.72rem; margin-top:0.15rem; letter-spacing:0.04em; opacity:0.85;">Prepared for ' + esc(companyName) + '</p>';
+        html = html.slice(0, insertAt) + preparedLine + html.slice(insertAt);
+      }
+    }
   }
 
   /* 5. Build a safe filename */

@@ -148,6 +148,7 @@ APPLICATIONS_INDEX_PATH = "data/applications.json"
 DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
 SUPABASE_DEFAULT_BUCKET = "cv-files"
 SUPABASE_APPLICATIONS_TABLE = "applications"
+SUPABASE_CV_PAGE_VISITS_TABLE = "cv_page_visits"
 SUPABASE_REVIEWED_JOBS_TABLE = "reviewed_jobs"
 SUPABASE_AI_TOP_JOBS_TABLE = "ai_top_jobs"
 KEYCHAIN_SERVICE_OPENAI_KEY = "benhowardcv-openai-api-key"
@@ -1751,6 +1752,39 @@ def read_supabase_index(config):
   return [item for item in (supabase_summary_from_row(row) for row in rows) if item]
 
 
+def read_supabase_cv_page_visits(config):
+  if not has_supabase_access(config):
+    return []
+
+  path = (
+    f"/rest/v1/{SUPABASE_CV_PAGE_VISITS_TABLE}"
+    "?select=id,created_at,cv_ref,short_code,company_name,role_title,job_url,page_url,referrer,user_agent"
+    "&order=created_at.desc&limit=5000"
+  )
+  status, payload = supabase_request_json(config, path)
+  if status < 200 or status >= 300:
+    return []
+
+  rows = payload if isinstance(payload, list) else []
+  visits = []
+  for row in rows:
+    if not isinstance(row, dict):
+      continue
+    visits.append({
+      "id": str(row.get("id", "")).strip(),
+      "createdAt": str(row.get("created_at", "")).strip(),
+      "cvRef": str(row.get("cv_ref", "")).strip(),
+      "shortCode": str(row.get("short_code", "")).strip(),
+      "companyName": str(row.get("company_name", "")).strip(),
+      "roleTitle": str(row.get("role_title", "")).strip(),
+      "jobUrl": str(row.get("job_url", "")).strip(),
+      "pageUrl": str(row.get("page_url", "")).strip(),
+      "referrer": str(row.get("referrer", "")).strip(),
+      "userAgent": str(row.get("user_agent", "")).strip(),
+    })
+  return visits
+
+
 def read_supabase_application_by_ref(ref, config):
   if not has_supabase_access(config):
     return None
@@ -1967,6 +2001,39 @@ def read_application_by_short_code(short_code, config=None):
     return read_application_by_ref(str(match["ref"]).strip().lower(), config)
 
   return None
+
+
+def build_public_cv_url(application, config=None):
+  config = config or load_local_config()
+  base_url = str(config.get("publicCvBaseUrl") or DEFAULT_PUBLIC_CV_BASE_URL).strip() or DEFAULT_PUBLIC_CV_BASE_URL
+  short_code = str(application.get("shortCode", "")).strip()
+  ref = str(application.get("ref", "")).strip()
+  if short_code:
+    return f"{base_url}?sc={quote(short_code, safe='')}"
+  if ref:
+    return f"{base_url}?ref={quote(ref, safe='')}"
+  return base_url
+
+
+def build_applications_backup_payload(config=None):
+  config = config or load_local_config()
+  applications = read_merged_index(config)
+  visits = read_supabase_cv_page_visits(config)
+
+  application_rows = []
+  for application in applications:
+    item = dict(application) if isinstance(application, dict) else {}
+    item["cvUrl"] = build_public_cv_url(item, config)
+    application_rows.append(item)
+
+  return {
+    "exportedAt": now_iso(),
+    "publicCvBaseUrl": str(config.get("publicCvBaseUrl") or DEFAULT_PUBLIC_CV_BASE_URL).strip() or DEFAULT_PUBLIC_CV_BASE_URL,
+    "applicationCount": len(application_rows),
+    "visitCount": len(visits),
+    "applications": application_rows,
+    "cvPageVisits": visits,
+  }
 
 
 # ---------------------------------------------------------------------------
@@ -2471,6 +2538,15 @@ class AppHandler(SimpleHTTPRequestHandler):
     self.end_headers()
     self.wfile.write(body)
 
+  def send_bytes(self, status, body, content_type="application/octet-stream", filename=None):
+    self.send_response(status)
+    self.send_header("Content-Type", content_type)
+    self.send_header("Content-Length", str(len(body)))
+    if filename:
+      self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+    self.end_headers()
+    self.wfile.write(body)
+
   def is_blocked_path(self, path):
     return path in {"/local-admin/secrets.local.json", "/local-admin/secrets.local.js"} or path.startswith("/local-cache/")
 
@@ -2512,6 +2588,17 @@ class AppHandler(SimpleHTTPRequestHandler):
       try:
         config = load_local_config()
         self.send_json(200, read_merged_index(config))
+      except RuntimeError as exc:
+        self.send_json(500, {"error": str(exc)})
+      return
+
+    if parsed.path == "/api/export-applications-backup":
+      try:
+        config = load_local_config()
+        payload = build_applications_backup_payload(config)
+        filename = f"applications-backup-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}.json"
+        body = json.dumps(payload, indent=2).encode("utf-8")
+        self.send_bytes(200, body, "application/json; charset=utf-8", filename)
       except RuntimeError as exc:
         self.send_json(500, {"error": str(exc)})
       return

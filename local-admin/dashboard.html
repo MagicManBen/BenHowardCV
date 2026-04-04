@@ -21,6 +21,7 @@
       <p class="eyebrow">Applications</p>
       <h1 class="page-title">Published Jobs</h1>
       <p class="page-subtitle">A cleaner overview of every application you have already published to Supabase.</p>
+      <p><button type="button" id="download-backup-button">Download Backup JSON</button></p>
     </section>
 
     <div class="page-grid">
@@ -44,6 +45,7 @@
       await checkSupabase();
       await loadApplications();
       bindDeleteActions();
+      bindBackupDownload();
     }
 
     async function checkSupabase() {
@@ -98,6 +100,40 @@
         button.disabled = false;
         button.textContent = original;
       }
+    }
+
+    function bindBackupDownload() {
+      var button = document.getElementById("download-backup-button");
+      if (!button) return;
+      button.addEventListener("click", async function() {
+        var originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = "Preparing backup...";
+        try {
+          var res = await fetch("/api/export-applications-backup");
+          if (!res.ok) {
+            var err = await res.json().catch(function() { return {}; });
+            throw new Error(err.error || ("Backup failed (" + res.status + ")"));
+          }
+          var blob = await res.blob();
+          var contentDisposition = res.headers.get("Content-Disposition") || "";
+          var filenameMatch = contentDisposition.match(/filename=\"([^\"]+)\"/);
+          var filename = filenameMatch ? filenameMatch[1] : "applications-backup.json";
+          var url = URL.createObjectURL(blob);
+          var link = document.createElement("a");
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          alert("Backup failed: " + error.message);
+        } finally {
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      });
     }
   </script>
 </body>

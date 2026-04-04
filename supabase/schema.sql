@@ -115,3 +115,31 @@ create policy "Anon insert cv_contact_requests"
 on public.cv_contact_requests
 for insert
 with check (true);
+
+-- CV page visit tracking (public page-view logging)
+create table if not exists public.cv_page_visits (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  cv_ref text not null default 'direct',
+  short_code text,
+  company_name text not null default '',
+  role_title text not null default '',
+  job_url text,
+  page_url text,
+  referrer text,
+  user_agent text
+);
+
+create index if not exists cv_page_visits_created_at_idx
+  on public.cv_page_visits (created_at desc);
+
+create index if not exists cv_page_visits_cv_ref_idx
+  on public.cv_page_visits (cv_ref);
+
+alter table public.cv_page_visits enable row level security;
+
+drop policy if exists "Anon insert cv_page_visits" on public.cv_page_visits;
+create policy "Anon insert cv_page_visits"
+on public.cv_page_visits
+for insert
+with check (true);

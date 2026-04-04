@@ -177,6 +177,7 @@ window.CVRuntime = (() => {
 
         const result = {
           ref: cleanString(data.ref) || cleanString(data.slug) || defaults.ref,
+          shortCode: cleanString(data.shortCode || data.short_code || data.sc),
           companyName,
           roleTitle,
           location,
@@ -1673,9 +1674,47 @@ window.CVRuntime = (() => {
         if (!res.ok) throw new Error(`Insert failed (${res.status})`);
       }
 
+      let visitLogged = false;
+
       function getRef() {
         const p = new URLSearchParams(window.location.search);
         return p.get('ref') || p.get('sc') || 'direct';
+      }
+
+      function buildJobUrl(state) {
+        const candidates = [
+          state.jobUrl,
+          state.advertUrl,
+          state.jobAdvertUrl,
+          state.applyUrl,
+          state.roleUrl,
+          state.url
+        ];
+        for (const candidate of candidates) {
+          const cleaned = cleanString(candidate);
+          if (cleaned) return cleaned;
+        }
+        return "";
+      }
+
+      async function logPageVisit(state) {
+        if (visitLogged) return;
+        if (!state || !cleanString(state.ref) || cleanString(state.ref) === defaults.ref) return;
+        visitLogged = true;
+        try {
+          await supabaseInsert('cv_page_visits', {
+            cv_ref: cleanString(state.ref) || 'direct',
+            short_code: cleanString(state.shortCode || ''),
+            company_name: cleanString(state.companyName || ''),
+            role_title: cleanString(state.roleTitle || ''),
+            job_url: buildJobUrl(state) || null,
+            page_url: window.location.href,
+            referrer: document.referrer || null,
+            user_agent: navigator.userAgent || null
+          });
+        } catch (error) {
+          console.warn('CV visit log failed.', error);
+        }
       }
 
       function initContactForms() {
@@ -1780,6 +1819,7 @@ window.CVRuntime = (() => {
       async function initFullPage() {
         try {
           const state = await loadState();
+          logPageVisit(state);
           applyState(state);
         } catch (error) {
           console.error(error);

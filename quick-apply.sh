@@ -15,8 +15,8 @@ set -euo pipefail
 # Auto-detect server port (OPEN THIS starts on first free port from 8000)
 detect_server() {
   for p in 8000 8001 8002 8003 8004 8005; do
-    if curl -sf "http://localhost:$p/api/status" > /dev/null 2>&1; then
-      echo "http://localhost:$p"
+    if curl -sf "http://127.0.0.1:$p/api/status" > /dev/null 2>&1; then
+      echo "http://127.0.0.1:$p"
       return 0
     fi
   done

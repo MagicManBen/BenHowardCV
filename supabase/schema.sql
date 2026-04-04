@@ -70,6 +70,31 @@ on public.reviewed_jobs
 for select
 using (true);
 
+-- AI top job picks (from AI job search feature)
+create table if not exists public.ai_top_jobs (
+  id uuid primary key default gen_random_uuid(),
+  fingerprint text not null unique,
+  title text not null default '',
+  company text not null default '',
+  location text not null default '',
+  url text not null default '',
+  salary text not null default '',
+  snippet text not null default '',
+  source text not null default '',
+  match_tags jsonb not null default '[]'::jsonb,
+  match_reason text not null default '',
+  search_keywords text not null default '',
+  created_at timestamptz not null default now()
+);
+
+alter table public.ai_top_jobs enable row level security;
+
+drop policy if exists "Public read ai_top_jobs" on public.ai_top_jobs;
+create policy "Public read ai_top_jobs"
+on public.ai_top_jobs
+for select
+using (true);
+
 -- CV contact requests (from the contact form on cv.html)
 create table if not exists public.cv_contact_requests (
   id uuid primary key default gen_random_uuid(),

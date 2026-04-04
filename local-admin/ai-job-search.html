@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Job Search</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    .ai-search-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .ai-search-form .field--full { grid-column: 1 / -1; }
+    .ai-search-form label { display: block; font-weight: 600; font-size: 0.85rem; color: var(--text-soft); margin-bottom: 0.3rem; }
+    .ai-search-form input, .ai-search-form select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-strong); font-size: 0.95rem; font-family: inherit; }
+    .run-btn { grid-column: 1 / -1; padding: 0.75rem 2rem; font-size: 1rem; font-weight: 700; border: none; border-radius: 10px; background: var(--brand); color: #fff; cursor: pointer; transition: background 0.15s; }
+    .run-btn:hover { background: var(--brand-strong); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .progress-bar { display: none; grid-column: 1 / -1; }
+    .progress-bar.visible { display: block; }
+    .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--brand); width: 0%; transition: width 0.4s ease; border-radius: 3px; }
+    .progress-label { font-size: 0.82rem; color: var(--text-soft); margin-top: 0.4rem; }
+
+    .results-section { margin-top: 2rem; }
+    .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; transition: box-shadow 0.15s; }
+    .result-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .result-card__rank { display: inline-block; font-weight: 800; font-size: 1.1rem; color: var(--brand); margin-right: 0.5rem; min-width: 1.8rem; }
+    .result-card__title { font-weight: 700; font-size: 1.05rem; color: var(--text); }
+    .result-card__title a { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; }
+    .result-card__title a:hover { border-bottom-color: var(--brand); }
+    .result-card__meta { font-size: 0.88rem; color: var(--text-soft); margin-top: 0.3rem; }
+    .result-card__reason { font-size: 0.9rem; color: var(--text); margin-top: 0.5rem; line-height: 1.5; }
+    .result-card__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+    .match-tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; background: var(--brand-soft); color: var(--brand-strong); }
+    .result-card__snippet { font-size: 0.82rem; color: var(--text-faint); margin-top: 0.5rem; max-height: 3.2em; overflow: hidden; line-height: 1.6; }
+    .result-card__actions { margin-top: 0.6rem; }
+    .result-card__actions a { font-size: 0.85rem; color: var(--brand); text-decoration: none; font-weight: 600; margin-right: 1rem; }
+    .result-card__actions a:hover { text-decoration: underline; }
+
+    .stats-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .stat-chip { padding: 0.35rem 0.85rem; background: var(--surface-muted); border-radius: 8px; font-size: 0.82rem; color: var(--text-soft); font-weight: 600; }
+
+    .history-section { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+    .history-card { background: var(--surface-muted); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+    .history-card__title { font-weight: 600; font-size: 0.95rem; }
+    .history-card__meta { font-size: 0.82rem; color: var(--text-soft); margin-top: 0.2rem; }
+    .history-card__tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+
+    .empty-msg { text-align: center; color: var(--text-faint); padding: 2rem; font-size: 0.95rem; }
+    .error-msg { color: var(--danger); font-weight: 600; padding: 1rem; background: rgba(178,76,76,0.08); border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <nav class="dash-nav">
+    <a href="jobspy.html">Job Search</a>
+    <a href="ai-job-search.html" class="active">AI Job Search</a>
+    <a href="dashboard.html">Applied Jobs</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="usage.html">Usage</a>
+    <a href="index.html" class="nav-link--muted">New Application</a>
+  </nav>
+
+  <main class="page-shell">
+    <section class="page-hero">
+      <p class="eyebrow">AI-Powered Match</p>
+      <h1 class="page-title">AI Job Search</h1>
+      <p class="page-subtitle">Searches all job sources, takes the top 50 results, and asks OpenAI to identify the 10 best matches against your CV. Previously picked jobs are excluded from future runs.</p>
+    </section>
+
+    <div class="page-grid">
+      <section class="surface-card">
+        <h2 class="section-title">Search Criteria</h2>
+        <p class="section-copy">Uses your saved preferences as defaults. Override any field before running.</p>
+
+        <div class="ai-search-form" id="search-form">
+          <div class="field">
+            <label for="keywords">Keywords</label>
+            <input id="keywords" placeholder="practice manager">
+          </div>
+          <div class="field">
+            <label for="location">Location</label>
+            <input id="location" placeholder="Leek, Staffordshire">
+          </div>
+          <div class="field">
+            <label for="radius">Radius (miles)</label>
+            <input id="radius" type="number" min="1" max="100" value="20">
+          </div>
+          <div class="field">
+            <label for="days">Posted within (days)</label>
+            <input id="days" type="number" min="1" max="90" value="30">
+          </div>
+          <div class="field">
+            <label for="per-source">Results per source</label>
+            <input id="per-source" type="number" min="5" max="200" value="50">
+          </div>
+          <div class="field">
+            <label for="sources">Sources</label>
+            <select id="sources">
+              <option value="indeed,reed,nhs,adzuna">All sources</option>
+              <option value="indeed,reed">Indeed + Reed</option>
+              <option value="indeed">Indeed only</option>
+              <option value="reed">Reed only</option>
+              <option value="nhs">NHS only</option>
+              <option value="adzuna">Adzuna only</option>
+            </select>
+          </div>
+
+          <div class="progress-bar" id="progress-bar">
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+            <p class="progress-label" id="progress-label">Starting…</p>
+          </div>
+
+          <button class="run-btn" id="run-btn" onclick="runAiSearch()">Run AI Job Search</button>
+        </div>
+      </section>
+
+      <section class="surface-card results-section" id="results-section">
+        <h2 class="section-title">AI Top 10 Matches</h2>
+        <div id="results-container">
+          <p class="empty-msg">Run a search to see AI-matched jobs here.</p>
+        </div>
+        <div class="stats-row" id="stats-row" style="display:none;"></div>
+      </section>
+
+      <section class="surface-card history-section" id="history-section">
+        <h2 class="section-title">Previously Selected Jobs</h2>
+        <p class="section-copy">These jobs have been picked in previous runs and will be excluded from future searches.</p>
+        <div id="history-container">
+          <p class="empty-msg">Loading…</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    var state = { preferences: null, history: [] };
+
+    document.addEventListener("DOMContentLoaded", function() {
+      loadPreferences();
+      loadHistory();
+    });
+
+    function esc(text) {
+      var el = document.createElement("span");
+      el.textContent = String(text || "");
+      return el.innerHTML;
+    }
+
+    async function loadPreferences() {
+      try {
+        var res = await fetch("/api/job-search-preferences");
+        var data = await res.json();
+        if (!res.ok) return;
+        state.preferences = data.preferences;
+        var defaults = (state.preferences && state.preferences.searchDefaults) || {};
+        var home = (state.preferences && state.preferences.homeLocation) || {};
+        document.getElementById("keywords").value = defaults.keywords || "";
+        document.getElementById("location").value = defaults.location || home.label || "";
+        document.getElementById("radius").value = defaults.radiusMiles || home.radiusMiles || 20;
+        document.getElementById("days").value = defaults.postedWithinDays || 30;
+        document.getElementById("per-source").value = defaults.perSourceLimit || 50;
+      } catch (e) {
+        // Use defaults from HTML
+      }
+    }
+
+    async function loadHistory() {
+      try {
+        var res = await fetch("/api/ai-top-jobs");
+        var data = await res.json();
+        if (!res.ok) {
+          document.getElementById("history-container").innerHTML = '<p class="empty-msg">Could not load history.</p>';
+          return;
+        }
+        state.history = data;
+        renderHistory(data);
+      } catch (e) {
+        document.getElementById("history-container").innerHTML = '<p class="empty-msg">Could not load history.</p>';
+      }
+    }
+
+    function renderHistory(jobs) {
+      if (!jobs || !jobs.length) {
+        document.getElementById("history-container").innerHTML = '<p class="empty-msg">No previously selected jobs. Run your first AI search above.</p>';
+        return;
+      }
+      var html = jobs.map(function(job) {
+        var tags = (job.match_tags || []).map(function(tag) {
+          return '<span class="match-tag">' + esc(tag) + '</span>';
+        }).join("");
+        var dateStr = job.created_at ? new Date(job.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
+        return '<div class="history-card">'
+          + '<div class="history-card__title">' + esc(job.title) + (job.company ? ' — ' + esc(job.company) : '') + '</div>'
+          + '<div class="history-card__meta">' + [job.location, job.salary, job.source, dateStr].filter(Boolean).join(" · ") + '</div>'
+          + (job.match_reason ? '<div class="result-card__reason">' + esc(job.match_reason) + '</div>' : '')
+          + (tags ? '<div class="history-card__tags">' + tags + '</div>' : '')
+          + (job.url ? '<div class="result-card__actions"><a href="' + esc(job.url) + '" target="_blank" rel="noopener">View advert</a></div>' : '')
+          + '</div>';
+      }).join("");
+      document.getElementById("history-container").innerHTML = html;
+    }
+
+    function setProgress(pct, label) {
+      var bar = document.getElementById("progress-bar");
+      bar.classList.add("visible");
+      document.getElementById("progress-fill").style.width = pct + "%";
+      document.getElementById("progress-label").textContent = label;
+    }
+
+    function hideProgress() {
+      document.getElementById("progress-bar").classList.remove("visible");
+    }
+
+    async function runAiSearch() {
+      var btn = document.getElementById("run-btn");
+      btn.disabled = true;
+      btn.textContent = "Searching…";
+
+      setProgress(10, "Running job search across all sources…");
+
+      var payload = {
+        keywords: document.getElementById("keywords").value.trim(),
+        location: document.getElementById("location").value.trim(),
+        radiusMiles: parseInt(document.getElementById("radius").value, 10) || 20,
+        postedWithinDays: parseInt(document.getElementById("days").value, 10) || 30,
+        perSourceLimit: parseInt(document.getElementById("per-source").value, 10) || 50,
+        sources: document.getElementById("sources").value,
+      };
+
+      setProgress(25, "Searching job boards…");
+
+      try {
+        setProgress(40, "Sending top 50 jobs + CV to OpenAI for matching…");
+
+        var res = await fetch("/api/ai-job-search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        setProgress(80, "Processing AI response…");
+
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Search failed (" + res.status + ")");
+
+        setProgress(100, "Done!");
+
+        renderResults(data);
+        loadHistory(); // Refresh history
+      } catch (e) {
+        document.getElementById("results-container").innerHTML = '<p class="error-msg">' + esc(e.message) + '</p>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Run AI Job Search";
+        setTimeout(hideProgress, 1500);
+      }
+    }
+
+    function renderResults(data) {
+      var jobs = data.top10 || [];
+
+      if (!jobs.length) {
+        document.getElementById("results-container").innerHTML = '<p class="empty-msg">' + esc(data.message || "No matches found.") + '</p>';
+        document.getElementById("stats-row").style.display = "none";
+        return;
+      }
+
+      var html = jobs.map(function(job, i) {
+        var tags = (job.matchTags || job.match_tags || []).map(function(tag) {
+          return '<span class="match-tag">' + esc(tag) + '</span>';
+        }).join("");
+        var reason = job.matchReason || job.match_reason || "";
+        var meta = [job.company, job.location, job.salary, job.source].filter(Boolean).join(" · ");
+        var snippet = (job.snippet || "").substring(0, 200);
+
+        return '<div class="result-card">'
+          + '<div><span class="result-card__rank">#' + (i + 1) + '</span>'
+          + '<span class="result-card__title">'
+          + (job.url ? '<a href="' + esc(job.url) + '" target="_blank" rel="noopener">' + esc(job.title) + '</a>' : esc(job.title))
+          + '</span></div>'
+          + '<div class="result-card__meta">' + esc(meta) + '</div>'
+          + (reason ? '<div class="result-card__reason">' + esc(reason) + '</div>' : '')
+          + (tags ? '<div class="result-card__tags">' + tags + '</div>' : '')
+          + (snippet ? '<div class="result-card__snippet">' + esc(snippet) + (snippet.length >= 200 ? '…' : '') + '</div>' : '')
+          + '<div class="result-card__actions">'
+          + (job.url ? '<a href="' + esc(job.url) + '" target="_blank" rel="noopener">Open advert</a>' : '')
+          + '</div>'
+          + '</div>';
+      }).join("");
+
+      document.getElementById("results-container").innerHTML = html;
+
+      // Stats
+      var statsHtml = '';
+      statsHtml += '<span class="stat-chip">Matched: ' + esc(jobs.length) + ' jobs</span>';
+      statsHtml += '<span class="stat-chip">Total searched: ' + esc(data.totalSearched || 0) + '</span>';
+      statsHtml += '<span class="stat-chip">Pool size: ' + esc(data.poolSize || 0) + '</span>';
+      if (data.excludedPrevious > 0) {
+        statsHtml += '<span class="stat-chip">Excluded (previous runs): ' + esc(data.excludedPrevious) + '</span>';
+      }
+      var statsRow = document.getElementById("stats-row");
+      statsRow.innerHTML = statsHtml;
+      statsRow.style.display = "flex";
+    }
+  </script>
+</body>
+</html>

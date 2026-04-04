@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import base64
+import hashlib
 import html
 import json
 import os
@@ -148,6 +149,7 @@ DEFAULT_PUBLIC_CV_BASE_URL = "https://checkloops.co.uk/cv.html"
 SUPABASE_DEFAULT_BUCKET = "cv-files"
 SUPABASE_APPLICATIONS_TABLE = "applications"
 SUPABASE_REVIEWED_JOBS_TABLE = "reviewed_jobs"
+SUPABASE_AI_TOP_JOBS_TABLE = "ai_top_jobs"
 KEYCHAIN_SERVICE_OPENAI_KEY = "benhowardcv-openai-api-key"
 
 # GraphHopper driving-time config
@@ -2704,6 +2706,21 @@ class AppHandler(SimpleHTTPRequestHandler):
         self.send_json(500, {"error": str(exc)})
       return
 
+    if parsed.path == "/api/ai-top-jobs":
+      try:
+        config = load_local_config()
+        status, rows = supabase_request_json(
+          config,
+          f"/rest/v1/{SUPABASE_AI_TOP_JOBS_TABLE}?select=*&order=created_at.desc",
+        )
+        if 200 <= status < 300:
+          self.send_json(200, rows if isinstance(rows, list) else [])
+        else:
+          self.send_json(status, {"error": rows.get("message", "Supabase error") if isinstance(rows, dict) else "Supabase error"})
+      except Exception as exc:
+        self.send_json(500, {"error": str(exc)})
+      return
+
     if self.is_blocked_path(parsed.path):
       self.send_error(404)
       return
@@ -2720,12 +2737,16 @@ class AppHandler(SimpleHTTPRequestHandler):
 
   def do_POST(self):
     parsed = urlparse(self.path)
-    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf", "/api/delete-application", "/api/review-job"):
+    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf", "/api/delete-application", "/api/review-job", "/api/ai-job-search"):
       self.send_error(404)
       return
 
     if parsed.path == "/api/review-job":
       self._handle_review_job()
+      return
+
+    if parsed.path == "/api/ai-job-search":
+      self._handle_ai_job_search()
       return
 
     if parsed.path == "/api/generate":
@@ -3179,6 +3200,228 @@ class AppHandler(SimpleHTTPRequestHandler):
       return
 
     self.send_json(200, {"ok": True, "review": review, "fingerprint": fingerprint, "driving": driving})
+
+  def _handle_ai_job_search(self):
+    """Run job search, send top 50 + CV to OpenAI, get top 10 matches, save to Supabase."""
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    try:
+      config = load_local_config()
+    except RuntimeError as exc:
+      self.send_json(500, {"error": str(exc)})
+      return
+
+    openai_key = config.get("openaiApiKey", "")
+    if not openai_key:
+      self.send_json(400, {"error": "No OpenAI API key configured."})
+      return
+
+    if not has_supabase_access(config):
+      self.send_json(400, {"error": "No Supabase service role key configured."})
+      return
+
+    # Build search params from the request payload
+    search_params = {
+      "q": str(payload.get("keywords", "")).strip(),
+      "location": str(payload.get("location", "")).strip(),
+      "distance": str(payload.get("radiusMiles", "50")),
+      "days": str(payload.get("postedWithinDays", "30")),
+      "limit": str(payload.get("perSourceLimit", "50")),
+      "sort": "best_fit",
+      "sources": str(payload.get("sources", "indeed,reed,nhs,adzuna")),
+    }
+
+    # 1. Run multi-source job search
+    try:
+      search_result = build_job_search_payload(search_params)
+    except Exception as exc:
+      self.send_json(502, {"error": f"Job search failed: {exc}"})
+      return
+
+    all_jobs = search_result.get("jobs") or []
+    if not all_jobs:
+      self.send_json(200, {"ok": True, "top10": [], "message": "No jobs found for the given criteria.", "totalSearched": 0})
+      return
+
+    # 2. Load existing AI top jobs from Supabase to exclude them
+    existing_fingerprints = set()
+    try:
+      status, rows = supabase_request_json(
+        config,
+        f"/rest/v1/{SUPABASE_AI_TOP_JOBS_TABLE}?select=fingerprint",
+      )
+      if 200 <= status < 300 and isinstance(rows, list):
+        existing_fingerprints = {row["fingerprint"] for row in rows if row.get("fingerprint")}
+    except Exception:
+      pass  # If we can't check, proceed without exclusion
+
+    # 3. Filter out previously selected jobs and take top 50
+    # Compute server-side fingerprints for each job using dedupeKey
+    for job in all_jobs:
+      if not job.get("fingerprint"):
+        job["fingerprint"] = hashlib.md5(job.get("dedupeKey", "").encode("utf-8")).hexdigest()[:24]
+
+    candidate_jobs = [j for j in all_jobs if j.get("fingerprint", "") not in existing_fingerprints]
+    if not candidate_jobs:
+      self.send_json(200, {
+        "ok": True, "top10": [], "totalSearched": len(all_jobs),
+        "message": "All found jobs have already been evaluated in previous runs."
+      })
+      return
+
+    pool = candidate_jobs[:50]
+
+    # 4. Build compact job list for the AI prompt
+    job_summaries = []
+    for i, job in enumerate(pool):
+      summary = (
+        f"[{i+1}] Title: {job.get('title', 'Untitled')}\n"
+        f"    Company: {job.get('company', 'Unknown')}\n"
+        f"    Location: {job.get('location', 'Not specified')}\n"
+        f"    Salary: {job.get('salaryText', '') or ''}\n"
+        f"    Snippet: {(job.get('description', '') or '')[:200]}\n"
+        f"    Remote: {job.get('isRemote', False)}\n"
+        f"    Source: {', '.join(job.get('sourceLabels', []))}"
+      )
+      job_summaries.append(summary)
+
+    jobs_block = "\n\n".join(job_summaries)
+
+    # 5. Get CV text
+    cv_html = ""
+    if CV_HTML_PATH.exists():
+      cv_html = CV_HTML_PATH.read_text(encoding="utf-8")
+    cv_text = html_to_text(cv_html)[:8000] if cv_html else ""
+
+    if not cv_text:
+      self.send_json(400, {"error": "Could not read CV text from BH CV.html"})
+      return
+
+    # 6. Build OpenAI prompt
+    prompt = (
+      "You are an expert career advisor reviewing job adverts for a candidate.\n\n"
+      "TASK: From the numbered list of jobs below, identify the TOP 10 that best match "
+      "the candidate's CV, experience, skills, and career trajectory.\n\n"
+      "For each pick, return:\n"
+      "- index: the job number from the list (1-based)\n"
+      "- matchTags: array of 3-5 keyword tags explaining the match (e.g. \"operations leadership\", \"team management\", \"healthcare sector\", \"salary match\", \"local area\")\n"
+      "- reason: one sentence explaining why this is a strong match\n\n"
+      "Return ONLY valid JSON in this format:\n"
+      "{\n"
+      "  \"top10\": [\n"
+      "    {\"index\": 1, \"matchTags\": [\"tag1\", \"tag2\"], \"reason\": \"...\"}, ...\n"
+      "  ]\n"
+      "}\n\n"
+      "RULES:\n"
+      "- Rank them: best match first\n"
+      "- Only use facts from the CV and job adverts — do not invent\n"
+      "- Consider role seniority, sector alignment, skills overlap, location, and salary\n"
+      "- If fewer than 10 jobs are genuinely good matches, return fewer\n\n"
+      f"--- CANDIDATE CV ---\n{cv_text}\n\n"
+      f"--- JOB POOL ({len(pool)} jobs) ---\n{jobs_block}"
+    )
+
+    # 7. Call OpenAI with higher token limit for this task
+    try:
+      body = json.dumps({
+        "model": "gpt-5.4-mini",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+        "max_tokens": 3000,
+      }).encode("utf-8")
+
+      req = Request(
+        "https://api.openai.com/v1/chat/completions",
+        data=body,
+        headers={
+          "Content-Type": "application/json",
+          "Authorization": f"Bearer {openai_key}",
+        },
+        method="POST",
+      )
+
+      with urlopen(req, timeout=120) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+
+      content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+      content = content.strip()
+      if content.startswith("```"):
+        content = re.sub(r"^```(?:json)?\s*", "", content)
+        content = re.sub(r"\s*```$", "", content)
+
+      ai_result = json.loads(content)
+    except json.JSONDecodeError:
+      self.send_json(502, {"error": "OpenAI returned invalid JSON. Try again."})
+      return
+    except HTTPError as exc:
+      error_body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+      self.send_json(502, {"error": f"OpenAI API returned {exc.code}: {error_body}"})
+      return
+    except Exception as exc:
+      self.send_json(502, {"error": f"OpenAI call failed: {exc}"})
+      return
+
+    # 8. Map AI picks back to job data and save to Supabase
+    picks = ai_result.get("top10") or []
+    saved_jobs = []
+    search_keywords = str(payload.get("keywords", "")).strip()
+
+    for pick in picks[:10]:
+      idx = int(pick.get("index", 0)) - 1
+      if idx < 0 or idx >= len(pool):
+        continue
+      job = pool[idx]
+      fp = job.get("fingerprint", "")
+      if not fp:
+        continue
+
+      row = {
+        "fingerprint": fp,
+        "title": str(job.get("title", ""))[:500],
+        "company": str(job.get("company", ""))[:500],
+        "location": str(job.get("location", ""))[:500],
+        "url": str(job.get("url", ""))[:2000],
+        "salary": str(job.get("salaryText", "") or "")[:200],
+        "snippet": str(job.get("description", ""))[:500],
+        "source": ", ".join(job.get("sourceLabels", [])),
+        "match_tags": pick.get("matchTags", []),
+        "match_reason": str(pick.get("reason", ""))[:1000],
+        "search_keywords": search_keywords[:200],
+      }
+
+      try:
+        status, result = supabase_request_json(
+          config,
+          f"/rest/v1/{SUPABASE_AI_TOP_JOBS_TABLE}?on_conflict=fingerprint",
+          method="POST",
+          payload=row,
+          extra_headers={
+            "Prefer": "return=representation,resolution=merge-duplicates",
+          },
+        )
+        if 200 <= status < 300:
+          saved_job = dict(row)
+          saved_job["matchTags"] = pick.get("matchTags", [])
+          saved_job["matchReason"] = pick.get("reason", "")
+          saved_jobs.append(saved_job)
+      except Exception:
+        pass  # Don't fail the whole batch for one insert
+
+    self.send_json(200, {
+      "ok": True,
+      "top10": saved_jobs,
+      "totalSearched": len(all_jobs),
+      "poolSize": len(pool),
+      "excludedPrevious": len(all_jobs) - len(candidate_jobs),
+      "searchCriteria": search_params,
+    })
 
   def _handle_generate(self):
     length = int(self.headers.get("Content-Length", "0") or 0)

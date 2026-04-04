@@ -1485,7 +1485,14 @@ window.CVRuntime = (() => {
         const heroRoleEl = document.getElementById("hero-role");
         if (heroNameEl) {
           heroNameEl.textContent = buildHeroHeading(state);
-          heroNameEl.classList.toggle("hero-title--application", state.companyName !== defaults.companyName);
+          const isApplication = state.companyName !== defaults.companyName;
+          heroNameEl.classList.toggle("hero-title--application", isApplication);
+          heroNameEl.style.fontSize = "";
+          if (isApplication) {
+            const len = heroNameEl.textContent.length;
+            if (len > 45) heroNameEl.style.fontSize = "clamp(1.8rem, 4vw, 3rem)";
+            else if (len > 35) heroNameEl.style.fontSize = "clamp(2rem, 4.5vw, 3.5rem)";
+          }
         }
         if (heroRoleEl) {
           heroRoleEl.textContent = state.companyName !== defaults.companyName

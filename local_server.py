@@ -3056,6 +3056,15 @@ class AppHandler(SimpleHTTPRequestHandler):
       return
 
     safe_name = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
+
+    # Save a copy to Applied Jobs CVs folder
+    applied_cvs_dir = Path.home() / "Desktop" / "Applied Jobs CVs"
+    try:
+      applied_cvs_dir.mkdir(parents=True, exist_ok=True)
+      (applied_cvs_dir / f"{safe_name}.pdf").write_bytes(pdf_bytes)
+    except Exception:
+      pass  # best-effort save; don't block the download
+
     content_disposition = f'attachment; filename="{safe_name}.pdf"'
     self.send_response(200)
     self.send_header("Content-Type", "application/pdf")

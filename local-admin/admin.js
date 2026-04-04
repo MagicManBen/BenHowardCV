@@ -95,6 +95,7 @@ async function initLocalAdminPage() {
     contentResults:   document.getElementById("content-results"),
     usageSummary:     document.getElementById("usage-summary"),
     debugJson:        document.getElementById("debug-json"),
+    debugPrompts:     document.getElementById("debug-prompts"),
     confirmButton:    document.getElementById("confirm-button"),
     confirmStatus:    document.getElementById("confirm-status"),
     confirmError:     document.getElementById("confirm-error"),
@@ -290,6 +291,20 @@ async function initLocalAdminPage() {
       }
       pendingApplication.evidenceSelection = result.evidenceSelection || pendingApplication.evidenceSelection || { count: 0, error: null, examples: [] };
       dom.debugJson.textContent = JSON.stringify(result, null, 2);
+
+      /* Populate prompts debug panel */
+      if (result.prompts && dom.debugPrompts) {
+        var promptsHtml = '';
+        if (result.prompts.system_prompt) {
+          promptsHtml += '<h3 style="margin:0 0 0.3rem; font-size:0.82rem;">System Prompt</h3>';
+          promptsHtml += '<pre style="white-space:pre-wrap; word-break:break-word; font-size:0.75rem; max-height:300px; overflow:auto; background:rgba(0,0,0,0.04); padding:0.5rem; border-radius:4px; margin-bottom:0.75rem;">' + esc(result.prompts.system_prompt) + '</pre>';
+        }
+        if (result.prompts.user_prompt) {
+          promptsHtml += '<h3 style="margin:0 0 0.3rem; font-size:0.82rem;">User Prompt</h3>';
+          promptsHtml += '<pre style="white-space:pre-wrap; word-break:break-word; font-size:0.75rem; max-height:300px; overflow:auto; background:rgba(0,0,0,0.04); padding:0.5rem; border-radius:4px;">' + esc(result.prompts.user_prompt) + '</pre>';
+        }
+        dom.debugPrompts.innerHTML = promptsHtml || '<p>No prompt data returned.</p>';
+      }
     } catch (error) {
       setPill(dom.pillGenerate, "error");
       dom.pipelineMessage.textContent = "Generation failed.";
@@ -898,10 +913,19 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName) {
     );
   }
 
-  /* 4. Inject QR into FIRST sidebar only (page 1) */
-  var asideIdx = html.indexOf('</aside>');
-  if (asideIdx === -1) throw new Error("Could not find any sidebar in BH CV.html");
-  html = html.slice(0, asideIdx) + makeQrBlock() + '\n' + html.slice(asideIdx);
+  /* 4. Inject QR into EVERY sidebar (both pages) */
+  var asideTag = '</aside>';
+  var offset = 0;
+  var injected = 0;
+  while (true) {
+    var asideIdx = html.indexOf(asideTag, offset);
+    if (asideIdx === -1) break;
+    var block = makeQrBlock() + '\n';
+    html = html.slice(0, asideIdx) + block + html.slice(asideIdx);
+    offset = asideIdx + block.length + asideTag.length;
+    injected++;
+  }
+  if (injected === 0) throw new Error("Could not find any sidebar in BH CV.html");
 
   /* 4b. Inject "Prepared for" subheading under title */
   if (companyName) {

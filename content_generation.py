@@ -413,7 +413,7 @@ EVIDENCE BANK RULES:
 DISTINCT FIELD PURPOSES (strict):
 - heroPositioning: one short, high-value positioning line for the hero. This should frame the kind of contribution I make. It is NOT a repeat of the role title, sector, or opening paragraph.
 - personalisedOpening: my opening case for why this opportunity fits me. It should introduce me in relation to the role, not summarise the advert.
-- whyThisCompany: about the organisation, environment, brand, direction, scale, or culture signals in the advert. Do NOT drift into describing the duties of the role.
+- whyThisCompany: about the organisation, environment, brand, direction, scale, or culture signals in the advert. Do NOT drift into describing the duties of the role. ALWAYS refer to the company by its actual name (from companyName) — never write "a named employer", "this company", or similar generic references.
 - whyThisRole: about the work itself, the operational challenge, and where I would contribute. Do NOT drift into generic praise of the company.
 - roleNeedsSummary: my interpretation of what the role really needs beyond the advert bullets.
 - fitSummary: why my background lines up overall. This is broader than any single requirement.
@@ -423,7 +423,7 @@ DISTINCT FIELD PURPOSES (strict):
 - closingProofPoints: 2-3 very short proof-led lines that support the closing section. These should feel like evidence anchors, not generic highlights.
 
 ANTI-REPETITION RULES (strict):
-- Do not repeat the company name, role title, location, sector, contract details, or workplace type across multiple fields unless genuinely useful.
+- Do not repeat the role title, location, sector, contract details, or workplace type across multiple fields unless genuinely useful. The company name SHOULD appear naturally where needed — especially in whyThisCompany.
 - Do not paraphrase the same idea in heroPositioning, personalisedOpening, fitSummary, likelyContributionSummary, and closingSummary.
 - Avoid overusing recurring theme words such as "digital transformation", "inclusive culture", "structured operations", "operational backbone", "cross-functional", and similar. Use them only where needed.
 - Do not simply convert advert bullets into polished prose.
@@ -440,7 +440,7 @@ Return ONLY valid JSON with this exact structure:
 {
   "heroPositioning": "A short premium positioning line for the hero. Usually 8-18 words.",
   "personalisedOpening": "A first-person opening statement for this specific application (2-3 sentences). Grounded in the role and company context. Not a biography.",
-  "whyThisCompany": "Why I'm drawn to this company and opportunity (2-3 sentences). Only use facts from the advert. Keep this clearly about the organisation or environment.",
+  "whyThisCompany": "Why I'm drawn to [companyName] and this opportunity (2-3 sentences). Use the actual company name, not generic descriptions. Only use facts from the advert. Keep this clearly about the organisation or environment.",
   "whyThisRole": "Why this specific role fits my experience and what I'm looking for (2-3 sentences). Keep this clearly about the work and where I would contribute.",
   "selectedEvidenceExamples": [
     {
@@ -895,7 +895,7 @@ def call_openai_responses_json(api_key, model, system_prompt, user_prompt, schem
 def call_openai_personalised_content(api_key, model, application, evidence_rows):
     """Generate personalised-content JSON from advert + evidence context."""
     user_prompt = _build_user_prompt(application, evidence_rows)
-    return call_openai_responses_json(
+    result, error, usage = call_openai_responses_json(
         api_key=api_key,
         model=model,
         system_prompt=SYSTEM_PROMPT,
@@ -904,6 +904,7 @@ def call_openai_personalised_content(api_key, model, application, evidence_rows)
         schema_name="personalised_content",
         temperature=0.4,
     )
+    return result, error, usage, {"system_prompt": SYSTEM_PROMPT, "user_prompt": user_prompt}
 
 
 # ---------------------------------------------------------------------------
@@ -986,6 +987,7 @@ def generate_application_from_advert(advert_text, config):
     personalised = generate_personalised_content(application, config)
     generated_content = personalised.get("generatedContent")
     evidence_selection = personalised.get("evidenceSelection") or {"count": 0, "error": None, "examples": []}
+    prompts_used = personalised.get("prompts")
     personalised_usage = (personalised.get("meta") or {}).get("usage") or {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
     total_usage = _merge_usage(extraction_usage, personalised_usage)
 
@@ -994,6 +996,7 @@ def generate_application_from_advert(advert_text, config):
             "application": application,
             "generatedContent": None,
             "evidenceSelection": evidence_selection,
+            "prompts": prompts_used,
             "meta": {
                 "success": False,
                 "stage": "personalise",
@@ -1019,9 +1022,8 @@ def generate_application_from_advert(advert_text, config):
         "application": application,
         "generatedContent": generated_content,
         "evidenceSelection": evidence_selection,
+        "prompts": prompts_used,
         "meta": {
-            "success": True,
-            "stage": "complete",
             "error": None,
             "model": openai_model,
             "provider": "openai",
@@ -1080,7 +1082,7 @@ def generate_personalised_content(application, config):
         }
 
     # Step 2: Call OpenAI
-    generated, generation_error, gen_usage = call_openai_personalised_content(
+    generated, generation_error, gen_usage, prompts_used = call_openai_personalised_content(
         openai_api_key, openai_model, application, evidence_rows,
     )
 
@@ -1088,6 +1090,7 @@ def generate_personalised_content(application, config):
         return {
             "generatedContent": None,
             "evidenceSelection": evidence_selection,
+            "prompts": prompts_used,
             "meta": {
                 "success": False,
                 "error": generation_error,
@@ -1102,6 +1105,7 @@ def generate_personalised_content(application, config):
     return {
         "generatedContent": generated,
         "evidenceSelection": evidence_selection,
+        "prompts": prompts_used,
         "meta": {
             "success": True,
             "error": None,

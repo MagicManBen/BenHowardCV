@@ -1477,7 +1477,9 @@ window.CVRuntime = (() => {
         setText("hero-kicker", state.companyName === defaults.companyName ? "Application support" : `Application support for ${state.companyName}`);
         setText("hero-topline-meta-1", "Companion to my CV");
         setText("hero-topline-meta-2", "Focused on fit and evidence");
-        setText("hero-role", state.roleTitle);
+        setText("hero-role", state.companyName !== defaults.companyName
+          ? `${state.roleTitle} for ${state.companyName}`
+          : state.roleTitle);
         setText("hero-positioning", heroPositioning);
         setText("hero-statement", heroStatement);
         setHtml("hero-pull-note", buildHeroPullNote(state, fitSummary, likelyContribution));

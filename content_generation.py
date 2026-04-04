@@ -9,6 +9,7 @@ Provides:
 
 import csv
 import json
+import re
 import socket
 import traceback
 from pathlib import Path
@@ -21,6 +22,31 @@ from urllib.request import Request, urlopen
 # ---------------------------------------------------------------------------
 
 EVIDENCE_BANK_PATH = Path(__file__).resolve().parent / "ben_evidence_bank_template.csv"
+CV_HTML_PATH = Path(__file__).resolve().parent / "BH CV.html"
+
+
+def _html_to_text(value):
+    """Strip HTML tags and return plain text."""
+    text = str(value or "")
+    text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r"<script[^>]*>.*?</script>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(r"</p\s*>", "\n\n", text, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+def _load_cv_text(max_chars=6000):
+    """Load BH CV.html, strip HTML, return plain text (truncated)."""
+    if not CV_HTML_PATH.exists():
+        return ""
+    try:
+        html = CV_HTML_PATH.read_text(encoding="utf-8")
+        return _html_to_text(html)[:max_chars]
+    except Exception:
+        return ""
 
 # Fields used for matching from the application
 APP_MATCH_FIELDS = [
@@ -983,6 +1009,10 @@ def generate_application_from_advert(advert_text, config):
                 "provider": "openai",
             },
         }
+
+    # Inject CV context so the personalisation prompt includes Ben's CV
+    if not application.get("cvText"):
+        application["cvText"] = _load_cv_text()
 
     personalised = generate_personalised_content(application, config)
     generated_content = personalised.get("generatedContent")

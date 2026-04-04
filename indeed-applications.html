@@ -54,6 +54,16 @@
   </style>
 </head>
 <body data-page="indeed">
+  <div id="gate-screen" hidden style="min-height:100vh;display:grid;place-items:center;padding:2rem;">
+    <form class="gate-form" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;max-width:340px;width:100%;box-shadow:var(--shadow);text-align:center;">
+      <h2 style="font-family:'Space Grotesk',sans-serif;margin:0 0 .6rem;">Private area</h2>
+      <p style="color:var(--text-soft);margin:0 0 1.2rem;font-size:.92rem;">Enter password to continue.</p>
+      <input class="gate-input" type="password" placeholder="Password" autocomplete="off" style="margin-bottom:.75rem;text-align:center;">
+      <button type="submit" class="button" style="width:100%;">Unlock</button>
+      <p class="gate-error" hidden style="color:var(--danger);margin:.7rem 0 0;font-size:.88rem;">Incorrect password.</p>
+    </form>
+  </div>
+  <script src="gate.js"></script>
   <header class="app-header">
     <div class="shell shell--header">
       <p class="eyebrow">Indeed Tracker</p>

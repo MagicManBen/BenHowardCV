@@ -916,7 +916,7 @@ async function downloadCvWithQr(cvUrl, roleTitle, companyName) {
   }
 
   /* 5. Build a safe filename */
-  var safeName = "Ben Howard CV" + (companyName ? " - " + companyName : "");
+  var safeName = "Ben Howard CV" + (roleTitle ? " - " + roleTitle : "");
 
   /* 6. Generate and download PDF locally */
   var pdfRes = await fetch("/api/pdf", {

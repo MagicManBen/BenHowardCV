@@ -120,6 +120,86 @@ def generate_pdf_from_html(html_content):
       return None, f"Chrome did not produce a PDF. {stderr_out}".strip()
     return Path(pdf_path).read_bytes(), None
 
+
+def generate_pdf_from_url(url):
+  """Navigate Chrome headless to a URL and print the full page to PDF. Returns (pdf_bytes, error_str)."""
+  chrome = find_chrome()
+  if not chrome:
+    return None, "Chrome/Chromium not found."
+
+  with tempfile.TemporaryDirectory() as tmp:
+    pdf_path = os.path.join(tmp, "cv.pdf")
+
+    cmd = [
+      chrome,
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--disable-extensions",
+      "--disable-background-networking",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--run-all-compositor-stages-before-draw",
+      "--virtual-time-budget=10000",
+      f"--print-to-pdf={pdf_path}",
+      f"--user-data-dir={tmp}/profile",
+      url,
+    ]
+    env = {**os.environ, "DISPLAY": ""}
+    try:
+      proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        stdin=subprocess.DEVNULL,
+        close_fds=True,
+        start_new_session=True,
+        env=env,
+      )
+    except OSError as exc:
+      return None, str(exc)
+
+    deadline = 90
+    interval = 0.5
+    elapsed = 0.0
+    pdf_ready = False
+    prev_size = -1
+    stable_ticks = 0
+    while elapsed < deadline:
+      retcode = proc.poll()
+      if retcode is not None:
+        break
+      if os.path.exists(pdf_path):
+        cur_size = os.path.getsize(pdf_path)
+        if cur_size > 0 and cur_size == prev_size:
+          stable_ticks += 1
+          if stable_ticks >= 3:
+            pdf_ready = True
+            break
+        else:
+          stable_ticks = 0
+        prev_size = cur_size
+      time.sleep(interval)
+      elapsed += interval
+
+    if proc.poll() is None:
+      try:
+        proc.kill()
+        proc.wait(timeout=5)
+      except Exception:
+        pass
+
+    if not os.path.exists(pdf_path) or os.path.getsize(pdf_path) == 0:
+      stderr_out = ""
+      try:
+        stderr_out = proc.stderr.read().decode("utf-8", errors="replace")[:500]
+      except Exception:
+        pass
+      return None, f"Chrome did not produce a PDF. {stderr_out}".strip()
+    return Path(pdf_path).read_bytes(), None
+
+
 from content_generation import generate_application_from_advert, generate_personalised_content
 
 
@@ -2720,7 +2800,7 @@ class AppHandler(SimpleHTTPRequestHandler):
 
   def do_POST(self):
     parsed = urlparse(self.path)
-    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf", "/api/delete-application", "/api/review-job"):
+    if parsed.path not in ("/api/publish", "/api/generate", "/api/upload-cv", "/api/pdf", "/api/pdf-url", "/api/delete-application", "/api/review-job"):
       self.send_error(404)
       return
 
@@ -2738,6 +2818,10 @@ class AppHandler(SimpleHTTPRequestHandler):
 
     if parsed.path == "/api/pdf":
       self._handle_pdf()
+      return
+
+    if parsed.path == "/api/pdf-url":
+      self._handle_pdf_url()
       return
 
     if parsed.path == "/api/delete-application":
@@ -3066,6 +3150,53 @@ class AppHandler(SimpleHTTPRequestHandler):
       pass  # best-effort save; don't block the download
 
     content_disposition = f'attachment; filename="{safe_name}.pdf"'
+    self.send_response(200)
+    self.send_header("Content-Type", "application/pdf")
+    self.send_header("Content-Length", str(len(pdf_bytes)))
+    self.send_header("Content-Disposition", content_disposition)
+    self.send_header("Cache-Control", "no-store")
+    self.end_headers()
+    self.wfile.write(pdf_bytes)
+
+  def _handle_pdf_url(self):
+    """Navigate Chrome to a URL and return the rendered page as a PDF download."""
+    length = int(self.headers.get("Content-Length", "0") or 0)
+    raw = self.rfile.read(length).decode("utf-8") if length else ""
+
+    try:
+      payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+      self.send_json(400, {"error": "Invalid JSON"})
+      return
+
+    url = str(payload.get("url", "")).strip()
+    filename = str(payload.get("filename", "Ben Howard CV")).strip() or "Ben Howard CV"
+    if not url:
+      self.send_json(400, {"error": "url is required"})
+      return
+
+    # Only allow http/https URLs
+    parsed_url = urlparse(url)
+    if parsed_url.scheme not in ("http", "https"):
+      self.send_json(400, {"error": "Only http/https URLs are supported"})
+      return
+
+    pdf_bytes, error = generate_pdf_from_url(url)
+    if error:
+      self.send_json(500, {"error": f"PDF generation failed: {error}"})
+      return
+
+    safe_name = re.sub(r'[^\w\s().,-]', '', filename).strip() or "Ben Howard CV"
+
+    # Save a copy to Applied Jobs CVs folder
+    applied_cvs_dir = Path.home() / "Desktop" / "Applied Jobs CVs"
+    try:
+      applied_cvs_dir.mkdir(parents=True, exist_ok=True)
+      (applied_cvs_dir / f"{safe_name} - Full.pdf").write_bytes(pdf_bytes)
+    except Exception:
+      pass  # best-effort save; don't block the download
+
+    content_disposition = f'attachment; filename="{safe_name} - Full.pdf"'
     self.send_response(200)
     self.send_header("Content-Type", "application/pdf")
     self.send_header("Content-Length", str(len(pdf_bytes)))

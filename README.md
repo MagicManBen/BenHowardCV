@@ -456,7 +456,7 @@ The active local-admin application-generation path uses:
 
 - OpenAI Responses API
 - server-side only
-- default model: `gpt-4.1-mini`
+- default model: `gpt-5.4-mini`
 
 The current primary generation route is:
 
@@ -808,7 +808,7 @@ Current keychain-backed secrets include:
 
 If nothing is configured, generation defaults to:
 
-- `gpt-4.1-mini`
+- `gpt-5.4-mini`
 
 ## Running Locally
 

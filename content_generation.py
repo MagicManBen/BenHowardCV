@@ -268,12 +268,14 @@ def _format_evidence_for_prompt(rows):
 # OpenAI structured generation
 # ---------------------------------------------------------------------------
 
-DEFAULT_OPENAI_GENERATION_MODEL = "gpt-4.1-mini"
+DEFAULT_OPENAI_GENERATION_MODEL = "gpt-5.4-mini"
 OPENAI_RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses"
 OPENAI_REQUEST_TIMEOUT_SECONDS = 120
 
 # Estimated pricing per 1M tokens (USD). Update when OpenAI changes prices.
 OPENAI_PRICING = {
+    "gpt-5.4-mini": {"input": 0.40, "output": 1.60},
+    "gpt-5.4":      {"input": 2.00, "output": 8.00},
     "gpt-4.1-mini": {"input": 0.40, "output": 1.60},
     "gpt-4.1":      {"input": 2.00, "output": 8.00},
     "gpt-4.1-nano": {"input": 0.10, "output": 0.40},

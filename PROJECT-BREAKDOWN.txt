@@ -224,7 +224,7 @@ Step 3: AI Generation (/api/generate)
     Sends the raw text to OpenAI with the ADVERT_EXTRACTION_SYSTEM_PROMPT.
     Returns structured JSON with fields like companyName, roleTitle, sector,
     essentialRequirements, keyFocusAreas, etc.
-    Model: configurable, defaults to gpt-4.1-mini.
+    Model: configurable, defaults to gpt-5.4-mini.
 
   Stage 2 — Personalised Content Generation:
     1. Loads the evidence bank from ben_evidence_bank_template.csv

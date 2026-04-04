@@ -3,9 +3,10 @@
 # quick-apply.sh — Paste a job advert, get a published CV + PDF
 #
 # Usage:
-#   ./quick-apply.sh                  # paste advert, Ctrl-D to finish
-#   ./quick-apply.sh advert.txt       # reads from file
-#   pbpaste | ./quick-apply.sh -      # reads from clipboard/stdin
+#   ./quick-apply.sh                           # prompts for URL or text
+#   ./quick-apply.sh https://example.com/job   # fetches advert from URL
+#   ./quick-apply.sh advert.txt                # reads from file
+#   pbpaste | ./quick-apply.sh -               # reads from clipboard/stdin
 #
 # Requires: local server on localhost:8000, jq, python3
 # ────────────────────────────────────────────────────────────────
@@ -28,16 +29,47 @@ if ! curl -sf "$SERVER/api/status" > /dev/null 2>&1; then
   fail "Local server not running at $SERVER. Start with: python3 local_server.py"
 fi
 
+# ── Fetch text from URL ──
+fetch_url() {
+  python3 -c "
+import sys, re
+from urllib.request import Request, urlopen
+
+url = sys.argv[1]
+req = Request(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'})
+html = urlopen(req, timeout=20).read().decode('utf-8', errors='replace')
+
+# strip script/style blocks then tags
+html = re.sub(r'<(script|style|noscript)[^>]*>.*?</\1>', '', html, flags=re.DOTALL|re.IGNORECASE)
+text = re.sub(r'<[^>]+>', ' ', html)
+# collapse whitespace
+text = re.sub(r'[ \t]+', ' ', text)
+text = re.sub(r'\n{3,}', '\n\n', text).strip()
+print(text[:15000])
+" "$1"
+}
+
 # ── Get advert text ──
 if [ "${1:-}" = "-" ]; then
   info "Reading advert from stdin…"
   ADVERT=$(cat)
+elif [[ "${1:-}" =~ ^https?:// ]]; then
+  info "Fetching advert from URL: $1"
+  ADVERT=$(fetch_url "$1") || fail "Could not fetch URL: $1"
 elif [ -n "${1:-}" ] && [ -f "$1" ]; then
   info "Reading advert from file: $1"
   ADVERT=$(cat "$1")
 else
-  printf "${BOLD}Paste the job advert text below, then press Ctrl-D when done:${NC}\n\n"
-  ADVERT=$(cat)
+  printf "${BOLD}Paste a job advert URL (or raw text then Ctrl-D):${NC} "
+  read -r FIRST_LINE
+  if [[ "$FIRST_LINE" =~ ^https?:// ]]; then
+    info "Fetching advert from URL: $FIRST_LINE"
+    ADVERT=$(fetch_url "$FIRST_LINE") || fail "Could not fetch URL: $FIRST_LINE"
+  else
+    printf "\n${BOLD}Paste the rest of the advert text, then press Ctrl-D:${NC}\n"
+    REST=$(cat)
+    ADVERT="${FIRST_LINE}${REST:+$'\n'$REST}"
+  fi
 fi
 
 [ -z "$ADVERT" ] && fail "No advert text provided."

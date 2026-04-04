@@ -538,13 +538,13 @@ def compact_currency(currency_code):
   }.get(code, (code + " ") if code else "")
 
 
-def call_openai_chat(api_key, prompt, model="gpt-5.4-mini"):
+def call_openai_chat(api_key, prompt, model="gpt-4.1-mini"):
   """Call OpenAI chat completions and return parsed JSON response."""
   body = json.dumps({
     "model": model,
     "messages": [{"role": "user", "content": prompt}],
     "temperature": 0.3,
-    "max_tokens": 1500,
+    "max_completion_tokens": 1500,
   }).encode("utf-8")
 
   req = Request(
@@ -3418,10 +3418,10 @@ class AppHandler(SimpleHTTPRequestHandler):
     # 7. Call OpenAI with higher token limit for this task
     try:
       body = json.dumps({
-        "model": "gpt-5.4-mini",
+        "model": "gpt-4.1-mini",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.2,
-        "max_tokens": 3000,
+        "max_completion_tokens": 3000,
       }).encode("utf-8")
 
       req = Request(

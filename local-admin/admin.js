@@ -44,7 +44,7 @@ const KNOWN_APPLICATION_KEYS = new Set([
   "heroPositioning", "personalisedOpening", "whyThisCompany",
   "roleNeedsSummary", "experienceMappings", "focusAreasToBring",
   "fitSummary", "likelyContributionSummary", "companyHighlights", "cultureFitSummary",
-  "first90DaysPlan", "closingSummary", "closingProofPoints",
+  "first90DaysPlan", "closingSummary", "closingProofPoints", "coverLetter",
   "selectedEvidenceExamples", "contentNotes"
 ]);
 
@@ -64,6 +64,7 @@ const KNOWN_PERSONALISED_KEYS = new Set([
   "first90DaysPlan",
   "closingSummary",
   "closingProofPoints",
+  "coverLetter",
   "contentNotes",
 ]);
 
@@ -110,6 +111,9 @@ async function initLocalAdminPage() {
     openPreviewLink:  document.getElementById("open-preview-link"),
     downloadCvButton: document.getElementById("download-cv-button"),
     resultQrImage:    document.getElementById("result-qr-image"),
+    coverLetterPanel: document.getElementById("cover-letter-panel"),
+    coverLetterText:  document.getElementById("cover-letter-text"),
+    copyCoverLetterButton: document.getElementById("copy-cover-letter-button"),
     toast:            document.getElementById("toast"),
   };
 
@@ -206,6 +210,22 @@ async function initLocalAdminPage() {
       } catch {
         dom.resultUrl.focus();
         dom.resultUrl.select();
+      }
+    });
+  }
+
+  if (dom.copyCoverLetterButton) {
+    dom.copyCoverLetterButton.addEventListener("click", async () => {
+      var coverLetter = dom.coverLetterText ? dom.coverLetterText.value : "";
+      if (!coverLetter) return;
+      try {
+        await navigator.clipboard.writeText(coverLetter);
+        showToast(dom, "Cover letter copied.");
+      } catch {
+        if (dom.coverLetterText) {
+          dom.coverLetterText.focus();
+          dom.coverLetterText.select();
+        }
       }
     });
   }
@@ -669,7 +689,7 @@ function normaliseProvidedPersonalisedContent(input) {
     input.heroPositioning || input.personalisedOpening || input.whyThisCompany || input.whyThisRole ||
     input.roleNeedsSummary || input.experienceMappings || input.focusAreasToBring ||
     input.fitSummary || input.likelyContributionSummary || input.companyHighlights ||
-    input.cultureFitSummary || input.first90DaysPlan || input.closingSummary || input.closingProofPoints || input.selectedEvidenceExamples ||
+    input.cultureFitSummary || input.first90DaysPlan || input.closingSummary || input.closingProofPoints || input.coverLetter || input.selectedEvidenceExamples ||
     input.contentNotes
   ) {
     source = input;
@@ -701,6 +721,7 @@ function normaliseProvidedPersonalisedContent(input) {
     first90DaysPlan: normaliseFirst90DaysPlan(source.first90DaysPlan),
     closingSummary: str(source.closingSummary),
     closingProofPoints: arr(source.closingProofPoints),
+    coverLetter: str(source.coverLetter),
     contentNotes: arr(source.contentNotes),
   };
 
@@ -813,6 +834,20 @@ async function renderPublishedResult(dom, application, fullUrl) {
 
   if (dom.openPreviewLink) dom.openPreviewLink.href = fullUrl;
   try { await renderQrImage(dom.resultQrImage, fullUrl); } catch (_) { dom.resultQrImage.hidden = true; }
+
+  if (dom.coverLetterPanel && dom.coverLetterText) {
+    var coverLetter = "";
+    if (application.personalisedContent && typeof application.personalisedContent === "object") {
+      coverLetter = str(application.personalisedContent.coverLetter);
+    }
+    if (!coverLetter && application.generatedContent && typeof application.generatedContent === "object") {
+      coverLetter = str(application.generatedContent.coverLetter);
+    }
+
+    dom.coverLetterText.value = coverLetter;
+    dom.coverLetterPanel.hidden = !coverLetter;
+    dom.coverLetterPanel.open = false;
+  }
 }
 
 function buildFullEmployerPageUrl(app) {

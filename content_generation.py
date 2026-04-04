@@ -411,6 +411,7 @@ VOICE AND TONE RULES (strict):
 - Avoid filler such as "I am excited to apply", "I am uniquely positioned", "dynamic professional", "leveraging", "driving excellence", or similar.
 - Prefer direct, practical language over corporate wording.
 - Prefer short, clean paragraphs and lines that will render well on a premium one-page site.
+- For coverLetter, use conventional professional letter language: specific, credible, and restrained. No references to AI, prompts, generated content, attachments, QR codes, or webpages.
 
 SOURCE DISCIPLINE RULES (strict):
 - The advert is the source of truth for company, role, and requirement facts.
@@ -447,6 +448,7 @@ DISTINCT FIELD PURPOSES (strict):
 - cultureFitSummary: only about working style and environment fit. Keep it brief.
 - closingSummary: a final employer-facing case in one sentence. It must not sound like a recap of the advert or a description of the webpage.
 - closingProofPoints: 2-3 very short proof-led lines that support the closing section. These should feel like evidence anchors, not generic highlights.
+- coverLetter: a complete, copy-ready cover letter for this application. It must read like a real professional wrote it, with no hint of AI assistance.
 
 ANTI-REPETITION RULES (strict):
 - Do not repeat the role title, location, sector, contract details, or workplace type across multiple fields unless genuinely useful. The company name SHOULD appear naturally where needed — especially in whyThisCompany.
@@ -508,6 +510,7 @@ Return ONLY valid JSON with this exact structure:
   ],
   "closingSummary": "A confident first-person closing line for the page (1 sentence).",
   "closingProofPoints": ["2-3 short proof-led supporting lines for the closing section."],
+  "coverLetter": "A professional, specific cover letter in first person, ready to copy into an email or application form. Use UK English. Include a natural greeting, 3-5 concise paragraphs, and a professional sign-off from Ben Howard. Do not mention AI, prompts, tailoring systems, attached CVs, QR codes, or webpages.",
   "contentNotes": ["Any notes about content choices, gaps, thin data, or caveats for review."]
 }
 
@@ -772,6 +775,7 @@ PERSONALISED_CONTENT_RESPONSE_SCHEMA = _object_schema({
     }),
     "closingSummary": _string_schema(),
     "closingProofPoints": _string_array_schema(),
+    "coverLetter": _string_schema(),
     "contentNotes": _string_array_schema(),
 })
 

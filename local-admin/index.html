@@ -31,6 +31,17 @@
 
     /* Confirm bar */
     .confirm-bar { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-top:1rem; padding-top:1rem; border-top:1px solid #ddd; }
+
+    /* Cover letter panel */
+    .cover-letter-panel { margin-top:1rem; border:1px solid rgba(13, 108, 91, 0.16); border-radius:0.75rem; background:rgba(13, 108, 91, 0.04); overflow:hidden; }
+    .cover-letter-panel summary { cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:0.9rem 1rem; font-weight:700; }
+    .cover-letter-panel summary::-webkit-details-marker { display:none; }
+    .cover-letter-panel summary::after { content:"+"; font-size:1.1rem; color:#0d6c5b; }
+    .cover-letter-panel[open] summary::after { content:"-"; }
+    .cover-letter-body { padding:0 1rem 1rem; }
+    .cover-letter-copy { margin:0 0 0.7rem; font-size:0.86rem; line-height:1.5; color:#4e5e58; }
+    .cover-letter-text { width:100%; min-height:16rem; padding:0.9rem 1rem; border:1px solid rgba(50, 41, 31, 0.12); border-radius:0.6rem; background:#fff; color:#2d251d; line-height:1.55; resize:vertical; }
+    .cover-letter-actions { display:flex; justify-content:flex-end; margin-top:0.75rem; }
   </style>
 </head>
 <body data-page="local-admin">
@@ -155,11 +166,22 @@
           </div>
         </div>
       </div>
+
+      <details class="cover-letter-panel" id="cover-letter-panel" hidden>
+        <summary>Cover Letter</summary>
+        <div class="cover-letter-body">
+          <p class="cover-letter-copy">Copy and use as-is, or trim it for the application form.</p>
+          <textarea id="cover-letter-text" class="cover-letter-text" rows="14" readonly></textarea>
+          <div class="cover-letter-actions">
+            <button class="button button--ghost" id="copy-cover-letter-button" type="button">Copy cover letter</button>
+          </div>
+        </div>
+      </details>
     </section>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../vendor/qrious.min.js" defer></script>
-  <script src="admin.js?v=25" defer></script>
+  <script src="admin.js?v=26" defer></script>
 </body>
 </html>

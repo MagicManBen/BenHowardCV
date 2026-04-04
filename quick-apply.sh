@@ -12,7 +12,19 @@
 # ────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-SERVER="http://localhost:8000"
+# Auto-detect server port (OPEN THIS starts on first free port from 8000)
+detect_server() {
+  for p in 8000 8001 8002 8003 8004 8005; do
+    if curl -sf "http://localhost:$p/api/status" > /dev/null 2>&1; then
+      echo "http://localhost:$p"
+      return 0
+    fi
+  done
+  return 1
+}
+
+SERVER="${QUICK_APPLY_SERVER:-$(detect_server || echo "")}"
+[ -z "$SERVER" ] && { printf '\033[0;31m✗\033[0m Server not found on ports 8000-8005. Start with: OPEN THIS - Ben Howard CV.command\n' >&2; exit 1; }
 APPLIED_DIR="$HOME/Desktop/Applied Jobs CVs"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
@@ -25,9 +37,7 @@ fail()  { printf "${RED}✗${NC} %s\n" "$*" >&2; exit 1; }
 
 command -v jq >/dev/null 2>&1 || fail "jq is required. Install with: brew install jq"
 
-if ! curl -sf "$SERVER/api/status" > /dev/null 2>&1; then
-  fail "Local server not running at $SERVER. Start with: python3 local_server.py"
-fi
+info "Using server at $SERVER"
 
 # ── Fetch text from URL ──
 fetch_url() {

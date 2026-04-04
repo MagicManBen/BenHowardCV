@@ -157,12 +157,32 @@ info "Generating PDF…"
 PDF_FILENAME="Ben Howard CV - $ROLE"
 
 python3 - "$SERVER" "$COMPANY" "$SHORT_CODE" "$FULL_URL" "$PDF_FILENAME" << 'PYEOF'
-import json, sys, re
+import json, sys, re, base64, io
 from urllib.request import Request, urlopen
+from urllib.parse import quote
 
 server, company, short_code, full_url, filename = sys.argv[1:6]
 
 html = urlopen(f"{server}/BH%20CV.html", timeout=10).read().decode("utf-8")
+
+qr_target = ("https://checkloops.co.uk/j/#" + short_code) if short_code else full_url or ""
+
+# Generate QR code as base64 PNG data URI (no third-party libraries)
+qr_data_uri = ""
+if qr_target:
+    try:
+        import qrcode
+        from io import BytesIO
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=8, border=1)
+        qr.add_data(qr_target)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="#284a5b", back_color="white")
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        qr_data_uri = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    except ImportError:
+        # Fallback: use quickchart.io QR API (Chrome headless will fetch it)
+        qr_data_uri = f"https://quickchart.io/qr?text={quote(qr_target)}&size=256&dark=284a5b&light=ffffff&format=png"
 
 if short_code:
     short_display = "checkloops.co.uk/j/#" + short_code
@@ -170,8 +190,19 @@ if short_code:
 else:
     qr_label = f"I have prepared a personalised CV for {company}. Scan or tap to view."
 
+qr_img_html = ""
+if qr_data_uri:
+    link_href = qr_target
+    qr_img_html = (
+        f'<a href="{link_href}" target="_blank" rel="noopener noreferrer" '
+        f'style="display:flex; align-items:center; justify-content:center; width:88px; height:88px; margin:0.38rem auto 0; background:#fff; border-radius:6px; line-height:0; text-decoration:none;">'
+        f'<img src="{qr_data_uri}" width="80" height="80" alt="QR code" style="display:block; width:80px; height:80px; margin:0 auto; object-fit:contain;">'
+        f'</a>'
+    )
+
 qr_block = f'''<section class="sidebar-card" style="margin-top:auto; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.14); display:flex; flex-direction:column; align-items:center; text-align:center;">
 <h2 style="margin:0;">Tailored CV</h2>
+{qr_img_html}
 <p style="margin-top:0.3rem; font-size:0.58rem; line-height:1.35; color:rgba(245,245,241,0.88);">{qr_label}</p>
 </section>'''
 
